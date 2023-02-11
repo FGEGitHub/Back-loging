@@ -59,6 +59,7 @@ app.use(cors());
 //routes
 app.use(require('./routes/index'))
 app.use(require('./routes/authentication'))
+app.use(`/personas`, require('./routes/personas'))
 //app.use(`/links`, require('./routes/links'))
 
 

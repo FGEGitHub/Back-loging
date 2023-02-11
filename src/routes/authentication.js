@@ -62,7 +62,7 @@ router.post('/signin', passport.authenticate('local.signin', { failureRedirect: 
     console.log(req.user)
     res.send({
         id :req.user.id,
-        cuil_cuit: req.user.cuil_cuit,
+        usuario: req.user.usuario,
         nivel: req.user.nivel,
         token,
       
