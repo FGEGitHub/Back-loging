@@ -58,6 +58,7 @@ passport.use('local.signup', new LocalStrategy({
   if (nivel == undefined){
     nivel= 1
   }
+ 
     const newUser = {
         password,
         usuario,
@@ -73,7 +74,7 @@ passport.use('local.signup', new LocalStrategy({
     //fin transformar 
     try {
         const verif  = await pool.query('select * from usuarios where usuario = ?',[usuario])
-        if (usuario.length>0){
+        if (verif.length>0){
             req.flash('message', 'error, usuario existente')
         }else{
         newUser.password = await helpers.encryptPassword(password)

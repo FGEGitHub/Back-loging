@@ -24,7 +24,7 @@ try {
 id_usuarioo = await pool.query('select id from usuarios where usuario = ?',[usuario])
 
 
-  const etc = await pool.query('select cursos.id,cursos.fecha , encargado, nombre, cupo, cursos.id, cursado.inscripcion from cursos left join cursado on cursos.id=(select cursado.id_curso from cursado where  id_usuario =?)', [id_usuarioo[0]['id']])
+  const etc = await pool.query('select cursos.id,cursos.fecha , encargado, nombre, cupo, cursos.id, cursado.inscripcion from cursos left join cursado on cursos.id=(select cursado.id_curso from cursado where  id_usuario =?) group by cursos.id', [id_usuarioo[0]['id']])
 
   res.json(etc);} catch (error) {
     res.json('Error algo salio mal')
