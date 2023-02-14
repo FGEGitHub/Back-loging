@@ -19,6 +19,15 @@ router.get('/datosusuario/:usuario', async (req, res) => {
 
 
 
+router.get('/datosusuarioporid/:id', async (req, res) => {
+  const id = req.params.id
+   console.log(id)
+   const etc = await pool.query ('select * from usuarios where id =?',[id] )
+   console.log(etc)
+
+ res.json(etc);
+//res.render('index')
+})
 
 
 
