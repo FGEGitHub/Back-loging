@@ -32,6 +32,19 @@ id_usuarioo = await pool.query('select id from usuarios where usuario = ?',[usua
   //res.render('index')
 })
 
+
+
+router.get('/verclases/:id', isLoggedInn2, async (req, res) => {
+  const id = req.params.id
+  try {
+    const etc = await pool.query('select * from clases where id_curso = ? ', [id])
+    res.json(etc)
+  } catch (error) {
+    console.log(error)
+    res.json(['']);
+  }
+})
+
 router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
   const id = req.params.id
   try {
@@ -41,8 +54,9 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     const cursado = await pool.query('select * from cursado join usuarios on cursado.id_usuario =usuarios.id  where id_curso=?',[id])
     const curso = await pool.query('select * from cursos where id = ? ', [id])
     const inscriptos = await pool.query('select * from cursado where id_curso=? and inscripcion ="Cursando"',[id])
+    const clases = await pool.query('select * from clases where id_curso=? ',[id])
 
-    res.json([etc,pendientes,cursado,curso,inscriptos.length]);
+    res.json([etc,pendientes,cursado,curso,inscriptos.length,clases]);
   } catch (error) {
     console.log(error)
     res.json(['']);
@@ -87,6 +101,25 @@ router.post("/crear", isLoggedInn2, async (req, res) => {
 })
 
 
+
+router.post("/nuevaclase", isLoggedInn2, async (req, res) => {
+  const { id_curso, fecha, observaciones } = req.body
+console.log(id_curso)
+console.log(fecha)
+try {
+  
+
+const nuev = {
+  id_curso, fecha ,observacion:observaciones
+}
+await pool.query('insert clases  set ?', [nuev])
+res.json('Cargada nueva clase')
+} catch (error) {
+  console.log(error)
+  res.json('Error algo sucedio')
+}
+
+})
 
 router.post("/inscribir", isLoggedInn, async (req, res) => {
   const { id, usuario } = req.body
