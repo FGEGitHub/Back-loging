@@ -45,6 +45,36 @@ router.get('/verclases/:id', isLoggedInn2, async (req, res) => {
   }
 })
 
+
+
+
+
+
+
+
+
+
+
+
+
+router.get('/asistencia/:id', isLoggedInn2, async (req, res) => {
+  const id = req.params.id
+
+try {
+   const clase  = await pool.query('select * from clases where id = ?',[id])
+   const alumnos = await pool.query('select * from cursado where id_curso = ? and inscripcion = "Cursando"',[clase[0]['id_curso']])
+  console.log(alumnos)
+res.json([clase,alumnos])
+} catch (error) {
+  console.log(error)
+}
+
+
+})
+
+
+
+
 router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
   const id = req.params.id
   try {
