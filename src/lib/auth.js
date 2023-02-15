@@ -8,9 +8,9 @@ module.exports = {
         //
         const authorization = req.get('authorization')
         let token =null
-        console.log(authorization)
+       
         if (authorization && authorization.startsWith('Bearer')){
-            console.log('entraa')
+           
             token = authorization.substring(7) 
         }
         let decodedToken = {}
@@ -37,14 +37,14 @@ module.exports = {
         let token =null
         console.log(authorization)
         if (authorization && authorization.startsWith('Bearer')){
-            console.log('entraa')
+          
             token = authorization.substring(7) 
         }
         let decodedToken = {}
         
         try{
              decodedToken = jwt.verify(token, 'fideicomisocs121')
-             console.log(decodedToken)
+            
            
         }catch{}
       

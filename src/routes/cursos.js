@@ -40,8 +40,9 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     const pendientes = await pool.query('select * from cursado where id_curso=? and inscripcion ="Pendiente"',[id])
     const cursado = await pool.query('select * from cursado join usuarios on cursado.id_usuario =usuarios.id  where id_curso=?',[id])
     const curso = await pool.query('select * from cursos where id = ? ', [id])
+    const inscriptos = await pool.query('select * from cursado where id_curso=? and inscripcion ="Cursando"',[id])
 
-    res.json([etc,pendientes,cursado,curso]);
+    res.json([etc,pendientes,cursado,curso,inscriptos.length]);
   } catch (error) {
     console.log(error)
     res.json(['']);
