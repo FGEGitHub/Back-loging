@@ -9,9 +9,9 @@ const pool = require('../database')
 
 router.get('/datosusuario/:usuario', async (req, res) => {
   const usuario = req.params.usuario
-  console.log(usuario)
+ 
   const etc = await pool.query('select * from usuarios where usuario =?', [usuario])
-
+ console.log(etc)
   res.json([etc,]);
   //res.render('index')
 })
@@ -83,6 +83,20 @@ console.log(id_usuario+'   '+accion)
 })
 
 
+router.post("/modificardatosadic", isLoggedInn, async (req, res) => {
+  const { anios, trabajo, hijos, usuario } = req.body
+try {
+  
+
+act = { anios, trabajo, hijos }  
+
+await pool.query('UPDATE usuarios set ?  where usuario = ?  ', [act, usuario])
+res.json('Guardado con exito')
+} catch (error) {
+  console.log(error)
+  res.json('Error algo sucedio')
+}
+})
 
 
 module.exports = router

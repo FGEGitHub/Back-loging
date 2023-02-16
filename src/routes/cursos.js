@@ -19,14 +19,15 @@ router.get('/lista/', isLoggedInn, async (req, res) => {
 router.get('/listaniv1/:usuario', isLoggedInn, async (req, res) => {
   const usuario = req.params.usuario
 try {
-  
+  console.log(usuario)
 
 id_usuarioo = await pool.query('select id from usuarios where usuario = ?',[usuario])
+console.log(id_usuarioo[0]['id'])
 
-
-  const etc = await pool.query('select cursos.id,cursos.fecha , encargado, nombre, cupo, cursos.id, cursado.inscripcion from cursos left join cursado on cursos.id=(select cursado.id_curso from cursado where  id_usuario =?) group by cursos.id', [id_usuarioo[0]['id']])
-
+  const etc = await pool.query('select cursos.id,cursos.fecha , encargado, nombre, cupo, cursos.id, cursado.inscripcion from cursos left join cursado on cursos.id=cursado.id_curso group by cursos.id', [id_usuarioo[0]['id']])
+console.log(etc)
   res.json(etc);} catch (error) {
+    console.log(Error)
     res.json('Error algo salio mal')
   }
   //res.render('index')
@@ -63,7 +64,7 @@ router.get('/asistencia/:id', isLoggedInn2, async (req, res) => {
 try {
    const clase  = await pool.query('select * from clases where id = ?',[id])
    
-   const alumnos = await pool.query('select * from cursado left  join asistencia on cursado.id = asistencia.id_cursado   join usuarios on  cursado.id_usuario = usuarios.id    where cursado.id_curso = ?  ',[clase[0]['id_curso']])
+   const alumnos = await pool.query('select * from cursado left  join asistencia on cursado.id = asistencia.id_cursado   join usuarios on  cursado.id_usuario = usuarios.id    where cursado.id_curso = ?  and cursado.inscripcion= "Cursando" ',[clase[0]['id_curso']])
    
    console.log(alumnos)
 res.json([clase,alumnos])
