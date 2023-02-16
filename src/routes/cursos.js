@@ -62,8 +62,10 @@ router.get('/asistencia/:id', isLoggedInn2, async (req, res) => {
 
 try {
    const clase  = await pool.query('select * from clases where id = ?',[id])
-   const alumnos = await pool.query('select * from cursado where id_curso = ? and inscripcion = "Cursando"',[clase[0]['id_curso']])
-  console.log(alumnos)
+   
+   const alumnos = await pool.query('select * from cursado left  join asistencia on cursado.id = asistencia.id_cursado   join usuarios on  cursado.id_usuario = usuarios.id    where cursado.id_curso = ?  ',[clase[0]['id_curso']])
+   
+   console.log(alumnos)
 res.json([clase,alumnos])
 } catch (error) {
   console.log(error)
@@ -176,6 +178,9 @@ router.post("/inscribir", isLoggedInn, async (req, res) => {
 })
 
 
-
+router.post("/presente", isLoggedInn2, async (req, res) => {
+  const { id_usuario, id} = req.body ///
+  console.log(id_usuario)
+})
 
 module.exports = router
