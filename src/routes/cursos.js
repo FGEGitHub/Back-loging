@@ -18,15 +18,22 @@ router.get('/lista/', isLoggedInn, async (req, res) => {
 /////// lista desde el usuario 1
 router.get('/listaniv1/:usuario', isLoggedInn, async (req, res) => {
   const usuario = req.params.usuario
+
+
+  const aux = await pool.query('select * from usuarios where usuario =?', [usuario])
+
+const etc2 = await pool.query('select * from personas where id =?', [aux[0]['id_persona']])
+ 
+
+console.log(etc2[0]['id'])
+//console.log(etc)
+
+const etc3 = await pool.query('select cursos.id,cursos.fecha , encargado, nombre, cupo, cursos.id, c.inscripcion, c.id_persona from cursos left join (select * from cursado where id_persona = ? ) c on cursos.id=c.id_curso  ', [etc2[0]['id']])
+
 try {
-  console.log(usuario)
+///const etc4 = await pool.query('select * from cursos join  cursado ')
 
-id_usuarioo = await pool.query('select id from usuarios where usuario = ?',[usuario])
-console.log(id_usuarioo[0]['id'])
-
-  const etc = await pool.query('select cursos.id,cursos.fecha , encargado, nombre, cupo, cursos.id, cursado.inscripcion from cursos left join cursado on cursos.id=cursado.id_curso group by cursos.id', [id_usuarioo[0]['id']])
-console.log(etc)
-  res.json(etc);} catch (error) {
+  res.json(etc3);} catch (error) {
     console.log(Error)
     res.json('Error algo salio mal')
   }
@@ -158,9 +165,13 @@ router.post("/inscribir", isLoggedInn, async (req, res) => {
   const { id, usuario } = req.body
 
   try {
-    user = await pool.query('select * from usuarios where usuario =? ', [usuario])
+    const aux = await pool.query('select * from usuarios where usuario =?', [usuario])
+
+    const etc = await pool.query('select * from personas where id =?', [aux[0]['id_persona']])
+
+
     nove = {
-      id_usuario: user[0]['id'],
+      id_persona:etc,
       id_curso: id,
       inscripcion: 'Pendiente',
       fecha: (new Date(Date.now())).toLocaleDateString(),
