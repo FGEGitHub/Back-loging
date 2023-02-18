@@ -10,12 +10,33 @@ const pool = require('../database')
 router.get('/datosusuario/:usuario', async (req, res) => {
   const usuario = req.params.usuario
  
-  const etc = await pool.query('select * from usuarios where usuario =?', [usuario])
+  
+  
+  const aux =  await pool.query('select * from usuarios where usuario =?', [usuario])
+
+  const etc = await pool.query('select * from personas where id =?', [aux[0]['id_persona']])
 
   res.json([etc]);
   //res.render('index')
 })
+router.get('/datospersona/:id', async (req, res) => {
+  const id = req.params.id
+ 
+  try {
+  
+  
+  const aux =  await pool.query('select * from personas where id =?', [id])
 
+  
+
+  res.json([aux]);
+    
+} catch (error) {
+  console.log(error)
+  res.json(['']);
+}
+  //res.render('index')
+})
 router.get('/lista', async (req, res) => {
   const usuario = req.params.usuario
  
