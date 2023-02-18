@@ -62,6 +62,7 @@ app.use(require('./routes/authentication'))
 app.use(`/personas`, require('./routes/personas'))
 app.use(`/cursos`, require('./routes/cursos'))
 app.use(`/novedades`, require('./routes/novedades'))
+app.use(`/inscripciones`, require('./routes/inscripciones'))
 //app.use(`/links`, require('./routes/links'))
 
 

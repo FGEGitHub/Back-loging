@@ -168,7 +168,7 @@ router.post("/crear", isLoggedInn, async (req, res) => {
 
 
 ///////// CARGAR PERSONAS DEL EXCEL
-router.get('/cargarpersonas', async (req, res) => {
+router.get('/cargarpersonas111', async (req, res) => {
 
   const workbook = XLSX.readFile('./src/cargadepersonas/Muestreo.xlsx')
   const workbooksheets = workbook.SheetNames
@@ -243,7 +243,7 @@ router.get('/cargarpersonas', async (req, res) => {
 
 
 
-router.get('/cargarcursos', async (req, res) => {
+router.get('/cargarcursos111', async (req, res) => {
 
   const workbook = XLSX.readFile('./src/cargadepersonas/Muestreo.xlsx')
   const workbooksheets = workbook.SheetNames
@@ -285,9 +285,9 @@ router.get('/cargarcursos', async (req, res) => {
           } else {
             try {
               const newLink = {
-               
+
                 nombre: aux,
-              
+
 
               }
 
@@ -319,7 +319,7 @@ router.get('/cargarcursos', async (req, res) => {
 
 
 ///////// CARGAR INSCRIPCIONES
-router.get('/cargarpersonas', async (req, res) => {
+router.get('/cargarinscripciones111', async (req, res) => {
 
   const workbook = XLSX.readFile('./src/cargadepersonas/Muestreo.xlsx')
   const workbooksheets = workbook.SheetNames
@@ -336,42 +336,176 @@ router.get('/cargarpersonas', async (req, res) => {
     existe = await pool.query('select * from personas where dni = ?', [aux])
 
 
-    if (existe.length > 0) {
-      console.log('Dni ya existe')
-    } else {
-      hijos = 0
-      if (dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'] === '') {
-        hijos = 0
-      } else {
-        hijos = dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?']
+    expresion = dataExcel[property]['Selecciona el primer curso de mayor preferencia (1)']
+    switch (expresion) {
+      case 'Bordado Mexicano':
+        id_curso = 122
+        break;
+      case 'Organización de Eventos, nivel 2':
+        id_curso = 123
+        break;
+
+      case 'Introducción al Maquillaje y Peinados para Eventos':
+        id_curso = 124
+        break;
+      case 'Introducción a la elaboración de prendas textiles a partir de la reutilización de materiales (upcycling)':
+        id_curso = 125
+        break;
+      case 'Introducción a la Instalación de Sistemas Operativos':
+        id_curso = 126
+        break;
+      case 'Restauración de Muebles':
+
+        id_curso = 127
+        break;
+      default:
+        id_curso = 1
+        break;
+    }
+    uno = id_curso
+
+
+    expresion = dataExcel[property]['Selecciona el primer curso de mayor preferencia (2)']
+    switch (expresion) {
+      case 'Bordado Mexicano':
+        id_curso = 122
+        break;
+      case 'Organización de Eventos, nivel 2':
+        id_curso = 123
+        break;
+
+      case 'Introducción al Maquillaje y Peinados para Eventos':
+        id_curso = 124
+        break;
+      case 'Introducción a la elaboración de prendas textiles a partir de la reutilización de materiales (upcycling)':
+        id_curso = 125
+        break;
+      case 'Introducción a la Instalación de Sistemas Operativos':
+        id_curso = 126
+        break;
+      case 'Restauración de Muebles':
+
+        id_curso = 127
+        break;
+      default:
+        id_curso = 1
+        break;
+    }
+    dos = id_curso
+
+
+
+    expresion = dataExcel[property]['Selecciona el primer curso de mayor preferencia (3)']
+    switch (expresion) {
+      case 'Bordado Mexicano':
+        id_curso = 122
+        break;
+      case 'Organización de Eventos, nivel 2':
+        id_curso = 123
+        break;
+
+      case 'Introducción al Maquillaje y Peinados para Eventos':
+        id_curso = 124
+        break;
+      case 'Introducción a la elaboración de prendas textiles a partir de la reutilización de materiales (upcycling)':
+        id_curso = 125
+        break;
+      case 'Introducción a la Instalación de Sistemas Operativos':
+        id_curso = 126
+        break;
+      case 'Restauración de Muebles':
+
+        id_curso = 127
+        break;
+      default:
+        id_curso = 1
+        break;
+    }
+    tres = id_curso
+
+
+    try {
+      const newLink = {
+        motivacion: dataExcel[property]['¿Por que elegiste tomar este curso?'],
+        conexion_int: dataExcel[property]['Posee alguno de los  siguientes dispositivos con conexión a internet:'],
+        dni_persona: dataExcel[property]['D.N.I.'],
+        objetivo: dataExcel[property]['¿Qué te gustaría  hacer con las habilidades aprendidas?'],
+        horario: dataExcel[property]['Disponibilidad Horaria para cursar'],
+        estado: 'pendiente',
+
+        uno,
+        dos,
+        tres
+
+
       }
+
+
+
+      await pool.query('INSERT INTO inscripciones set ?', [newLink]);
+
+
+      console.log('cargado')
+
+
+
+    } catch (e) {
+      console.log(e)
+    }
+
+    /* if ((dataExcel[property]['Sucursal']).includes(cuil_cuit)) {
+        estado = 'A'
+    }*/
+
+
+  }
+  console.log('finalizado')
+  res.send('finalizado')
+})
+
+
+
+
+
+
+
+
+
+///////cargar emprendimientos
+
+router.get('/cargaremprendimientos1111', async (req, res) => {
+
+  const workbook = XLSX.readFile('./src/cargadepersonas/Muestreo.xlsx')
+  const workbooksheets = workbook.SheetNames
+  const sheet = workbooksheets[0]
+
+  const dataExcel = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
+  //console.log(dataExcel)
+
+
+  let a = 1
+  for (const property in dataExcel) {
+    a += 1
+    aux = dataExcel[property]['¿Tenes un emprendimiento?']
+
+
+    if (aux === 'Sí') {
 
       try {
         const newLink = {
-          apellido: dataExcel[property]['Apellido'],
-          nombre: dataExcel[property]['Nombre'],
-          dni: dataExcel[property]['D.N.I.'],
 
-          usuario: 'No',
-          direccion: dataExcel[property]['Dirección calle'] + '-' + dataExcel[property][' Altura'] + '-' + dataExcel[property]['Piso y departamento (en caso que corresponda)'],
-          barrio: dataExcel[property]['Barrio'],
-          residencia: dataExcel[property]['Donde vivís'],
-          tel: dataExcel[property]['Número de teléfono de contacto'],
-
-          tel2: dataExcel[property]['tel2'],
-
-          participante_anterior: dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres? '],
-          nivel_secundario: dataExcel[property]['Nivel educativo alcanzado'],
-
-          hijos: hijos,
-          como_se_entero: dataExcel[property]['¿Cómo te enteraste de los cursos?'],
+          dni_persona : dataExcel[property]['D.N.I.'],
+          rubro : dataExcel[property]['Rubro'],
+          descripcion : dataExcel[property]['Contamos brevemente de que se trata'],
+          red_social : dataExcel[property]['Dejannos las redes sociales de tu emprendimiento (si lo tiene)'],
+          quiere_partic_esme : dataExcel[property]['¿Te interesaría participar de una feria?'],
 
 
         }
 
 
 
-        await pool.query('INSERT INTO personas set ?', [newLink]);
+        await pool.query('INSERT INTO emprendimientos_pers set ?', [newLink]);
 
 
         console.log('cargado')
@@ -382,12 +516,21 @@ router.get('/cargarpersonas', async (req, res) => {
         console.log(e)
       }
 
-      /* if ((dataExcel[property]['Sucursal']).includes(cuil_cuit)) {
-          estado = 'A'
-      }*/
-
+    
     }
+
+    
+
+
+
+    
+
   }
   console.log('finalizado')
 })
+
+
+
+
+
 module.exports = router
