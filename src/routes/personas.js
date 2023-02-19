@@ -319,7 +319,7 @@ router.get('/cargarcursos111', async (req, res) => {
 
 
 ///////// CARGAR INSCRIPCIONES
-router.get('/cargarinscripciones111', async (req, res) => {
+router.get('/cargarinscripciones0000', async (req, res) => {
 
   const workbook = XLSX.readFile('./src/cargadepersonas/Muestreo.xlsx')
   const workbooksheets = workbook.SheetNames
