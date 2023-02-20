@@ -88,15 +88,25 @@ res.json([clase,alumnos])
 router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
   const id = req.params.id
   try {
-
+      /////CLASES DEL CURSO
     const etc = await pool.query('select * from clases where id_curso = ? ', [id])
-    const pendientes = await pool.query('select * from cursado where id_curso=? and inscripcion ="Pendiente"',[id])
-    const cursado = await pool.query('select * from cursado join usuarios on cursado.id_usuario =usuarios.id  where id_curso=?',[id])
+   //////pendientes inscriptos prioridad 1 2 3
+    const pendientes1 = await pool.query('select * from inscripciones where uno=? and estado ="pendiente"',[id])
+    const pendientes2 = await pool.query('select * from inscripciones where dos=? and estado ="pendiente"',[id])
+    const pendientes3 = await pool.query('select * from inscripciones where tres=? and estado ="pendiente"',[id])
+    /////isncripciones si participo/no participo
+    //si
+    const cursadosi = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona =personas.dni  where inscripciones.uno=? and personas.participante_anterior="Sí"',[id])
+    //no
+    const cursadono = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona =personas.dni  where inscripciones.uno=? and personas.participante_anterior="No"',[id])
+///////datos del curso
     const curso = await pool.query('select * from cursos where id = ? ', [id])
+    ////////////ALUMNOS YAINSCRIPTOS
     const inscriptos = await pool.query('select * from cursado where id_curso=? and inscripcion ="Cursando"',[id])
+    ///CLASES DEL CURSO
     const clases = await pool.query('select * from clases where id_curso=? ',[id])
 
-    res.json([etc,pendientes,cursado,curso,inscriptos.length,clases]);
+    res.json([etc,[pendientes1.length,pendientes2.length,pendientes3.length],[cursadosi,cursadono],curso,inscriptos.length,clases]);
   } catch (error) {
     console.log(error)
     res.json(['']);
