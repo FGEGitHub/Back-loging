@@ -91,9 +91,18 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
       /////CLASES DEL CURSO
     const etc = await pool.query('select * from clases where id_curso = ? ', [id])
    //////pendientes inscriptos prioridad 1 2 3
-    const pendientes1 = await pool.query('select * from inscripciones where uno=? and estado ="pendiente"',[id])
-    const pendientes2 = await pool.query('select * from inscripciones where dos=? and estado ="pendiente"',[id])
-    const pendientes3 = await pool.query('select * from inscripciones where tres=? and estado ="pendiente"',[id])
+    const pendientes1 = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona = personas.dni where uno=? and estado ="pendiente" ',[id])
+
+    const pendientes2 = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona = personas.dni where dos=? and estado ="pendiente" ',[id])
+    const pendientes3 = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona = personas.dni where dos=? and estado ="pendiente" ',[id])
+    
+   cursado = await pool.query('select * from cursado where id_curso = ?',[id])
+
+
+    array1=pendientes1.concat(pendientes2);
+
+    array1= array1.concat(pendientes3);
+console.log(array1.length)
     /////isncripciones si participo/no participo
     //si
     const cursadosi = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona =personas.dni  where inscripciones.uno=? and personas.participante_anterior="Sí"',[id])
@@ -112,7 +121,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
  cantidad:curso[0]['cupo']
 }
  lista.push(auxil)
-console.log(lista)
+
 auxil = {dato:"Participo/tiene hijos/trabaja formal",
 cantidad:(curso[0]['cupo']*0.012285).toFixed(2)
 }
@@ -127,7 +136,7 @@ cantidad:(curso[0]['cupo']*0.3159).toFixed(2)
  lista.push(auxil)
 
 auxil = {dato:"Participo/No tiene hijos/No trabaja",
-cantidad:curso[0]['cupo']*0.08415
+cantidad:curso[0]['cupo']*0.08415.toFixed(2)
 }
 lista.push(auxil)
 
@@ -147,7 +156,7 @@ cantidad:(curso[0]['cupo']*0.1309).toFixed(2)
  lista.push(auxil)
 
 auxil = {dato:"No Participo/tiene hijos/No trabaja ",
-cantidad:(curso[0]['cupo']*0.187)
+cantidad:(curso[0]['cupo']*0.187).toFixed(2)
 }
  lista.push(auxil)
 
@@ -167,14 +176,17 @@ cantidad:(curso[0]['cupo']*0.0262).toFixed(2)
 }
  lista.push(auxil)
 
-    res.json([etc,[pendientes1.length,pendientes2.length,pendientes3.length],[cursadosi,cursadono],curso,inscriptos.length,clases,lista]);
+    res.json([etc,array1,[cursadosi,cursadono],curso,inscriptos.length,clases,lista,cursado]);
   } catch (error) {
     console.log(error)
     res.json(['']);
   }
 
-  //res.render('index')
+
 })
+
+
+
 router.post("/crear", isLoggedInn2, async (req, res) => {
   const { nombre, observaciones, encargado, cupo } = req.body
 

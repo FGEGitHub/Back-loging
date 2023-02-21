@@ -64,7 +64,7 @@ router.get('/datosusuarioporid/:id', isLoggedInn2, async (req, res) => {
   }
 
   tiene_hijos = "Si"
- 
+
   if ((etc[0]['hijos'] == "0") || (etc[0]['hijos'] == null)) {
     tiene_hijos = "No"
   }
@@ -83,53 +83,53 @@ router.get('/datosusuarioporid/:id', isLoggedInn2, async (req, res) => {
   console.log(trabaja)
 
   ficha = {
-    nombre: etc[0]['apellido']+ etc[0]['nombre'],participante_ant, tiene_hijos, trabaja, tipot
+    nombre: etc[0]['apellido'] + etc[0]['nombre'], participante_ant, tiene_hijos, trabaja, tipot
   }
 
-console.log(ficha)
-  porcentaje_real =100
+  console.log(ficha)
+  porcentaje_real = 100
   if (participante_ant === "Si") {
-   // porcentaje_real=45
-   console.log('Participante anteirior')
+    // porcentaje_real=45
+    console.log('Participante anteirior')
     ///45%   PARTICIPO  TIENE HIJOS
     if (tiene_hijos === "Si") {
       console.log('Tiene hijos')
       ///78% tiene hijos
-    //  porcentaje_real=35.1
+      //  porcentaje_real=35.1
       if (trabaja === "Si") {
         console.log('Trabaja')
         if (tipot === "Formal") {
           console.log('formalmente')
           ///trabaja formal 3.5
-          porcentaje_real=1.2285
+          porcentaje_real = 1.2285
         } else {
           console.log('Informalmente')
           ///// trabaja informalñ 6.5
-          porcentaje_real=2.2815
+          porcentaje_real = 2.2815
         }
 
 
       } else {
         ///No trabaja 90%
         console.log('No trabaja')
-        porcentaje_real=31.59
+        porcentaje_real = 31.59
 
 
 
       }
     } else {
       ///22%  Notiene hijos
-    //  porcentaje_real=9.9
-    console.log('No tiene hijos')
+      //  porcentaje_real=9.9
+      console.log('No tiene hijos')
       if (trabaja === "Si") {
-     ///15%
-     console.log('Trabaja')
-     porcentaje_real=1.485
+        ///15%
+        console.log('Trabaja')
+        porcentaje_real = 1.485
 
       } else {
         ///No trabaja 85%
         console.log('no trabaja')
-        porcentaje_real=8.415
+        porcentaje_real = 8.415
 
 
       }
@@ -143,50 +143,50 @@ console.log(ficha)
   } else {///////////////////////NO PARTICIPARON 
     ////55% 
     console.log('No participaron')
- //   porcentaje_real=55
+    //   porcentaje_real=55
     if (tiene_hijos === "Si") {
       ///68&  
       console.log('Tiene hijos')
-    //  porcentaje_real=37.4
-      if (trabaja === "Si"){
+      //  porcentaje_real=37.4
+      if (trabaja === "Si") {
         console.log('Trabaja')
-        if (tipot ==="Formal"){
+        if (tipot === "Formal") {
           /////15%
           console.log('formalmente')
-          porcentaje_real=5.61
-        }else{
+          porcentaje_real = 5.61
+        } else {
           console.log('Informalmente')
-          porcentaje_real=13.09
+          porcentaje_real = 13.09
           ///35%
 
         }
 
-      }else{
-        porcentaje_real=18.7
+      } else {
+        porcentaje_real = 18.7
         console.log('No trabaja')
         //no trabaja 50%
       }
 
     } else {
       ///no tiene hijos
-    //  porcentaje_real=17.6
+      //  porcentaje_real=17.6
       ///32%
       console.log('No tiene hijos')
 
-      if (trabaja === "Si"){
+      if (trabaja === "Si") {
         console.log('trabaja')
-        if (tipot ==="Formal"){
+        if (tipot === "Formal") {
           console.log('formal')
           /////15
-          porcentaje_real=2.64
-        }else{
-          porcentaje_real=2.64
+          porcentaje_real = 2.64
+        } else {
+          porcentaje_real = 2.64
           ///15
 
         }
 
-      }else{
-        porcentaje_real=12.32
+      } else {
+        porcentaje_real = 12.32
         //no trabaja 70%
       }
 
@@ -209,34 +209,166 @@ console.log(ficha)
 
 router.post("/inscribir", isLoggedInn2, async (req, res) => {
   const { id_curso, dni, accion } = req.body
-  console.log(id_usuario + '   ' + accion)
-
-  const aux = await pool.query('select * from usuarios where id =?', [id_usuario])
-
-  const etc = await pool.query('select * from personas where id =?', [aux[0]['id_persona']])
+ 
 
 
-  try {
-    let act = {
-      inscripcion: 'Pendiente'
+
+  const etc = await pool.query('select * from personas where dni =?', [dni])
+
+  //////////////////////
+
+  categoria = "0"
+  if ((etc[0]['participante_anterior'] === "Sí") || (etc[0]['participante_anterior'] === "Si")) {
+    // porcentaje_real=45
+    console.log('Participante anteirior')
+    ///45%   PARTICIPO  TIENE HIJOS
+    if ((etc[0]['hijos'] == "0") || (etc[0]['hijos'] == null)) {
+      console.log('NO Tiene hijos')
+      ///78% tiene hijos
+      //  porcentaje_real=35.1
+      if (etc[0]['trabajo'] === "Si" || etc[0]['trabajo'] === "Si") {
+        console.log('Trabaja')
+        if (tipot === "Formal") {
+          console.log('formalmente')
+          categoria = "2.2.2"
+
+        } else {
+          console.log('Informalmente')
+
+        }
+
+
+      } else {
+        ///No trabaja 90%
+        console.log('No trabaja')
+        categoria = "2.2.1"
+
+
+
+      }
+    } else {
+      ///22%  Notiene hijos
+      //  porcentaje_real=9.9
+      console.log('tiene hijos')
+      if (etc[0]['trabajo'] === "Si" || etc[0]['trabajo'] === "Si") {
+        console.log('Trabaja')
+        if (tipot === "Formal") {
+          console.log('formalmente')
+          categoria = "2.1.2.2"
+
+        } else {
+          console.log('Informalmente')
+          categoria = "2.1.2.1"
+        }
+
+
+      } else {
+        ///No trabaja 90%
+        console.log('No trabaja')
+        categoria = "2.1.1"
+
+
+
+      }
+
+
+
     }
+
+
+
+  } else {///////////////////////NO PARTICIPARON 
+    ////55% 
+    console.log('No participaron')
+    //   porcentaje_real=55
+    if ((etc[0]['hijos'] == "0") || (etc[0]['hijos'] == null)) {
+      console.log('NO Tiene hijos')
+      ///78% tiene hijos
+      //  porcentaje_real=35.1
+      if (etc[0]['trabajo'] === "Si" || etc[0]['trabajo'] === "Si") {
+        console.log('Trabaja')
+        if (tipot === "Formal") {
+          console.log('formalmente')
+          categoria = "1.2.2.2"
+
+        } else {
+          console.log('Informalmente')
+          categoria = "1.2.2.1"
+        }
+
+
+      } else {
+        ///No trabaja 90%
+        console.log('No trabaja')
+        categoria = "2.2.1"
+
+
+
+      }
+    } else {
+      ///22%  Notiene hijos
+      //  porcentaje_real=9.9
+      console.log('tiene hijos')
+      if (etc[0]['trabajo'] === "Si" || etc[0]['trabajo'] === "Si") {
+        console.log('Trabaja')
+        if (tipot === "Formal") {
+          console.log('formalmente')
+          categoria = "1.1.2.2"
+
+        } else {
+          console.log('Informalmente')
+          categoria = "1.1.2.1"
+        }
+
+
+      } else {
+        ///No trabaja 90%
+        console.log('No trabaja')
+        categoria = "1.1.1"
+
+
+
+      }
+
+
+
+    }
+
+  }
+
+
+
+
+
+
+  ////////////
+  try {
+   
+      inscripcion= 'Pendiente'
+  
 
 
     if (accion == 'Aceptar') {
-      console.log('opcion aceptar ')
-      act = {
-        inscripcion: 'Cursando'
-      }
+    
+        inscripcion= 'Cursando'
+      
     }
 
     if (accion == 'Rechazar') {
-      act = {
-        inscripcion: 'Rechazado'
-      }
+      
+        inscripcion= 'Rechazado'
+    
     }
 
+    act = {
+      inscripcion,
+      categoria,
+      id_persona:etc[0]['id'],
+      id_curso
+    }
+    
 
-    await pool.query('UPDATE cursado set ? WHERE id_curso = ? and id_persona = ?  ', [act, id_curso, etc[0]['id']])
+    await pool.query('insert into cursado set ?   ', [act])
     res.json('Realizado con exito ')
 
   } catch (error) {

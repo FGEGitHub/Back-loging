@@ -96,9 +96,6 @@ router.get('/listacursos/', async (req, res) => {
 
 
 
-  const priori3 = await pool.query('select cursos.id idc, cursos.nombre, count (tres ) cantidad , cupo  from inscripciones  join personas on inscripciones.dni_persona  = personas.dni join cursos on inscripciones.tres =  cursos.id   group by tres ')
-
-
   //const priori2 = await pool.query('select * from inscripciones join cursos on inscripciones.dos  =cursos.id')
   // const priori3 = await pool.query('select * from inscripciones join cursos on inscripciones.tres  =cursos.id')
   
