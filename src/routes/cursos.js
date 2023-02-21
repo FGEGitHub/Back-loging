@@ -106,7 +106,68 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     ///CLASES DEL CURSO
     const clases = await pool.query('select * from clases where id_curso=? ',[id])
 
-    res.json([etc,[pendientes1.length,pendientes2.length,pendientes3.length],[cursadosi,cursadono],curso,inscriptos.length,clases]);
+    //////estadisticas
+ lista=[]
+ auxil = {dato:"Cupo",
+ cantidad:curso[0]['cupo']
+}
+ lista.push(auxil)
+console.log(lista)
+auxil = {dato:"Participo/tiene hijos/trabaja formal",
+cantidad:(curso[0]['cupo']*0.012285).toFixed(2)
+}
+lista.push(auxil)
+auxil = {dato:"Participo/tiene hijos/trabaja Informal",
+cantidad:(curso[0]['cupo']*0.022815.toFixed(2))
+}
+lista.push(auxil)
+auxil = {dato:"Participo/tiene hijos/No trabaja",
+cantidad:(curso[0]['cupo']*0.3159).toFixed(2)
+}
+ lista.push(auxil)
+
+auxil = {dato:"Participo/No tiene hijos/No trabaja",
+cantidad:curso[0]['cupo']*0.08415
+}
+lista.push(auxil)
+
+auxil = {dato:"Participo/tiene hijos/trabaja",
+cantidad:(curso[0]['cupo']*0.01485).toFixed(2)
+}
+ lista.push(auxil)
+
+auxil = {dato:"No Participo/tiene hijos/trabaja Formalmente ",
+cantidad:(curso[0]['cupo']*0.0561).toFixed(2)
+}
+ lista.push(auxil)
+
+auxil = {dato:"No Participo/tiene hijos/trabaja Inormalmente ",
+cantidad:(curso[0]['cupo']*0.1309).toFixed(2)
+}
+ lista.push(auxil)
+
+auxil = {dato:"No Participo/tiene hijos/No trabaja ",
+cantidad:(curso[0]['cupo']*0.187)
+}
+ lista.push(auxil)
+
+
+auxil = {dato:"No Participo/No tiene hijos/No trabaja ",
+cantidad:(curso[0]['cupo']*0.1232).toFixed(2)
+}
+ lista.push(auxil)
+
+auxil = {dato:"No Participo/No tiene hijos/Trabaja Formalmente ",
+cantidad:(curso[0]['cupo']*0.0262).toFixed(2)
+}
+ lista.push(auxil)
+
+auxil = {dato:"No Participo/No tiene hijos/Trabaja Informalmente ",
+cantidad:(curso[0]['cupo']*0.0262).toFixed(2)
+}
+ lista.push(auxil)
+
+    res.json([etc,[pendientes1.length,pendientes2.length,pendientes3.length],[cursadosi,cursadono],curso,inscriptos.length,clases,lista]);
   } catch (error) {
     console.log(error)
     res.json(['']);
