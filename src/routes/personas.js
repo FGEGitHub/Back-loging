@@ -218,7 +218,7 @@ router.get('/datosusuarioporid/:id', isLoggedInn2, async (req, res) => {
 
 
 router.post("/inscribir", isLoggedInn2, async (req, res) => {
-  const { id_curso, dni, accion } = req.body
+  const { id_curso, dni, accion,  id_inscripcion} = req.body
  
 
 
@@ -354,19 +354,22 @@ router.post("/inscribir", isLoggedInn2, async (req, res) => {
   ////////////
   try {
    
-      inscripcion= 'Pendiente'
+      inscripcion= 'pendiente'
+      estadonuevo="pendiente"
   
 
 
     if (accion == 'Aceptar') {
     
-        inscripcion= 'Cursando'
+        inscripcion= 'Asignado a curso'
+        estadonuevo="Asignado a curso"
       
     }
 
     if (accion == 'Rechazar') {
       
         inscripcion= 'Rechazado'
+        
     
     }
 
@@ -374,11 +377,19 @@ router.post("/inscribir", isLoggedInn2, async (req, res) => {
       inscripcion,
       categoria,
       id_persona:etc[0]['id'],
-      id_curso
+      id_curso,
+      id_inscripcion
     }
     
 
     await pool.query('insert into cursado set ?   ', [act])
+
+    act = {
+     estado:estadonuevo,
+     
+    }
+    await pool.query('update inscripciones set ? where id=?  ', [act,id_inscripcion])
+
     res.json('Realizado con exito ')
 
   } catch (error) {

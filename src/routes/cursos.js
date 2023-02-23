@@ -92,12 +92,12 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     /////CLASES DEL CURSO
     const etc = await pool.query('select * from clases where id_curso = ? ', [id])
     //////pendientes inscriptos prioridad 1 2 3
-    const pendientes1 = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona = personas.dni where uno=? and estado ="pendiente" ', [id])
+    const pendientes1 = await pool.query('select inscripciones.id id_inscripcion, inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.trabajo, personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where uno=?  ', [id])
 
-    const pendientes2 = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona = personas.dni where dos=? and estado ="pendiente" ', [id])
-    const pendientes3 = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona = personas.dni where dos=? and estado ="pendiente" ', [id])
+    const pendientes2 = await pool.query('select inscripciones.id id_inscripcion, inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.trabajo, personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where dos=? ', [id])
+    const pendientes3 = await pool.query('select inscripciones.id id_inscripcion, inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.trabajo, personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where tres=?  ', [id])
 
-    cursado = await pool.query('select * from cursado where id_curso = ?', [id])
+    cursado = await pool.query('select cursado.id, cursado.categoria, cursado.id_persona,cursado.inscripcion, cursado.id_curso, personas.nombre, personas.apellido from cursado join personas on cursado.id_persona=personas.id where id_curso = ? ', [id])
 
 
     array1 = pendientes1.concat(pendientes2);
@@ -106,9 +106,9 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     console.log(array1.length)
     /////isncripciones si participo/no participo
     //si
-    const cursadosi = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona =personas.dni  where inscripciones.uno=? and personas.participante_anterior="Sí"', [id])
+    //const cursadosi = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona =personas.dni  where inscripciones.uno=? and personas.participante_anterior="Sí"', [id])
     //no
-    const cursadono = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona =personas.dni  where inscripciones.uno=? and personas.participante_anterior="No"', [id])
+    //const cursadono = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona =personas.dni  where inscripciones.uno=? and personas.participante_anterior="No"', [id])
     ///////datos del curso
     const curso = await pool.query('select * from cursos where id = ? ', [id])
     ////////////ALUMNOS YAINSCRIPTOS
@@ -119,7 +119,6 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     ///---------------------------------------------------
     //////ARMADO DE TABLA DL CURSO
 
-    cursado = await pool.query('select * from cursado where id_curso = ? ', [id])
     unounouno = 0
     unounodosuno = 0
     unounodosdos = 0
@@ -280,7 +279,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     }
     lista.push(auxil)
 
-    res.json([etc, array1, [cursadosi, cursadono], curso, inscriptos.length, clases, lista, cursado]);
+    res.json([ array1, curso, inscriptos.length, clases, lista, cursado]);
   } catch (error) {
     console.log(error)
     res.json(['']);
