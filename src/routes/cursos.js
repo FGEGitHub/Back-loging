@@ -164,14 +164,6 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           dosunouno += 1
           break;
-        case "1.2.2.2":
-          //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
-          unodosdosdos += 1
-          break;
-        case "2.1.1":
-          //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
-          dosunouno += 1
-          break;
         case "2.1.2.1":
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           dosunodosuno += 1
@@ -180,6 +172,8 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           dosunodosdos += 1
           break;
+       
+      
         case "2.2.1":
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           dosdosuno += 1
@@ -202,54 +196,62 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     auxil = {
       dato: "Participo/tiene hijos/trabaja formal",
       cantidad: (curso[0]['cupo'] * 0.012285).toFixed(2),
-      aceptados:dosunodosdos
+      aceptados:dosunodosdos,
+      Categoria:"K"
     }
     lista.push(auxil)
     auxil = {
       dato: "Participo/tiene hijos/trabaja Informal",
       cantidad: (curso[0]['cupo'] * 0.022815.toFixed(2)),
-      aceptados:dosunodosuno
+      aceptados:dosunodosuno,
+      Categoria:"I"
     }
     lista.push(auxil)
     auxil = {
       dato: "Participo/tiene hijos/No trabaja",
       cantidad: (curso[0]['cupo'] * 0.3159).toFixed(2),
-      aceptados:dosunouno
+      aceptados:dosunouno,
+      Categoria:"A"
     }
     lista.push(auxil)
 
     auxil = {
       dato: "Participo/No tiene hijos/No trabaja",
       cantidad: curso[0]['cupo'] * 0.08415.toFixed(2),
-      aceptados:dosdosuno
+      aceptados:dosdosuno,
+      Categoria:"E"
     }
     lista.push(auxil)
 
     auxil = {
-      dato: "Participo/tiene hijos/trabaja",
+      dato: "Participo/tiene hijos/trabaja (formal/Informal)",
       cantidad: (curso[0]['cupo'] * 0.01485).toFixed(2),
-      aceptados:dosdosdos
+      aceptados:dosdosdos,
+      Categoria:"J"
     }
     lista.push(auxil)
 
     auxil = {
       dato: "No Participo/tiene hijos/trabaja Formalmente ",
       cantidad: (curso[0]['cupo'] * 0.0561).toFixed(2),
-      aceptados:unounodosdos
+      aceptados:unounodosdos,
+      Categoria:"F"
     }
     lista.push(auxil)
 
     auxil = {
-      dato: "No Participo/tiene hijos/trabaja Inormalmente ",
+      dato: "No Participo/tiene hijos/trabaja Informalmente ",
       cantidad: (curso[0]['cupo'] * 0.1309).toFixed(2),
-      aceptados:unounodosuno
+      aceptados:unounodosuno,
+      Categoria:"C"
     }
     lista.push(auxil)
 
     auxil = {
       dato: "No Participo/tiene hijos/No trabaja ",
       cantidad: (curso[0]['cupo'] * 0.187).toFixed(2),
-      aceptados:unounouno
+      aceptados:unounouno,
+      Categoria:"B"
     }
     lista.push(auxil)
 
@@ -257,21 +259,24 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     auxil = {
       dato: "No Participo/No tiene hijos/No trabaja ",
       cantidad: (curso[0]['cupo'] * 0.1232).toFixed(2),
-      aceptados:unodosuno
+      aceptados:unodosuno,
+      Categoria:"D"
     }
     lista.push(auxil)
 
     auxil = {
       dato: "No Participo/No tiene hijos/Trabaja Formalmente ",
-      cantidad: (curso[0]['cupo'] * 0.0262).toFixed(2),
-      aceptados:unounodosdos
+      cantidad: (curso[0]['cupo'] * 0.0264).toFixed(2),
+      aceptados:unodosdosdos,
+      Categoria:"H"
     }
     lista.push(auxil)
 
     auxil = {
       dato: "No Participo/No tiene hijos/Trabaja Informalmente ",
-      cantidad: (curso[0]['cupo'] * 0.0262).toFixed(2),
-      aceptados:dosunodosuno
+      cantidad: (curso[0]['cupo'] * 0.0264).toFixed(2),
+      aceptados:unodosdosuno,
+      Categoria:"G"
     }
     lista.push(auxil)
 

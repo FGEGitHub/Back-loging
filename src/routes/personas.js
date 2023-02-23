@@ -85,7 +85,7 @@ router.get('/datosusuarioporid/:id', isLoggedInn2, async (req, res) => {
   ficha = {
     nombre: etc[0]['apellido'] + etc[0]['nombre'], participante_ant, tiene_hijos, trabaja, tipot
   }
-
+  categoria=''
   console.log(ficha)
   porcentaje_real = 100
   if (participante_ant === "Si") {
@@ -102,10 +102,12 @@ router.get('/datosusuarioporid/:id', isLoggedInn2, async (req, res) => {
           console.log('formalmente')
           ///trabaja formal 3.5
           porcentaje_real = 1.2285
+          categoria='K'
         } else {
           console.log('Informalmente')
           ///// trabaja informalñ 6.5
           porcentaje_real = 2.2815
+          categoria='I'
         }
 
 
@@ -113,6 +115,7 @@ router.get('/datosusuarioporid/:id', isLoggedInn2, async (req, res) => {
         ///No trabaja 90%
         console.log('No trabaja')
         porcentaje_real = 31.59
+        categoria='A'
 
 
 
@@ -125,12 +128,13 @@ router.get('/datosusuarioporid/:id', isLoggedInn2, async (req, res) => {
         ///15%
         console.log('Trabaja')
         porcentaje_real = 1.485
+        categoria='J'
 
       } else {
         ///No trabaja 85%
         console.log('no trabaja')
         porcentaje_real = 8.415
-
+        categoria='E'
 
       }
 
@@ -154,9 +158,11 @@ router.get('/datosusuarioporid/:id', isLoggedInn2, async (req, res) => {
           /////15%
           console.log('formalmente')
           porcentaje_real = 5.61
+          categoria='F'
         } else {
           console.log('Informalmente')
           porcentaje_real = 13.09
+          categoria='C'
           ///35%
 
         }
@@ -164,6 +170,7 @@ router.get('/datosusuarioporid/:id', isLoggedInn2, async (req, res) => {
       } else {
         porcentaje_real = 18.7
         console.log('No trabaja')
+        categoria='B'
         //no trabaja 50%
       }
 
@@ -179,14 +186,17 @@ router.get('/datosusuarioporid/:id', isLoggedInn2, async (req, res) => {
           console.log('formal')
           /////15
           porcentaje_real = 2.64
+          categoria='H'
         } else {
           porcentaje_real = 2.64
+          categoria='G'
           ///15
 
         }
 
       } else {
         porcentaje_real = 12.32
+        categoria='D'
         //no trabaja 70%
       }
 
@@ -196,7 +206,7 @@ router.get('/datosusuarioporid/:id', isLoggedInn2, async (req, res) => {
 
 
 
-  res.json([ficha, porcentaje_real]);
+  res.json([ficha, porcentaje_real,categoria]);
   //res.render('index')
 })
 
