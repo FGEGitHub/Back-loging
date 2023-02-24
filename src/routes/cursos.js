@@ -103,7 +103,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     array1 = pendientes1.concat(pendientes2);
 
     array1 = array1.concat(pendientes3);
-    console.log(array1.length)
+  
     /////isncripciones si participo/no participo
     //si
     //const cursadosi = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona =personas.dni  where inscripciones.uno=? and personas.participante_anterior="Sí"', [id])
@@ -111,8 +111,10 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     //const cursadono = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona =personas.dni  where inscripciones.uno=? and personas.participante_anterior="No"', [id])
     ///////datos del curso
     const curso = await pool.query('select * from cursos where id = ? ', [id])
+    console.log(curso)
     ////////////ALUMNOS YAINSCRIPTOS
-    const inscriptos = await pool.query('select * from cursado where id_curso=? and inscripcion ="Cursando"', [id])
+    const inscriptos = await pool.query('select * from cursado where id_curso=? ', [id])
+    console.log(cursado.length)
     ///CLASES DEL CURSO
     const clases = await pool.query('select * from clases where id_curso=? ', [id])
 
