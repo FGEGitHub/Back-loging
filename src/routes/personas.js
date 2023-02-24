@@ -5,6 +5,13 @@ const pool = require('../database')
 const XLSX = require('xlsx')
 
 
+router.get('/traerprofesores/', async (req, res) => {
+
+  profesores = await pool.query('select * from usuarios where nivel=3')
+  res.json(profesores)
+})
+
+
 
 
 router.get('/datosusuario/:usuario', async (req, res) => {
@@ -420,6 +427,26 @@ router.post("/modificardatosadic", isLoggedInn, async (req, res) => {
 
 
 
+
+router.post("/asignarllamado", isLoggedInn, async (req, res) => {
+const  { id_profesor, id_cursado }= req.body
+console.log(id_profesor)
+console.log(id_cursado)
+
+  act = {profesor:id_profesor,
+        inscripcion:"Asignado a llamado"
+  }
+
+await pool.query('update cursado set ? where id = ?',[act,id_cursado])
+
+curs = await pool.query('select * from cursado where id =?',[id_cursado])
+act = {
+  estado:"Asignado a llamado"
+}
+await pool.query('update inscripciones set ? where id = ?',[act,curs[0]['id_inscripcion']])
+
+res.json('realizado')
+})
 
 router.post("/crear", isLoggedInn, async (req, res) => {
   const { nombre, apellido, fecha_nac, trabajo, hijos, dni } = req.body
