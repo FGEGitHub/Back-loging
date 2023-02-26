@@ -245,13 +245,13 @@ router.post("/inscribir", isLoggedInn2, async (req, res) => {
       //  porcentaje_real=35.1
       if (etc[0]['trabajo'] === "Si" || etc[0]['trabajo'] === "Si") {
         console.log('Trabaja')
-        if (tipot === "Formal") {
+        if (etc[0]['tipo_trabajo'] === "Formal") {
           console.log('formalmente')
           categoria = "2.2.2"
 
         } else {
           console.log('Informalmente')
-
+          categoria = "2.2.2"
         }
 
 
@@ -269,7 +269,7 @@ router.post("/inscribir", isLoggedInn2, async (req, res) => {
       console.log('tiene hijos')
       if (etc[0]['trabajo'] === "Si" || etc[0]['trabajo'] === "Si") {
         console.log('Trabaja')
-        if (tipot === "Formal") {
+        if (etc[0]['tipo_trabajo'] === "Formal") {
           console.log('formalmente')
           categoria = "2.1.2.2"
 
@@ -304,7 +304,7 @@ router.post("/inscribir", isLoggedInn2, async (req, res) => {
       //  porcentaje_real=35.1
       if (etc[0]['trabajo'] === "Si" || etc[0]['trabajo'] === "Si") {
         console.log('Trabaja')
-        if (tipot === "Formal") {
+        if (etc[0]['tipo_trabajo'] === "Formal") {
           console.log('formalmente')
           categoria = "1.2.2.2"
 
@@ -317,7 +317,7 @@ router.post("/inscribir", isLoggedInn2, async (req, res) => {
       } else {
         ///No trabaja 90%
         console.log('No trabaja')
-        categoria = "2.2.1"
+        categoria = "1.2.1"
 
 
 
@@ -328,19 +328,19 @@ router.post("/inscribir", isLoggedInn2, async (req, res) => {
       console.log('tiene hijos')
       if (etc[0]['trabajo'] === "Si" || etc[0]['trabajo'] === "Si") {
         console.log('Trabaja')
-        if (tipot === "Formal") {
+        if (etc[0]['tipo_trabajo'] === "Formal") {
           console.log('formalmente')
           categoria = "1.1.2.2"
 
         } else {
-          console.log('Informalmente')
+      
           categoria = "1.1.2.1"
         }
 
 
       } else {
         ///No trabaja 90%
-        console.log('No trabaja')
+       
         categoria = "1.1.1"
 
 

@@ -25,8 +25,6 @@ router.get('/listaniv1/:usuario', isLoggedInn, async (req, res) => {
   const etc2 = await pool.query('select * from personas where id =?', [aux[0]['id_persona']])
 
 
-  console.log(etc2[0]['id'])
-  //console.log(etc)
 
   const etc3 = await pool.query('select cursos.id,cursos.fecha , encargado, nombre, cupo, cursos.id, c.inscripcion, c.id_persona from cursos left join (select * from cursado where id_persona = ? ) c on cursos.id=c.id_curso  ', [etc2[0]['id']])
 
@@ -92,10 +90,10 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     /////CLASES DEL CURSO
     const etc = await pool.query('select * from clases where id_curso = ? ', [id])
     //////pendientes inscriptos prioridad 1 2 3
-    const pendientes1 = await pool.query('select inscripciones.id id_inscripcion, inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.trabajo, personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where uno=?  ', [id])
+    const pendientes1 = await pool.query('select inscripciones.id id_inscripcion,personas.hijos, inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.trabajo, personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where uno=?  ', [id])
 
-    const pendientes2 = await pool.query('select inscripciones.id id_inscripcion, inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.trabajo, personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where dos=? ', [id])
-    const pendientes3 = await pool.query('select inscripciones.id id_inscripcion, inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.trabajo, personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where tres=?  ', [id])
+    const pendientes2 = await pool.query('select inscripciones.id id_inscripcion,personas.hijos, inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.trabajo, personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where dos=? ', [id])
+    const pendientes3 = await pool.query('select inscripciones.id id_inscripcion,personas.hijos, inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.trabajo, personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where tres=?  ', [id])
 
     cursado = await pool.query('select cursado.id, cursado.categoria, cursado.id_persona,cursado.inscripcion, cursado.id_curso, personas.nombre, personas.apellido from cursado join personas on cursado.id_persona=personas.id where id_curso = ? ', [id])
 
@@ -104,6 +102,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     array1 = array1.concat(pendientes3);
   
+    const criterios = await pool.query('select * from criterios ')
     /////isncripciones si participo/no participo
     //si
     //const cursadosi = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona =personas.dni  where inscripciones.uno=? and personas.participante_anterior="Sí"', [id])
@@ -196,21 +195,21 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "Participo/tiene hijos/trabaja formal",
-      cantidad: (curso[0]['cupo'] * 0.012285).toFixed(2),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['2.1.2.2'])/100).toFixed(2),
       aceptados:dosunodosdos,
       Categoria:"K"
     }
     lista.push(auxil)
     auxil = {
       dato: "Participo/tiene hijos/trabaja Informal",
-      cantidad: (curso[0]['cupo'] * 0.022815.toFixed(2)),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['2.1.2.1'])/100).toFixed(2),
       aceptados:dosunodosuno,
       Categoria:"I"
     }
     lista.push(auxil)
     auxil = {
       dato: "Participo/tiene hijos/No trabaja",
-      cantidad: (curso[0]['cupo'] * 0.3159).toFixed(2),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['2.1.1'])/100).toFixed(2),
       aceptados:dosunouno,
       Categoria:"A"
     }
@@ -218,15 +217,15 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "Participo/No tiene hijos/No trabaja",
-      cantidad: curso[0]['cupo'] * 0.08415.toFixed(2),
+      cantidad: curso[0]['cupo'] *  parseFloat(criterios[criterios.length-1]['2.2.1']/100).toFixed(2),
       aceptados:dosdosuno,
       Categoria:"E"
     }
     lista.push(auxil)
 
     auxil = {
-      dato: "Participo/tiene hijos/trabaja (formal/Informal)",
-      cantidad: (curso[0]['cupo'] * 0.01485).toFixed(2),
+      dato: "Participo/No tiene hijos/trabaja (formal/Informal)",
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['2.2.2'])/100).toFixed(2),
       aceptados:dosdosdos,
       Categoria:"J"
     }
@@ -234,7 +233,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "No Participo/tiene hijos/trabaja Formalmente ",
-      cantidad: (curso[0]['cupo'] * 0.0561).toFixed(2),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['1.1.2.2'])/100).toFixed(2),
       aceptados:unounodosdos,
       Categoria:"F"
     }
@@ -242,7 +241,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "No Participo/tiene hijos/trabaja Informalmente ",
-      cantidad: (curso[0]['cupo'] * 0.1309).toFixed(2),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['1.1.2.1'])/100).toFixed(2),
       aceptados:unounodosuno,
       Categoria:"C"
     }
@@ -250,7 +249,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "No Participo/tiene hijos/No trabaja ",
-      cantidad: (curso[0]['cupo'] * 0.187).toFixed(2),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['1.1.1'])/100).toFixed(2),
       aceptados:unounouno,
       Categoria:"B"
     }
@@ -259,7 +258,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "No Participo/No tiene hijos/No trabaja ",
-      cantidad: (curso[0]['cupo'] * 0.1232).toFixed(2),
+      cantidad: (curso[0]['cupo'] *parseFloat(criterios[criterios.length-1]['1.2.1'])/100).toFixed(2),
       aceptados:unodosuno,
       Categoria:"D"
     }
@@ -267,7 +266,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "No Participo/No tiene hijos/Trabaja Formalmente ",
-      cantidad: (curso[0]['cupo'] * 0.0264).toFixed(2),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['1.2.2.2'])/100).toFixed(2),
       aceptados:unodosdosdos,
       Categoria:"H"
     }
@@ -275,7 +274,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "No Participo/No tiene hijos/Trabaja Informalmente ",
-      cantidad: (curso[0]['cupo'] * 0.0264).toFixed(2),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['1.2.2.1'])/100).toFixed(2),
       aceptados:unodosdosuno,
       Categoria:"G"
     }

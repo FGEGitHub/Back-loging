@@ -51,7 +51,7 @@ passport.use('local.signup', new LocalStrategy({
     passReqToCallback: 'true'
 }, async (req, usuario, password, done) => {
     
-    const { nombre, mail, tel,nivel } = req.body
+    const { nombre, mail, tel,nivel,dni } = req.body
     //  const razon = await pool.query('Select razon from clientes where cuil_cuit like  ?', [cuil_cuit]) seleccionar razon
 
 
@@ -73,6 +73,8 @@ passport.use('local.signup', new LocalStrategy({
 
     //fin transformar 
     try {
+        if( existe.length<1) {
+        existe = await pool.query('select * from personas where dni = ?',[dni])
         const verif  = await pool.query('select * from usuarios where usuario = ?',[usuario])
         if (verif.length>0){
             req.flash('message', 'error, usuario existente')
@@ -89,6 +91,16 @@ passport.use('local.signup', new LocalStrategy({
         } catch (error) {
             console.log(error)
         }}
+
+
+    }else{
+        req.flash('message', 'error, usuario existente')
+
+    }
+
+
+
+
     } catch (error) {
         console.log(error)
         req.flash('message', 'error,algo sucedio ')

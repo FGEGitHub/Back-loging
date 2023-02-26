@@ -2,7 +2,49 @@ const express = require('express')
 const router = express.Router()
 const { isLoggedIn, isLoggedInn, isLoggedInn2 } = require('../lib/auth') //proteger profile
 const pool = require('../database')
+const caregorizar = require('./funciones/caregorizar')
+const consultarcupos = require('./funciones/cantidadocupado.')
 
+router.get('/inscribirauto/', async (req, res) => {
+
+  const inscripciones= await pool.query('select * from inscripciones where estado="pendiente"')
+  const criterios = await pool.query('select * from criterios')
+
+console.log()
+  for (ii in inscripciones) {
+
+    persona = await pool.query('select * from personas where dni =?',inscripciones[ii]['dni_persona'])
+       cat = await caregorizar.asignarcategoria(persona) //// trae la categoria
+      
+       haycupo= await consultarcupos.cantidadcategoriaporcurso(cat,inscripciones[ii]['uno'], criterios[0][cat], criterios[0]['turno'] )//// envia categoria y la id del curso devuelve si hay cupo 
+   
+    if(haycupo){
+
+      nuevo = {
+     
+        inscripcion:"Asignado a curso",
+        id_persona: persona[0]['id'],
+        id_curso:inscripciones[ii]['uno'],
+        categoria:cat,
+        id_inscripcion:inscripciones[ii]['id'],
+
+
+      }
+      console.log(nuevo)
+          await pool.query('insert into cursado set ? ',[nuevo])
+
+          act={
+            estado:"Asignado a curso",
+          }
+          await pool.query('update inscripciones set ? where id=? ',[act,inscripciones[ii]['id'],])
+
+    }
+
+   
+  
+  }
+res.send('hola')
+})
 
 
 router.get('/listacursos/', async (req, res) => {
