@@ -5,23 +5,36 @@ const router = express.Router()
 const pool = require('../../database')
 
 
-async function cantidadcategoriaporcurso(categoria, id_curso, porcentaje_creiterio,turno) {
- 
+async function cantidadcategoriaporcurso(categoria, id_curso, porcentaje_creiterio, turno) {
 
-const cursado = await pool.query('select cursos.cupo from cursado  join cursos on cursado.id_curso=cursos.id join turnos on cursado.id_curso =  turnos.id_curso  where cursado.id_curso= ? and  categoria =? and turnos.numero = ? ',[id_curso,categoria,turno])
-console.log('cursado'+cursado)
-haylugar=true
-cuporeal = await pool.query('select * from turnos where id_curso=?', [id_curso])
-if (cursado.length >0){
+    haylugar = true
 
-    if ((cursado[0]['cupo']* porcentaje_creiterio/100)<  (cursado.length+1 )){
-        haylugar=false
+
+
+    curso = await pool.query('select * from cursos where id = ? ', [id_curso])
+    console.log(curso[0]['nombre'])
+    const cursado = await pool.query('select cursos.cupo from cursado  join cursos on cursado.id_curso=cursos.id  where cursado.id_curso= ? and  categoria =?', [id_curso, categoria])
+    console.log('cursado')
+    console.log(cursado) /////inscriptos
+
+    cuporeal = await pool.query('select * from turnos where id_curso=?', [id_curso])
+    console.log('cupo por turno ' + cuporeal.length)
+
+
+    try {
+
+
+        cuporeal = curso[0]['cupo'] / cuporeal.length
+        if ((curso[0]['cupo'] * porcentaje_creiterio / 100) < (cursado.length + 1)) {
+            haylugar = false
+        }
+
+    } catch (error) {
+
     }
 
-    
-}
-return haylugar
-    
+    return haylugar
+
 }
 
 
