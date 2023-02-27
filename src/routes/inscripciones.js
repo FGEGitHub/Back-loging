@@ -5,6 +5,28 @@ const pool = require('../database')
 const caregorizar = require('./funciones/caregorizar')
 const consultarcupos = require('./funciones/cantidadocupado.')
 
+
+
+
+
+////// desinscribir 
+
+
+router.get('/desinscribirtodos/', async (req, res) => {
+
+act = {
+  estado:"pendiente"
+}
+
+await pool.query('update inscripciones set ?',[act])
+
+
+await pool.query('delete  from  cursado')
+res.json('Realizado')
+
+})
+
+
 router.get('/inscribirauto/', async (req, res) => {
 
   const inscripciones = await pool.query('select * from inscripciones where estado="pendiente"')
@@ -60,51 +82,65 @@ router.get('/inscribirauto/', async (req, res) => {
 
 router.get('/listaaclaracioncriterios/', async (req, res) => {
 
+
+  criterios= await pool.query(' select * from criterios ' )
+
 tabla = [ 
   {
     Categoria:"1.1.1",
-    Detalle:"No participo/Tiene hijos/No trabaja"
+    Detalle:"No participo/Tiene hijos/No trabaja",
+    porcentaje:criterios[criterios.length-1]['1.1.1']
   },
   {
     Categoria:"1.1.2.1",
-    Detalle:"No participo/Tiene hijos/trabaja informalmente"
+    Detalle:"No participo/Tiene hijos/trabaja informalmente",
+    porcentaje:criterios[criterios.length-1]['1.1.2.1']
   },
   {
     Categoria:"1.1.2.2",
-    Detalle:"No participo/Tiene hijos/trabaja formalmente"
+    Detalle:"No participo/Tiene hijos/trabaja formalmente",
+    porcentaje:criterios[criterios.length-1]['1.1.2.2']
   },
   {
     Categoria:"1.2.1",
-    Detalle:"No participo/ No tiene hijos/ No trabaja "
+    Detalle:"No participo/ No tiene hijos/ No trabaja ",
+    porcentaje:criterios[criterios.length-1]['1.2.1']
   }
   , {
     Categoria:"1.2.2.1",
-    Detalle:"No participo/ No tiene hijos/ Trabaja Informalmente"
+    Detalle:"No participo/ No tiene hijos/ Trabaja Informalmente",
+    porcentaje:criterios[criterios.length-1]['1.2.2.1']
   },
   {
     Categoria:"1.2.2.2",
-    Detalle:"No participo/ No tiene hijos/ Trabaja Formalmente"
+    Detalle:"No participo/ No tiene hijos/ Trabaja Formalmente",
+    porcentaje:criterios[criterios.length-1]['1.2.2.2']
   },
 
   {
     Categoria:"2.1.1",
-    Detalle:"Participo/Tiene hijos/ trabaja"
+    Detalle:"Participo/Tiene hijos/ trabaja",
+    porcentaje:criterios[criterios.length-1]['2.1.1']
   },
   {
     Categoria:"2.1.2.1",
-    Detalle:"Participo/Tiene hijos/ Tranaja informalmente"
+    Detalle:"Participo/Tiene hijos/ Tranaja informalmente",
+    porcentaje:criterios[criterios.length-1]['2.1.2.1']
   },
   {
     Categoria:"2.1.2.2",
-    Detalle:"Participo/Tiene hijos/ Tranaja Formalmente"
+    Detalle:"Participo/Tiene hijos/ Tranaja Formalmente",
+    porcentaje:criterios[criterios.length-1]['2.1.2.2']
   },
   {
     Categoria:"2.2.1",
-    Detalle:"Participo/ No tiene hijos/ No trabaja"
+    Detalle:"Participo/ No tiene hijos/ No trabaja",
+    porcentaje:criterios[criterios.length-1]['2.2.1']
   },
   {
     Categoria:"2.2.2",
-    Detalle:"Participo/ No tiene hijos/ trabaja"
+    Detalle:"Participo/ No tiene hijos/ trabaja",
+    porcentaje:criterios[criterios.length-1]['2.2.2']
   },
  
 
@@ -161,7 +197,7 @@ router.get('/listacursos/', async (req, res) => {
   /////// inicio carga de prioridad 2
   for (ii in cursos) {
 
-    cantidad = await pool.query('select  cursos.id,cursos.nombre,cursos.cupo, count (*) cantidad from inscripciones left join cursos on inscripciones.dos = cursos.id  left join personas on inscripciones.dni_persona = personas.dni  where inscripciones.dos= ?    ', [cursos[ii]['id']])
+    cantidad = await pool.query('select  cursos.id,cursos.nombre,cursos.cupo from inscripciones left join cursos on inscripciones.dos = cursos.id  left join personas on inscripciones.dni_persona = personas.dni  where inscripciones.dos= ?    ', [cursos[ii]['id']])
     
  
     Obj = {
@@ -184,7 +220,7 @@ router.get('/listacursos/', async (req, res) => {
   /////// inicio carga de prioridad 3
   for (ii in cursos) {
 
-    cantidad = await pool.query('select  cursos.id,cursos.nombre,cursos.cupo, count (*) cantidad from inscripciones left join cursos on inscripciones.tres = cursos.id  left join personas on inscripciones.dni_persona = personas.dni  where inscripciones.tres = ?   ', [cursos[ii]['id']])
+    cantidad = await pool.query('select  cursos.id,cursos.nombre,cursos.cupo  from inscripciones left join cursos on inscripciones.tres = cursos.id  left join personas on inscripciones.dni_persona = personas.dni  where inscripciones.tres = ?   ', [cursos[ii]['id']])
     
  
     Obj = {
@@ -203,7 +239,7 @@ router.get('/listacursos/', async (req, res) => {
 
 
 
-
+  const pend = await pool.query('select count(*) from inscripciones where estado = "pendiente" ')
 
 
 
@@ -212,10 +248,29 @@ router.get('/listacursos/', async (req, res) => {
   //const priori2 = await pool.query('select * from inscripciones join cursos on inscripciones.dos  =cursos.id')
   // const priori3 = await pool.query('select * from inscripciones join cursos on inscripciones.tres  =cursos.id')
 
-  res.json([listadef, listadef2, listadef3]);
+  res.json([listadef, listadef2, listadef3, pend[0]["count(*)"]]);
 
 })
+router.post("/actualizarprioridades", isLoggedInn2, async (req, res) => {
+  const { unounouno, unounodosuno, unounodosdos,  unodosuno, unodosdosuno, unodosdosdos, dosunouno, dosunodosuno,dosunodosdos,dosdosuno,dosdosdos } = req.body
 
+const act = {
+  "1.1.1":unounouno,
+  "1.1.2.1":unounodosuno,
+  "1.1.2.2":unounodosdos,
 
+  "1.2.1":unodosuno,
+  "1.2.2.1":unodosdosuno,
+  "1.2.2.2":unodosdosdos,
+  "2.1.1":dosunouno,
+  "2.1.2.1":dosunodosuno,
+  "2.1.2.2":dosunodosdos,
+  "2.2.1":dosdosuno,
+  "2.2.2":dosdosdos,
+  
+}
+console.log(act)
+
+})
 
 module.exports = router
