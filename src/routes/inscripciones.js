@@ -54,6 +54,76 @@ router.get('/inscribirauto/', async (req, res) => {
 })
 
 
+
+
+
+
+router.get('/listaaclaracioncriterios/', async (req, res) => {
+
+tabla = [ 
+  {
+    Categoria:"1.1.1",
+    Detalle:"No participo/Tiene hijos/No trabaja"
+  },
+  {
+    Categoria:"1.1.2.1",
+    Detalle:"No participo/Tiene hijos/trabaja informalmente"
+  },
+  {
+    Categoria:"1.1.2.2",
+    Detalle:"No participo/Tiene hijos/trabaja formalmente"
+  },
+  {
+    Categoria:"1.2.1",
+    Detalle:"No participo/ No tiene hijos/ No trabaja "
+  }
+  , {
+    Categoria:"1.2.2.1",
+    Detalle:"No participo/ No tiene hijos/ Trabaja Informalmente"
+  },
+  {
+    Categoria:"1.2.2.2",
+    Detalle:"No participo/ No tiene hijos/ Trabaja Formalmente"
+  },
+
+  {
+    Categoria:"2.1.1",
+    Detalle:"Participo/Tiene hijos/ trabaja"
+  },
+  {
+    Categoria:"2.1.2.1",
+    Detalle:"Participo/Tiene hijos/ Tranaja informalmente"
+  },
+  {
+    Categoria:"2.1.2.2",
+    Detalle:"Participo/Tiene hijos/ Tranaja Formalmente"
+  },
+  {
+    Categoria:"2.2.1",
+    Detalle:"Participo/ No tiene hijos/ No trabaja"
+  },
+  {
+    Categoria:"2.2.2",
+    Detalle:"Participo/ No tiene hijos/ trabaja"
+  },
+ 
+
+]
+res.json(tabla)
+
+})
+
+
+///////// LISTA DE CRITERIOS 
+
+router.get('/listacriterios/', async (req, res) => {
+
+  criterios = await pool.query('select * from criterios')
+
+  res.json(criterios)
+})
+
+
 router.get('/listacursos/', async (req, res) => {
 
   ////////ista de inscriptos con prioridad uno
@@ -63,15 +133,14 @@ router.get('/listacursos/', async (req, res) => {
   //seleccionamos los cursos 
   const cursos = await pool.query(' select id from cursos')
   //recorremos los cursos 
-  listasi = []
-  listano = []
+
   listadef = []
 
   /////// inicio carga de prioridad 1
   for (ii in cursos) {
 
     cantidad = await pool.query('select  cursos.id,cursos.nombre,cursos.cupo from inscripciones left join cursos on inscripciones.uno = cursos.id  left join personas on inscripciones.dni_persona = personas.dni  where inscripciones.uno = ?    ', [cursos[ii]['id']])
-    console.log(cantidad)
+   
  cursado = await pool.query('select * from cursado where id_curso= ?',[cursos[ii]['id']])
     Obj = {
       nombre: cantidad[0]['nombre'],
@@ -85,15 +154,14 @@ router.get('/listacursos/', async (req, res) => {
 
   }
 
-  console.log(listadef)
-  listasi = []
-  listano = []
+
+
   listadef2 = []
 
   /////// inicio carga de prioridad 2
   for (ii in cursos) {
 
-    cantidad = await pool.query('select  cursos.id,cursos.nombre,cursos.cupo, count (*) cantidad from inscripciones left join cursos on inscripciones.dos = cursos.id  left join personas on inscripciones.dni_persona = personas.dni  where inscripciones.uno = ?    ', [cursos[ii]['id']])
+    cantidad = await pool.query('select  cursos.id,cursos.nombre,cursos.cupo, count (*) cantidad from inscripciones left join cursos on inscripciones.dos = cursos.id  left join personas on inscripciones.dni_persona = personas.dni  where inscripciones.dos= ?    ', [cursos[ii]['id']])
     
  
     Obj = {
@@ -111,14 +179,12 @@ router.get('/listacursos/', async (req, res) => {
 
 
 
-  listasi = []
-  listano = []
   listadef3 = []
 
   /////// inicio carga de prioridad 3
   for (ii in cursos) {
 
-    cantidad = await pool.query('select  cursos.id,cursos.nombre,cursos.cupo, count (*) cantidad from inscripciones left join cursos on inscripciones.tres = cursos.id  left join personas on inscripciones.dni_persona = personas.dni  where inscripciones.uno = ?   ', [cursos[ii]['id']])
+    cantidad = await pool.query('select  cursos.id,cursos.nombre,cursos.cupo, count (*) cantidad from inscripciones left join cursos on inscripciones.tres = cursos.id  left join personas on inscripciones.dni_persona = personas.dni  where inscripciones.tres = ?   ', [cursos[ii]['id']])
     
  
     Obj = {
