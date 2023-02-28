@@ -90,12 +90,12 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     /////CLASES DEL CURSO
     const etc = await pool.query('select * from clases where id_curso = ? ', [id])
     //////pendientes inscriptos prioridad 1 2 3
-    const pendientes1 = await pool.query('select inscripciones.id id_inscripcion,personas.hijos, inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.trabajo, personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where uno=?  ', [id])
+    const pendientes1 = await pool.query('select inscripciones.id id_inscripcion,personas.hijos, inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.apellido, personas.trabajo, personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where uno=?  ', [id])
 
-    const pendientes2 = await pool.query('select inscripciones.id id_inscripcion,personas.hijos, inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.trabajo, personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where dos=? ', [id])
-    const pendientes3 = await pool.query('select inscripciones.id id_inscripcion,personas.hijos, inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.trabajo, personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where tres=?  ', [id])
+    const pendientes2 = await pool.query('select inscripciones.id id_inscripcion,personas.hijos, inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.trabajo, personas.apellido,personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where dos=? ', [id])
+    const pendientes3 = await pool.query('select inscripciones.id id_inscripcion,personas.hijos, inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.trabajo,personas.apellido, personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where tres=?  ', [id])
 
-    cursado = await pool.query('select cursado.id, cursado.categoria, cursado.id_persona,cursado.inscripcion, cursado.id_curso, personas.nombre, personas.apellido from cursado join personas on cursado.id_persona=personas.id where id_curso = ? ', [id])
+    cursado = await pool.query('select cursado.id, cursado.categoria, cursado.id_persona,cursado.inscripcion, cursado.id_curso,turnos.descripcion horario, personas.nombre, personas.apellido from cursado join personas on cursado.id_persona=personas.id join turnos on cursado.id_turno = turnos.id where cursado.id_curso = ? ', [id])
 
 
     array1 = pendientes1.concat(pendientes2);
@@ -136,49 +136,49 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     for (ii in cursado) {
 
       switch (cursado[ii]['categoria']) {
-        case "1.1.1":
+        case "uno":
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           unounouno += 1
           break;
-        case "1.1.2.1":
+        case "dos":
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           unounodosuno += 1
           break
-        case "1.1.2.2":
+        case "tres":
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           unounodosdos += 1
           break;
-        case "1.2.1":
+        case "cuatro":
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           unodosuno += 1
           break;
-        case "1.2.2.1":
+        case "cinco":
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           unodosdosuno += 1
           break;
-        case "1.2.2.2":
+        case "seis":
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           unodosdosdos += 1
           break;
-        case "2.1.1":
+        case "siete":
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           dosunouno += 1
           break;
-        case "2.1.2.1":
+        case "ocho":
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           dosunodosuno += 1
           break;
-        case "2.1.2.2":
+        case "nueve":
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           dosunodosdos += 1
           break;
        
       
-        case "2.2.1":
+        case "diez":
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           dosdosuno += 1
           break;
-        case "2.2.2":
+        case "once":
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           dosdosdos += 1
           break;
@@ -197,6 +197,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
       dato: "Participo/tiene hijos/trabaja formal",
       cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['nueve'])/100).toFixed(2),
       aceptados:dosunodosdos,
+      aclaracion:"Nueve",
       Categoria:"K"
     }
     lista.push(auxil)
@@ -204,6 +205,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
       dato: "Participo/tiene hijos/trabaja Informal",
       cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['ocho'])/100).toFixed(2),
       aceptados:dosunodosuno,
+      aclaracion:"Ocho",
       Categoria:"I"
     }
     lista.push(auxil)
@@ -211,6 +213,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
       dato: "Participo/tiene hijos/No trabaja",
       cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['siete'])/100).toFixed(2),
       aceptados:dosunouno,
+      aclaracion:"Siete",
       Categoria:"A"
     }
     lista.push(auxil)
@@ -219,6 +222,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
       dato: "Participo/No tiene hijos/No trabaja",
       cantidad: curso[0]['cupo'] *  parseFloat(criterios[criterios.length-1]['diez']/100).toFixed(2),
       aceptados:dosdosuno,
+      aclaracion:"Diez",
       Categoria:"E"
     }
     lista.push(auxil)
@@ -227,6 +231,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
       dato: "Participo/No tiene hijos/trabaja (formal/Informal)",
       cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['once'])/100).toFixed(2),
       aceptados:dosdosdos,
+      aclaracion:"Once",
       Categoria:"J"
     }
     lista.push(auxil)
@@ -235,6 +240,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
       dato: "No Participo/tiene hijos/trabaja Formalmente ",
       cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['tres'])/100).toFixed(2),
       aceptados:unounodosdos,
+      aclaracion:"Tres",
       Categoria:"F"
     }
     lista.push(auxil)
@@ -243,6 +249,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
       dato: "No Participo/tiene hijos/trabaja Informalmente ",
       cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['dos'])/100).toFixed(2),
       aceptados:unounodosuno,
+      aclaracion:"Dos",
       Categoria:"C"
     }
     lista.push(auxil)
@@ -251,6 +258,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
       dato: "No Participo/tiene hijos/No trabaja ",
       cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['uno'])/100).toFixed(2),
       aceptados:unounouno,
+      aclaracion:"Uno",
       Categoria:"B"
     }
     lista.push(auxil)
@@ -260,6 +268,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
       dato: "No Participo/No tiene hijos/No trabaja ",
       cantidad: (curso[0]['cupo'] *parseFloat(criterios[criterios.length-1]['cuatro'])/100).toFixed(2),
       aceptados:unodosuno,
+      aclaracion:"Cuatro",
       Categoria:"D"
     }
     lista.push(auxil)
@@ -268,6 +277,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
       dato: "No Participo/No tiene hijos/Trabaja Formalmente ",
       cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['seis'])/100).toFixed(2),
       aceptados:unodosdosdos,
+      aclaracion:"Seis",
       Categoria:"H"
     }
     lista.push(auxil)
@@ -276,6 +286,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
       dato: "No Participo/No tiene hijos/Trabaja Informalmente ",
       cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['cinco'])/100).toFixed(2),
       aceptados:unodosdosuno,
+      aclaracion:"Cinco",
       Categoria:"G"
     }
     lista.push(auxil)

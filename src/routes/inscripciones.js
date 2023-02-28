@@ -29,9 +29,9 @@ res.json('Realizado')
 
 router.get('/inscribirauto/', async (req, res) => {
 
-  const inscripciones = await pool.query('select * from inscripciones where estado="pendiente"')
+  let inscripciones = await pool.query('select * from inscripciones where estado="pendiente"')
   const criterios = await pool.query('select * from criterios')
-
+  listadef=[]
   console.log()
   for (ii in inscripciones) {
 
@@ -41,6 +41,9 @@ router.get('/inscribirauto/', async (req, res) => {
 
     bandera = false////la bandera para avisar si ya se inscribio en alguno de los cupos
     iii = 0
+    if (persona.length===0){
+      bandera=true
+    }
     while (!bandera && iii < turnoaux.length) {////////ENTRA EN BUCLE REVISANDO CUPO EN HORARIOS
       haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, inscripciones[ii]['uno'], criterios[criterios.length-1][cat], turnoaux[iii])//// envia categoria y la id del curso devuelve si hay cupo 
 
@@ -69,23 +72,44 @@ router.get('/inscribirauto/', async (req, res) => {
         bandera=true
       }
       iii += 1
+      if(!bandera){
+        listadef.push(inscripciones[ii])
+        console.log(inscripciones[ii])//////crea una listta con las inscripciones 1 rechazadas
+      }
+
     }
-///////////////////////segundo while para la prioridad 2
-iii = 0
+
+
+  }
+
+
+  ////////////propridad 2
+  console.log()
+  for (ii in listadef) {
+
+    persona = await pool.query('select * from personas where dni =?', listadef[ii]['dni_persona'])
+    cat = await caregorizar.asignarcategoria(persona) //// trae la categoria
+    turnoaux = inscripciones[0]['turno'].split(' ');
+
+    bandera = false////la bandera para avisar si ya se inscribio en alguno de los cupos
+    iii = 0
+    if (persona.length===0){
+      bandera=true
+    }
     while (!bandera && iii < turnoaux.length) {////////ENTRA EN BUCLE REVISANDO CUPO EN HORARIOS
-      haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, inscripciones[ii]['dos'], criterios[criterios.length-1][cat], turnoaux[iii])//// envia categoria y la id del curso devuelve si hay cupo 
+      haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, listadef[ii]['uno'], criterios[criterios.length-1][cat], turnoaux[iii])//// envia categoria y la id del curso devuelve si hay cupo 
 
       if (haycupo) {
-        turnoo = await pool.query('select * from turnos where id_curso =? and numero = ?', [inscripciones[ii]['uno'], turnoaux[iii]])
+        turnoo = await pool.query('select * from turnos where id_curso =? and numero = ?', [inscripciones[ii]['dos'], turnoaux[iii]])
      
        
         nuevo = {
 
           inscripcion: "Asignado a curso",
           id_persona: persona[0]['id'],
-          id_curso: inscripciones[ii]['dos'],
+          id_curso: listadef[ii]['dos'],
           categoria: cat,
-          id_inscripcion: inscripciones[ii]['id'],
+          id_inscripcion: listadef[ii]['id'],
           id_turno: turnoo[0]['id'],
           /////////////////
 
@@ -96,12 +120,11 @@ iii = 0
         act = {
           estado: "Asignado a curso",
         }
-        await pool.query('update inscripciones set ? where id=? ', [act, inscripciones[ii]['id'],])
+        await pool.query('update inscripciones set ? where id=? ', [act, listadef[ii]['id'],])
         bandera=true
       }
       iii += 1
     }
-
 
 
   }
@@ -121,57 +144,68 @@ router.get('/listaaclaracioncriterios/', async (req, res) => {
 tabla = [ 
   {
     Categoria:"1.1.1",
+    Aclaracion:"Uno",
     Detalle:"No participo/Tiene hijos/No trabaja",
     porcentaje:criterios[criterios.length-1]['uno']
   },
   {
     Categoria:"1.1.2.1",
     Detalle:"No participo/Tiene hijos/trabaja informalmente",
+    Aclaracion:"Dos",
     porcentaje:criterios[criterios.length-1]['dos']
   },
   {
     Categoria:"1.1.2.2",
+    Aclaracion:"Tres",
     Detalle:"No participo/Tiene hijos/trabaja formalmente",
     porcentaje:criterios[criterios.length-1]['tres']
   },
   {
     Categoria:"1.2.1",
+    Aclaracion:"Cuatro",
     Detalle:"No participo/ No tiene hijos/ No trabaja ",
     porcentaje:criterios[criterios.length-1]['cuatro']
   }
   , {
     Categoria:"1.2.2.1",
+    Aclaracion:"Cinco",
     Detalle:"No participo/ No tiene hijos/ Trabaja Informalmente",
     porcentaje:criterios[criterios.length-1]['cinco']
   },
   {
     Categoria:"1.2.2.2",
+    Aclaracion:"Seis",
     Detalle:"No participo/ No tiene hijos/ Trabaja Formalmente",
     porcentaje:criterios[criterios.length-1]['seis']
   },
 
   {
     Categoria:"2.1.1",
+    Aclaracion:"Siete",
     Detalle:"Participo/Tiene hijos/ trabaja",
     porcentaje:criterios[criterios.length-1]['siete']
   },
   {
     Categoria:"2.1.2.1",
+    Aclaracion:"Ocho",
     Detalle:"Participo/Tiene hijos/ Tranaja informalmente",
     porcentaje:criterios[criterios.length-1]['ocho']
   },
   {
     Categoria:"2.1.2.2",
+    Aclaracion:"Nueve",
     Detalle:"Participo/Tiene hijos/ Tranaja Formalmente",
     porcentaje:criterios[criterios.length-1]['nueve']
   },
   {
     Categoria:"2.2.1",
+    Aclaracion:"Diez",
     Detalle:"Participo/ No tiene hijos/ No trabaja",
     porcentaje:criterios[criterios.length-1]['diez']
   },
   {
     Categoria:"2.2.2",
+    Aclaracion:"Once",
     Detalle:"Participo/ No tiene hijos/ trabaja",
     porcentaje:criterios[criterios.length-1]['once']
   },

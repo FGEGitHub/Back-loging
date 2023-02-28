@@ -84,7 +84,7 @@ router.get('/lista', async (req, res) => {
 ///////////detalleusuarioparainscripcion
 router.get('/datosusuarioporid/:dni', isLoggedInn2, async (req, res) => {
   const dni = req.params.dni
-
+console.log(dni)
 
   const etc = await pool.query('select * from personas where dni =?', [dni])
 

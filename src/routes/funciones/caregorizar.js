@@ -7,7 +7,10 @@ const pool = require('../../database')
 
 async function asignarcategoria (persona) {
     
-    const caregoria =''
+    let caregoria ='cero'
+    try {
+      
+   
 if ((persona[0]['participante_anterior'] === "Sí") || (persona[0]['participante_anterior'] === "Si")) {
 
     /// 
@@ -66,7 +69,10 @@ if ((persona[0]['participante_anterior'] === "Sí") || (persona[0]['participante
 
 
 
-  } else {///////////////////////NO PARTICIPARON 
+  } else {
+    
+    
+    ///////////////////////NO PARTICIPARON 
     ////55% 
 
     //   porcentaje_real=55
@@ -124,6 +130,10 @@ if ((persona[0]['participante_anterior'] === "Sí") || (persona[0]['participante
     }
 
   }
+
+} catch (error) {
+      
+}
   return categoria
 
 }
