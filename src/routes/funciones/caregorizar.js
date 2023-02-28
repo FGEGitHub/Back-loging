@@ -19,18 +19,18 @@ if ((persona[0]['participante_anterior'] === "Sí") || (persona[0]['participante
         
         if (persona[0]['tipo_trabajo'] === "Formal") {
           
-          categoria = "2.2.2"
+          categoria = "once"
 
         } else {
         
-          categoria = "2.2.2"
+          categoria = "once"
         }
 
 
       } else {
         ///No trabaja 90%
      
-        categoria = "2.2.1"
+        categoria = "diez"
 
 
 
@@ -43,18 +43,18 @@ if ((persona[0]['participante_anterior'] === "Sí") || (persona[0]['participante
      
         if (persona[0]['tipo_trabajo'] === "Formal") {
           
-          categoria = "2.1.2.2"
+          categoria = "nueve"
 
         } else {
           
-          categoria = "2.1.2.1"
+          categoria = "ocho"
         }
 
 
       } else {
         ///No trabaja 90%
        
-        categoria = "2.1.1"
+        categoria = "siete"
 
 
 
@@ -78,18 +78,18 @@ if ((persona[0]['participante_anterior'] === "Sí") || (persona[0]['participante
        
         if (persona[0]['tipo_trabajo'] === "Formal") {
          
-          categoria = "1.2.2.2"
+          categoria = "seis"
 
         } else {
          
-          categoria = "1.2.2.1"
+          categoria = "cinco"
         }
 
 
       } else {
         ///No trabaja 90%
       
-        categoria = "1.2.1"
+        categoria = "cuatro"
 
 
 
@@ -102,18 +102,18 @@ if ((persona[0]['participante_anterior'] === "Sí") || (persona[0]['participante
         
         if (persona[0]['tipo_trabajo'] === "Formal") {
           
-          categoria = "1.1.2.2"
+          categoria = "tres"
 
         } else {
       
-          categoria = "1.1.2.1"
+          categoria = "dos"
         }
 
 
       } else {
         ///No trabaja 90%
        
-        categoria = "1.1.1"
+        categoria = "uno"
 
 
 

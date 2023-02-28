@@ -3,7 +3,7 @@ const router = express.Router()
 const { isLoggedIn, isLoggedInn, isLoggedInn2 } = require('../lib/auth') //proteger profile
 const pool = require('../database')
 const XLSX = require('xlsx')
-
+const caregorizar = require('./funciones/caregorizar')
 
 router.get('/traerprofesores/', async (req, res) => {
 
@@ -44,12 +44,37 @@ router.get('/datospersona/:id', async (req, res) => {
   }
   //res.render('index')
 })
+
+
+///// lista
 router.get('/lista', async (req, res) => {
   const usuario = req.params.usuario
 
-  const etc = await pool.query('select * from personas')
+  const etc = await pool.query('select * from personas left join cursado on personas.id=cursado.id')
+  listadef=[]
+  for (ii in etc) {
+ 
+    cat = await caregorizar.asignarcategoria([etc[ii]]) 
 
-  res.json(etc);
+
+
+    nuevo = {
+
+      nombre: etc[ii]['nombre'],
+      id_persona: etc[ii]['id'],
+      apellido:  etc[ii]['apellido'],
+      dni: etc[ii]['dni'],
+      categoria: cat,
+      curso: etc[ii]['id'],
+      id_turno: etc[ii]['id_turno'],
+      /////////////////
+
+    }
+    listadef.push(nuevo)
+  }
+  
+
+  res.json(listadef);
   //res.render('index')
 })
 
@@ -57,14 +82,41 @@ router.get('/lista', async (req, res) => {
 
 
 ///////////detalleusuarioparainscripcion
-router.get('/datosusuarioporid/:id', isLoggedInn2, async (req, res) => {
-  const id = req.params.id
-  console.log(id)
-  /////se recibe dni
-  console.log('detalleusuario')
+router.get('/datosusuarioporid/:dni', isLoggedInn2, async (req, res) => {
+  const dni = req.params.dni
 
-  const etc = await pool.query('select * from personas where dni =?', [id])
 
+  const etc = await pool.query('select * from personas where dni =?', [dni])
+
+  const curso1 = await pool.query('select cursos.nombre prioridaduno from inscripciones join cursos on inscripciones.uno =cursos.id where inscripciones.dni_persona =?', [dni])
+  const curso2 = await pool.query('select cursos.nombre prioridaddos from inscripciones join cursos on inscripciones.dos =cursos.id where inscripciones.dni_persona =?', [dni])
+
+let cursado = await pool.query('select cursos.nombre from cursado  join cursos on cursado.id_curso = cursos.id where cursado.id_persona=?',[etc[0]['id']])
+
+  if (cursado.length === 0){
+    cursado=[{anotado:null}]
+  }
+
+
+  ficha = {
+    nombre: etc[0]['apellido'] + etc[0]['nombre'],
+    prioridad1: curso1[0]['prioridaduno'],
+    prioridad2: curso2[0]['prioridaddos'],
+    anotado: cursado[0]['nombre']
+  }
+
+  cat = await caregorizar.asignarcategoria(etc)
+
+  criterios= await pool.query(' select * from criterios ' )
+  porcentaje=criterios[criterios.length-1][cat]
+
+
+  res.json([ficha, porcentaje,cat]);
+
+
+
+
+/* 
   participante_ant = "No"
   if (etc[0]['participante_anterior'] == "Sí") {
     participante_ant = "Si"
@@ -89,9 +141,7 @@ router.get('/datosusuarioporid/:id', isLoggedInn2, async (req, res) => {
   }
   console.log(trabaja)
 
-  ficha = {
-    nombre: etc[0]['apellido'] + etc[0]['nombre'], participante_ant, tiene_hijos, trabaja, tipot
-  }
+  
   categoria=''
   console.log(ficha)
   porcentaje_real = 100
@@ -210,10 +260,10 @@ router.get('/datosusuarioporid/:id', isLoggedInn2, async (req, res) => {
     }
 
   }
+ */
 
 
-
-  res.json([ficha, porcentaje_real,categoria]);
+ 
   //res.render('index')
 })
 

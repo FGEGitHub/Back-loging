@@ -195,21 +195,21 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "Participo/tiene hijos/trabaja formal",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['2.1.2.2'])/100).toFixed(2),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['nueve'])/100).toFixed(2),
       aceptados:dosunodosdos,
       Categoria:"K"
     }
     lista.push(auxil)
     auxil = {
       dato: "Participo/tiene hijos/trabaja Informal",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['2.1.2.1'])/100).toFixed(2),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['ocho'])/100).toFixed(2),
       aceptados:dosunodosuno,
       Categoria:"I"
     }
     lista.push(auxil)
     auxil = {
       dato: "Participo/tiene hijos/No trabaja",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['2.1.1'])/100).toFixed(2),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['siete'])/100).toFixed(2),
       aceptados:dosunouno,
       Categoria:"A"
     }
@@ -217,7 +217,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "Participo/No tiene hijos/No trabaja",
-      cantidad: curso[0]['cupo'] *  parseFloat(criterios[criterios.length-1]['2.2.1']/100).toFixed(2),
+      cantidad: curso[0]['cupo'] *  parseFloat(criterios[criterios.length-1]['diez']/100).toFixed(2),
       aceptados:dosdosuno,
       Categoria:"E"
     }
@@ -225,7 +225,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "Participo/No tiene hijos/trabaja (formal/Informal)",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['2.2.2'])/100).toFixed(2),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['once'])/100).toFixed(2),
       aceptados:dosdosdos,
       Categoria:"J"
     }
@@ -233,7 +233,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "No Participo/tiene hijos/trabaja Formalmente ",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['1.1.2.2'])/100).toFixed(2),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['tres'])/100).toFixed(2),
       aceptados:unounodosdos,
       Categoria:"F"
     }
@@ -241,7 +241,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "No Participo/tiene hijos/trabaja Informalmente ",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['1.1.2.1'])/100).toFixed(2),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['dos'])/100).toFixed(2),
       aceptados:unounodosuno,
       Categoria:"C"
     }
@@ -249,7 +249,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "No Participo/tiene hijos/No trabaja ",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['1.1.1'])/100).toFixed(2),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['uno'])/100).toFixed(2),
       aceptados:unounouno,
       Categoria:"B"
     }
@@ -258,7 +258,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "No Participo/No tiene hijos/No trabaja ",
-      cantidad: (curso[0]['cupo'] *parseFloat(criterios[criterios.length-1]['1.2.1'])/100).toFixed(2),
+      cantidad: (curso[0]['cupo'] *parseFloat(criterios[criterios.length-1]['cuatro'])/100).toFixed(2),
       aceptados:unodosuno,
       Categoria:"D"
     }
@@ -266,7 +266,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "No Participo/No tiene hijos/Trabaja Formalmente ",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['1.2.2.2'])/100).toFixed(2),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['seis'])/100).toFixed(2),
       aceptados:unodosdosdos,
       Categoria:"H"
     }
@@ -274,7 +274,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "No Participo/No tiene hijos/Trabaja Informalmente ",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['1.2.2.1'])/100).toFixed(2),
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['cinco'])/100).toFixed(2),
       aceptados:unodosdosuno,
       Categoria:"G"
     }
