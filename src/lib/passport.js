@@ -72,9 +72,8 @@ passport.use('local.signup', new LocalStrategy({
 
 
     //fin transformar 
-    try {
-        if( existe.length<1) {
-        existe = await pool.query('select * from personas where dni = ?',[dni])
+    try {  
+      
         const verif  = await pool.query('select * from usuarios where usuario = ?',[usuario])
         if (verif.length>0){
             req.flash('message', 'error, usuario existente')
@@ -93,11 +92,7 @@ passport.use('local.signup', new LocalStrategy({
         }}
 
 
-    }else{
-        req.flash('message', 'error, usuario existente')
-
-    }
-
+   
 
 
 

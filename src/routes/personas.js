@@ -676,7 +676,7 @@ router.get('/cargarcursos111', async (req, res) => {
 
 
 ///////// CARGAR INSCRIPCIONES
-router.get('/cargarinscripciones0000', async (req, res) => {
+router.get('/cargarinscripciones', async (req, res) => {
 
   const workbook = XLSX.readFile('./src/cargadepersonas/Muestreo.xlsx')
   const workbooksheets = workbook.SheetNames
@@ -788,6 +788,7 @@ router.get('/cargarinscripciones0000', async (req, res) => {
         dni_persona: dataExcel[property]['D.N.I.'],
         objetivo: dataExcel[property]['¿Qué te gustaría  hacer con las habilidades aprendidas?'],
         horario: dataExcel[property]['Disponibilidad Horaria para cursar'],
+         horario2: dataExcel[property]['Disponibilidad Horaria para cursar2'],
         estado: 'pendiente',
 
         uno,

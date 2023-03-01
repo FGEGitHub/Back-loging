@@ -29,10 +29,25 @@ res.json('Realizado')
 
 router.get('/inscribirauto/', async (req, res) => {
 
+
+
+
+const cursos = await pool.query('select * from cursos ')
   let inscripciones = await pool.query('select * from inscripciones where estado="pendiente"')
+
+  for (ii in inscripciones) {
+    curso1 = await pool.query('select * from inscripciones where estado="pendiente"')
+  }
+
+
+
+
+
+
+
   const criterios = await pool.query('select * from criterios')
   listadef=[]
-  console.log()
+
   for (ii in inscripciones) {
 
     persona = await pool.query('select * from personas where dni =?', inscripciones[ii]['dni_persona'])
@@ -285,6 +300,7 @@ router.get('/listacursos/', async (req, res) => {
   listadef3 = []
 
   /////// inicio carga de prioridad 3
+  /*
   for (ii in cursos) {
 
     cantidad = await pool.query('select  cursos.id,cursos.nombre,cursos.cupo  from inscripciones left join cursos on inscripciones.tres = cursos.id  left join personas on inscripciones.dni_persona = personas.dni  where inscripciones.tres = ?   ', [cursos[ii]['id']])
@@ -299,7 +315,7 @@ router.get('/listacursos/', async (req, res) => {
 
     listadef3.push(Obj)
 
-  }
+  }*/
   ////////ista de inscriptos con prioridad dos
 
 
