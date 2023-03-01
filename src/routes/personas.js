@@ -673,7 +673,9 @@ router.get('/cargarcursos111', async (req, res) => {
 
 
 ///////////
-
+router.get('/prueba', async (req, res) => {
+  res.send('hola mundo')
+})
 
 ///////// CARGAR INSCRIPCIONES
 router.get('/cargarinscripciones', async (req, res) => {
