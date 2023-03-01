@@ -27,27 +27,64 @@ res.json('Realizado')
 })
 
 
+
+
+/////definir cupos 
+router.get('/designarturnos/', async (req, res) => {
+const descripcion_curso = await pool.query('select * from descripcion_turno')
+  const cursos = await pool.query('select uno, count(uno) from inscripciones group by uno ')
+
+  
+   let inscripciones = await pool.query('select * from inscripciones where estado="pendiente"')
+  
+   let turnos = 0
+   if(inscripciones.length>1000){
+    turnos =25
+   }else {
+    ///cursos de 10 personas
+      turnos = inscripciones.length/10//////ACA REEMPLAZAR POR 25 DESPUES DE LAS PRUEBAS
+   }
+  rta=[]
+
+
+   for (ii in cursos) {
+   
+
+      porcentaje=cursos[ii]['count(uno)']/ inscripciones.length*100
+      console.log(porcentaje)
+      console.log(turnos)
+      console.log(turnos*porcentaje/100 + "%")
+    
+      cantidad  = Math.round(turnos*porcentaje/100)
+    console.log(cantidad)
+      for (let i  = 0; i < cantidad; i++) {
+      
+        nuev = {
+          id_curso:cursos[ii]['uno'],
+          numero:i+1,
+          descripcion:descripcion_curso[i+1]['descripcion']
+        }
+        await pool.query('insert into turnos set ? ', [nuev])
+
+      }
+    
+
+
+   }
+
+
+   res.json('Realizado')
+  })
+
+
+
+  
 router.get('/inscribirauto/', async (req, res) => {
 
-
-
-
-const cursos = await pool.query('select * from cursos ')
   let inscripciones = await pool.query('select * from inscripciones where estado="pendiente"')
-
-  for (ii in inscripciones) {
-    curso1 = await pool.query('select * from inscripciones where estado="pendiente"')
-  }
-
-
-
-
-
-
-
   const criterios = await pool.query('select * from criterios')
   listadef=[]
-
+  console.log()
   for (ii in inscripciones) {
 
     persona = await pool.query('select * from personas where dni =?', inscripciones[ii]['dni_persona'])

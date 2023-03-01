@@ -81,7 +81,32 @@ router.get('/asistencia/:id', isLoggedInn2, async (req, res) => {
 
 })
 
+router.get('/listadeturnos/:id', isLoggedInn2, async (req, res) => {
+  const id = req.params.id
+  console.log(id)
+  turnos = await pool.query('select * from turnos  where id_curso = ?', [id])
 
+  todos = []
+  for (ii in turnos) {
+    cursado = await pool.query('select * from cursado join turnos on cursado.id_turno=turnos.id where cursado.id_curso = ? and cursado.id_turno =?', [id, turnos[ii]['id']])
+    if (cursado.length > 0) {
+      todos.push(cursado)
+      }else{
+        cursado = {
+          turno: turnos[ii]['numero'],
+          descripcion: turnos[ii]['descripcion']
+        }
+        todos.push([cursado])
+      }
+    
+    
+
+  }
+console.log(todos)
+  res.json(todos)
+
+
+})
 
 
 router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
@@ -101,7 +126,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     array1 = pendientes1.concat(pendientes2);
 
     array1 = array1.concat(pendientes3);
-  
+
     const criterios = await pool.query('select * from criterios ')
     /////isncripciones si participo/no participo
     //si
@@ -172,8 +197,8 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           dosunodosdos += 1
           break;
-       
-      
+
+
         case "diez":
           //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
           dosdosuno += 1
@@ -195,103 +220,103 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     auxil = {
       dato: "Participo/tiene hijos/trabaja formal",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['nueve'])/100).toFixed(2),
-      aceptados:dosunodosdos,
-      aclaracion:"Nueve",
-      Categoria:"K"
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length - 1]['nueve']) / 100).toFixed(2),
+      aceptados: dosunodosdos,
+      aclaracion: "Nueve",
+      Categoria: "K"
     }
     lista.push(auxil)
     auxil = {
       dato: "Participo/tiene hijos/trabaja Informal",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['ocho'])/100).toFixed(2),
-      aceptados:dosunodosuno,
-      aclaracion:"Ocho",
-      Categoria:"I"
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length - 1]['ocho']) / 100).toFixed(2),
+      aceptados: dosunodosuno,
+      aclaracion: "Ocho",
+      Categoria: "I"
     }
     lista.push(auxil)
     auxil = {
       dato: "Participo/tiene hijos/No trabaja",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['siete'])/100).toFixed(2),
-      aceptados:dosunouno,
-      aclaracion:"Siete",
-      Categoria:"A"
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length - 1]['siete']) / 100).toFixed(2),
+      aceptados: dosunouno,
+      aclaracion: "Siete",
+      Categoria: "A"
     }
     lista.push(auxil)
 
     auxil = {
       dato: "Participo/No tiene hijos/No trabaja",
-      cantidad: curso[0]['cupo'] *  parseFloat(criterios[criterios.length-1]['diez']/100).toFixed(2),
-      aceptados:dosdosuno,
-      aclaracion:"Diez",
-      Categoria:"E"
+      cantidad: curso[0]['cupo'] * parseFloat(criterios[criterios.length - 1]['diez'] / 100).toFixed(2),
+      aceptados: dosdosuno,
+      aclaracion: "Diez",
+      Categoria: "E"
     }
     lista.push(auxil)
 
     auxil = {
       dato: "Participo/No tiene hijos/trabaja (formal/Informal)",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['once'])/100).toFixed(2),
-      aceptados:dosdosdos,
-      aclaracion:"Once",
-      Categoria:"J"
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length - 1]['once']) / 100).toFixed(2),
+      aceptados: dosdosdos,
+      aclaracion: "Once",
+      Categoria: "J"
     }
     lista.push(auxil)
 
     auxil = {
       dato: "No Participo/tiene hijos/trabaja Formalmente ",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['tres'])/100).toFixed(2),
-      aceptados:unounodosdos,
-      aclaracion:"Tres",
-      Categoria:"F"
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length - 1]['tres']) / 100).toFixed(2),
+      aceptados: unounodosdos,
+      aclaracion: "Tres",
+      Categoria: "F"
     }
     lista.push(auxil)
 
     auxil = {
       dato: "No Participo/tiene hijos/trabaja Informalmente ",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['dos'])/100).toFixed(2),
-      aceptados:unounodosuno,
-      aclaracion:"Dos",
-      Categoria:"C"
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length - 1]['dos']) / 100).toFixed(2),
+      aceptados: unounodosuno,
+      aclaracion: "Dos",
+      Categoria: "C"
     }
     lista.push(auxil)
 
     auxil = {
       dato: "No Participo/tiene hijos/No trabaja ",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['uno'])/100).toFixed(2),
-      aceptados:unounouno,
-      aclaracion:"Uno",
-      Categoria:"B"
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length - 1]['uno']) / 100).toFixed(2),
+      aceptados: unounouno,
+      aclaracion: "Uno",
+      Categoria: "B"
     }
     lista.push(auxil)
 
 
     auxil = {
       dato: "No Participo/No tiene hijos/No trabaja ",
-      cantidad: (curso[0]['cupo'] *parseFloat(criterios[criterios.length-1]['cuatro'])/100).toFixed(2),
-      aceptados:unodosuno,
-      aclaracion:"Cuatro",
-      Categoria:"D"
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length - 1]['cuatro']) / 100).toFixed(2),
+      aceptados: unodosuno,
+      aclaracion: "Cuatro",
+      Categoria: "D"
     }
     lista.push(auxil)
 
     auxil = {
       dato: "No Participo/No tiene hijos/Trabaja Formalmente ",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['seis'])/100).toFixed(2),
-      aceptados:unodosdosdos,
-      aclaracion:"Seis",
-      Categoria:"H"
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length - 1]['seis']) / 100).toFixed(2),
+      aceptados: unodosdosdos,
+      aclaracion: "Seis",
+      Categoria: "H"
     }
     lista.push(auxil)
 
     auxil = {
       dato: "No Participo/No tiene hijos/Trabaja Informalmente ",
-      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length-1]['cinco'])/100).toFixed(2),
-      aceptados:unodosdosuno,
-      aclaracion:"Cinco",
-      Categoria:"G"
+      cantidad: (curso[0]['cupo'] * parseFloat(criterios[criterios.length - 1]['cinco']) / 100).toFixed(2),
+      aceptados: unodosdosuno,
+      aclaracion: "Cinco",
+      Categoria: "G"
     }
     lista.push(auxil)
 
-    res.json([ array1, curso, inscriptos.length, clases, lista, cursado]);
+    res.json([array1, curso, inscriptos.length, clases, lista, cursado]);
   } catch (error) {
     console.log(error)
     res.json(['']);
