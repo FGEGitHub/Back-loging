@@ -88,11 +88,13 @@ router.get('/listadeturnos/:id', isLoggedInn2, async (req, res) => {
 
   todos = []
   for (ii in turnos) {
-    cursado = await pool.query('select * from cursado join turnos on cursado.id_turno=turnos.id where cursado.id_curso = ? and cursado.id_turno =?', [id, turnos[ii]['id']])
+    cursado = await pool.query('select *, turnos.id from cursado join turnos on cursado.id_turno=turnos.id join personas on cursado.id_persona =personas.id where cursado.id_curso = ? and cursado.id_turno =?', [id, turnos[ii]['id']])
     if (cursado.length > 0) {
       todos.push(cursado)
       }else{
+        console.log(turnos[ii])
         cursado = {
+          id_turno:turnos[ii]['id'],
           turno: turnos[ii]['numero'],
           descripcion: turnos[ii]['descripcion']
         }
