@@ -96,7 +96,9 @@ router.get('/listadeturnos/:id', isLoggedInn2, async (req, res) => {
         cursado = {
           id_turno:turnos[ii]['id'],
           turno: turnos[ii]['numero'],
-          descripcion: turnos[ii]['descripcion']
+          descripcion: turnos[ii]['descripcion'],
+          encargado:turnos[ii]['encargado'],
+         
         }
         todos.push([cursado])
       }

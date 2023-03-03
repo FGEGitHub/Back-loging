@@ -5,9 +5,9 @@ const pool = require('../database')
 const XLSX = require('xlsx')
 const caregorizar = require('./funciones/caregorizar')
 
-router.get('/traerprofesores/', async (req, res) => {
+router.get('/traerencargados/', async (req, res) => {
 
-  profesores = await pool.query('select * from usuarios where nivel=3')
+  profesores = await pool.query('select * from usuarios where nivel=4')
   res.json(profesores)
 })
 
@@ -478,6 +478,26 @@ router.post("/modificardatosadic", isLoggedInn, async (req, res) => {
 
 
 
+
+
+router.post("/asignarencargado", isLoggedInn, async (req, res) => {
+  const  { id_encargado, id }= req.body
+  console.log(id_encargado)
+  console.log(id)
+try {
+  act = {
+    id_encargado
+}
+await pool.query('update turnos set ? where id = ?',[act,id])
+res.json('realizado')
+} catch (error) {
+  console.log(error)
+  res.json('Error algo sucedio')
+}
+
+
+})
+
 router.post("/asignarllamado", isLoggedInn, async (req, res) => {
 const  { id_profesor, id_cursado }= req.body
 console.log(id_profesor)
@@ -497,6 +517,38 @@ await pool.query('update inscripciones set ? where id = ?',[act,curs[0]['id_insc
 
 res.json('realizado')
 })
+
+
+
+
+
+router.post("/asignarllamadoatodas", isLoggedInn, async (req, res) => {
+  const  { id  }= req.body
+  console.log(id) //////id turno
+
+  turno = await pool.query('select * from turnos where id = ?',[id])
+  
+
+
+    act = {
+          inscripcion:"Asignado a llamado"
+    }
+  
+  await pool.query('update cursado set ? where id_turno = ?',[act,id])
+  
+ /*  curs = await pool.query('select * from cursado where id =?',[id_cursado])
+  act = {
+    estado:"Asignado a llamado"
+  } */
+  //await pool.query('update inscripciones set ? where id = ?',[act,curs[0]['id_inscripcion']])
+  
+  res.json('realizado')
+  })
+  
+
+
+
+
 
 router.post("/crear", isLoggedInn, async (req, res) => {
   const { nombre, apellido, fecha_nac, trabajo, hijos, dni } = req.body

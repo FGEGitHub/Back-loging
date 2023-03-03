@@ -112,6 +112,76 @@ passport.use('local.signup', new LocalStrategy({
 ))
 
 
+
+
+
+
+
+passport.use('local.registroadmin', new LocalStrategy({
+    usernameField: 'usuario',
+    passwordField: 'password',
+    passReqToCallback: 'true'
+}, async (req, usuario, password, done) => {
+
+    const { nombre, mail, nivel } = req.body
+    //  const razon = await pool.query('Select razon from clientes where usuario like  ?', [usuario]) seleccionar razon
+
+
+    const habilitado = 'NO'
+    const newUser = {
+        password,
+        usuario,
+        nombre,
+        nivel,
+        mail,
+
+
+    }
+
+
+    //fin transformar 
+    try {
+        var rows = await pool.query('SELECT * FROM usuarios WHERE usuario like  ?', [usuario]) // falta restringir si un usuario se puede registrar sin ser cliente
+        if (rows.length == 0) { // si ya hay un USER con ese dni 
+
+            newUser.password = await helpers.encryptPassword(password)
+            try {
+                const result = await pool.query('INSERT INTO usuarios  set ?', [newUser])
+                newUser.id = result.insertId// porque newuser no tiene el id
+
+                return done(null, newUser)// para continuar, y devuelve el newUser para que almacene en una sesion
+
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        else {
+            console.log('error, ese cuit ya tiene un usuairo existente')
+            done(null, false, req.flash('message', 'error, ese cuit ya tiene un usuairo existente  ')) // false para no avanzar
+
+        }
+    } catch (error) {
+        console.log(error)
+        req.flash('message', 'error,algo sucedio ')
+
+
+    }
+}
+
+
+))
+
+
+
+
+
+
+
+
+
+
+
 passport.serializeUser((user, done) => {
     done(null, user.id)
 })
