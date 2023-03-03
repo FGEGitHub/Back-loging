@@ -65,6 +65,7 @@ app.use(`/novedades`, require('./routes/novedades'))
 app.use(`/inscripciones`, require('./routes/inscripciones'))
 app.use(`/tareas`, require('./routes/tareas'))
 app.use(`/administracion`, require('./routes/administracion'))
+app.use(`/encargados`, require('./routes/encargados'))
 //app.use(`/links`, require('./routes/links'))
 
 
