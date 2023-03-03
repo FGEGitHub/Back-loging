@@ -34,9 +34,9 @@ router.get('/datospersona/:id', async (req, res) => {
 
     const aux = await pool.query('select * from personas where id =?', [id])
 
+console.log(aux)
 
-
-    res.json([aux]);
+    res.json(aux);
 
   } catch (error) {
     console.log(error)

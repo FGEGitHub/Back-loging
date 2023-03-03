@@ -189,7 +189,7 @@ router.get('/inscribirauto/', async (req, res) => {
       }
 
       turno = await pool.query('select * from turnos where id_curso=? and numero = ?', [listadef[ii]['dos'], turnoactual])
-      if (turno.length >  0) {
+      if (turno.length > 0) {
         try {
           id_turn = turno[0]['id']
         } catch (err) {
@@ -423,6 +423,43 @@ router.get('/listacursos/', async (req, res) => {
   res.json([listadef, listadef2, listadef3, pend[0]["count(*)"]]);
 
 })
+
+
+
+
+
+router.post("/confirmaciondellamado", async (req, res) => {
+  const { confirmacion, id_turno, id_persona, id_cursado } = req.body
+  try {
+
+
+
+    cursado = await pool.query('select * from cursado where id = ? ', [id_cursado])
+
+    act = {
+      inscripcion: confirmacion
+
+    }
+
+    await pool.query('update cursado set ? where id=?', [act, id_cursado])
+    act = {
+      estado: confirmacion
+
+    }
+
+    await pool.query('update inscripciones set ? where id=?', [act, cursado[0]['id_inscripcion']])
+    console.log('realizado')
+    res.json('Realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('Error algo sucedio')
+  }
+
+
+})
+
+
+
 router.post("/actualizarprioridades", isLoggedInn2, async (req, res) => {
   const { unounouno, unounodosuno, unounodosdos, unodosuno, unodosdosuno, unodosdosdos, dosunouno, dosunodosuno, dosunodosdos, dosdosuno, dosdosdos } = req.body
 
