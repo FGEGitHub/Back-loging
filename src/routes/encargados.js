@@ -40,27 +40,26 @@ router.get('/curso/:id', async (req, res) => {
 
 
 router.post("/confirmaciondellamado", async (req, res) => {
-  const { confirmacion, id_turno, id_persona, id_cursado,motivo } = req.body
+  const { confirmacion, id_turno, id_persona, id_cursado,observaciones } = req.body
   try {
-
 
 
     cursado = await pool.query('select * from cursado where id = ? ', [id_cursado])
 
     act = {
       inscripcion: confirmacion,
-      motivo
+      motivo:observaciones
 
     }
 
     await pool.query('update cursado set ? where id=?', [act, id_cursado])
     act = {
       estado: confirmacion,
-      motivo
+      motivo:observaciones
     }
-
+console.log(act)
     await pool.query('update inscripciones set ? where id=?', [act, cursado[0]['id_inscripcion']])
-    console.log('realizado')
+   
     res.json('Realizado')
   } catch (error) {
     console.log(error)
