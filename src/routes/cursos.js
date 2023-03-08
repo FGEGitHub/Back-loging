@@ -68,12 +68,53 @@ router.get('/asistencia/:id', isLoggedInn2, async (req, res) => {
   const id = req.params.id
 
   try {
+    /// trae la clase
     const clase = await pool.query('select * from clases where id = ?', [id])
+//// trae el listado de alumnos  que cursan en ese turno
 
-    const alumnos = await pool.query('select * from cursado left  join asistencia on cursado.id = asistencia.id_cursado   join usuarios on  cursado.id_usuario = usuarios.id    where cursado.id_curso = ?  and cursado.inscripcion= "Cursando" ', [clase[0]['id_curso']])
+    const alumnos = await pool.query('select * from cursado join personas on cursado.id_persona=personas.id  where cursado.id_turno = ?  and cursado.inscripcion= "Confirmado" ', [clase[0]['id_turno']])
+console.log('asistencia')
+console.log(alumnos)
 
-    console.log(alumnos)
-    res.json([clase, alumnos])
+    ////recorremos por la asistencia
+    asistenciaa=[]
+    for (ii in alumnos) {
+
+        asis = await pool.query('select * from asistencia where id_alumno = ? and id_clase = ?',[alumnos[ii]['id_persona'],id])
+
+      if (asis.length === 0) {
+        aux = {
+          id_alumno:alumnos[ii]['id_persona'],
+          nombre: alumnos[ii]['nombre'],
+          apellido: alumnos[ii]['apellido'],
+          dni:alumnos[ii]['dni'],
+          asistencia:'No Tomada',
+          id_clase:id
+         
+        }
+        asistenciaa.push(aux)
+        }else{
+      
+          aux = {
+            id_alumno:alumnos[ii]['id_persona'],
+            nombre: alumnos[ii]['nombre'],
+            apellido: alumnos[ii]['apellido'],
+            dni:alumnos[ii]['dni'],
+            asistencia:asis[0]['asistencia'],
+            id_clase:id
+           
+          }
+          asistenciaa.push(aux)
+        }
+      
+
+    }
+
+
+
+
+    console.log(asistenciaa)
+    res.json([clase, asistenciaa])
   } catch (error) {
     console.log(error)
   }
@@ -118,7 +159,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
   const id = req.params.id
   try {
     /////CLASES DEL CURSO
-    const etc = await pool.query('select * from clases where id_curso = ? ', [id])
+ 
     //////pendientes inscriptos prioridad 1 2 3
     const pendientes1 = await pool.query('select inscripciones.id id_inscripcion,personas.hijos, inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.apellido, personas.trabajo, personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where uno=?  ', [id])
 
@@ -145,7 +186,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     const inscriptos = await pool.query('select * from cursado where id_curso=? ', [id])
     console.log(cursado.length)
     ///CLASES DEL CURSO
-    const clases = await pool.query('select * from clases where id_curso=? ', [id])
+    const clases = []
 
     ///---------------------------------------------------
     //////ARMADO DE TABLA DL CURSO
