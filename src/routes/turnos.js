@@ -9,7 +9,7 @@ const pool = require('../database')
 
 
 router.post("/nuevaclase",  async (req, res) => {
-  const { id_turno, dni, observaciones,  fecha} = req.body
+  const { id_turno, dni, observaciones,numero_clase,  fecha} = req.body
 
 
 try {
@@ -17,6 +17,7 @@ try {
 act = {
 observacion:observaciones,
 fecha,
+numero_clase,
 id_turno
 }
 

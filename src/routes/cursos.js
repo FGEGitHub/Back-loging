@@ -73,15 +73,14 @@ router.get('/asistencia/:id', isLoggedInn2, async (req, res) => {
 //// trae el listado de alumnos  que cursan en ese turno
 
     const alumnos = await pool.query('select * from cursado join personas on cursado.id_persona=personas.id  where cursado.id_turno = ?  and cursado.inscripcion= "Confirmado" ', [clase[0]['id_turno']])
-console.log('asistencia')
-console.log(alumnos)
+
 
     ////recorremos por la asistencia
     asistenciaa=[]
     for (ii in alumnos) {
 
-        asis = await pool.query('select * from asistencia where id_alumno = ? and id_clase = ?',[alumnos[ii]['id_persona'],id])
-
+        asis = await pool.query('select * from asistencia where id_persona = ? and id_clase = ?',[alumnos[ii]['id_persona'],id])
+        console.log(asis)
       if (asis.length === 0) {
         aux = {
           id_alumno:alumnos[ii]['id_persona'],
@@ -94,7 +93,7 @@ console.log(alumnos)
         }
         asistenciaa.push(aux)
         }else{
-      
+    
           aux = {
             id_alumno:alumnos[ii]['id_persona'],
             nombre: alumnos[ii]['nombre'],
@@ -111,9 +110,8 @@ console.log(alumnos)
     }
 
 
-
-
     console.log(asistenciaa)
+
     res.json([clase, asistenciaa])
   } catch (error) {
     console.log(error)
@@ -460,8 +458,43 @@ router.post("/inscribir", isLoggedInn, async (req, res) => {
 
 
 router.post("/presente", isLoggedInn2, async (req, res) => {
-  const { id_usuario, id } = req.body ///
-  console.log(id_usuario)
+  const { id_alumno, asistencia, id_clase, observaciones } = req.body ///
+
+///asistencia (presente ausente)
+try {
+
+
+  const nuevo= {
+    id_persona:id_alumno,
+    asistencia,
+    id_clase,
+    justificacion:observaciones
+   }
+  
+   const yatomada = await pool.query('select * from asistencia where id_persona = ? and id_clase =? ',[id_alumno,id_clase])
+if (yatomada.length>0){
+
+  const nuev= {
+    
+    asistencia,
+
+    justificacion:observaciones
+   }
+
+
+  await pool.query('update asistencia set ? where id=?  ', [nuev,yatomada[0]['id']])
+
+}else{
+
+   await pool.query('insert into asistencia set ? ', [nuevo])
+  }
+   res.json('Realizado')
+
+} catch (error) {
+  console.log(error)
+  res.json('Error algo sucedio')
+}
+
 })
 
 module.exports = router
