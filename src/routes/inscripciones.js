@@ -15,21 +15,21 @@ const path = require('path')
 /////////////////////
 
 
-router.get('/todaslasinscripciones',  async (req, res,) => {
-    cuil_cuit = req.params.cuil_cuit
+router.get('/todaslasinscripciones', async (req, res,) => {
+  cuil_cuit = req.params.cuil_cuit
 
-    try {
-        estr = await pool.query('select * from excelinscripciones ')
-        console.log(estr)
-        res.json(estr)
-    } catch (error) {
-        res.send('algo salio mal')
-    }
+  try {
+    estr = await pool.query('select * from excelinscripciones ')
+    console.log(estr)
+    res.json(estr)
+  } catch (error) {
+    res.send('algo salio mal')
+  }
 
 
 })
 
-router.post('/incripcionesid',  async (req, res) => {
+router.post('/incripcionesid', async (req, res) => {
   const { id } = req.body
 
   const estract = await pool.query('select * from excelinscripciones where id = ? ', [id])
@@ -42,101 +42,272 @@ router.post('/incripcionesid',  async (req, res) => {
   // const workbook = XLSX.readFile('./src/Excel/1665706467397-estr-cuentas_PosicionConsolidada.xls')
 
   try {
-      const workbook = XLSX.readFile(path.join(__dirname, '../Excel/' + nombree))
-      const workbooksheets = workbook.SheetNames
-      const sheet = workbooksheets[0]
+    const workbook = XLSX.readFile(path.join(__dirname, '../Excel/' + nombree))
+    const workbooksheets = workbook.SheetNames
+    const sheet = workbooksheets[0]
 
-      const dataExcel = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
-      //console.log(dataExcel)
+    const dataExcel = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
+    //console.log(dataExcel)
 
-      let regex = /(\d+)/g;
+    let regex = /(\d+)/g;
 
-      for (const property in dataExcel) {
-
-
-          /*  if ((dataExcel[property]['Descripción']).includes(cuil_cuit)) {
-               estado = 'A'
-               // tipo de pago normal 
-           } */
+    for (const property in dataExcel) {
 
 
+      /*  if ((dataExcel[property]['Descripción']).includes(cuil_cuit)) {
+           estado = 'A'
+           // tipo de pago normal 
+       } */
 
 
 
 
-          try {
+
+
+      try {
 
 
 
-           
-
-                  try {
-
-               
-
-                
-                   
 
 
-                          nombre = dataExcel[property]['Nombre']
-                          apellido = dataExcel[property]['Apellido']
-                          dni = dataExcel[property]['D.N.I.']
-                          eleccion1 = dataExcel[property]['Selecciona el primer curso de mayor preferencia (1)']
-                          eleccion2 = dataExcel[property]['Selecciona el primer curso de mayor preferencia (2)']
-                          nuevo = {
-                            nombre,
-                         
-                              apellido,
-                              dni,
-                              eleccion1,
-                              eleccion2
-
-                          }
+        try {
 
 
-                          mandar.push(nuevo);
-                 
-
-                  } catch (error) {
-                    console.log(error)
-                    nombre = dataExcel[property]['Nombre']
-                    apellido = dataExcel[property]['Apellido']
-                    dni = dataExcel[property]['D.N.I.']
-                    eleccion1 = dataExcel[property]['Selecciona el primer curso de mayor preferencia (1)']
-                    eleccion2 = dataExcel[property]['Selecciona el primer curso de mayor preferencia (2)']
-                      nuevo = {
-                        nombre: 'no se encontro archivo',
-                        apellido: 'no se encontro archivo',
-                        dni: 'no se encontro archivo',
-                        eleccion1: 'no se encontro archivo',
-                        eleccion2: 'no se encontro archivo',
-                        
-
-                      }
-                      mandar = [nuevo]
-
-                  }
-            
 
 
-          } catch (error) {
-console.log(error)
+
+
+
+          nombre = dataExcel[property]['Nombre']
+          apellido = dataExcel[property]['Apellido']
+          dni = dataExcel[property]['D.N.I.']
+          eleccion1 = dataExcel[property]['Selecciona el primer curso de mayor preferencia (1)']
+          eleccion2 = dataExcel[property]['Selecciona el primer curso de mayor preferencia (2)']
+          nuevo = {
+            nombre,
+
+            apellido,
+            dni,
+            eleccion1,
+            eleccion2
+
           }
 
 
+          mandar.push(nuevo);
+
+
+        } catch (error) {
+          console.log(error)
+          nombre = dataExcel[property]['Nombre']
+          apellido = dataExcel[property]['Apellido']
+          dni = dataExcel[property]['D.N.I.']
+          eleccion1 = dataExcel[property]['Selecciona el primer curso de mayor preferencia (1)']
+          eleccion2 = dataExcel[property]['Selecciona el primer curso de mayor preferencia (2)']
+          nuevo = {
+            nombre: 'no se encontro archivo',
+            apellido: 'no se encontro archivo',
+            dni: 'no se encontro archivo',
+            eleccion1: 'no se encontro archivo',
+            eleccion2: 'no se encontro archivo',
+
+
+          }
+          mandar = [nuevo]
+
+        }
 
 
 
+      } catch (error) {
+        console.log(error)
       }
 
+
+
+
+
+    }
+
   } catch (error) {
-console.log(error)
+    console.log(error)
   }
-console.log(mandar)
+  console.log(mandar)
   res.json(mandar)
 
 
 })
+
+
+
+
+
+
+
+
+
+
+
+router.post('/cargarinscripciones', async (req, res) => {
+  const { id } = req.body
+console.log(id)
+  const estract = await pool.query('select * from excelinscripciones where id = ? ', [id])
+  console.log(estract)
+  const nombree = estract[0]['ruta']
+  console.log(nombree)
+
+  let mandar = []
+  // const workbook = XLSX.readFile(`./src/Excel/${nombree}`)
+
+  // const workbook = XLSX.readFile('./src/Excel/1665706467397-estr-cuentas_PosicionConsolidada.xls')
+
+  try {
+    const workbook = XLSX.readFile(path.join(__dirname, '../Excel/' + nombree))
+    const workbooksheets = workbook.SheetNames
+    const sheet = workbooksheets[0]
+
+    const dataExcel = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
+    //console.log(dataExcel)
+
+    let regex = /(\d+)/g;
+    cursoss = await pool.query('select * from cursos')
+    curso1 = cursoss[0]['nombre']
+    curso2 = cursoss[1]['nombre']
+    curso3 = cursoss[2]['nombre']
+    curso4 = cursoss[3]['nombre']
+    let a = 1
+    for (const property in dataExcel) {
+      a += 1
+      aux = dataExcel[property]['Número']
+      existe = await pool.query('select * from personas where dni = ?', [aux])
+
+
+      expresion = dataExcel[property]['Selecciona el primer curso de mayor preferencia (1)']
+      switch (expresion) {
+        case cursoss[0]['nombre']:
+          id_curso = cursoss[0]['id']
+          break;
+        case cursoss[1]['nombre']:
+          id_curso = cursoss[1]['id']
+          break;
+
+        case cursoss[2]['nombre']:
+          id_curso = cursoss[2]['id']
+          break;
+        case cursoss[3]['nombre']:
+          id_curso = cursoss[3]['id']
+          break;
+
+        default:
+          id_curso = 1
+          break;
+      }
+      uno = id_curso
+
+
+      expresion = dataExcel[property]['Selecciona el primer curso de mayor preferencia (2)']
+      switch (expresion) {
+        case cursoss[0]['nombre']:
+          id_curso = cursoss[0]['id']
+          break;
+        case cursoss[1]['nombre']:
+          id_curso = cursoss[1]['id']
+          break;
+
+        case cursoss[2]['nombre']:
+          id_curso = cursoss[2]['id']
+          break;
+        case cursoss[3]['nombre']:
+          id_curso = cursoss[3]['id']
+          break;
+
+        default:
+          id_curso = 1
+          break;
+      }
+      dos = id_curso
+      expresion = dataExcel[property]['Selecciona el primer curso de mayor preferencia (3)']
+      switch (expresion) {
+        case 'Bordado Mexicano':
+          id_curso = 122
+          break;
+        case 'Organización de Eventos, nivel 2':
+          id_curso = 123
+          break;
+
+        case 'Introducción al Maquillaje y Peinados para Eventos':
+          id_curso = 124
+          break;
+        case 'Introducción a la elaboración de prendas textiles a partir de la reutilización de materiales (upcycling)':
+          id_curso = 125
+          break;
+        case 'Introducción a la Instalación de Sistemas Operativos':
+          id_curso = 126
+          break;
+        case 'Restauración de Muebles':
+
+          id_curso = 127
+          break;
+        default:
+          id_curso = 1
+          break;
+      }
+      tres = id_curso
+
+      try {
+        const newLink = {
+          motivacion: dataExcel[property]['¿Por que elegiste tomar este curso?'],
+          conexion_int: dataExcel[property]['Posee alguno de los  siguientes dispositivos con conexión a internet:'],
+          dni_persona: dataExcel[property]['D.N.I.'],
+          objetivo: dataExcel[property]['¿Qué te gustaría  hacer con las habilidades aprendidas?'],
+          horario: dataExcel[property]['Disponibilidad Horaria para cursar'],
+          horario2: dataExcel[property]['Disponibilidad Horaria para cursar2'],
+          estado: 'pendiente',
+
+          uno,
+          dos,
+          tres
+
+
+        }
+
+        await pool.query('INSERT INTO inscripciones set ?', [newLink]);
+
+
+        console.log('cargado')
+
+
+
+      } catch (e) {
+        console.log(e)
+      }
+
+      /* if ((dataExcel[property]['Sucursal']).includes(cuil_cuit)) {
+          estado = 'A'
+      }*/
+
+
+    }
+
+  } catch (error) {
+    console.log(error)
+  }
+  console.log(mandar)
+  res.json(mandar)
+
+
+})
+
+
+
+
+
+
+
+
+
+
+
 
 
 ////// desinscribir 
@@ -157,7 +328,23 @@ router.get('/desinscribirtodos/', async (req, res) => {
 })
 
 
+router.get('/borrarincripciones/', async (req, res) => {
 
+  try {
+
+
+
+    await pool.query('delete  from  inscripciones')
+    await pool.query('delete  from  cursado')
+    await pool.query('delete  from  turnos')
+    await pool.query('delete  from  clases')
+    res.json('Realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('Algo salio mal')
+  }
+
+})
 
 /////definir cupos 
 router.get('/designarturnos/', async (req, res) => {
@@ -479,13 +666,25 @@ router.get('/listacursos/', async (req, res) => {
     cantidad = await pool.query('select  cursos.id,cursos.nombre,cursos.cupo from inscripciones left join cursos on inscripciones.uno = cursos.id  left join personas on inscripciones.dni_persona = personas.dni  where inscripciones.uno = ?    ', [cursos[ii]['id']])
 
     cursado = await pool.query('select * from cursado where id_curso= ?', [cursos[ii]['id']])
-    Obj = {
-      nombre: cantidad[0]['nombre'],
-      cantidad: cantidad.length,
-      cupo: cantidad[0]['cupo'],
-      cursando: cursado.length,
-      id: cantidad[0]['id'],
+    try {
+      Obj = {
+        nombre: cantidad[0]['nombre'],
+        cantidad: cantidad.length,
+        cupo: cantidad[0]['cupo'],
+        cursando: cursado.length,
+        id: cantidad[0]['id'],
+      }
+
+    } catch (error) {
+      Obj = {
+        nombre: 'no',
+        cantidad: 'no',
+        cupo: 'no',
+        cursando: 'no',
+        id: 'no',
+      }
     }
+
 
     listadef.push(Obj)
 
@@ -500,13 +699,25 @@ router.get('/listacursos/', async (req, res) => {
     cantidad = await pool.query('select  cursos.id,cursos.nombre,cursos.cupo from inscripciones left join cursos on inscripciones.dos = cursos.id  left join personas on inscripciones.dni_persona = personas.dni  where inscripciones.dos = ?    ', [cursos[ii]['id']])
 
     cursado = await pool.query('select * from cursado where id_curso= ?', [cursos[ii]['id']])
-    Obj = {
-      nombre: cantidad[0]['nombre'],
-      cantidad: cantidad.length,
-      cupo: cantidad[0]['cupo'],
-      cursando: cursado.length,
-      id: cantidad[0]['id'],
+    try {
+      Obj = {
+        nombre: cantidad[0]['nombre'],
+        cantidad: cantidad.length,
+        cupo: cantidad[0]['cupo'],
+        cursando: cursado.length,
+        id: cantidad[0]['id'],
+      }
+
+    } catch (error) {
+      Obj = {
+        nombre: 'no',
+        cantidad: 'no',
+        cupo: 'no',
+        cursando: 'no',
+        id: 'no',
+      }
     }
+
 
     listadef2.push(Obj)
 
