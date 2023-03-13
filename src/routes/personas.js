@@ -4,6 +4,26 @@ const { isLoggedIn, isLoggedInn, isLoggedInn2 } = require('../lib/auth') //prote
 const pool = require('../database')
 const XLSX = require('xlsx')
 const caregorizar = require('./funciones/caregorizar')
+const multer = require('multer')
+const path = require('path')
+const fs = require('fs')
+
+
+const diskstorage = multer.diskStorage({
+  destination: path.join(__dirname, '../Excel'),
+  filename: (req, file, cb) => {
+      cb(null,  Date.now() + '-inscrip-' + file.originalname)
+
+  }
+}) //para que almacene temporalmente la imagen
+const fileUpload = multer({
+  storage: diskstorage,
+
+}).single('image')
+
+
+
+
 
 router.get('/traerencargados/', async (req, res) => {
 
@@ -729,8 +749,51 @@ router.get('/prueba', async (req, res) => {
   res.send('hola mundo')
 })
 
+
+///////////Guardar inscripciones
+
+router.post('/subirprueba', fileUpload, async (req, res, done) => {
+  const {formdata, file} = req.body
+
+try {
+  
+
+  const type = req.file.mimetype
+  const name = req.file.originalname
+ // const data = fs.readFileSync(path.join(__dirname, '../Excel' + req.file.filename))
+  fech = (new Date(Date.now())).toLocaleDateString()
+ 
+  const datoss = {
+    fecha: fech,
+    ruta: req.file.filename/////ubicacion
+
+      
+  }
+  await pool.query('insert into excelinscripciones set?', datoss)
+  res.send('Imagen guardada con exito')
+} catch (error) {
+  console.log(error)
+}
+
+
+
+
+
+})
+
+
 ///////// CARGAR INSCRIPCIONES
+
+
+
+
 router.get('/cargarinscripciones', async (req, res) => {
+
+
+
+
+
+
 
   const workbook = XLSX.readFile('./src/cargadepersonas/Muestreo.xlsx')
   const workbooksheets = workbook.SheetNames

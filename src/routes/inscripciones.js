@@ -4,9 +4,139 @@ const { isLoggedIn, isLoggedInn, isLoggedInn2 } = require('../lib/auth') //prote
 const pool = require('../database')
 const caregorizar = require('./funciones/caregorizar')
 const consultarcupos = require('./funciones/cantidadocupado.')
+const XLSX = require('xlsx')
+const path = require('path')
+
+////////////
 
 
 
+
+/////////////////////
+
+
+router.get('/todaslasinscripciones',  async (req, res,) => {
+    cuil_cuit = req.params.cuil_cuit
+
+    try {
+        estr = await pool.query('select * from excelinscripciones ')
+        console.log(estr)
+        res.json(estr)
+    } catch (error) {
+        res.send('algo salio mal')
+    }
+
+
+})
+
+router.post('/incripcionesid',  async (req, res) => {
+  const { id } = req.body
+
+  const estract = await pool.query('select * from excelinscripciones where id = ? ', [id])
+  const nombree = estract[0]['ruta']
+  console.log(nombree)
+
+  let mandar = []
+  // const workbook = XLSX.readFile(`./src/Excel/${nombree}`)
+
+  // const workbook = XLSX.readFile('./src/Excel/1665706467397-estr-cuentas_PosicionConsolidada.xls')
+
+  try {
+      const workbook = XLSX.readFile(path.join(__dirname, '../Excel/' + nombree))
+      const workbooksheets = workbook.SheetNames
+      const sheet = workbooksheets[0]
+
+      const dataExcel = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
+      //console.log(dataExcel)
+
+      let regex = /(\d+)/g;
+
+      for (const property in dataExcel) {
+
+
+          /*  if ((dataExcel[property]['Descripción']).includes(cuil_cuit)) {
+               estado = 'A'
+               // tipo de pago normal 
+           } */
+
+
+
+
+
+
+          try {
+
+
+
+           
+
+                  try {
+
+               
+
+                
+                   
+
+
+                          nombre = dataExcel[property]['Nombre']
+                          apellido = dataExcel[property]['Apellido']
+                          dni = dataExcel[property]['D.N.I.']
+                          eleccion1 = dataExcel[property]['Selecciona el primer curso de mayor preferencia (1)']
+                          eleccion2 = dataExcel[property]['Selecciona el primer curso de mayor preferencia (2)']
+                          nuevo = {
+                            nombre,
+                         
+                              apellido,
+                              dni,
+                              eleccion1,
+                              eleccion2
+
+                          }
+
+
+                          mandar.push(nuevo);
+                 
+
+                  } catch (error) {
+                    console.log(error)
+                    nombre = dataExcel[property]['Nombre']
+                    apellido = dataExcel[property]['Apellido']
+                    dni = dataExcel[property]['D.N.I.']
+                    eleccion1 = dataExcel[property]['Selecciona el primer curso de mayor preferencia (1)']
+                    eleccion2 = dataExcel[property]['Selecciona el primer curso de mayor preferencia (2)']
+                      nuevo = {
+                        nombre: 'no se encontro archivo',
+                        apellido: 'no se encontro archivo',
+                        dni: 'no se encontro archivo',
+                        eleccion1: 'no se encontro archivo',
+                        eleccion2: 'no se encontro archivo',
+                        
+
+                      }
+                      mandar = [nuevo]
+
+                  }
+            
+
+
+          } catch (error) {
+console.log(error)
+          }
+
+
+
+
+
+      }
+
+  } catch (error) {
+console.log(error)
+  }
+console.log(mandar)
+  res.json(mandar)
+
+
+})
 
 
 ////// desinscribir 
