@@ -150,7 +150,7 @@ router.post('/incripcionesid', async (req, res) => {
 
 router.post('/cargarinscripciones', async (req, res) => {
   const { id } = req.body
-console.log(id)
+  console.log(id)
   const estract = await pool.query('select * from excelinscripciones where id = ? ', [id])
   console.log(estract)
   const nombree = estract[0]['ruta']
@@ -184,64 +184,64 @@ console.log(id)
       a += 1
       aux = dataExcel[property]['D.N.I.']
       existe = await pool.query('select * from personas where dni = ?', [aux])
-try {
-      ///////
-      if(existe.length>0){
-        
-          
-    
-        ///actualizar
-        nuevo={
-          residencia :  dataExcel[property]['Donde vivís'],   //// ncampo residencia 
-          direccion :dataExcel[property]['Dirección calle']  +dataExcel[property]['Altura'],
-          adicional_direccion:dataExcel[property]['Grupo de viviendas (en caso que corresponda)'] + ' - '+  dataExcel[property]['Piso y departamento (en caso que corresponda)'],
-          barrio: dataExcel[property]['Barrio'],
-          fecha_nac: dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'], 
-          tel: dataExcel[property]['Número de teléfono de contacto'],
-          tel2: dataExcel[property]['Número de teléfono alternativo'],
-          participante_anterior: dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?'],
-          nivel_secundario: dataExcel[property]['Nivel educativo alcanzado'],
-          trabajo: dataExcel[property]['Actualmente, ¿se encuentra trabajando?'],
-          tipo_trabajo: dataExcel[property]['¿Qué tipo de empleo posee?'],
-          hijos: dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'],
-  
+      try {
+        ///////
+        if (existe.length > 0) {
+
+
+
+          ///actualizar
+          nuevo = {
+            residencia: dataExcel[property]['Donde vivís'],   //// ncampo residencia 
+            direccion: dataExcel[property]['Dirección calle'] + dataExcel[property]['Altura'],
+            adicional_direccion: dataExcel[property]['Grupo de viviendas (en caso que corresponda)'] + ' - ' + dataExcel[property]['Piso y departamento (en caso que corresponda)'],
+            barrio: dataExcel[property]['Barrio'],
+            fecha_nac: dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'],
+            tel: dataExcel[property]['Número de teléfono de contacto'],
+            tel2: dataExcel[property]['Número de teléfono alternativo'],
+            participante_anterior: dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?'],
+            nivel_secundario: dataExcel[property]['Nivel educativo alcanzado'],
+            trabajo: dataExcel[property]['Actualmente, ¿se encuentra trabajando?'],
+            tipo_trabajo: dataExcel[property]['¿Qué tipo de empleo posee?'],
+            hijos: dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'],
+
+          }
+
+          await pool.query('update personas set ? where dni = ?', [nuevo, aux])
+        } else {
+          ///crear nueva persona 
+          nuevo = {
+            nombre: dataExcel[property]['Nombre'],
+            apellido: dataExcel[property]['Apellido'],
+            dni: dataExcel[property]['D.N.I.'],
+            residencia: dataExcel[property]['Donde vivís'],   //// ncampo residencia 
+            direccion: dataExcel[property]['Dirección calle'] + dataExcel[property]['Altura'],
+            adicional_direccion: dataExcel[property]['Grupo de viviendas (en caso que corresponda)'] + ' - ' + dataExcel[property]['Piso y departamento (en caso que corresponda)'],
+            barrio: dataExcel[property]['Barrio'],
+            fecha_nac: dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'],
+            tel: dataExcel[property]['Número de teléfono de contacto'],
+            tel2: dataExcel[property]['Número de teléfono alternativo'],
+            participante_anterior: dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?'],
+            nivel_secundario: dataExcel[property]['Nivel educativo alcanzado'],
+            trabajo: dataExcel[property]['Actualmente, ¿se encuentra trabajando?'],
+            tipo_trabajo: dataExcel[property]['¿Qué tipo de empleo posee?'],
+            hijos: dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'],
+
+
+
+          }
+          await pool.query('INSERT INTO personas set ?', [nuevo]);
         }
+        /////////¿Actualmente  se encuentra estudiando? actividad adicional
+        /////////////Tipo de empleo
 
-        await pool.query('update personas set ? where dni = ?', [nuevo,aux])
-      }else{
-        ///crear nueva persona 
-        nuevo={
-          nombre :  dataExcel[property]['Nombre'], 
-          apellido :  dataExcel[property]['Apellido'], 
-          dni:  dataExcel[property]['D.N.I.'], 
-        residencia :  dataExcel[property]['Donde vivís'],   //// ncampo residencia 
-        direccion :dataExcel[property]['Dirección calle']  +dataExcel[property]['Altura'],
-        adicional_direccion:dataExcel[property]['Grupo de viviendas (en caso que corresponda)'] + ' - '+  dataExcel[property]['Piso y departamento (en caso que corresponda)'],
-        barrio: dataExcel[property]['Barrio'],
-        fecha_nac: dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'], 
-        tel: dataExcel[property]['Número de teléfono de contacto'],
-        tel2: dataExcel[property]['Número de teléfono alternativo'],
-        participante_anterior: dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?'],
-        nivel_secundario: dataExcel[property]['Nivel educativo alcanzado'],
-        trabajo: dataExcel[property]['Actualmente, ¿se encuentra trabajando?'],
-        tipo_trabajo: dataExcel[property]['¿Qué tipo de empleo posee?'],
-        hijos: dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'],
 
-      
-      
+
       }
-      await pool.query('INSERT INTO personas set ?', [nuevo]);  
-      } 
-/////////¿Actualmente  se encuentra estudiando? actividad adicional
-/////////////Tipo de empleo
-   
-
-          
-    }
       //////
- catch (error) { 
-  console.log(error)
-  }
+      catch (error) {
+        console.log(error)
+      }
 
       expresion = dataExcel[property]['Selecciona el primer curso de mayor preferencia (1)']
       switch (expresion) {
@@ -322,7 +322,7 @@ try {
           dni_persona: dataExcel[property]['D.N.I.'],
           objetivo: dataExcel[property]['¿Qué te gustaría  hacer con las habilidades aprendidas?'],
           horario: dataExcel[property]['Disponibilidad Horaria para cursar'],
-         horario2: dataExcel[property]['Disponibilidad Horaria para cursar2'],
+          horario2: dataExcel[property]['Disponibilidad Horaria para cursar2'],
           estado: 'pendiente',
 
           uno,
@@ -481,15 +481,20 @@ router.get('/inscribirauto/', async (req, res) => {
       bandera = true
     }
     while (!bandera && iii < turnoaux.length) {////////ENTRA EN BUCLE REVISANDO CUPO EN HORARIOS
-
-      if (iii === 0) {
-        turnoactual = turnoaux[0][0]
-      } else {
-        turnoactual = turnoaux[1][0]
+      turnoactual = '99'
+      try {
+        if (iii === 0) {
+          turnoactual = turnoaux[0][0]
+        } else {
+          turnoactual = turnoaux[1][0]
+        }
+      } catch (error) {
+        console.log(error)
       }
 
+
       turno = await pool.query('select * from turnos where id_curso=? and numero = ?', [inscripciones[ii]['uno'], turnoactual])
-      
+
       try {
         id_turn = turno[0]['id']
       } catch (err) {

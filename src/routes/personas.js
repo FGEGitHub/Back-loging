@@ -104,13 +104,13 @@ router.get('/lista', async (req, res) => {
 ///////////detalleusuarioparainscripcion
 router.get('/datosusuarioporid/:dni', isLoggedInn2, async (req, res) => {
   const dni = req.params.dni
-console.log(dni)
+
 
   const etc = await pool.query('select * from personas where dni =?', [dni])
 
   const curso1 = await pool.query('select cursos.nombre prioridaduno from inscripciones join cursos on inscripciones.uno =cursos.id where inscripciones.dni_persona =?', [dni])
   const curso2 = await pool.query('select cursos.nombre prioridaddos from inscripciones join cursos on inscripciones.dos =cursos.id where inscripciones.dni_persona =?', [dni])
-
+  console.log(dni)
 let cursado = await pool.query('select cursos.nombre from cursado  join cursos on cursado.id_curso = cursos.id where cursado.id_persona=?',[etc[0]['id']])
 
   if (cursado.length === 0){
