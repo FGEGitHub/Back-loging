@@ -6,7 +6,22 @@ const pool = require('../database')
 
 
 
+router.post("/modificarturno",  async (req, res) => {
+  const { id,descripcion} = req.body
+try {
+  
+act = {
+  descripcion
+}
 
+  await pool.query('update turnos set ? where id =?', [act,id])
+  res.json('Realizado')
+} catch (error) {
+  console.log(error)
+  res.json('No realizado')
+}
+
+})
 
 router.post("/nuevaclase",  async (req, res) => {
   const { id_turno, dni, observaciones,numero_clase,  fecha} = req.body

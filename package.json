@@ -24,8 +24,8 @@
   "scripts": {
     "dev": "node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
- 
-    "start": "set PORT=3000 && react-scripts start --host 0.0.0.0"
+    "start": "node src/index.js"
+    
   },
   "author": "Pipao",
   "license": "ISC",
