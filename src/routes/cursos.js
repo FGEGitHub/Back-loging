@@ -74,14 +74,19 @@ router.get('/asistencia/:id', isLoggedInn2, async (req, res) => {
 
     const alumnos = await pool.query('select * from cursado join personas on cursado.id_persona=personas.id  where cursado.id_turno = ?  and cursado.inscripcion= "Confirmado" ', [clase[0]['id_turno']])
 
-
+    total = alumnos.length
+    presentes=0
+    ausentes=0
+    notomados = 0
     ////recorremos por la asistencia
     asistenciaa=[]
     for (ii in alumnos) {
 
         asis = await pool.query('select * from asistencia where id_persona = ? and id_clase = ?',[alumnos[ii]['id_persona'],id])
         console.log(asis)
+
       if (asis.length === 0) {
+        notomados += 1
         aux = {
           id_alumno:alumnos[ii]['id_persona'],
           nombre: alumnos[ii]['nombre'],
@@ -93,6 +98,11 @@ router.get('/asistencia/:id', isLoggedInn2, async (req, res) => {
         }
         asistenciaa.push(aux)
         }else{
+          if(asis[0]['asistencia'] ==='Presente'){
+            presentes +=1
+          }else{
+            ausentes+=1
+          }
     
           aux = {
             id_alumno:alumnos[ii]['id_persona'],
@@ -110,9 +120,14 @@ router.get('/asistencia/:id', isLoggedInn2, async (req, res) => {
     }
 
 
-    console.log(asistenciaa)
+   estadisticas = {
+    presentes,
+    ausentes,
+    notomados,
 
-    res.json([clase, asistenciaa])
+   }
+
+    res.json([clase, asistenciaa,estadisticas])
   } catch (error) {
     console.log(error)
   }

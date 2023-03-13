@@ -388,6 +388,25 @@ router.get('/desinscribirtodos/', async (req, res) => {
 
 })
 
+router.get('/borrarturnos/', async (req, res) => {
+
+  try {
+
+ 
+
+  
+    await pool.query('delete  from  cursado ')
+    await pool.query('delete  from  turnos')
+    await pool.query('delete  from  clases')
+    res.json('Realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('Algo salio mal')
+  }
+
+})
+
+
 
 router.get('/borrarincripciones/', async (req, res) => {
 
