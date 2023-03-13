@@ -120,6 +120,43 @@ router.get('/asistencia/:id', isLoggedInn2, async (req, res) => {
 
 })
 
+
+
+router.get('/borrarturno/:id', async (req, res) => {
+  const id = req.params.id
+  console.log(id)
+  try {
+
+try {
+
+  cursado = await pool.query('select * from cursado where id_turno = ?',[id])
+
+  for (ii in cursado) {
+  const nuev= {
+    estado:'pendiente'
+   }
+
+
+  await pool.query('update incripciones set ? where id=?  ', [nuev,cursado[ii]['id_inscripcion']])
+}
+} catch (error) {
+  console.log(error)
+}
+
+
+    await pool.query('delete  from  cursado where id_turno = ?',[id])
+    await pool.query('delete  from  inscripciones where id = ?',[id])
+    await pool.query('delete  from  turnos where id = ?',[id])
+    console.log('realizado')
+    res.json('realizado')
+  } catch (error) {
+    console.log(error)
+    res.json(' no realizado')
+  }
+
+
+})
+
 router.get('/listadeturnos/:id', isLoggedInn2, async (req, res) => {
   const id = req.params.id
   console.log(id)
@@ -369,6 +406,22 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
 })
 
+
+router.post("/modificarcurso",  async (req, res) => {
+  const { id, nombre  } = req.body
+try {
+  act = {nombre
+  
+  }
+  await pool.query('update cursos set ? where id=?  ', [act,id])
+  res.json('Realizado')
+} catch (error) {
+console.log(error)
+  res.json('No Realizado')
+}
+
+
+})
 
 
 router.post("/crear", isLoggedInn2, async (req, res) => {

@@ -261,7 +261,7 @@ console.log(id)
           dni_persona: dataExcel[property]['D.N.I.'],
           objetivo: dataExcel[property]['¿Qué te gustaría  hacer con las habilidades aprendidas?'],
           horario: dataExcel[property]['Disponibilidad Horaria para cursar'],
-          horario2: dataExcel[property]['Disponibilidad Horaria para cursar2'],
+         horario2: dataExcel[property]['Disponibilidad Horaria para cursar2'],
           estado: 'pendiente',
 
           uno,
@@ -410,7 +410,7 @@ router.get('/inscribirauto/', async (req, res) => {
 
     persona = await pool.query('select * from personas where dni =?', inscripciones[ii]['dni_persona'])
     cat = await caregorizar.asignarcategoria(persona) //// trae la categoria
-    turnoaux = [inscripciones[ii]['horario'], inscripciones[ii]['horario']];
+    turnoaux = [inscripciones[ii]['horario'], inscripciones[ii]['horario2']];
 
 
 
@@ -428,7 +428,7 @@ router.get('/inscribirauto/', async (req, res) => {
       }
 
       turno = await pool.query('select * from turnos where id_curso=? and numero = ?', [inscripciones[ii]['uno'], turnoactual])
-
+      
       try {
         id_turn = turno[0]['id']
       } catch (err) {
