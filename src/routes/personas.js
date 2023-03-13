@@ -508,6 +508,7 @@ try {
   act = {
     id_encargado
 }
+console.log(act)
 await pool.query('update turnos set ? where id = ?',[act,id])
 res.json('realizado')
 } catch (error) {

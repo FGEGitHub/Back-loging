@@ -131,7 +131,7 @@ router.get('/listadeturnos/:id', isLoggedInn2, async (req, res) => {
     if (cursado.length > 0) {
       todos.push(cursado)
       }else{
-        console.log(turnos[ii])
+     
         cursado = {
           id_turno:turnos[ii]['id'],
           turno: turnos[ii]['numero'],
