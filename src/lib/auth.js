@@ -48,7 +48,7 @@ module.exports = {
            
         }catch{}
       
-        if (!token || !decodedToken.id || (decodedToken.nivel <2) ){
+        if (!token || !decodedToken.id || (decodedToken.nivel !=2) ){
             console.log('error token')
             return res.send('error login')
         }
@@ -58,7 +58,7 @@ module.exports = {
         next()
     },
 
-    isLoggedInn3(req,res, next){
+    isLoggedInn4(req,res, next){
         console.log('entra1')
         //
         const authorization = req.get('authorization')
@@ -76,7 +76,7 @@ module.exports = {
            
         }catch{}
       
-        if (!token || !decodedToken.id || (decodedToken.nivel <3) ){
+        if (!token || !decodedToken.id || (decodedToken.nivel !=4 && decodedToken.nivel !=2  ) ){
             console.log('error token')
             return res.send('error login')
         }

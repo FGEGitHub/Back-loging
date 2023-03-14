@@ -1,11 +1,11 @@
 const express = require('express')
 const router = express.Router()
-const { isLoggedIn, isLoggedInn, isLoggedInn2 } = require('../lib/auth') //proteger profile
+const { isLoggedIn, isLoggedInn, isLoggedInn2,isLoggedInn4 } = require('../lib/auth') //proteger profile
 const pool = require('../database')
 
 
 
-router.get('/lista/', isLoggedInn, async (req, res) => {
+router.get('/lista/', isLoggedInn4, async (req, res) => {
 
 
   const etc = await pool.query('select * from cursos')
@@ -64,7 +64,7 @@ router.get('/verclases/:id', isLoggedInn2, async (req, res) => {
 
 
 
-router.get('/asistencia/:id', isLoggedInn2, async (req, res) => {
+router.get('/asistencia/:id', isLoggedInn4, async (req, res) => {
   const id = req.params.id
 
   try {
@@ -422,7 +422,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 })
 
 
-router.post("/modificarcurso",  async (req, res) => {
+router.post("/modificarcurso",isLoggedInn2,  async (req, res) => {
   const { id, nombre  } = req.body
 try {
   act = {nombre
@@ -438,7 +438,7 @@ console.log(error)
 
 })
 
-
+///
 router.post("/crear", isLoggedInn2, async (req, res) => {
   const { nombre, observaciones, encargado, cupo } = req.body
 
@@ -477,7 +477,7 @@ router.post("/crear", isLoggedInn2, async (req, res) => {
 
 
 
-router.post("/nuevaclase", isLoggedInn2, async (req, res) => {
+router.post("/nuevaclase", isLoggedInn4, async (req, res) => {
   const { id_curso, fecha, observaciones } = req.body
   console.log(id_curso)
   console.log(fecha)
@@ -525,7 +525,7 @@ router.post("/inscribir", isLoggedInn, async (req, res) => {
 })
 
 
-router.post("/presente", isLoggedInn2, async (req, res) => {
+router.post("/presente", isLoggedInn4, async (req, res) => {
   const { id_alumno, asistencia, id_clase, observaciones } = req.body ///
 
 ///asistencia (presente ausente)

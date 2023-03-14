@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const passport= require('passport')
 const pool = require('../database')
-
+const {isLoggedIn,isLoggedInn,isLoggedInn2, } = require('../lib/auth')
 
 router.get('/todos/', async (req, res) => {
    
@@ -13,15 +13,10 @@ router.get('/todos/', async (req, res) => {
 //res.render('index')
 })
 
-router.post("/presente",  async (req, res) => {
-    const { id_usuario, id } = req.body ///
-    console.log(id_usuario)
-  })
 
 
 
-
-  router.post('/signupp',  passport.authenticate('local.registroadmin', {
+  router.post('/signupp', isLoggedInn2, passport.authenticate('local.registroadmin', {
     successRedirect: '/exitosignup',
     failureRedirect:'/noexito',
     failureFlash:true
