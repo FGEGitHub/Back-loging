@@ -476,6 +476,26 @@ router.post("/crear", isLoggedInn2, async (req, res) => {
 })
 
 
+router.post("/nuevoturno", isLoggedInn4, async (req, res) => {
+  const { id_curso, numero, descripcion } = req.body
+
+  try {
+
+
+    const nuev = {
+      id_curso, numero, descripcion
+    }
+    await pool.query('insert turnos  set ?', [nuev])
+    res.json('Cargada nueva clase')
+  } catch (error) {
+    console.log(error)
+    res.json('Error algo sucedio')
+  }
+
+})
+
+
+
 
 router.post("/nuevaclase", isLoggedInn4, async (req, res) => {
   const { id_curso, fecha, observaciones } = req.body

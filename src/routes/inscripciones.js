@@ -751,6 +751,7 @@ router.get('/listacursos/', async (req, res) => {
     cantidad = await pool.query('select  cursos.id,cursos.nombre,cursos.cupo from inscripciones left join cursos on inscripciones.uno = cursos.id  left join personas on inscripciones.dni_persona = personas.dni  where inscripciones.uno = ?    ', [cursos[ii]['id']])
 
     cursado = await pool.query('select * from cursado where id_curso= ?', [cursos[ii]['id']])
+    turnosss = await pool.query('select * from turnos where id_curso= ?', [cursos[ii]['id']])
     try {
       Obj = {
         nombre: cantidad[0]['nombre'],
@@ -758,6 +759,7 @@ router.get('/listacursos/', async (req, res) => {
         cupo: cantidad[0]['cupo'],
         cursando: cursado.length,
         id: cantidad[0]['id'],
+        turnos:turnosss.length
       }
 
     } catch (error) {
@@ -767,6 +769,7 @@ router.get('/listacursos/', async (req, res) => {
         cupo: 'no',
         cursando: 'no',
         id: 'no',
+
       }
     }
 
@@ -791,6 +794,7 @@ router.get('/listacursos/', async (req, res) => {
         cupo: cantidad[0]['cupo'],
         cursando: cursado.length,
         id: cantidad[0]['id'],
+        turnos:turnosss.length
       }
 
     } catch (error) {
