@@ -416,7 +416,7 @@ router.get('/borrarincripciones/', async (req, res) => {
 
     await pool.query('delete  from  inscripciones')
     await pool.query('delete  from  cursado')
-    await pool.query('delete  from  turnos')
+   
     await pool.query('delete  from  clases')
     res.json('Realizado')
   } catch (error) {
@@ -490,29 +490,23 @@ router.get('/inscribirauto/', async (req, res) => {
 
     persona = await pool.query('select * from personas where dni =?', inscripciones[ii]['dni_persona'])
     cat = await caregorizar.asignarcategoria(persona) //// trae la categoria
-    turnoaux = [inscripciones[ii]['horario'], inscripciones[ii]['horario2']];
+    turnoaux = inscripciones[ii]['horario']
 
 
 
     bandera = false////la bandera para avisar si ya se inscribio en alguno de los cupos
-    iii = 0
+    //iii = 0
+yaseinscribio =await pool.query('select * from inscripciones where dni_persona =?', inscripciones[ii]['dni_persona'])
+if (yaseinscribio.length>0){
     if (persona.length === 0) {
       bandera = true
     }
-    while (!bandera && iii < turnoaux.length) {////////ENTRA EN BUCLE REVISANDO CUPO EN HORARIOS
+    ////////ENTRA EN BUCLE REVISANDO CUPO EN HORARIOS
       turnoactual = '99'
-      try {
-        if (iii === 0) {
-          turnoactual = turnoaux[0][0]
-        } else {
-          turnoactual = turnoaux[1][0]
-        }
-      } catch (error) {
-        console.log(error)
-      }
 
 
-      turno = await pool.query('select * from turnos where id_curso=? and numero = ?', [inscripciones[ii]['uno'], turnoactual])
+
+      turno = await pool.query('select * from turnos where id_curso=? and numero = ?', [inscripciones[ii]['uno'], turnoaux])
 
       try {
         id_turn = turno[0]['id']
@@ -526,7 +520,7 @@ router.get('/inscribirauto/', async (req, res) => {
 
         for (iiii in turno) {
 
-        haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, inscripciones[ii]['uno'], criterios[criterios.length - 1][cat], turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
+        haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, inscripciones[ii]['uno'], criterios[criterios.length - 1][cat],turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
 
         if (haycupo) {
 
@@ -542,7 +536,7 @@ router.get('/inscribirauto/', async (req, res) => {
             id_curso: inscripciones[ii]['uno'],
             categoria: cat,
             id_inscripcion: inscripciones[ii]['id'],
-            id_turno: id_turn,
+            id_turno:  turno[iiii]['id'],
             /////////////////
 
           }
@@ -556,15 +550,15 @@ router.get('/inscribirauto/', async (req, res) => {
           bandera = true
         }
       } }
-      iii += 1
+      
       if (!bandera) {
         listadef.push(inscripciones[ii])
         //////crea una listta con las inscripciones 1 rechazadas
       }
 
    
+ 
     }
-
 
   }
 
@@ -576,7 +570,7 @@ router.get('/inscribirauto/', async (req, res) => {
 
     persona = await pool.query('select * from personas where dni =?', listadef[ii]['dni_persona'])
     cat = await caregorizar.asignarcategoria(persona) //// trae la categoria
-    turnoaux = [listadef[ii]['horario'], listadef[ii]['horario']];
+    turnoaux = inscripciones[ii]['horario']
 
 
 
@@ -585,25 +579,15 @@ router.get('/inscribirauto/', async (req, res) => {
     if (persona.length === 0) {
       bandera = true
     }
-    while (!bandera && iii < turnoaux.length) {////////ENTRA EN BUCLE REVISANDO CUPO EN HORARIOS
+  ////////ENTRA EN BUCLE REVISANDO CUPO EN HORARIOS
 
 
 
-      if (iii === 0) {
-        turnoactual = turnoaux[0][0]
-      } else {
-        turnoactual = turnoaux[1][0]
-      }
 
-      turno = await pool.query('select * from turnos where id_curso=? and numero = ?', [listadef[ii]['dos'], turnoactual])
+      turno = await pool.query('select * from turnos where id_curso=? and numero = ?', [listadef[ii]['dos'], turnoaux])
       if (turno.length > 0) {
         for (iiii in turno) {
-        try {
-          id_turn = turno[0]['id']
-        } catch (err) {
-
-          id_turn = '9999j'/////valor cualquiera
-        }
+       
         haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, listadef[ii]['dos'], criterios[criterios.length - 1][cat], turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
 
 
@@ -620,7 +604,7 @@ router.get('/inscribirauto/', async (req, res) => {
             id_curso: listadef[ii]['dos'],
             categoria: cat,
             id_inscripcion: listadef[ii]['id'],
-            id_turno: id_turn,
+            id_turno: turno[iiii]['id'],
             /////////////////
 
           }
@@ -635,8 +619,8 @@ router.get('/inscribirauto/', async (req, res) => {
         }
 
       }}
-      iii += 1
-    }
+    
+    
 
 
   }
@@ -762,7 +746,7 @@ router.get('/listacursos/', async (req, res) => {
       Obj = {
         nombre: cantidad[0]['nombre'],
         cantidad: cantidad.length,
-        cupo: cantidad[0]['cupo'],
+        cupo: turnosss.length*44,
         cursando: cursado.length,
         id: cantidad[0]['id'],
         turnos:turnosss.length
@@ -791,13 +775,13 @@ router.get('/listacursos/', async (req, res) => {
   /////// inicio carga de prioridad 2
   for (ii in cursos) {
     cantidad = await pool.query('select  cursos.id,cursos.nombre,cursos.cupo from inscripciones left join cursos on inscripciones.dos = cursos.id  left join personas on inscripciones.dni_persona = personas.dni  where inscripciones.dos = ?    ', [cursos[ii]['id']])
-
+    turnosss = await pool.query('select * from turnos where id_curso= ?', [cursos[ii]['id']])
     cursado = await pool.query('select * from cursado where id_curso= ?', [cursos[ii]['id']])
     try {
       Obj = {
         nombre: cantidad[0]['nombre'],
         cantidad: cantidad.length,
-        cupo: cantidad[0]['cupo'],
+        cupo: turnosss.length*44,
         cursando: cursado.length,
         id: cantidad[0]['id'],
         turnos:turnosss.length

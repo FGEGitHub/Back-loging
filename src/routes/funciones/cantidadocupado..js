@@ -23,7 +23,7 @@ async function cantidadcategoriaporcurso(categoria, id_curso, porcentaje_creiter
     try {
 
 
-        cuporeal = cuporeal.length*10///////////////cambiar a 25
+        cuporeal = cuporeal.length*44///////////////cambiar a 25
         ///comparacion de si el cupo / cursado.length es para ver si agedando sobrepasa
       
        
@@ -34,7 +34,7 @@ async function cantidadcategoriaporcurso(categoria, id_curso, porcentaje_creiter
       ////////preguntar horario antes o despues
       const curs = await pool.query('select * from cursado  join turnos on cursado.id_turno=turnos.id  where cursado.id_curso= ? and cursado.id_turno=?', [id_curso,id_turno])
      
-      if ( 10 <= (curs.length )) {////////+1 par aque se llene ante el redondeo
+      if ( 44 <= (curs.length )) {////////+1 par aque se llene ante el redondeo
         haylugar = false
     }
 
