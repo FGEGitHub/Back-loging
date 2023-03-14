@@ -118,12 +118,62 @@ let cursado = await pool.query('select cursos.nombre from cursado  join cursos o
   }
 
 
-  ficha = {
-    nombre: etc[0]['apellido'] + etc[0]['nombre'],
-    prioridad1: curso1[0]['prioridaduno'],
-    prioridad2: curso2[0]['prioridaddos'],
-    anotado: cursado[0]['nombre']
+
+  try {
+    nombre= etc[0]['apellido'] + etc[0]['nombre']
+  } catch (error) {
+    nombre= 'no determinado'
   }
+
+  try {
+    prioridad1= curso1[0]['prioridaduno']
+  } catch (error) {
+    prioridad1='no determinado'
+  }
+  try {
+    prioridad2= curso2[0]['prioridaddos']
+  } catch (error) {
+    prioridad2='no determinado'
+  }
+  try {
+    anotado= cursado[0]['nombre']
+  } catch (error) {
+    anotado='no determinado'
+  }
+  try {
+    hijos= etc[0]['hijos']
+  } catch (error) {
+    hijos='no determinado'
+  }
+  try {
+    trabajo= etc[0]['trabajo']
+  } catch (error) {
+    trabajo='no determinado'
+  }
+  try {
+    tipo_trabajo=  etc[0]['tipo_trabajo']
+  } catch (error) {
+    tipo_trabajo='no determinado'
+  }
+try {
+  ficha = {
+    nombre,
+    prioridad1,
+    prioridad2,
+    anotado,
+    hijos,
+    trabajo,
+    tipo_trabajo
+  }
+} catch (error) {
+  ficha = {
+    nombre: 'no determinado',
+    prioridad1: 'no determinado',
+    prioridad2: 'no determinado',
+    anotado: 'no determinado'
+  }
+}
+
 
   cat = await caregorizar.asignarcategoria(etc)
 
