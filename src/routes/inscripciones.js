@@ -516,12 +516,17 @@ router.get('/inscribirauto/', async (req, res) => {
 
       try {
         id_turn = turno[0]['id']
+
+
       } catch (err) {
 
         id_turn = '9999j'/////valor cualquiera
       }
       if (turno.length > 0) {
-        haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, inscripciones[ii]['uno'], criterios[criterios.length - 1][cat], id_turn)//// envia categoria y la id del curso devuelve si hay cupo 
+
+        for (iiii in turno) {
+
+        haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, inscripciones[ii]['uno'], criterios[criterios.length - 1][cat], turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
 
         if (haycupo) {
 
@@ -550,14 +555,14 @@ router.get('/inscribirauto/', async (req, res) => {
           await pool.query('update inscripciones set ? where id=? ', [act, inscripciones[ii]['id'],])
           bandera = true
         }
-      }
+      } }
       iii += 1
       if (!bandera) {
         listadef.push(inscripciones[ii])
         //////crea una listta con las inscripciones 1 rechazadas
       }
 
-
+   
     }
 
 
@@ -592,13 +597,14 @@ router.get('/inscribirauto/', async (req, res) => {
 
       turno = await pool.query('select * from turnos where id_curso=? and numero = ?', [listadef[ii]['dos'], turnoactual])
       if (turno.length > 0) {
+        for (iiii in turno) {
         try {
           id_turn = turno[0]['id']
         } catch (err) {
 
           id_turn = '9999j'/////valor cualquiera
         }
-        haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, listadef[ii]['dos'], criterios[criterios.length - 1][cat], id_turn)//// envia categoria y la id del curso devuelve si hay cupo 
+        haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, listadef[ii]['dos'], criterios[criterios.length - 1][cat], turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
 
 
         if (haycupo) {
@@ -628,7 +634,7 @@ router.get('/inscribirauto/', async (req, res) => {
           bandera = true
         }
 
-      }
+      }}
       iii += 1
     }
 
