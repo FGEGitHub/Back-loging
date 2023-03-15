@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { isLoggedIn, isLoggedInn, isLoggedInn2 } = require('../lib/auth') //proteger profile
+const { isLoggedIn, isLoggedInn, isLoggedInn2,isLoggedInn4 } = require('../lib/auth') //proteger profile
 const pool = require('../database')
 const XLSX = require('xlsx')
 const caregorizar = require('./funciones/caregorizar')
@@ -30,7 +30,11 @@ router.get('/traerencargados/', async (req, res) => {
   profesores = await pool.query('select * from usuarios where nivel=4')
   res.json(profesores)
 })
+router.get('/traercoordiandores/', async (req, res) => {
 
+  profesores = await pool.query('select * from usuarios where nivel=3')
+  res.json(profesores)
+})
 
 
 
@@ -70,7 +74,7 @@ console.log(aux)
 router.get('/lista', async (req, res) => {
   const usuario = req.params.usuario
 
-  const etc = await pool.query('select * from personas left join cursado on personas.id=cursado.id')
+  const etc = await pool.query('select *,  personas.id id from personas left join cursado on personas.id=cursado.id')
   listadef=[]
   for (ii in etc) {
  
@@ -79,7 +83,7 @@ router.get('/lista', async (req, res) => {
 
 
     nuevo = {
-
+      id: etc[ii]['id'],
       nombre: etc[ii]['nombre'],
       id_persona: etc[ii]['id'],
       apellido:  etc[ii]['apellido'],
@@ -528,7 +532,30 @@ router.post("/inscribir", isLoggedInn2, async (req, res) => {
 })
 
 
-router.post("/modificardatosadic", isLoggedInn, async (req, res) => {
+router.post("/modificarpersona", isLoggedInn4, async (req, res) => {
+  const {id, nombre, apellido, mail,tel, tel2, direccion, adicional_direccion} = req.body
+try {
+  console.log(id)
+  act ={
+    nombre, apellido, mail,tel, tel2, direccion, adicional_direccion
+  }
+  res.json('realizado')
+} catch (error) {
+  console.log(error)
+  res.json('realizado')
+}
+
+
+await pool.query('UPDATE personas set ?  where id = ?  ', [act, id])
+
+
+
+})
+
+
+
+
+router.post("/modificardatosadic", isLoggedInn4, async (req, res) => {
   const { anios, trabajo, hijos, usuario } = req.body
   try {
     const aux = await pool.query('select * from usuarios where usuario =?', [usuario])
@@ -550,13 +577,14 @@ router.post("/modificardatosadic", isLoggedInn, async (req, res) => {
 
 
 
-router.post("/asignarencargado", isLoggedInn, async (req, res) => {
-  const  { id_encargado, id }= req.body
-  console.log(id_encargado)
+router.post("/asignarcoordinador", isLoggedInn4, async (req, res) => {
+  const  { id_coordinador, id }= req.body
+  console.log(id_coordinador)
   console.log(id)
 try {
   act = {
-    id_encargado
+    id_coordinador,
+   
 }
 console.log(act)
 await pool.query('update turnos set ? where id = ?',[act,id])
@@ -569,13 +597,50 @@ res.json('realizado')
 
 })
 
+
+
+router.post("/asignarencargado", isLoggedInn, async (req, res) => {
+  const  { id_encargado, id }= req.body
+  console.log(id_encargado)
+  console.log(id) // id turno
+try {
+  act = {
+    id_encargado,
+  
+}
+
+await pool.query('update turnos set ? where id = ?',[act,id])
+
+
+turno = await pool.query('select * from turnos where id = ?',[id])
+  
+
+
+act = {
+      inscripcion:"Asignado a llamado"
+}
+
+await pool.query('update cursado set ? where id_turno = ?',[act,id])
+
+
+res.json('realizado')
+} catch (error) {
+  console.log(error)
+  res.json('Error algo sucedio')
+}
+
+
+})
+
+
+
 router.post("/asignarllamado", isLoggedInn, async (req, res) => {
-const  { id_profesor, id_cursado }= req.body
+const  { id_profesor, id_cursado,}= req.body
 console.log(id_profesor)
 console.log(id_cursado)
 
   act = {profesor:id_profesor,
-        inscripcion:"Asignado a llamado"
+        
   }
 
 await pool.query('update cursado set ? where id = ?',[act,id_cursado])

@@ -174,7 +174,7 @@ try {
 
 router.get('/listadeturnos/:id', isLoggedInn2, async (req, res) => {
   const id = req.params.id
-  console.log(id)
+ 
   turnos = await pool.query('select * from turnos  where id_curso = ?', [id])
 
   todos = []
@@ -198,7 +198,7 @@ router.get('/listadeturnos/:id', isLoggedInn2, async (req, res) => {
     
 
   }
-console.log(todos)
+
   res.json(todos)
 
 
@@ -230,8 +230,15 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     //no
     //const cursadono = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona =personas.dni  where inscripciones.uno=? and personas.participante_anterior="No"', [id])
     ///////datos del curso
-    const curso = await pool.query('select * from cursos where id = ? ', [id])
-    console.log(curso)
+    const cursos = await pool.query('select * from cursos where id = ? ', [id])
+    turnos = await pool.query('select * from turnos where id_curso = ? ', [id])
+    curso = [{nombre:cursos[0]['nombre'],
+    cupo:44*turnos.length,
+    turnos:turnos.length
+    
+    }]
+
+    
     ////////////ALUMNOS YAINSCRIPTOS
     const inscriptos = await pool.query('select * from cursado where id_curso=? ', [id])
     console.log(cursado.length)
