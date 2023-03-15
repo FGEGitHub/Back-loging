@@ -9,7 +9,7 @@ const passport = require('passport')
 const cors = require("cors");
 const jwt = require('jsonwebtoken')
 const keys = require('./keys')
-const PORT = require('./config')
+
 
 ////
 
@@ -23,7 +23,7 @@ app.set('key',keys.key)
 
 //settings
 
-app.set('port', process.env.PORT || 4000)
+app.set('port',  4000)
 
 
 app.set('view engine', '.hbs')
