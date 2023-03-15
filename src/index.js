@@ -9,10 +9,11 @@ const passport = require('passport')
 const cors = require("cors");
 const jwt = require('jsonwebtoken')
 const keys = require('./keys')
-
+///
+const pool = require('./database')
+DBConnector = require('./dbconnector')
 
 ////
-
 
 
 
@@ -24,7 +25,7 @@ app.set('key',keys.key)
 //settings
 
 app.set('port',  4000)
-
+//app.enableCors({ origin: "*" })
 
 app.set('view engine', '.hbs')
 
@@ -81,7 +82,8 @@ app.use(express.static(path.join(__dirname, 'public') ))
 
 
 //start 
-app.listen(app.get('port'), ()=>{
+app.listen(app.get('port'), async ()=>{
     console.log(`server onport`, app.get('port'))
+  
 })
 

@@ -327,7 +327,7 @@ router.post('/cargarinscripciones', async (req, res) => {
 
           uno,
           dos,
-          tres
+  
 
 
         }
@@ -353,7 +353,7 @@ router.post('/cargarinscripciones', async (req, res) => {
   } catch (error) {
     console.log(error)
   }
-  console.log(mandar)
+
   res.json(mandar)
 
 

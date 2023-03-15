@@ -17,7 +17,7 @@ passport.use('local.signin', new LocalStrategy({
 }, async (req, usuario, password, done) => {  // que es lo que va a hacer 
     console.log('entra')
     const rows = await pool.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario])
-    
+    console.log(rows)
     if (rows.length > 0) {
         const usuario = rows[0]
        

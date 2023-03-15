@@ -1,8 +1,9 @@
-const mysql = require('mysql')
+const mariadb = require('mariadb')
+
 const {database} =require (('./keys'))
 const {promisify } = require('util')
 
-const pool = mysql.createPool(database)
+const pool = mariadb.createPool(database)
 
 pool.getConnection((err,connection)=> {
     if (err) {
@@ -21,7 +22,7 @@ pool.getConnection((err,connection)=> {
     return;
 })
 //convirtiendo promesas
-pool.query = promisify(pool.query)
+//pool.query = promisify(pool.query)
 
 module.exports = pool
 
