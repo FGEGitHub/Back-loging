@@ -207,7 +207,7 @@ router.post('/cargarinscripciones', async (req, res) => {
 
           }
 
-          await pool.query('update personas set ? where dni = ?', [nuevo, aux])
+          await pool.query('update personas set residencia=?,direccion =?,adicional_direccion=?,barrio=?,fecha_nac=?, tel=?, tel2=?,participante_anterior=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,hijos=? where dni = ?', [dataExcel[property]['Donde vivís'],dataExcel[property]['Dirección calle'] + dataExcel[property]['Altura'],dataExcel[property]['Grupo de viviendas (en caso que corresponda)'] + ' - ' + dataExcel[property]['Piso y departamento (en caso que corresponda)'],dataExcel[property]['Barrio'], dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'],dataExcel[property]['Número de teléfono de contacto'],dataExcel[property]['Número de teléfono alternativo'],dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?'],dataExcel[property]['Nivel educativo alcanzado'],dataExcel[property]['Actualmente, ¿se encuentra trabajando?'],dataExcel[property]['¿Qué tipo de empleo posee?'],dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'],aux])
         } else {
           ///crear nueva persona 
           nuevo = {
@@ -376,11 +376,8 @@ router.post('/cargarinscripciones', async (req, res) => {
 
 router.get('/desinscribirtodos/', async (req, res) => {
 
-  act = {
-    estado: "pendiente"
-  }
 
-  await pool.query('update inscripciones set ?', [act])
+  await pool.query('update inscripciones set  estado= "pendiente"', [act])
 
 
   await pool.query('delete  from  cursado')
@@ -431,6 +428,8 @@ router.get('/designarturnos/', async (req, res) => {
   const descripcion_curso = await pool.query('select * from descripcion_turno')
   const cursos = await pool.query('select uno, count(uno) from inscripciones group by uno ')
 
+try {
+  
 
   let inscripciones = await pool.query('select * from inscripciones where estado="pendiente"')
 
@@ -462,19 +461,22 @@ router.get('/designarturnos/', async (req, res) => {
         descripcion: descripcion_curso[i + 1]['descripcion']
       }
       await pool.query('insert into turnos set ? ', [nuev])
-      act = {
-        cupo: cantidad * 10////////////////////CAMBIAR A 25 CUANDO SE DE
-      }
-      await pool.query('update cursos set ?  where id=?', [act, cursos[ii]['uno']])
+     
+        act= cantidad * 44////////////////////CAMBIAR A 25 CUANDO SE DE
+  
+      await pool.query('update cursos set cupo=?  where id=?', [act, cursos[ii]['uno']])
+
 
     }
 
 
-
   }
-
-
-  res.json('Realizado')
+ res.json('Realizado')
+  } catch (error) {
+  console.log(error)
+  res.send('algo sucedio, asignar manualmente')
+  }
+ 
 })
 
 
@@ -543,10 +545,8 @@ if (yaseinscribio.length>0){
 
           await pool.query('insert into cursado set ? ', [nuevo])
 
-          act = {
-            estado: "Asignado a curso",
-          }
-          await pool.query('update inscripciones set ? where id=? ', [act, inscripciones[ii]['id'],])
+        
+          await pool.query('update inscripciones set estado="Asignado a curso" where id=? ', [ inscripciones[ii]['id'],])
           bandera = true
         }
       } }
@@ -611,10 +611,7 @@ if (yaseinscribio.length>0){
 
           await pool.query('insert into cursado set ? ', [nuevo])
 
-          act = {
-            estado: "Asignado a curso",
-          }
-          await pool.query('update inscripciones set ? where id=? ', [act, listadef[ii]['id'],])
+          await pool.query('update inscripciones set estado= "Asignado a curso" where id=? ', [act, listadef[ii]['id'],])
           bandera = true
         }
 
@@ -831,16 +828,18 @@ router.get('/listacursos/', async (req, res) => {
 
 
 
-  const pend = await pool.query('select count(*) from inscripciones where estado = "pendiente" ')
+  const pend = await pool.query('select id from inscripciones where estado = "pendiente" ')
 
 
 
 
+console.log(listadef)
+console.log(listadef2)
 
   //const priori2 = await pool.query('select * from inscripciones join cursos on inscripciones.dos  =cursos.id')
   // const priori3 = await pool.query('select * from inscripciones join cursos on inscripciones.tres  =cursos.id')
 
-  res.json([listadef, listadef2, listadef3, pend[0]["count(*)"]]);
+  res.json([listadef, listadef2,  pend.length]);
 
 })
 
@@ -856,18 +855,12 @@ router.post("/confirmaciondellamado", async (req, res) => {
 
     cursado = await pool.query('select * from cursado where id = ? ', [id_cursado])
 
-    act = {
-      inscripcion: confirmacion
+  
 
-    }
+    await pool.query('update cursado set inscripcion=? where id=?', [confirmacion, id_cursado])
+ 
 
-    await pool.query('update cursado set ? where id=?', [act, id_cursado])
-    act = {
-      estado: confirmacion
-
-    }
-
-    await pool.query('update inscripciones set ? where id=?', [act, cursado[0]['id_inscripcion']])
+    await pool.query('update inscripciones set estado=? where id=?', [confirmacion, cursado[0]['id_inscripcion']])
     console.log('realizado')
     res.json('Realizado')
   } catch (error) {

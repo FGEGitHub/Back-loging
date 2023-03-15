@@ -582,12 +582,9 @@ router.post("/asignarcoordinador", isLoggedInn4, async (req, res) => {
   console.log(id_coordinador)
   console.log(id)
 try {
-  act = {
-    id_coordinador,
-   
-}
-console.log(act)
-await pool.query('update turnos set ? where id = ?',[act,id])
+  
+
+await pool.query('update turnos set id_coordinador=? where id = ?',[id_coordinador,id])
 res.json('realizado')
 } catch (error) {
   console.log(error)
@@ -604,23 +601,18 @@ router.post("/asignarencargado", isLoggedInn, async (req, res) => {
   console.log(id_encargado)
   console.log(id) // id turno
 try {
-  act = {
-    id_encargado,
+ 
   
-}
 
-await pool.query('update turnos set ? where id = ?',[act,id])
+
+await pool.query('update turnos set id_encargado=? where id = ?',[id_encargado,id])
 
 
 turno = await pool.query('select * from turnos where id = ?',[id])
   
 
 
-act = {
-      inscripcion:"Asignado a llamado"
-}
-
-await pool.query('update cursado set ? where id_turno = ?',[act,id])
+await pool.query('update cursado set inscripcion=? where id_turno = ?',['Asignado a llamado',id])
 
 
 res.json('realizado')
