@@ -193,7 +193,7 @@ router.post('/cargarinscripciones', async (req, res) => {
           ///actualizar
           nuevo = {
             residencia: dataExcel[property]['Donde vivís'],   //// ncampo residencia 
-            direccion: dataExcel[property]['Dirección calle'] +' ' +dataExcel[property]['Altura'],
+            direccion: dataExcel[property]['Dirección calle'] + ' ' + dataExcel[property]['Altura'],
             adicional_direccion: dataExcel[property]['Grupo de viviendas (en caso que corresponda)'] + ' - ' + dataExcel[property]['Piso y departamento (en caso que corresponda)'],
             barrio: dataExcel[property]['Barrio'],
             fecha_nac: dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'],
@@ -206,75 +206,75 @@ router.post('/cargarinscripciones', async (req, res) => {
             hijos: dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'],
 
           }
-          if( dataExcel[property]['Nombre'] === undefined ){
-            nombre='Nombre'
-          }else{
-            nombre=  dataExcel[property]['Nombre']
+          if (dataExcel[property]['Nombre'] === undefined) {
+            nombre = 'Nombre'
+          } else {
+            nombre = dataExcel[property]['Nombre']
 
           }
-          if( dataExcel[property]['Apellido'] === undefined ){
-            apellido='apellido'
-          }else{
-            apellido=  dataExcel[property]['Apellido']
+          if (dataExcel[property]['Apellido'] === undefined) {
+            apellido = 'apellido'
+          } else {
+            apellido = dataExcel[property]['Apellido']
           }
-          if( dataExcel[property]['D.N.I.'] === undefined ){
-            dni='dni'
-          }else{
-            dni=  dataExcel[property]['D.N.I.']
+          if (dataExcel[property]['D.N.I.'] === undefined) {
+            dni = 'dni'
+          } else {
+            dni = dataExcel[property]['D.N.I.']
           }
-          if(  dataExcel[property]['Donde vivís'] === undefined ){
-            residencia='Nombre'
-          }else{
-           residencia=dataExcel[property]['Donde vivís']
+          if (dataExcel[property]['Donde vivís'] === undefined) {
+            residencia = 'Nombre'
+          } else {
+            residencia = dataExcel[property]['Donde vivís']
           }
-          if(  dataExcel[property]['Barrio'] === undefined ){
-            barrio='Nombre'
-          }else{
-            barrio=dataExcel[property]['Barrio']
+          if (dataExcel[property]['Barrio'] === undefined) {
+            barrio = 'Nombre'
+          } else {
+            barrio = dataExcel[property]['Barrio']
           }
-          if(  dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'] === undefined ){
-            fecha_nac='Nombre'
-          }else{
-            fecha_nac=dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)']
+          if (dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'] === undefined) {
+            fecha_nac = 'Nombre'
+          } else {
+            fecha_nac = dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)']
           }
-          if(  dataExcel[property]['Número de teléfono de contacto'] === undefined ){
-            tel='Nombre'
-          }else{
-            tel=dataExcel[property]['Número de teléfono de contacto']
+          if (dataExcel[property]['Número de teléfono de contacto'] === undefined) {
+            tel = 'Nombre'
+          } else {
+            tel = dataExcel[property]['Número de teléfono de contacto']
           }
-          if(  dataExcel[property]['Número de teléfono alternativo'] === undefined ){
-            tel2='Nombre'
-          }else{
-            tel2=dataExcel[property]['Número de teléfono alternativo']
+          if (dataExcel[property]['Número de teléfono alternativo'] === undefined) {
+            tel2 = 'Nombre'
+          } else {
+            tel2 = dataExcel[property]['Número de teléfono alternativo']
           }
-          if(  dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?'] === undefined ){
-            participante_anterior='Nombre'
-          }else{
-            participante_anterior= dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?']
+          if (dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?'] === undefined) {
+            participante_anterior = 'Nombre'
+          } else {
+            participante_anterior = dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?']
           }
-          if(  dataExcel[property]['Nivel educativo alcanzado'] === undefined ){
-            nivel_secundario='Nombre'
-          }else{
-            nivel_secundario=dataExcel[property]['Nivel educativo alcanzado']
+          if (dataExcel[property]['Nivel educativo alcanzado'] === undefined) {
+            nivel_secundario = 'Nombre'
+          } else {
+            nivel_secundario = dataExcel[property]['Nivel educativo alcanzado']
           }
-          if(  dataExcel[property]['Actualmente, ¿se encuentra trabajando?'] === undefined ){
-            trabajo='Nombre'
-          }else{
-            trabajo=dataExcel[property]['Actualmente, ¿se encuentra trabajando?']
+          if (dataExcel[property]['Actualmente, ¿se encuentra trabajando?'] === undefined) {
+            trabajo = 'Nombre'
+          } else {
+            trabajo = dataExcel[property]['Actualmente, ¿se encuentra trabajando?']
           }
-          if(  dataExcel[property]['¿Qué tipo de empleo posee?'] === undefined ){
-            tipo_trabajo='Nombre'
-          }else{
-            tipo_trabajo=dataExcel[property]['¿Qué tipo de empleo posee?']
+          if (dataExcel[property]['¿Qué tipo de empleo posee?'] === undefined) {
+            tipo_trabajo = 'Nombre'
+          } else {
+            tipo_trabajo = dataExcel[property]['¿Qué tipo de empleo posee?']
           }
-          if( dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'] === undefined ){
-            hijos='Nombre'
-          }else{
-            hijos=dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?']
+          if (dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'] === undefined) {
+            hijos = 'Nombre'
+          } else {
+            hijos = dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?']
           }
-          await pool.query('update personas set residencia=?,direccion =?,adicional_direccion=?,barrio=?,fecha_nac=?, tel=?, tel2=?,participante_anterior=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,hijos=? where dni = ?', [residencia, dataExcel[property]['Dirección calle'] +' ' +dataExcel[property]['Altura'],dataExcel[property]['Grupo de viviendas (en caso que corresponda)'] + ' - ' + dataExcel[property]['Piso y departamento (en caso que corresponda)'],barrio, fecha_nac,tel,tel2,participante_anterior,nivel_secundario,trabajo,tipo_trabajo,hijos,aux])
-       
-       
+          await pool.query('update personas set residencia=?,direccion =?,adicional_direccion=?,barrio=?,fecha_nac=?, tel=?, tel2=?,participante_anterior=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,hijos=? where dni = ?', [residencia, dataExcel[property]['Dirección calle'] + ' ' + dataExcel[property]['Altura'], dataExcel[property]['Grupo de viviendas (en caso que corresponda)'] + ' - ' + dataExcel[property]['Piso y departamento (en caso que corresponda)'], barrio, fecha_nac, tel, tel2, participante_anterior, nivel_secundario, trabajo, tipo_trabajo, hijos, aux])
+
+
         } else {
           ///crear nueva persona 
           nuevo = {
@@ -282,7 +282,7 @@ router.post('/cargarinscripciones', async (req, res) => {
             apellido: dataExcel[property]['Apellido'],
             dni: dataExcel[property]['D.N.I.'],
             residencia: dataExcel[property]['Donde vivís'],   //// ncampo residencia 
-            direccion: dataExcel[property]['Dirección calle'] +' ' + dataExcel[property]['Altura'],
+            direccion: dataExcel[property]['Dirección calle'] + ' ' + dataExcel[property]['Altura'],
             adicional_direccion: dataExcel[property]['Grupo de viviendas (en caso que corresponda)'] + ' - ' + dataExcel[property]['Piso y departamento (en caso que corresponda)'],
             barrio: dataExcel[property]['Barrio'],
             fecha_nac: dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'],
@@ -295,75 +295,75 @@ router.post('/cargarinscripciones', async (req, res) => {
             hijos: dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'],
 
           }
-          if( dataExcel[property]['Nombre'] === undefined ){
-            nombre='Nombre'
-          }else{
-            nombre=  dataExcel[property]['Nombre']
+          if (dataExcel[property]['Nombre'] === undefined) {
+            nombre = 'Nombre'
+          } else {
+            nombre = dataExcel[property]['Nombre']
 
           }
-          if( dataExcel[property]['Apellido'] === undefined ){
-            apellido='apellido'
-          }else{
-            apellido=  dataExcel[property]['Apellido']
+          if (dataExcel[property]['Apellido'] === undefined) {
+            apellido = 'apellido'
+          } else {
+            apellido = dataExcel[property]['Apellido']
           }
-          if( dataExcel[property]['D.N.I.'] === undefined ){
-            dni='dni'
-          }else{
-            dni=  dataExcel[property]['D.N.I.']
+          if (dataExcel[property]['D.N.I.'] === undefined) {
+            dni = 'dni'
+          } else {
+            dni = dataExcel[property]['D.N.I.']
           }
-          if(  dataExcel[property]['Donde vivís'] === undefined ){
-            residencia='Nombre'
-          }else{
-           residencia=dataExcel[property]['Donde vivís']
+          if (dataExcel[property]['Donde vivís'] === undefined) {
+            residencia = 'Nombre'
+          } else {
+            residencia = dataExcel[property]['Donde vivís']
           }
-          if(  dataExcel[property]['Barrio'] === undefined ){
-            barrio='Nombre'
-          }else{
-            barrio=dataExcel[property]['Barrio']
+          if (dataExcel[property]['Barrio'] === undefined) {
+            barrio = 'Nombre'
+          } else {
+            barrio = dataExcel[property]['Barrio']
           }
-          if(  dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'] === undefined ){
-            fecha_nac='Nombre'
-          }else{
-            fecha_nac=dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)']
+          if (dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'] === undefined) {
+            fecha_nac = 'Nombre'
+          } else {
+            fecha_nac = dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)']
           }
-          if(  dataExcel[property]['Número de teléfono de contacto'] === undefined ){
-            tel='Nombre'
-          }else{
-            tel=dataExcel[property]['Número de teléfono de contacto']
+          if (dataExcel[property]['Número de teléfono de contacto'] === undefined) {
+            tel = 'Nombre'
+          } else {
+            tel = dataExcel[property]['Número de teléfono de contacto']
           }
-          if(  dataExcel[property]['Número de teléfono alternativo'] === undefined ){
-            tel2='Nombre'
-          }else{
-            tel2=dataExcel[property]['Número de teléfono alternativo']
+          if (dataExcel[property]['Número de teléfono alternativo'] === undefined) {
+            tel2 = 'Nombre'
+          } else {
+            tel2 = dataExcel[property]['Número de teléfono alternativo']
           }
-          if(  dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?'] === undefined ){
-            participante_anterior='Nombre'
-          }else{
-            participante_anterior= dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?']
+          if (dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?'] === undefined) {
+            participante_anterior = 'Nombre'
+          } else {
+            participante_anterior = dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?']
           }
-          if(  dataExcel[property]['Nivel educativo alcanzado'] === undefined ){
-            nivel_secundario='Nombre'
-          }else{
-            nivel_secundario=dataExcel[property]['Nivel educativo alcanzado']
+          if (dataExcel[property]['Nivel educativo alcanzado'] === undefined) {
+            nivel_secundario = 'Nombre'
+          } else {
+            nivel_secundario = dataExcel[property]['Nivel educativo alcanzado']
           }
-          if(  dataExcel[property]['Actualmente, ¿se encuentra trabajando?'] === undefined ){
-            trabajo='Nombre'
-          }else{
-            trabajo=dataExcel[property]['Actualmente, ¿se encuentra trabajando?']
+          if (dataExcel[property]['Actualmente, ¿se encuentra trabajando?'] === undefined) {
+            trabajo = 'Nombre'
+          } else {
+            trabajo = dataExcel[property]['Actualmente, ¿se encuentra trabajando?']
           }
-          if(  dataExcel[property]['¿Qué tipo de empleo posee?'] === undefined ){
-            tipo_trabajo='Nombre'
-          }else{
-            tipo_trabajo=dataExcel[property]['¿Qué tipo de empleo posee?']
+          if (dataExcel[property]['¿Qué tipo de empleo posee?'] === undefined) {
+            tipo_trabajo = 'Nombre'
+          } else {
+            tipo_trabajo = dataExcel[property]['¿Qué tipo de empleo posee?']
           }
-          if( dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'] === undefined ){
-            hijos='Nombre'
-          }else{
-            hijos=dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?']
+          if (dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'] === undefined) {
+            hijos = 'Nombre'
+          } else {
+            hijos = dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?']
           }
 
 
-          await pool.query('INSERT INTO personas set nombre=?,apellido=?,dni=?,residencia=?,direccion=?,adicional_direccion=?,barrio=?,fecha_nac=?,tel=?, tel2=?,participante_anterior=?, nivel_secundario=?, trabajo=?,tipo_trabajo=?,hijos=?', [nombre,apellido,dni,residencia,dataExcel[property]['Dirección calle'] + dataExcel[property]['Altura'],dataExcel[property]['Grupo de viviendas (en caso que corresponda)'] + ' - ' + dataExcel[property]['Piso y departamento (en caso que corresponda)'], barrio,fecha_nac,tel,tel2,participante_anterior,nivel_secundario,trabajo,tipo_trabajo, hijos       ]);
+          await pool.query('INSERT INTO personas set nombre=?,apellido=?,dni=?,residencia=?,direccion=?,adicional_direccion=?,barrio=?,fecha_nac=?,tel=?, tel2=?,participante_anterior=?, nivel_secundario=?, trabajo=?,tipo_trabajo=?,hijos=?', [nombre, apellido, dni, residencia, dataExcel[property]['Dirección calle'] + dataExcel[property]['Altura'], dataExcel[property]['Grupo de viviendas (en caso que corresponda)'] + ' - ' + dataExcel[property]['Piso y departamento (en caso que corresponda)'], barrio, fecha_nac, tel, tel2, participante_anterior, nivel_secundario, trabajo, tipo_trabajo, hijos]);
         }
         /////////¿Actualmente  se encuentra estudiando? actividad adicional
         /////////////Tipo de empleo
@@ -414,7 +414,7 @@ router.post('/cargarinscripciones', async (req, res) => {
         case cursoss[3]['nombre']:
           id_curso = cursoss[3]['id']
           break;
- case cursoss[3]['nombre']:
+        case cursoss[3]['nombre']:
           id_curso = cursoss[3]['id']
           break;
         default:
@@ -422,7 +422,7 @@ router.post('/cargarinscripciones', async (req, res) => {
           break;
       }
       dos = id_curso
-      
+
 
       try {
         const newLink = {
@@ -436,39 +436,39 @@ router.post('/cargarinscripciones', async (req, res) => {
 
           uno,
           dos,
-  
-
-
-        }
-        if( dataExcel[property]['¿Por que elegiste tomar este curso?']=== undefined ){
-          motivacion='Sin completar'
-        }else{
-          motivacion=dataExcel[property]['¿Por que elegiste tomar este curso?']
-        }
-        if(dataExcel[property]['Posee alguno de los  siguientes dispositivos con conexión a internet:']=== undefined ){
-          conexion_int='Sin completar'
-        }else{
-          conexion_int=dataExcel[property]['Posee alguno de los  siguientes dispositivos con conexión a internet:']
-        }
-        if(dataExcel[property]['D.N.I.']=== undefined ){
-          dni_persona='Sin completar'
-        }else{
-          dni_persona=dataExcel[property]['D.N.I.']
-        }
-        if(dataExcel[property]['¿Qué te gustaría hacer con las habilidades aprendidas?']=== undefined ){
-          objetivo='Sin completar'
-        }else{
-          objetivo=dataExcel[property]['¿Qué te gustaría hacer con las habilidades aprendidas?']
-        }
-        if(dataExcel[property]['Disponibilidad Horaria para cursar']=== undefined ){
-          horario='Sin completar'
-        }else{
-          horario=dataExcel[property]['Disponibilidad Horaria para cursar']
-        }
 
 
 
-        await pool.query('INSERT INTO inscripciones set motivacion=?,conexion_int=?,dni_persona=?,objetivo=?,horario=?, estado="pendiente",uno=?,dos=?', [motivacion,conexion_int,dni_persona,objetivo,horario,uno,dos]);
+        }
+        if (dataExcel[property]['¿Por que elegiste tomar este curso?'] === undefined) {
+          motivacion = 'Sin completar'
+        } else {
+          motivacion = dataExcel[property]['¿Por que elegiste tomar este curso?']
+        }
+        if (dataExcel[property]['Posee alguno de los  siguientes dispositivos con conexión a internet:'] === undefined) {
+          conexion_int = 'Sin completar'
+        } else {
+          conexion_int = dataExcel[property]['Posee alguno de los  siguientes dispositivos con conexión a internet:']
+        }
+        if (dataExcel[property]['D.N.I.'] === undefined) {
+          dni_persona = 'Sin completar'
+        } else {
+          dni_persona = dataExcel[property]['D.N.I.']
+        }
+        if (dataExcel[property]['¿Qué te gustaría hacer con las habilidades aprendidas?'] === undefined) {
+          objetivo = 'Sin completar'
+        } else {
+          objetivo = dataExcel[property]['¿Qué te gustaría hacer con las habilidades aprendidas?']
+        }
+        if (dataExcel[property]['Disponibilidad Horaria para cursar'] === undefined) {
+          horario = 'Sin completar'
+        } else {
+          horario = dataExcel[property]['Disponibilidad Horaria para cursar']
+        }
+
+
+
+        await pool.query('INSERT INTO inscripciones set motivacion=?,conexion_int=?,dni_persona=?,objetivo=?,horario=?, estado="pendiente",uno=?,dos=?', [motivacion, conexion_int, dni_persona, objetivo, horario, uno, dos]);
 
 
         console.log('cargado')
@@ -506,10 +506,23 @@ router.post('/cargarinscripciones', async (req, res) => {
 
 
 
+router.get('/incriptoss/', async (req, res) => {
+
+
+  noinsc = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona=personas.dni  where estado= "pendiente"')
+  inscriptos = await pool.query('select id_persona,id_curso,id_turno, selec1.dni, selec1.nombre as nombrepersona,selec1.apellido as apellidopersona, cursos.nombre as nombrecurso, selec2.numero as numeroturno, selec2.descripcion  from  cursado join (select *, id as idpersona from personas) as selec1 on cursado.id_persona = selec1.idpersona join cursos on cursado.id_curso=cursos.id join (select id as idturno, numero, descripcion from turnos ) as selec2 on cursado.id_turno=selec2.idturno')
+  console.log(inscriptos)
+  res.json([inscriptos, noinsc])
+})
+
+
+
+
+
+
+
 
 ////// desinscribir 
-
-
 router.get('/desinscribirtodos/', async (req, res) => {
 
 
@@ -525,9 +538,9 @@ router.get('/borrarturnos/', async (req, res) => {
 
   try {
 
- 
 
-  
+
+
     await pool.query('delete  from  cursado ')
     await pool.query('delete  from  turnos')
     await pool.query('delete  from  clases')
@@ -549,7 +562,7 @@ router.get('/borrarincripciones/', async (req, res) => {
 
     await pool.query('delete  from  inscripciones')
     await pool.query('delete  from  cursado')
-   
+
     await pool.query('delete  from  clases')
     res.json('Realizado')
   } catch (error) {
@@ -564,55 +577,55 @@ router.get('/designarturnos/', async (req, res) => {
   const descripcion_curso = await pool.query('select * from descripcion_turno')
   const cursos = await pool.query('select uno, count(uno) from inscripciones group by uno ')
 
-try {
-  
-
-  let inscripciones = await pool.query('select * from inscripciones where estado="pendiente"')
-
-  let turnos = 0
-  if (inscripciones.length > 1000) {
-    turnos = 25
-  } else {
-    ///cursos de 10 personas
-    turnos = inscripciones.length / 10//////ACA REEMPLAZAR POR 25 DESPUES DE LAS PRUEBAS
-  }
-  rta = []
+  try {
 
 
-  for (ii in cursos) {
+    let inscripciones = await pool.query('select * from inscripciones where estado="pendiente"')
+
+    let turnos = 0
+    if (inscripciones.length > 1000) {
+      turnos = 25
+    } else {
+      ///cursos de 10 personas
+      turnos = inscripciones.length / 10//////ACA REEMPLAZAR POR 25 DESPUES DE LAS PRUEBAS
+    }
+    rta = []
 
 
-    porcentaje = cursos[ii]['count(uno)'] / inscripciones.length * 100
-    console.log(porcentaje)
-    console.log(turnos)
-    console.log(turnos * porcentaje / 100 + "%")
+    for (ii in cursos) {
 
-    cantidad = Math.round(turnos * porcentaje / 100)
-    console.log(cantidad)
-    for (let i = 0; i < cantidad; i++) {
 
-      nuev = {
-        id_curso: cursos[ii]['uno'],
-        numero: i + 1,
-        descripcion: descripcion_curso[i + 1]['descripcion']
+      porcentaje = cursos[ii]['count(uno)'] / inscripciones.length * 100
+      console.log(porcentaje)
+      console.log(turnos)
+      console.log(turnos * porcentaje / 100 + "%")
+
+      cantidad = Math.round(turnos * porcentaje / 100)
+      console.log(cantidad)
+      for (let i = 0; i < cantidad; i++) {
+
+        nuev = {
+          id_curso: cursos[ii]['uno'],
+          numero: i + 1,
+          descripcion: descripcion_curso[i + 1]['descripcion']
+        }
+        await pool.query('insert into turnos set ? ', [nuev])
+
+        act = cantidad * 44////////////////////CAMBIAR A 25 CUANDO SE DE
+
+        await pool.query('update cursos set cupo=?  where id=?', [act, cursos[ii]['uno']])
+
+
       }
-      await pool.query('insert into turnos set ? ', [nuev])
-     
-        act= cantidad * 44////////////////////CAMBIAR A 25 CUANDO SE DE
-  
-      await pool.query('update cursos set cupo=?  where id=?', [act, cursos[ii]['uno']])
 
 
     }
-
-
-  }
- res.json('Realizado')
+    res.json('Realizado')
   } catch (error) {
-  console.log(error)
-  res.send('algo sucedio, asignar manualmente')
+    console.log(error)
+    res.send('algo sucedio, asignar manualmente')
   }
- 
+
 })
 
 
@@ -634,18 +647,18 @@ router.get('/inscribirauto/', async (req, res) => {
 
     bandera = false////la bandera para avisar si ya se inscribio en alguno de los cupos
     //iii = 0
-yaseinscribio =await pool.query('select * from inscripciones where dni_persona =?', inscripciones[ii]['dni_persona'])
-if (yaseinscribio.length>0){
-    if (persona.length === 0) {
-      bandera = true
-    }
-    ////////ENTRA EN BUCLE REVISANDO CUPO EN HORARIOS
+    yaseinscribio = await pool.query('select * from inscripciones where dni_persona =?', inscripciones[ii]['dni_persona'])
+    if (yaseinscribio.length > 0) {
+      if (persona.length === 0) {
+        bandera = false
+      }
+      ////////ENTRA EN BUCLE REVISANDO CUPO EN HORARIOS
       turnoactual = '99'
 
 
 
       turno = await pool.query('select * from turnos where id_curso=? and numero = ?', [inscripciones[ii]['uno'], turnoaux])
-
+      bandera = false
       try {
         id_turn = turno[0]['id']
 
@@ -655,35 +668,38 @@ if (yaseinscribio.length>0){
         id_turn = '9999j'/////valor cualquiera
       }
       if (turno.length > 0) {
-
+        console.log(turno.length) 
         for (iiii in turno) {
-
-        haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, inscripciones[ii]['uno'], criterios[criterios.length - 1][cat],turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
-
-        if (haycupo) {
-
-
+          if (!bandera) {
+            haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, inscripciones[ii]['uno'], criterios[criterios.length - 1][cat], turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
+            console.log(iiii) 
+            if (haycupo) {
 
 
-          console.log(inscripciones[ii]['uno'])
 
-       
 
-          await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=? ', [ "Asignado a curso",persona[0]['id'],inscripciones[ii]['uno'], cat, inscripciones[ii]['id'], turno[iiii]['id']])
+              console.log(inscripciones[ii]['uno'])
 
-        
-          await pool.query('update inscripciones set estado="Asignado a curso" where id=? ', [ inscripciones[ii]['id']])
-          bandera = true
+
+
+              await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=? ', ["Asignado a curso", persona[0]['id'], inscripciones[ii]['uno'], cat, inscripciones[ii]['id'], turno[iiii]['id']])
+
+              bandera = true
+              await pool.query('update inscripciones set estado="Asignado a curso" where id=? ', [inscripciones[ii]['id']])
+
+            }
+
+          }
         }
-      } }
-      
+      }
+
       if (!bandera) {
         listadef.push(inscripciones[ii])
         //////crea una listta con las inscripciones 1 rechazadas
       }
 
-   
- 
+
+
     }
 
   }
@@ -705,36 +721,38 @@ if (yaseinscribio.length>0){
     if (persona.length === 0) {
       bandera = true
     }
-  ////////ENTRA EN BUCLE REVISANDO CUPO EN HORARIOS
+    ////////ENTRA EN BUCLE REVISANDO CUPO EN HORARIOS
 
 
 
 
-      turno = await pool.query('select * from turnos where id_curso=? and numero = ?', [listadef[ii]['dos'], turnoaux])
-      if (turno.length > 0) {
-        for (iiii in turno) {
-       
-        haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, listadef[ii]['dos'], criterios[criterios.length - 1][cat], turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
+    turno = await pool.query('select * from turnos where id_curso=? and numero = ?', [listadef[ii]['dos'], turnoaux])
+    if (turno.length > 0) {
+      for (iiii in turno) {
+        if (!bandera) {
+          haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, listadef[ii]['dos'], criterios[criterios.length - 1][cat], turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
 
 
-        if (haycupo) {
+          if (haycupo) {
 
 
 
 
 
-          
-          await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=? ', [ "Asignado a curso",persona[0]['id'],inscripciones[ii]['uno'], cat, inscripciones[ii]['id'], turno[iiii]['id']])
 
-          
+            await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=? ', ["Asignado a curso", persona[0]['id'], inscripciones[ii]['uno'], cat, inscripciones[ii]['id'], turno[iiii]['id']])
 
-          await pool.query('update inscripciones set estado= "Asignado a curso" where id=? ', [ listadef[ii]['id'],])
-          bandera = true
+
+
+            await pool.query('update inscripciones set estado= "Asignado a curso" where id=? ', [listadef[ii]['id'],])
+            bandera = true
+          }
         }
 
-      }}
-    
-    
+      }
+    }
+
+
 
 
   }
@@ -860,10 +878,10 @@ router.get('/listacursos/', async (req, res) => {
       Obj = {
         nombre: cantidad[0]['nombre'],
         cantidad: cantidad.length,
-        cupo: turnosss.length*44,
+        cupo: turnosss.length * 44,
         cursando: cursado.length,
         id: cantidad[0]['id'],
-        turnos:turnosss.length
+        turnos: turnosss.length
       }
 
     } catch (error) {
@@ -895,10 +913,10 @@ router.get('/listacursos/', async (req, res) => {
       Obj = {
         nombre: cantidad[0]['nombre'],
         cantidad: cantidad.length,
-        cupo: turnosss.length*44,
+        cupo: turnosss.length * 44,
         cursando: cursado.length,
         id: cantidad[0]['id'],
-        turnos:turnosss.length
+        turnos: turnosss.length
       }
 
     } catch (error) {
@@ -950,13 +968,13 @@ router.get('/listacursos/', async (req, res) => {
 
 
 
-console.log(listadef)
-console.log(listadef2)
+  console.log(listadef)
+  console.log(listadef2)
 
   //const priori2 = await pool.query('select * from inscripciones join cursos on inscripciones.dos  =cursos.id')
   // const priori3 = await pool.query('select * from inscripciones join cursos on inscripciones.tres  =cursos.id')
 
-  res.json([listadef, listadef2,  pend.length]);
+  res.json([listadef, listadef2, pend.length]);
 
 })
 
@@ -972,10 +990,10 @@ router.post("/confirmaciondellamado", async (req, res) => {
 
     cursado = await pool.query('select * from cursado where id = ? ', [id_cursado])
 
-  
+
 
     await pool.query('update cursado set inscripcion=? where id=?', [confirmacion, id_cursado])
- 
+
 
     await pool.query('update inscripciones set estado=? where id=?', [confirmacion, cursado[0]['id_inscripcion']])
     console.log('realizado')
