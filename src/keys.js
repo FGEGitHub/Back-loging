@@ -2,9 +2,9 @@
 module.exports = {
     database:{
         host: 'localhost',
-       // user: 'root',
+        //user: 'root',
            user: 'admin',
-       /// password: 'root',
+       // password: 'root',
        password:'11235',
         database: 'marketing'
     }
