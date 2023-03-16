@@ -74,7 +74,7 @@ console.log(aux)
 router.get('/lista', async (req, res) => {
   const usuario = req.params.usuario
 
-  const etc = await pool.query('select *,  personas.id as idpersona from personas left join cursado on personas.idpersona=cursado.id')
+  const etc = await pool.query('select * from personas  ')
   listadef=[]
   for (ii in etc) {
  
@@ -401,6 +401,8 @@ try {
   act ={
     nombre, apellido, mail,tel, tel2, direccion, adicional_direccion
   }
+
+  await pool.query('UPDATE personas set nombre=?,apellido=?,mail=?,tel=?,tel2=?,direccion=?,adicional_direccion=?  where id = ?  ', [ nombre, apellido, mail,tel, tel2, direccion, adicional_direccion, id])
   res.json('realizado')
 } catch (error) {
   console.log(error)
@@ -408,7 +410,7 @@ try {
 }
 
 
-await pool.query('UPDATE personas set ?  where id = ?  ', [act, id])
+
 
 
 

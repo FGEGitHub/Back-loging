@@ -14,7 +14,25 @@ router.get('/lista/', isLoggedInn4, async (req, res) => {
   //res.render('index')
 })
 
+router.get('/datosdelturno/:id', isLoggedInn4, async (req, res) => {
+try {
+  const id = req.params.id
+  
+  turno = await pool.query('select nombrecurso, turnos.id from turnos join (Select id as idcurso, nombre as nombrecurso from cursos) as selec1 on turnos.id_curso=selec1.idcurso where turnos.id=?  ',[id])
+  console.log(turno)
+res.json(turno)
+} catch (error) {
+  console.log(error)
+  res.json(error)
+}
 
+
+
+})
+
+
+
+  
 /////// lista desde el usuario 1
 router.get('/listaniv1/:usuario', isLoggedInn, async (req, res) => {
   const usuario = req.params.usuario

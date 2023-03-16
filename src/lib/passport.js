@@ -80,7 +80,7 @@ passport.use('local.signup', new LocalStrategy({
         }else{
         newUser.password = await helpers.encryptPassword(password)
         try {
-            const result = await pool.query('INSERT INTO usuarios  set password=?, usuario=?,nombre=?,tel=?,mail=?,nivel=?,', [newUser.password, usuario,nombre,tel, mail,nivel])
+            const result = await pool.query('INSERT INTO usuarios  set password=?, usuario=?,nombre=?,tel=?,mail=?,nivel=?', [newUser.password, usuario,nombre,tel, mail,nivel])
             
             newUser.id = result.insertId// porque newuser no tiene el id
            
