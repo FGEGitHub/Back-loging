@@ -3,7 +3,8 @@ const morgan = require('morgan')
 const path = require('path')
 const flash = require ('connect-flash')
 const session = require('express-session')
-const MySQLStore = require('express-mysql-session')
+//const MySQLStore = require('express-mysql-session')
+const MariaDBStore = require('express-mysql-session')(session);
 const {database} = require('./keys')
 const passport = require('passport')
 const cors = require("cors");
@@ -31,13 +32,41 @@ app.set('view engine', '.hbs')
 
 
 //middlwares
-/*
-app.use(session({
+
+/* app.use(session({
     secret: 'faztmysqlnodesession',
     resave: false,
     saveUninitialized: false,
     store: new MySQLStore(database)
-}))*/
+})) */
+
+const sessionStore = new MariaDBStore({
+    host: 'localhost',
+    port: 3306,
+   // user: 'root',
+   // password: 'root',
+    user: 'admin',
+    password: '11235',
+    database: 'marketing'
+  });
+  
+  // Agregar la sesión a la configuración de Express
+  app.use(session({
+    secret: 'my_secret_',
+    resave: false,
+    saveUninitialized: false,
+    store: new MariaDBStore(database)
+
+}))
+
+
+
+
+
+
+
+
+
 
 app.use(flash())
 app.use(morgan('dev'))
