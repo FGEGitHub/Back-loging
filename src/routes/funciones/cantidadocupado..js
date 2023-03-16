@@ -2,7 +2,7 @@
 
 const express = require('express')
 const router = express.Router()
-const pool = require('../../database')
+const pool = require('../../dbconnector')
 
 
 async function cantidadcategoriaporcurso(categoria, id_curso, porcentaje_creiterio, id_turno) {

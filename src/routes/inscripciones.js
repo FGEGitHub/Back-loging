@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { isLoggedIn, isLoggedInn, isLoggedInn2 } = require('../lib/auth') //proteger profile
-const pool = require('../database')
+const pool = require('../dbconnector')
 const caregorizar = require('./funciones/caregorizar')
 const consultarcupos = require('./funciones/cantidadocupado.')
 const XLSX = require('xlsx')

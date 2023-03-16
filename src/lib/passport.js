@@ -1,6 +1,6 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
-const pool = require('../database')
+const pool = require('../dbconnector')
 const helpers = require('../lib/helpers')
 
 

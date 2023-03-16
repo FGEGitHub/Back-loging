@@ -4,7 +4,7 @@ const router = express.Router()
 const passport= require('passport')
 //const {isLoggedIn,isLoggedInn,isLoggedInn2, isNotLoggedIn} = require('../lib/auth') //proteger profile
 //const isClient = require('../lib/authusuario') ----->>>>  Para Rol 
-const pool = require('../database')
+const pool = require('../dbconnector')
 
 const jwt = require('jsonwebtoken')
 
