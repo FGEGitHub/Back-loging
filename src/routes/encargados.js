@@ -12,12 +12,12 @@ const pool = require('../database')
 router.get('/clases/:id', async (req, res) => {
   const id = req.params.id
 
-  turnos = await pool.query('select *, turnos.id turnoid from turnos join cursos on turnos.id_curso=cursos.id where id_encargado =? ', [id])
+  turnos = await pool.query('select *, id as turnoid  from turnos join (select  id as idcurso, nombre from cursos  )as cursoss on turnos.id_curso=cursoss.idcurso where turnos.id_encargado =? ', [id])
 
 
 
   ////////id usuario encargado
-
+console.log(turnos)
   res.json(turnos);
   //res.render('index')
 })
@@ -40,25 +40,20 @@ router.get('/curso/:id', async (req, res) => {
 
 
 router.post("/confirmaciondellamado", async (req, res) => {
-  const { confirmacion, id_turno, id_persona, id_cursado,observaciones } = req.body
+  let { confirmacion, id_turno, id_persona, id_cursado,observaciones } = req.body
   try {
 
+if(observaciones===undefined ){
+observaciones='sin definir'
+}
 
     cursado = await pool.query('select * from cursado where id = ? ', [id_cursado])
 
-    act = {
-      inscripcion: confirmacion,
-      motivo:observaciones
+    
 
-    }
-
-    await pool.query('update cursado set ? where id=?', [act, id_cursado])
-    act = {
-      estado: confirmacion,
-      motivo:observaciones
-    }
-console.log(act)
-    await pool.query('update inscripciones set ? where id=?', [act, cursado[0]['id_inscripcion']])
+    await pool.query('update cursado set inscripcion = ?,motivo =? where id=?', [confirmacion,observaciones, id_cursado])
+   
+    await pool.query('update inscripciones set estado=? ,motivo =?  where id=?', [confirmacion,observaciones, cursado[0]['id_inscripcion']])
    
     res.json('Realizado')
   } catch (error) {

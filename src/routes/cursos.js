@@ -147,12 +147,10 @@ try {
   cursado = await pool.query('select * from cursado where id_turno = ?',[id])
 
   for (ii in cursado) {
-  const nuev= {
-    estado:'pendiente'
-   }
 
 
-  await pool.query('update incripciones set ? where id=?  ', [nuev,cursado[ii]['id_inscripcion']])
+
+  await pool.query('update incripciones set estado="pendiente" where id=?  ', [cursado[ii]['id_inscripcion']])
 }
 } catch (error) {
   console.log(error)
@@ -179,7 +177,10 @@ router.get('/listadeturnos/:id', isLoggedInn2, async (req, res) => {
 
   todos = []
   for (ii in turnos) {
-    cursado = await pool.query('select *, turnos.id, usuarios.nombre coordinador from cursado join turnos on cursado.id_turno=turnos.id join personas on cursado.id_persona =personas.id  join usuarios on turnos.id_coordinador = usuarios.id join usuarios where cursado.id_curso = ? and cursado.id_turno =?', [id, turnos[ii]['id']])
+  
+   // cursado = await pool.query('select *, turnos.id id, usuarios.nombre coordinador from cursado join turnos on cursado.id_turno=turnos.id join personas on cursado.id_persona =personas.id  join usuarios on turnos.id_coordinador = usuarios.id where cursado.id_curso = ? and cursado.id_turno =?', [id, turnos[ii]['id']])
+cursado=await pool.query('select *  from cursado  join(select id as idturno, descripcion, id_coordinador, id_encargado from turnos ) as selec1 on cursado.id_turno = selec1.idturno  left join (select id as idpersona, nombre as nombrepersona,apellido as apellidopersona, dni from personas) as selec2 on cursado.id_persona = selec2.idpersona left join (select id as idusuario, nombre as nombrecoordinador from usuarios ) as selec3 on  selec1.id_coordinador = selec3.idusuario left join (select id as  idusuarioo, nombre as nombreencargado from usuarios ) as selec4 on selec1.id_encargado = selec4.idusuarioo where cursado.id_curso = ? and cursado.id_turno =? ', [id, turnos[ii]['id']])
+console.log(cursado)
     if (cursado.length > 0) {
       todos.push(cursado)
       }else{
@@ -432,10 +433,8 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 router.post("/modificarcurso",isLoggedInn2,  async (req, res) => {
   const { id, nombre  } = req.body
 try {
-  act = {nombre
-  
-  }
-  await pool.query('update cursos set ? where id=?  ', [act,id])
+ 
+  await pool.query('update cursos set nombre=? where id=?  ', [nombre,id])
   res.json('Realizado')
 } catch (error) {
 console.log(error)
@@ -489,10 +488,8 @@ router.post("/nuevoturno", isLoggedInn4, async (req, res) => {
   try {
 
 
-    const nuev = {
-      id_curso, numero, descripcion
-    }
-    await pool.query('insert turnos  set ?', [nuev])
+    
+    await pool.query('insert turnos  set id_curso=?,numero=numero,descripcion=?', [id_curso, numero, descripcion])
     res.json('Cargada nueva clase')
   } catch (error) {
     console.log(error)
@@ -569,15 +566,10 @@ try {
    const yatomada = await pool.query('select * from asistencia where id_persona = ? and id_clase =? ',[id_alumno,id_clase])
 if (yatomada.length>0){
 
-  const nuev= {
-    
-    asistencia,
-
-    justificacion:observaciones
-   }
 
 
-  await pool.query('update asistencia set ? where id=?  ', [nuev,yatomada[0]['id']])
+
+  await pool.query('update asistencia set asistencia=?, justificacion=? where id=?  ', [asistencia,observaciones,yatomada[0]['id']])
 
 }else{
 
