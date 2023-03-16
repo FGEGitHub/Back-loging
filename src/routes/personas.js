@@ -74,7 +74,7 @@ console.log(aux)
 router.get('/lista', async (req, res) => {
   const usuario = req.params.usuario
 
-  const etc = await pool.query('select *,  personas.id id from personas left join cursado on personas.id=cursado.id')
+  const etc = await pool.query('select *,  personas.id as idpersona from personas left join cursado on personas.idpersona=cursado.id')
   listadef=[]
   for (ii in etc) {
  
@@ -863,7 +863,7 @@ try {
  
 
   
-  await pool.query('insert into excelinscripciones set fecha=?, fecha=?', [fech,req.file.filename])
+  await pool.query('insert into excelinscripciones set fecha=?, ruta=?', [fech,req.file.filename])
   res.send('Imagen guardada con exito')
 } catch (error) {
   console.log(error)

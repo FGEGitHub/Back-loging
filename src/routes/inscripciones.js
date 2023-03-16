@@ -414,39 +414,15 @@ router.post('/cargarinscripciones', async (req, res) => {
         case cursoss[3]['nombre']:
           id_curso = cursoss[3]['id']
           break;
-
+ case cursoss[3]['nombre']:
+          id_curso = cursoss[3]['id']
+          break;
         default:
           id_curso = 1
           break;
       }
       dos = id_curso
-      expresion = dataExcel[property]['Selecciona el primer curso de mayor preferencia (3)']
-      switch (expresion) {
-        case 'Bordado Mexicano':
-          id_curso = 122
-          break;
-        case 'Organización de Eventos, nivel 2':
-          id_curso = 123
-          break;
-
-        case 'Introducción al Maquillaje y Peinados para Eventos':
-          id_curso = 124
-          break;
-        case 'Introducción a la elaboración de prendas textiles a partir de la reutilización de materiales (upcycling)':
-          id_curso = 125
-          break;
-        case 'Introducción a la Instalación de Sistemas Operativos':
-          id_curso = 126
-          break;
-        case 'Restauración de Muebles':
-
-          id_curso = 127
-          break;
-        default:
-          id_curso = 1
-          break;
-      }
-      tres = id_curso
+      
 
       try {
         const newLink = {
@@ -479,10 +455,10 @@ router.post('/cargarinscripciones', async (req, res) => {
         }else{
           dni_persona=dataExcel[property]['D.N.I.']
         }
-        if(dataExcel[property]['¿Qué te gustaría  hacer con las habilidades aprendidas?']=== undefined ){
+        if(dataExcel[property]['¿Qué te gustaría hacer con las habilidades aprendidas?']=== undefined ){
           objetivo='Sin completar'
         }else{
-          objetivo=dataExcel[property]['¿Qué te gustaría  hacer con las habilidades aprendidas?']
+          objetivo=dataExcel[property]['¿Qué te gustaría hacer con las habilidades aprendidas?']
         }
         if(dataExcel[property]['Disponibilidad Horaria para cursar']=== undefined ){
           horario='Sin completar'
@@ -537,7 +513,7 @@ router.post('/cargarinscripciones', async (req, res) => {
 router.get('/desinscribirtodos/', async (req, res) => {
 
 
-  await pool.query('update inscripciones set  estado= "pendiente"', [act])
+  await pool.query('update inscripciones set  estado= "pendiente"')
 
 
   await pool.query('delete  from  cursado')
@@ -693,7 +669,7 @@ if (yaseinscribio.length>0){
 
        
 
-          await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=?, ', [ "Asignado a curso",persona[0]['id'],inscripciones[ii]['uno'], cat, inscripciones[ii]['id'], turno[iiii]['id']])
+          await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=? ', [ "Asignado a curso",persona[0]['id'],inscripciones[ii]['uno'], cat, inscripciones[ii]['id'], turno[iiii]['id']])
 
         
           await pool.query('update inscripciones set estado="Asignado a curso" where id=? ', [ inscripciones[ii]['id']])
@@ -748,7 +724,7 @@ if (yaseinscribio.length>0){
 
 
           
-          await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=?, ', [ "Asignado a curso",persona[0]['id'],inscripciones[ii]['uno'], cat, inscripciones[ii]['id'], turno[iiii]['id']])
+          await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=? ', [ "Asignado a curso",persona[0]['id'],inscripciones[ii]['uno'], cat, inscripciones[ii]['id'], turno[iiii]['id']])
 
           
 
