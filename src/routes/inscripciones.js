@@ -230,7 +230,7 @@ router.post('/cargarinscripciones', async (req, res) => {
 
 
           }
-          await pool.query('INSERT INTO personas set ?', [nuevo]);
+          await pool.query('INSERT INTO personas set nombre=?,apellido=?,dni=?,residencia=?,direccion=?,adicional_direccion=?,barrio=?,fecha_nac=?,tel=?, tel2=?,participante_anterior=?, nivel_secundario=?, trabajo=?,tipo_trabajo=?,hijos=?', [dataExcel[property]['Nombre'],dataExcel[property]['Apellido'],dataExcel[property]['D.N.I.'],dataExcel[property]['Donde vivís'],dataExcel[property]['Dirección calle'] + dataExcel[property]['Altura'],dataExcel[property]['Grupo de viviendas (en caso que corresponda)'] + ' - ' + dataExcel[property]['Piso y departamento (en caso que corresponda)'], dataExcel[property]['Barrio'],dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'],dataExcel[property]['Número de teléfono de contacto'],dataExcel[property]['Número de teléfono alternativo'],dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?'],dataExcel[property]['Nivel educativo alcanzado'],dataExcel[property]['Actualmente, ¿se encuentra trabajando?'],dataExcel[property]['¿Qué tipo de empleo posee?'], dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'],        ]);
         }
         /////////¿Actualmente  se encuentra estudiando? actividad adicional
         /////////////Tipo de empleo
@@ -332,7 +332,7 @@ router.post('/cargarinscripciones', async (req, res) => {
 
         }
 
-        await pool.query('INSERT INTO inscripciones set ?', [newLink]);
+        await pool.query('INSERT INTO inscripciones set motivacion=?,conexion_int=?,dni_persona=?,objetivo=?,horario=?, estado="pendiente",uno=?,dos=?', [dataExcel[property]['¿Por que elegiste tomar este curso?'],dataExcel[property]['Posee alguno de los  siguientes dispositivos con conexión a internet:'],dataExcel[property]['D.N.I.'],dataExcel[property]['¿Qué te gustaría  hacer con las habilidades aprendidas?'],dataExcel[property]['Disponibilidad Horaria para cursar'],uno,dos]);
 
 
         console.log('cargado')
@@ -531,22 +531,12 @@ if (yaseinscribio.length>0){
 
           console.log(inscripciones[ii]['uno'])
 
-          nuevo = {
+       
 
-            inscripcion: "Asignado a curso",
-            id_persona: persona[0]['id'],
-            id_curso: inscripciones[ii]['uno'],
-            categoria: cat,
-            id_inscripcion: inscripciones[ii]['id'],
-            id_turno:  turno[iiii]['id'],
-            /////////////////
-
-          }
-
-          await pool.query('insert into cursado set ? ', [nuevo])
+          await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=?, ', [ "Asignado a curso",persona[0]['id'],inscripciones[ii]['uno'], cat, inscripciones[ii]['id'], turno[iiii]['id']])
 
         
-          await pool.query('update inscripciones set estado="Asignado a curso" where id=? ', [ inscripciones[ii]['id'],])
+          await pool.query('update inscripciones set estado="Asignado a curso" where id=? ', [ inscripciones[ii]['id']])
           bandera = true
         }
       } }
@@ -597,21 +587,12 @@ if (yaseinscribio.length>0){
 
 
 
-          nuevo = {
+          
+          await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=?, ', [ "Asignado a curso",persona[0]['id'],inscripciones[ii]['uno'], cat, inscripciones[ii]['id'], turno[iiii]['id']])
 
-            inscripcion: "Asignado a curso",
-            id_persona: persona[0]['id'],
-            id_curso: listadef[ii]['dos'],
-            categoria: cat,
-            id_inscripcion: listadef[ii]['id'],
-            id_turno: turno[iiii]['id'],
-            /////////////////
+          
 
-          }
-
-          await pool.query('insert into cursado set ? ', [nuevo])
-
-          await pool.query('update inscripciones set estado= "Asignado a curso" where id=? ', [act, listadef[ii]['id'],])
+          await pool.query('update inscripciones set estado= "Asignado a curso" where id=? ', [ listadef[ii]['id'],])
           bandera = true
         }
 

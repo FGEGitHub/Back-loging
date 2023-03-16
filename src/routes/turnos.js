@@ -10,11 +10,9 @@ router.post("/modificarturno",  async (req, res) => {
   const { id,descripcion} = req.body
 try {
   
-act = {
-  descripcion
-}
 
-  await pool.query('update turnos set ? where id =?', [act,id])
+
+  await pool.query('update turnos set descripcion=? where id =?', [descripcion,id])
   res.json('Realizado')
 } catch (error) {
   console.log(error)

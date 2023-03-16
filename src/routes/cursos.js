@@ -72,7 +72,7 @@ router.get('/asistencia/:id', isLoggedInn4, async (req, res) => {
     const clase = await pool.query('select * from clases where id = ?', [id])
 //// trae el listado de alumnos  que cursan en ese turno
 
-    const alumnos = await pool.query('select * from cursado join personas on cursado.id_persona=personas.id  where cursado.id_turno = ?  and cursado.inscripcion= "Confirmado" ', [clase[0]['id_turno']])
+    const alumnos = await pool.query('select *, id as idcursado from cursado join   (select nombre,apellido, id as idpersona from personas) as  personaa on cursado.id_persona=personaa.idpersona  where cursado.id_turno = ?  and cursado.inscripcion= "Confirmado" ', [clase[0]['id_turno']])
 
     total = alumnos.length
     presentes=0
@@ -556,12 +556,6 @@ router.post("/presente", isLoggedInn4, async (req, res) => {
 try {
 
 
-  const nuevo= {
-    id_persona:id_alumno,
-    asistencia,
-    id_clase,
-    justificacion:observaciones
-   }
   
    const yatomada = await pool.query('select * from asistencia where id_persona = ? and id_clase =? ',[id_alumno,id_clase])
 if (yatomada.length>0){
@@ -573,7 +567,7 @@ if (yatomada.length>0){
 
 }else{
 
-   await pool.query('insert into asistencia set ? ', [nuevo])
+   await pool.query('insert into asistencia set id_persona=?,asistencia=?,id_clase=?,justificacion=? ', [id_alumno,asistencia,id_clase,observaciones])
   }
    res.json('Realizado')
 

@@ -80,7 +80,7 @@ passport.use('local.signup', new LocalStrategy({
         }else{
         newUser.password = await helpers.encryptPassword(password)
         try {
-            const result = await pool.query('INSERT INTO usuarios  set ?', [newUser])
+            const result = await pool.query('INSERT INTO usuarios  set password=?, usuario=?,nombre=?,tel=?,mail=?,nivel=?,', [newUser.password, usuario,nombre,tel, mail,nivel])
             
             newUser.id = result.insertId// porque newuser no tiene el id
            
@@ -144,9 +144,11 @@ passport.use('local.registroadmin', new LocalStrategy({
         var rows = await pool.query('SELECT * FROM usuarios WHERE usuario like  ?', [usuario]) // falta restringir si un usuario se puede registrar sin ser cliente
         if (rows.length == 0) { // si ya hay un USER con ese dni 
 
-            newUser.password = await helpers.encryptPassword(password)
+            
+           newUser.password = await helpers.encryptPassword(password)
+
             try {
-                const result = await pool.query('INSERT INTO usuarios  set ?', [newUser])
+                const result = await pool.query('INSERT INTO usuarios  set  usuario=?,nombre=?,mail=?,nivel=?,password=?', [ usuario,nombre, mail,nivel,newUser.password])
                 newUser.id = result.insertId// porque newuser no tiene el id
 
                 return done(null, newUser)// para continuar, y devuelve el newUser para que almacene en una sesion

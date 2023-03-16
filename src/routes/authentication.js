@@ -30,7 +30,7 @@ router.get('/traerusuario/:cuil_cuit', async(req,res)=>{
 
 router.get('/exitosignup',(req,res)=>{
     console.log('registrado')
-    res.send('Registrado exitosamente!')
+    res.json('Registrado exitosamente!')
 })
 
 router.get('/noexito',(req,res)=>{
@@ -124,7 +124,7 @@ router.get('/logout', (req,res) =>{
 //  ACCIONES NIVEL 3
 
 router.post('/agregarunusuario',passport.authenticate('local.signupnivel3', {
-    successRedirect: '/signin',
+    successRedirect: '/exitosignup',
     failureRedirect:'/signup',
     failureFlash:true
 

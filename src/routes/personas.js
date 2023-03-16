@@ -684,7 +684,7 @@ router.post("/crear", isLoggedInn, async (req, res) => {
 
     etc = { nombre, apellido, fecha_nac, trabajo, hijos, dni }
     console.log(etc)
-    await pool.query('insert personas  set ?', [etc])
+    await pool.query('insert personas  set nombre=?,apellido=?,fecha_nac=?,nombre=?,trabajo', [nombre,apellido,fecha_nac,trabajo,hijos,dni])
     console.log(1)
     res.json('Guardado con exito')
   } catch (error) {
@@ -744,20 +744,16 @@ router.get('/cargarpersonas111', async (req, res) => {
           residencia: dataExcel[property]['Donde vivís'],
           tel: dataExcel[property]['Número de teléfono de contacto'],
 
-          tel2: dataExcel[property]['tel2'],
+          tel2: dataExcel[property]['Número de teléfono alternativo'],
 
           participante_anterior: dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres? '],
           nivel_secundario: dataExcel[property]['Nivel educativo alcanzado'],
 
           hijos: hijos,
           como_se_entero: dataExcel[property]['¿Cómo te enteraste de los cursos?'],
-
-
         }
 
-
-
-        await pool.query('INSERT INTO personas set ?', [newLink]);
+        await pool.query('INSERT INTO personas set apellido=?,nombre=?,dni=?,usuario=?,direccion=?,barrio=?,residencia=?,tel=?,tel2=?,participante_anterior=?,nivel_secundario=?,hijos=?,como_se_entero=?', [dataExcel[property]['Apellido'], dataExcel[property]['Nombre'],dataExcel[property]['D.N.I.'],'No',dataExcel[property]['Dirección calle'] + '-' + dataExcel[property][' Altura'] + '-' + dataExcel[property]['Piso y departamento (en caso que corresponda)'],dataExcel[property]['Barrio'],dataExcel[property]['Donde vivís'],dataExcel[property]['Número de teléfono de contacto'], dataExcel[property]['Número de teléfono alternativo'],dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres? '],dataExcel[property]['Nivel educativo alcanzado'],dataExcel[property]['¿Cómo te enteraste de los cursos?']]);
 
 
         console.log('cargado')
@@ -821,16 +817,10 @@ router.get('/cargarcursos111', async (req, res) => {
             console.log('Curso ya existe')
           } else {
             try {
-              const newLink = {
-
-                nombre: aux,
+            
 
 
-              }
-
-
-
-              await pool.query('INSERT INTO cursos set ?', [newLink]);
+              await pool.query('INSERT INTO cursos set nombre=?', [aux]);
 
 
               console.log('cargado')
@@ -871,13 +861,9 @@ try {
  // const data = fs.readFileSync(path.join(__dirname, '../Excel' + req.file.filename))
   fech = (new Date(Date.now())).toLocaleDateString()
  
-  const datoss = {
-    fecha: fech,
-    ruta: req.file.filename/////ubicacion
 
-      
-  }
-  await pool.query('insert into excelinscripciones set?', datoss)
+  
+  await pool.query('insert into excelinscripciones set fecha=?, fecha=?', [fech,req.file.filename])
   res.send('Imagen guardada con exito')
 } catch (error) {
   console.log(error)
