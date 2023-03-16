@@ -509,7 +509,7 @@ router.post('/cargarinscripciones', async (req, res) => {
 router.get('/incriptoss/', async (req, res) => {
 
 
-  noinsc = await pool.query('select * from inscripciones join personas on inscripciones.dni_persona=personas.dni  where estado= "pendiente"')
+  noinsc = await pool.query('select selec1.nombre,selec1.apellido, cursos.nombre as nombrecurso,priori2.nombre as nombrecurso2,selec1.dni from inscripciones join (select *, id as idpersona from personas ) as selec1 on inscripciones.dni_persona=selec1.dni join cursos on inscripciones.uno =cursos.id join (select * from cursos) as priori2 on inscripciones.dos=priori2.id where estado= "pendiente"')
   inscriptos = await pool.query('select id_persona,id_curso,id_turno, selec1.dni, selec1.nombre as nombrepersona,selec1.apellido as apellidopersona, cursos.nombre as nombrecurso, selec2.numero as numeroturno, selec2.descripcion  from  cursado join (select *, id as idpersona from personas) as selec1 on cursado.id_persona = selec1.idpersona join cursos on cursado.id_curso=cursos.id join (select id as idturno, numero, descripcion from turnos ) as selec2 on cursado.id_turno=selec2.idturno')
   console.log(inscriptos)
   res.json([inscriptos, noinsc])
