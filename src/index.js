@@ -11,7 +11,7 @@ const jwt = require('jsonwebtoken')
 const keys = require('./keys')
 ///
 //const pool = require('./database')
-DBConnector = require('./dbconnector')
+
 
 ////
 

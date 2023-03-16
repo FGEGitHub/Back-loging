@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const passport= require('passport')
-const pool = require('../dbconnector')
+const pool = require('../database')
 const {isLoggedIn,isLoggedInn,isLoggedInn2, } = require('../lib/auth')
 
 router.get('/todos/', async (req, res) => {
