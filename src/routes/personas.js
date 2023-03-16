@@ -349,161 +349,21 @@ try {
 
 
 router.post("/inscribir", isLoggedInn2, async (req, res) => {
-  const { id_curso, dni, accion,  id_inscripcion} = req.body
+  const { id_curso, dni,   id_inscripcion, id_turno} = req.body
  
 
 
 
-  const etc = await pool.query('select * from personas where dni =?', [dni])
+  const persona = await pool.query('select * from personas where dni =?', [dni])
 
   //////////////////////
-
-  categoria = "0"
-  if ((etc[0]['participante_anterior'] === "Sí") || (etc[0]['participante_anterior'] === "Si")) {
-    // porcentaje_real=45
-    console.log('Participante anteirior')
-    ///45%   PARTICIPO  TIENE HIJOS
-    if ((etc[0]['hijos'] == "0") || (etc[0]['hijos'] == null)) {
-      console.log('NO Tiene hijos')
-      ///78% tiene hijos
-      //  porcentaje_real=35.1
-      if (etc[0]['trabajo'] === "Si" || etc[0]['trabajo'] === "Si") {
-        console.log('Trabaja')
-        if (etc[0]['tipo_trabajo'] === "Formal") {
-          console.log('formalmente')
-          categoria = "2.2.2"
-
-        } else {
-          console.log('Informalmente')
-          categoria = "2.2.2"
-        }
-
-
-      } else {
-        ///No trabaja 90%
-        console.log('No trabaja')
-        categoria = "2.2.1"
-
-
-
-      }
-    } else {
-      ///22%  Notiene hijos
-      //  porcentaje_real=9.9
-      console.log('tiene hijos')
-      if (etc[0]['trabajo'] === "Si" || etc[0]['trabajo'] === "Si") {
-        console.log('Trabaja')
-        if (etc[0]['tipo_trabajo'] === "Formal") {
-          console.log('formalmente')
-          categoria = "2.1.2.2"
-
-        } else {
-          console.log('Informalmente')
-          categoria = "2.1.2.1"
-        }
-
-
-      } else {
-        ///No trabaja 90%
-        console.log('No trabaja')
-        categoria = "2.1.1"
-
-
-
-      }
-
-
-
-    }
-
-
-
-  } else {///////////////////////NO PARTICIPARON 
-    ////55% 
-    console.log('No participaron')
-    //   porcentaje_real=55
-    if ((etc[0]['hijos'] == "0") || (etc[0]['hijos'] == null)) {
-      console.log('NO Tiene hijos')
-      ///78% tiene hijos
-      //  porcentaje_real=35.1
-      if (etc[0]['trabajo'] === "Si" || etc[0]['trabajo'] === "Si") {
-        console.log('Trabaja')
-        if (etc[0]['tipo_trabajo'] === "Formal") {
-          console.log('formalmente')
-          categoria = "1.2.2.2"
-
-        } else {
-          console.log('Informalmente')
-          categoria = "1.2.2.1"
-        }
-
-
-      } else {
-        ///No trabaja 90%
-        console.log('No trabaja')
-        categoria = "1.2.1"
-
-
-
-      }
-    } else {
-      ///22%  Notiene hijos
-      //  porcentaje_real=9.9
-      console.log('tiene hijos')
-      if (etc[0]['trabajo'] === "Si" || etc[0]['trabajo'] === "Si") {
-        console.log('Trabaja')
-        if (etc[0]['tipo_trabajo'] === "Formal") {
-          console.log('formalmente')
-          categoria = "1.1.2.2"
-
-        } else {
-      
-          categoria = "1.1.2.1"
-        }
-
-
-      } else {
-        ///No trabaja 90%
-       
-        categoria = "1.1.1"
-
-
-
-      }
-
-
-
-    }
-
-  }
-
-
-
-
-
+  
+  cat = await caregorizar.asignarcategoria(persona)
 
   ////////////
   try {
    
-      inscripcion= 'pendiente'
-      estadonuevo="pendiente"
   
-
-
-    if (accion == 'Aceptar') {
-    
-        inscripcion= 'Asignado a curso'
-        estadonuevo="Asignado a curso"
-      
-    }
-
-    if (accion == 'Rechazar') {
-      
-        inscripcion= 'Rechazado'
-        
-    
-    }
-
     act = {
       inscripcion,
       categoria,
@@ -512,8 +372,10 @@ router.post("/inscribir", isLoggedInn2, async (req, res) => {
       id_inscripcion
     }
     
+///queda id_inscripcion
+    await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=? ', ["Asignado a curso", persona[0]['id'], id_curso, cat,id_inscripcion, id_turno])
 
-    await pool.query('insert into cursado set ?   ', [act])
+    await pool.query('update inscripciones set estado="Asignado a curso" where id=? ', [inscripciones[ii]['id']])
 
     act = {
      estado:estadonuevo,
