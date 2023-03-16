@@ -8,8 +8,8 @@ host: '127.0.0.1',
 user:'admin',
 password:'11235',
 database:'marketing',
-connectionLimit:10,
-aquireTimeout:300
+connectionLimit:100,
+aquireTimeout:1000
 
 }
 
