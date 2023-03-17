@@ -485,12 +485,14 @@ router.post('/cargarinscripciones', async (req, res) => {
 
 
     }
-
+  res.json(mandar)
   } catch (error) {
     console.log(error)
+    res.json(error)
+
   }
 
-  res.json(mandar)
+
 
 
 })
