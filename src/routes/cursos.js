@@ -468,7 +468,7 @@ router.post("/crear", isLoggedInn2, async (req, res) => {
 
 
   try {
-    datos 
+    
     fecha= (new Date(Date.now())).toLocaleDateString()
     
 
