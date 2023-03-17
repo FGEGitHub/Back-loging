@@ -77,7 +77,8 @@ app.use(passport.session())
 
 
  const corsOptions ={
-    origin:'*', 
+    origin:'*',
+    methods:["GET","POST"],
     credentials:true,            //access-control-allow-credentials:true
     optionSuccessStatus:200
 } 
