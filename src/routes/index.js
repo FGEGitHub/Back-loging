@@ -11,14 +11,15 @@ const pool = require('../database')
 router.get('/', async (req, res) => {
     console.log('hola')
 try {
-   pipo= 'select * from personas'
+   pipo= await pool.query('select * from usuarios')
+   res.json(pipo);
 } catch (error) {
-  
+  res.json('error')
 }
    
 
 
-  res.json(pipo);
+ 
 //res.render('index')
 })
 
