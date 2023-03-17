@@ -355,7 +355,7 @@ router.post("/inscribir", isLoggedInn2, async (req, res) => {
 
 
   const persona = await pool.query('select * from personas where dni =?', [dni])
-
+  const inscripciones = await pool.query('select * from inscripciones where id =?', [id_inscripcion])
   //////////////////////
   
   cat = await caregorizar.asignarcategoria(persona)
@@ -364,24 +364,14 @@ router.post("/inscribir", isLoggedInn2, async (req, res) => {
   try {
    
   
-    act = {
-      inscripcion,
-      categoria,
-      id_persona:etc[0]['id'],
-      id_curso,
-      id_inscripcion
-    }
+
     
 ///queda id_inscripcion
     await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=? ', ["Asignado a curso", persona[0]['id'], id_curso, cat,id_inscripcion, id_turno])
 
-    await pool.query('update inscripciones set estado="Asignado a curso" where id=? ', [inscripciones[ii]['id']])
+    await pool.query('update inscripciones set estado="Asignado a curso" where id=? ', [inscripciones[0]['id']])
 
-    act = {
-     estado:estadonuevo,
-     
-    }
-    await pool.query('update inscripciones set ? where id=?  ', [act,id_inscripcion])
+   
 
     res.json('Realizado con exito ')
 
