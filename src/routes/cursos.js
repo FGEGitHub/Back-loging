@@ -441,7 +441,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
     res.json([array1, curso, inscriptos.length, clases, lista, cursado]);
   } catch (error) {
     console.log(error)
-    res.json(['']);
+    res.json([[''],[''],0,[''],[''],['']]);
   }
 
 

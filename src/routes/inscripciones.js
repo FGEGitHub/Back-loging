@@ -1028,7 +1028,7 @@ router.post("/actualizarprioridades", isLoggedInn2, async (req, res) => {
     once: dosdosdos,
   }
   console.log(act)
-  await pool.query('insert criterios set ? ', [act])
+  await pool.query('insert criterios set uno=?,dos=?,tres=?,cuatro=?,cinco=?,seis=?,siete=?,ocho=?,nueve=?,diez=?,once=? ', [unounouno,unounodosuno,unounodosdos,unodosuno,unodosdosuno,unodosdosdos,dosunouno,dosunodosuno,dosunodosdos, dosdosuno,dosdosdos,])
 
 
   res.json('realizado')
