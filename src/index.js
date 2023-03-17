@@ -77,7 +77,7 @@ app.use(passport.session())
 app.use(cors());
 
  const corsOptions ={
-    origin:'http://esme.cuquicalvano.com:3000/', 
+    origin:'*', 
     credentials:true,            //access-control-allow-credentials:true
     optionSuccessStatus:200
 } 
