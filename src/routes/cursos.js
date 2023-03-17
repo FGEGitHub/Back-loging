@@ -491,7 +491,7 @@ router.post("/nuevoturno", isLoggedInn4, async (req, res) => {
 
 
     
-    await pool.query('insert turnos  set id_curso=?,numero=numero,descripcion=?', [id_curso, numero, descripcion])
+    await pool.query('insert turnos  set id_curso=?,numero=?,descripcion=?', [id_curso, numero, descripcion])
     res.json('Cargada nueva clase')
   } catch (error) {
     console.log(error)
@@ -513,7 +513,7 @@ router.post("/nuevaclase", isLoggedInn4, async (req, res) => {
     const nuev = {
       id_curso, fecha, observacion: observaciones
     }
-    await pool.query('insert clases  set ?', [nuev])
+    await pool.query('insert clases  set id_curso=?,fecha=?,observacion=?', [id_curso, fecha,observaciones])
     res.json('Cargada nueva clase')
   } catch (error) {
     console.log(error)
