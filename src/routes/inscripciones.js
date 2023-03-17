@@ -207,68 +207,68 @@ router.post('/cargarinscripciones', async (req, res) => {
 
           }
           if (dataExcel[property]['Nombre'] === undefined) {
-            nombre = 'Nombre'
+            nombre = 'No'
           } else {
             nombre = dataExcel[property]['Nombre']
 
           }
           if (dataExcel[property]['Apellido'] === undefined) {
-            apellido = 'apellido'
+            apellido = 'No'
           } else {
             apellido = dataExcel[property]['Apellido']
           }
           if (dataExcel[property]['D.N.I.'] === undefined) {
-            dni = 'dni'
+            dni = 'No'
           } else {
             dni = dataExcel[property]['D.N.I.']
           }
           if (dataExcel[property]['Donde vivís'] === undefined) {
-            residencia = 'Nombre'
+            residencia = 'No'
           } else {
             residencia = dataExcel[property]['Donde vivís']
           }
           if (dataExcel[property]['Barrio'] === undefined) {
-            barrio = 'Nombre'
+            barrio = 'No'
           } else {
             barrio = dataExcel[property]['Barrio']
           }
           if (dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'] === undefined) {
-            fecha_nac = 'Nombre'
+            fecha_nac = 'No'
           } else {
             fecha_nac = dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)']
           }
           if (dataExcel[property]['Número de teléfono de contacto'] === undefined) {
-            tel = 'Nombre'
+            tel = 'No'
           } else {
             tel = dataExcel[property]['Número de teléfono de contacto']
           }
           if (dataExcel[property]['Número de teléfono alternativo'] === undefined) {
-            tel2 = 'Nombre'
+            tel2 = 'No'
           } else {
             tel2 = dataExcel[property]['Número de teléfono alternativo']
           }
           if (dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?'] === undefined) {
-            participante_anterior = 'Nombre'
+            participante_anterior = 'No'
           } else {
             participante_anterior = dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?']
           }
           if (dataExcel[property]['Nivel educativo alcanzado'] === undefined) {
-            nivel_secundario = 'Nombre'
+            nivel_secundario = 'No'
           } else {
             nivel_secundario = dataExcel[property]['Nivel educativo alcanzado']
           }
           if (dataExcel[property]['Actualmente, ¿se encuentra trabajando?'] === undefined) {
-            trabajo = 'Nombre'
+            trabajo = 'No'
           } else {
             trabajo = dataExcel[property]['Actualmente, ¿se encuentra trabajando?']
           }
           if (dataExcel[property]['¿Qué tipo de empleo posee?'] === undefined) {
-            tipo_trabajo = 'Nombre'
+            tipo_trabajo = 'No'
           } else {
             tipo_trabajo = dataExcel[property]['¿Qué tipo de empleo posee?']
           }
           if (dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'] === undefined) {
-            hijos = 'Nombre'
+            hijos = 'No'
           } else {
             hijos = dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?']
           }
@@ -296,68 +296,68 @@ router.post('/cargarinscripciones', async (req, res) => {
 
           }
           if (dataExcel[property]['Nombre'] === undefined) {
-            nombre = 'Nombre'
+            nombre = 'No'
           } else {
             nombre = dataExcel[property]['Nombre']
 
           }
           if (dataExcel[property]['Apellido'] === undefined) {
-            apellido = 'apellido'
+            apellido = 'No'
           } else {
             apellido = dataExcel[property]['Apellido']
           }
           if (dataExcel[property]['D.N.I.'] === undefined) {
-            dni = 'dni'
+            dni = 'No'
           } else {
             dni = dataExcel[property]['D.N.I.']
           }
           if (dataExcel[property]['Donde vivís'] === undefined) {
-            residencia = 'Nombre'
+            residencia = 'No'
           } else {
             residencia = dataExcel[property]['Donde vivís']
           }
           if (dataExcel[property]['Barrio'] === undefined) {
-            barrio = 'Nombre'
+            barrio = 'No'
           } else {
             barrio = dataExcel[property]['Barrio']
           }
           if (dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'] === undefined) {
-            fecha_nac = 'Nombre'
+            fecha_nac = 'No'
           } else {
             fecha_nac = dataExcel[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)']
           }
           if (dataExcel[property]['Número de teléfono de contacto'] === undefined) {
-            tel = 'Nombre'
+            tel = 'No'
           } else {
             tel = dataExcel[property]['Número de teléfono de contacto']
           }
           if (dataExcel[property]['Número de teléfono alternativo'] === undefined) {
-            tel2 = 'Nombre'
+            tel2 = 'No'
           } else {
             tel2 = dataExcel[property]['Número de teléfono alternativo']
           }
           if (dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?'] === undefined) {
-            participante_anterior = 'Nombre'
+            participante_anterior = 'No'
           } else {
             participante_anterior = dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres?']
           }
           if (dataExcel[property]['Nivel educativo alcanzado'] === undefined) {
-            nivel_secundario = 'Nombre'
+            nivel_secundario = 'No'
           } else {
             nivel_secundario = dataExcel[property]['Nivel educativo alcanzado']
           }
           if (dataExcel[property]['Actualmente, ¿se encuentra trabajando?'] === undefined) {
-            trabajo = 'Nombre'
+            trabajo = 'No'
           } else {
             trabajo = dataExcel[property]['Actualmente, ¿se encuentra trabajando?']
           }
           if (dataExcel[property]['¿Qué tipo de empleo posee?'] === undefined) {
-            tipo_trabajo = 'Nombre'
+            tipo_trabajo = 'No'
           } else {
             tipo_trabajo = dataExcel[property]['¿Qué tipo de empleo posee?']
           }
           if (dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'] === undefined) {
-            hijos = 'Nombre'
+            hijos = 'No'
           } else {
             hijos = dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?']
           }

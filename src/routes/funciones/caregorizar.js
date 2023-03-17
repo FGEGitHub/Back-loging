@@ -14,7 +14,7 @@ async function asignarcategoria (persona) {
 if ((persona[0]['participante_anterior'] === "Sí") || (persona[0]['participante_anterior'] === "Si")) {
 
     /// 
-    if ((persona[0]['hijos'] == "0") || (persona[0]['hijos'] == null)) {
+    if ((persona[0]['hijos'] == "0") || (persona[0]['hijos'] == null )|| (persona[0]['hijos'] == "No")) {
       
       ///tiene hijos
       //  porcentaje_real=35.1
@@ -76,7 +76,7 @@ if ((persona[0]['participante_anterior'] === "Sí") || (persona[0]['participante
     ////55% 
 
     //   porcentaje_real=55
-    if ((persona[0]['hijos'] == "0") || (persona[0]['hijos'] == null)) {
+    if ((persona[0]['hijos'] == "0") || (persona[0]['hijos'] == null)|| (persona[0]['hijos'] == "No")) {
      
       ///78% tiene hijos
       //  porcentaje_real=35.1
