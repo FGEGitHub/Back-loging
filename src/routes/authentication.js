@@ -53,7 +53,7 @@ router.get('/noexito',(req,res)=>{
 
 
 /////////////jwt prueba
-router.post('/signin2', passport.authenticate('local.signin', { failureRedirect: '/login' }),
+router.post('/signin2', passport.authenticate('local.signin', { failureRedirect: '/noexito' }),
   function(req, res) {
     console.log(req.user)
     const userFoRToken ={
