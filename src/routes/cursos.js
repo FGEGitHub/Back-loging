@@ -464,33 +464,17 @@ console.log(error)
 
 ///
 router.post("/crear", isLoggedInn2, async (req, res) => {
-  const { nombre, observaciones, encargado, cupo } = req.body
+  const { nombre } = req.body
 
 
   try {
-    datos = {
-      fecha: (new Date(Date.now())).toLocaleDateString(),
-      nombre,
-      observaciones,
-      encargado,
-      cupo
-    }
+    datos 
+    fecha= (new Date(Date.now())).toLocaleDateString()
+    
 
-    await pool.query('insert cursos  set ?', [datos])
-    aux = await pool.query('select * from cursos ')
-    console.log((aux.length))
-    console.log(aux[(aux.length - 1)])
-    console.log(aux[(aux.length - 1)]['id'])
-    idaux = aux[(aux.length - 1)]['id']
-    nove = {
-      id_ref: idaux,
-      asunto: 'Nuevo Curso',
-      detalle: 'Lanzamiento de curso:' + nombre,
-      fecha: (new Date(Date.now())).toLocaleDateString(),
+    await pool.query('insert cursos  set nombre=?, fecha=?', [nombre,fecha])
+   
 
-
-    }
-    await pool.query('insert novedades  set ?', [nove])
     res.json('Realizado')
   } catch (error) {
     console.log(error)
