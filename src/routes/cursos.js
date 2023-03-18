@@ -199,6 +199,8 @@ try {
   todos = []
   for (ii in turnos) {
     cat = await pool.query('select * from cursado where id_turno= ?',[turnos[ii]['id']])
+    faltan = await pool.query('select * from cursado where id_turno= ? and inscripcion = "Asignado a llamado"',[turnos[ii]['id']])
+   
    nuev = {
       id: turnos[ii]['id'],
       id_curso: turnos[ii]['id_curso'],
@@ -209,7 +211,8 @@ try {
       idcurso: 123,
       nombrecurso: turnos[ii]['nombrecurso'],
       id_turno: turnos[ii]['id_turno'],
-      cant: cat.length
+      cant: cat.length,
+      faltanporresp:faltan.length
     }
     todos.push(nuev)
   }

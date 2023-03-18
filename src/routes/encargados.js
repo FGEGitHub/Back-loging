@@ -16,9 +16,30 @@ router.get('/clases/:id', async (req, res) => {
 
 
 
+  todos = []
+  for (ii in turnos) {
+    cat = await pool.query('select * from cursado where id_turno= ? and inscripcion = "Asignado a llamado"',[turnos[ii]['id']])
+    tot = await pool.query('select * from cursado where id_turno= ? ',[turnos[ii]['id']])
+   nuev = {
+    id: turnos[ii]['id'],
+    id_curso: turnos[ii]['id_curso'],
+    numero: turnos[ii]['numero'],
+    descripcion:turnos[ii]['descripcion'],
+    id_encargado: turnos[ii]['id_encargado'],
+    id_coordinador: null,
+    idcurso: turnos[ii]['idcurso'],
+    nombre:turnos[ii]['nombre'],
+    turnoid: turnos[ii]['turnoid'],
+    cantsinresp:cat.length,
+    total:tot.length
+ 
+
+  }
+    todos.push(nuev)
+  }
   ////////id usuario encargado
 console.log(turnos)
-  res.json(turnos);
+  res.json(todos);
   //res.render('index')
 })
 
