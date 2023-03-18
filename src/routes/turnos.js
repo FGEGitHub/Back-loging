@@ -34,7 +34,9 @@ numero_clase,
 id_turno
 }
 
-await pool.query('insert clases  set ?', [act])
+
+await pool.query('insert clases  set observacion=?,fecha=?,numero_clase=?,id_turno=?', [observaciones,fecha,numero_clase,id_turno])
+
 res.json('Clase agregada')
 } catch (error) {
   console.log(error)
