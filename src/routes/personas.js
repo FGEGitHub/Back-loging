@@ -346,6 +346,25 @@ try {
 
 
 
+router.post("/desinscribir", isLoggedInn2, async (req, res) => {
+  const { id_cursado} = req.body
+try {
+  cursado = await pool.query('select * from cursado where id=?',[id_cursado])  
+await pool.query('update inscripciones set estado="pendiente" where id=? ', [cursado[0]['id_inscripcion']])
+
+
+  await pool.query('delete  from  cursado where id = ?',[id_cursado])
+
+
+  res.json('Realizado')
+} catch (error) {
+  console.log(error)
+  res.json('Error algo sucedio')
+}
+
+
+
+})
 
 
 router.post("/inscribir", isLoggedInn2, async (req, res) => {
