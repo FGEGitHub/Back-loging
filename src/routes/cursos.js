@@ -188,6 +188,44 @@ try {
 
 })
 
+
+
+router.get('/listadetodoslosturnos/',  async (req, res) => {
+try {
+  console.log('listadetodos')
+  turnos = await pool.query('select * from turnos   join  (select id as idcurso, nombre as nombrecurso from cursos) as selec1  on turnos.id_curso= selec1.idcurso ')
+
+
+  todos = []
+  for (ii in turnos) {
+    cat = await pool.query('select * from cursado where id_turno= ?',[turnos[ii]['id']])
+   nuev = {
+      id: turnos[ii]['id'],
+      id_curso: turnos[ii]['id_curso'],
+      numero: turnos[ii]['numero'],
+      descripcion: turnos[ii]['descripcion'],
+      id_encargado: null,
+      id_coordinador: null,
+      idcurso: 123,
+      nombrecurso: turnos[ii]['nombrecurso'],
+      id_turno: turnos[ii]['id_turno'],
+      cant: cat.length
+    }
+    todos.push(nuev)
+  }
+
+
+  res.json(todos)
+} catch (error) {
+console.log(error)
+  res.json([])
+}
+ 
+
+})
+
+
+
 router.get('/listadeturnos/:id', isLoggedInn2, async (req, res) => {
   const id = req.params.id
  
