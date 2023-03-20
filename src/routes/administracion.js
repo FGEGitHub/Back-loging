@@ -24,7 +24,12 @@ router.get('/todos/', async (req, res) => {
 }))
 
 
+router.post('/modificarusuario', isLoggedInn2, passport.authenticate('local.modificadoradmin', {
+  successRedirect: '/exitosignupp',
+  failureRedirect:'/exitosignupp',
+  failureFlash:true
 
+}))
 
 
 module.exports = router

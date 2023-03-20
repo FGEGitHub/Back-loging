@@ -43,10 +43,10 @@ router.get('/listaniv1/:usuario', isLoggedInn, async (req, res) => {
   const etc2 = await pool.query('select * from personas where id =?', [aux[0]['id_persona']])
 
 
-
+  try {
   const etc3 = await pool.query('select cursos.id,cursos.fecha , encargado, nombre, cupo, cursos.id, c.inscripcion, c.id_persona from cursos left join (select * from cursado where id_persona = ? ) c on cursos.id=c.id_curso  ', [etc2[0]['id']])
 
-  try {
+
     ///const etc4 = await pool.query('select * from cursos join  cursado ')
 
     res.json(etc3);

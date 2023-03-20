@@ -25,7 +25,15 @@ try {
 
 
 
-  
+router.get('/exitosignupp', async (req, res) => {
+res.json('Modificado correctamente')
+
+})
+
+router.get('/noexitop', async (req, res) => {
+  res.json('Error algo sucedio, complete correctamente los datos')
+
+})
 
 
 
