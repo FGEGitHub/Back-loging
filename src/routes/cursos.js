@@ -591,7 +591,7 @@ router.post("/inscribir", isLoggedInn, async (req, res) => {
 
 })
 
-router.post("/traerlosturnos", isLoggedInn4, async (req, res) => {
+router.post("/traerlosturnos",  async (req, res) => {
   const { id } = req.body
   try {
     turnos = await pool.query('select * from turnos where id_curso =?',[id])
