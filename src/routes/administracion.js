@@ -32,4 +32,17 @@ router.post('/modificarusuario', isLoggedInn2, passport.authenticate('local.modi
 }))
 
 
+router.post('/borrarusuario', async (req, res) => {
+  const { id } = req.body
+  try {
+    await pool.query('delete  from  usuarios where id = ?',[id])
+    res.json('Realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('no realizado')
+  }
+
+})
+
+
 module.exports = router
