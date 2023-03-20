@@ -8,7 +8,7 @@ router.get('/todos/', async (req, res) => {
    
   
     const etc = await pool.query ('select * from usuarios' )
-
+console.log(etc)
   res.json(etc);
 //res.render('index')
 })

@@ -239,7 +239,7 @@ router.get('/listadeturnos/:id', isLoggedInn2, async (req, res) => {
   
    // cursado = await pool.query('select *, turnos.id id, usuarios.nombre coordinador from cursado join turnos on cursado.id_turno=turnos.id join personas on cursado.id_persona =personas.id  join usuarios on turnos.id_coordinador = usuarios.id where cursado.id_curso = ? and cursado.id_turno =?', [id, turnos[ii]['id']])
 cursado=await pool.query('select *  from cursado  join(select id as idturno, descripcion, id_coordinador, id_encargado from turnos ) as selec1 on cursado.id_turno = selec1.idturno  left join (select id as idpersona, nombre as nombrepersona,apellido as apellidopersona, dni from personas) as selec2 on cursado.id_persona = selec2.idpersona left join (select id as idusuario, nombre as nombrecoordinador from usuarios ) as selec3 on  selec1.id_coordinador = selec3.idusuario left join (select id as  idusuarioo, nombre as nombreencargado from usuarios ) as selec4 on selec1.id_encargado = selec4.idusuarioo where cursado.id_curso = ? and cursado.id_turno =? ', [id, turnos[ii]['id']])
-console.log(cursado)
+
     if (cursado.length > 0) {
       todos.push(cursado)
       }else{

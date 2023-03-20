@@ -345,6 +345,22 @@ try {
 
 
 
+router.post("/cambiarestadocursado",  async (req, res) => {
+  const { estado, id_cursado } = req.body
+
+  try {
+    await pool.query('update cursado set inscripcion=? where id=? ', [estado,id_cursado])
+    cursado = await pool.query('select * from cursado where id =?',[id_cursado])
+    await pool.query('update inscipciones set estado=? where id=? ', [estado,cursado[0]['id_inscripcion']])
+    res.json('Realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('No Realizado')
+  }
+
+})
+
+
 
 router.post("/desinscribir", isLoggedInn2, async (req, res) => {
   const { id_cursado} = req.body
