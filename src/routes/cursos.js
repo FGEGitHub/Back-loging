@@ -190,7 +190,7 @@ try {
 
 
 
-router.get('/listadetodoslosturnos/',  async (req, res) => {
+router.get('/listadetodoslosturnos/', isLoggedInn2, async (req, res) => {
 try {
   console.log('listadetodos')
   turnos = await pool.query('select * from turnos   join  (select id as idcurso, nombre as nombrecurso from cursos) as selec1  on turnos.id_curso= selec1.idcurso ')
