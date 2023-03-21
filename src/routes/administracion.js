@@ -19,7 +19,7 @@ router.get('/sistemas/', async (req, res) => {
    
   
   const etc = await pool.query ('select * from cursado' )
-  const etc2 = await pool.query ('select * from inscripciones' )
+  const etc2 = await pool.query ('select * from turnos' )
   const etc3 = await pool.query ('select * from personas' )
   const etc4 = await pool.query ('select * from cursos' )
   console.log(etc4)
