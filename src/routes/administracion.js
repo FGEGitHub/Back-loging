@@ -15,6 +15,18 @@ console.log(etc)
 
 
 
+router.get('/sistemas/', async (req, res) => {
+   
+  
+  const etc = await pool.query ('select * from cursado' )
+  const etc2 = await pool.query ('select * from inscripciones' )
+  const etc3 = await pool.query ('select * from personas' )
+  const etc4 = await pool.query ('select * from cursos' )
+  console.log(etc4)
+res.json([etc,etc2,etc3,etc4]);
+//res.render('index')
+})
+
 
   router.post('/signupp', isLoggedInn2, passport.authenticate('local.registroadmin', {
     successRedirect: '/exitosignup',
