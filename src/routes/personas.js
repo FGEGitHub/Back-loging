@@ -115,7 +115,7 @@ router.get('/datosusuarioporid/:dni',  async (req, res) => {
   const curso1 = await pool.query('select cursos.nombre prioridaduno from inscripciones join cursos on inscripciones.uno =cursos.id where inscripciones.dni_persona =?', [dni])
   const curso2 = await pool.query('select cursos.nombre prioridaddos from inscripciones join cursos on inscripciones.dos =cursos.id where inscripciones.dni_persona =?', [dni])
   console.log(dni)
-let cursado = await pool.query('select cursos.nombre from cursado  join cursos on cursado.id_curso = cursos.id where cursado.id_persona=?',[etc[0]['id']])
+let cursado = await pool.query('select selec2.nombrecurso from cursado  join (select id as idturnos, id_curso as idcurso from turnos) as selec1 on cursado.id_turno = selec1.idturnos join (select nombre as nombrecurso,  id as idcurso2 from cursos ) as selec2 on selec1.idcurso=selec2.idcurso2  where cursado.id_persona=?',[etc[0]['id']])
 
   if (cursado.length === 0){
     cursado=[{anotado:null}]
@@ -140,7 +140,7 @@ let cursado = await pool.query('select cursos.nombre from cursado  join cursos o
     prioridad2='no determinado'
   }
   try {
-    anotado= cursado[0]['nombre']
+    anotado= cursado[0]['nombrecurso']
   } catch (error) {
     anotado='no determinado'
   }
