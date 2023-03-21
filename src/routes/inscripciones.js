@@ -485,7 +485,7 @@ router.post('/cargarinscripciones', async (req, res) => {
 
 
     }
-  res.json(mandar)
+    res.json(mandar)
   } catch (error) {
     console.log(error)
     res.send(error)
@@ -642,6 +642,7 @@ router.get('/inscribirauto/', async (req, res) => {
   for (ii in inscripciones) {
 
     persona = await pool.query('select * from personas where dni =?', inscripciones[ii]['dni_persona'])
+
     cat = await caregorizar.asignarcategoria(persona) //// trae la categoria
     turnoaux = inscripciones[ii]['horario']
 
@@ -649,14 +650,15 @@ router.get('/inscribirauto/', async (req, res) => {
 
     bandera = false////la bandera para avisar si ya se inscribio en alguno de los cupos
     //iii = 0
-    yaseinscribio = await pool.query('select * from inscripciones where dni_persona =?', inscripciones[ii]['dni_persona'])
-    if (yaseinscribio.length > 0) {
+
+    yaseinscribio = await pool.query('select * from cursado where id_persona =?', persona[0]['id'])
+    if (yaseinscribio.length === 0) {
       if (persona.length === 0) {
         bandera = false
       }
       ////////ENTRA EN BUCLE REVISANDO CUPO EN HORARIOS
       turnoactual = '99'
-
+     
 
 
       turno = await pool.query('select * from turnos where id_curso=? and numero = ?', [inscripciones[ii]['uno'], turnoaux])
@@ -670,15 +672,15 @@ router.get('/inscribirauto/', async (req, res) => {
         id_turn = '9999j'/////valor cualquiera
       }
       if (turno.length > 0) {
-        console.log(turno.length) 
+        console.log(turno.length)
         for (iiii in turno) {
           if (!bandera) {
             haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, inscripciones[ii]['uno'], criterios[criterios.length - 1][cat], turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
-            console.log(iiii) 
+            console.log(iiii)
             if (haycupo) {
 
 
-
+              bandera = true
 
               console.log(inscripciones[ii]['uno'])
 
@@ -686,13 +688,16 @@ router.get('/inscribirauto/', async (req, res) => {
 
               await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=? ', ["Asignado a curso", persona[0]['id'], inscripciones[ii]['uno'], cat, inscripciones[ii]['id'], turno[iiii]['id']])
 
-              bandera = true
+
               await pool.query('update inscripciones set estado="Asignado a curso" where id=? ', [inscripciones[ii]['id']])
 
             }
 
           }
+
         }
+
+
       }
 
       if (!bandera) {
@@ -725,8 +730,10 @@ router.get('/inscribirauto/', async (req, res) => {
     }
     ////////ENTRA EN BUCLE REVISANDO CUPO EN HORARIOS
 
+    pers = await pool.query('select * from personas where dni =?', inscripciones[ii]['dni_persona'])
 
-
+    yaseinscribio = await pool.query('select * from cursado where id_persona =?', pers[0]['id'])
+    if (yaseinscribio.length === 0) {
 
     turno = await pool.query('select * from turnos where id_curso=? and numero = ?', [listadef[ii]['dos'], turnoaux])
     if (turno.length > 0) {
@@ -755,7 +762,7 @@ router.get('/inscribirauto/', async (req, res) => {
     }
 
 
-
+  }
 
   }
   res.send('Realizado')
@@ -1028,7 +1035,7 @@ router.post("/actualizarprioridades", isLoggedInn2, async (req, res) => {
     once: dosdosdos,
   }
   console.log(act)
-  await pool.query('insert criterios set uno=?,dos=?,tres=?,cuatro=?,cinco=?,seis=?,siete=?,ocho=?,nueve=?,diez=?,once=? ', [unounouno,unounodosuno,unounodosdos,unodosuno,unodosdosuno,unodosdosdos,dosunouno,dosunodosuno,dosunodosdos, dosdosuno,dosdosdos,])
+  await pool.query('insert criterios set uno=?,dos=?,tres=?,cuatro=?,cinco=?,seis=?,siete=?,ocho=?,nueve=?,diez=?,once=? ', [unounouno, unounodosuno, unounodosdos, unodosuno, unodosdosuno, unodosdosdos, dosunouno, dosunodosuno, dosunodosdos, dosdosuno, dosdosdos,])
 
 
   res.json('realizado')
