@@ -593,6 +593,7 @@ router.post("/inscribir", isLoggedInn, async (req, res) => {
 router.post("/traerlosturnos",  async (req, res) => {
   const { id } = req.body
   try {
+    console.log(id)
     turnos = await pool.query('select * from turnos where id_curso =?',[id])
     res.json(turnos)
   } catch (error) {

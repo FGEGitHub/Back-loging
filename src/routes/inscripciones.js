@@ -1041,4 +1041,40 @@ router.post("/actualizarprioridades", isLoggedInn2, async (req, res) => {
   res.json('realizado')
 })
 
+
+
+
+router.get('/actualizarcursado/', async (req, res) => {
+correjidos=0
+cursado = await pool.query('select * from cursado')
+personas=''
+
+for (ii in cursado) {
+cantidad = await pool.query('select * from cursado where id_persona = ?',[cursado[ii]['id_persona']])
+if(cantidad.length>1){
+  pers= await pool.query('select * from personas where id = ?',[cursado[ii]['id_persona']])
+  personas=personas + 'persona '+pers[0]['nombre']+' inscripta mas de una vez en curso '+cursado[ii]['id_curso']
+}
+
+inscripcion = await pool.query('select * from inscripciones where id = ?',[cursado[ii]['id_inscripcion']])
+if (inscripcion[0]['estado'] === 'pendiente'){
+
+  await pool.query('update inscripciones set estado=? where id=? ', [cursado[ii]['inscripcion'],cursado[ii]['id_inscripcion']])
+  correjidos+=1
+
+}
+
+}
+rta= ' SE CORRIJIERON '+correjidos+'estados en inscripciones'
+if (personas===''){
+  personas='no hay personas inscriptas mas de una vez'
+}
+
+res.json ([rta,personas ])
+})
+
+
+
+
+
 module.exports = router
