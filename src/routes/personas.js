@@ -22,6 +22,15 @@ const fileUpload = multer({
 }).single('image')
 
 
+router.get('/traerusuario/:id', isLoggedInn,async (req, res) => {
+  const id = req.params.id
+
+
+  const etc = await pool.query('select nombre, usuario from usuarios where id=?', [id])
+
+  res.json(etc);
+  //res.render('index')
+})
 
 
 
