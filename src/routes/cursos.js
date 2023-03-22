@@ -18,12 +18,45 @@ router.get('/datosdelturno/:id', isLoggedInn4, async (req, res) => {
 try {
   const id = req.params.id
   
-  turno = await pool.query('select nombrecurso, turnos.id from turnos join (Select id as idcurso, nombre as nombrecurso from cursos) as selec1 on turnos.id_curso=selec1.idcurso where turnos.id=?  ',[id])
-  console.log(turno)
-res.json(turno)
+  turno = await pool.query('select nombrecurso, turnos.id,  id_encargado, id_coordinador from turnos join (Select id as idcurso, nombre as nombrecurso from cursos) as selec1 on turnos.id_curso=selec1.idcurso where turnos.id=?  ',[id])
+  cantidad = await pool.query ('select * from cursado where id_turno  =?',[id])
+  cant={
+    cantidad:cantidad.length
+  }
+  array1 = turno.concat(cant);
+ 
+  encarg= await pool.query('select * from usuarios where id = ?',[turno[0]['id_encargado']])
+  try {
+    en={
+      encargado:encarg[0]['nombre']
+    }
+  } catch (error) {
+    en={
+      encargado:'Sin definir'
+    }
+  }
+
+  array2 = array1.concat(en);
+
+  coor= await pool.query('select * from usuarios where id = ?',[turno[0]['id_coordinador']])
+  try {
+    en={
+      coordinador:encarg[0]['nombre']
+    }
+  } catch (error) {
+    en={
+      coordinador:'sin definir'
+    }
+  }
+
+  array3 = array2.concat(en);
+
+
+
+res.json(array3)
 } catch (error) {
   console.log(error)
-  res.json(error)
+  res.json(['nd','nd','nd','nd'])
 }
 
 
