@@ -639,7 +639,7 @@ router.post("/traerlosturnos",  async (req, res) => {
 })
 
 
-router.post("/presente", isLoggedInn4, async (req, res) => {
+router.post("/presente",  async (req, res) => {
   const { id_alumno, asistencia, id_clase, observaciones } = req.body ///
 
 ///asistencia (presente ausente)
