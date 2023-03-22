@@ -234,15 +234,15 @@ router.get('/listadetodoslosturnos/', isLoggedInn2, async (req, res) => {
       cat = await pool.query('select * from cursado where id_turno= ?', [turnos[ii]['id']])
       faltan = await pool.query('select * from cursado where id_turno= ? and (inscripcion <> "Confirmado" and inscripcion <> "Rechazado") ', [turnos[ii]['id']])
       en = await pool.query('select * from usuarios where id= ?', [turnos[ii]['id_encargado']])
-      co = await pool.query('select * from usuarios where id= ?', [turnos[ii]['id_coordinador']])
+      c1 = await pool.query('select * from usuarios where id= ?', [turnos[ii]['id_coordinador']])
       enc = 'sin determinar'
       if (en.length > 0) {
         enc = en[0]['nombre']
       }
 
       coor = 'sin determinar'
-      if (co.length > 0) {
-        coor = co[0]['nombre']
+      if (c1.length > 0) {
+        coor = c1[0]['nombre']
       }
 
 
