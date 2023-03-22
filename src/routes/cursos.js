@@ -246,6 +246,8 @@ router.get('/listadetodoslosturnos/', isLoggedInn2, async (req, res) => {
       }
 
 
+      
+
       nuev = {
         id: turnos[ii]['id'],
         id_curso: turnos[ii]['id_curso'],
