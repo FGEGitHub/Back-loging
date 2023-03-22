@@ -117,7 +117,7 @@ router.get('/verclases/:id', isLoggedInn2, async (req, res) => {
 
 router.get('/asistencia/:id', isLoggedInn4, async (req, res) => {
   const id = req.params.id
-
+console.log('asistencia')
   try {
     /// trae la clase
     const clase = await pool.query('select * from clases where id = ?', [id])
@@ -645,8 +645,8 @@ router.post("/presente",  async (req, res) => {
 ///asistencia (presente ausente)
 try {
 
-
-  
+console.log(id_alumno)
+console.log(id_clase)
    const yatomada = await pool.query('select * from asistencia where id_persona = ? and id_clase =? ',[id_alumno,id_clase])
 if (yatomada.length>0){
 
