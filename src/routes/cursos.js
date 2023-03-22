@@ -233,14 +233,26 @@ try {
   for (ii in turnos) {
     cat = await pool.query('select * from cursado where id_turno= ?',[turnos[ii]['id']])
     faltan = await pool.query('select * from cursado where id_turno= ? and (inscripcion <> "Confirmado" and inscripcion <> "Rechazado") ',[turnos[ii]['id']])
-   
+   en =  await pool.query('select * from usuarios where id= ?',[turnos[ii]['id_encargado']])
+   co =  await pool.query('select * from usuarios where id= ?',[turnos[ii]['id_coordinador']])
+   enc='sin determinar'
+   if(en.length>0) {
+    enc= en[0]['nombre']
+   }
+
+   coor='sin determinar'
+   if(en.length>0) {
+    coor= en[0]['nombre']
+   }
+
+
    nuev = {
       id: turnos[ii]['id'],
       id_curso: turnos[ii]['id_curso'],
       numero: turnos[ii]['numero'],
       descripcion: turnos[ii]['descripcion'],
-      id_encargado: null,
-      id_coordinador: null,
+     enc,
+   coor,
       idcurso: 123,
       nombrecurso: turnos[ii]['nombrecurso'],
       id_turno: turnos[ii]['id_turno'],
