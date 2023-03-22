@@ -40,16 +40,16 @@ try {
 
   coor= await pool.query('select * from usuarios where id = ?',[turno[0]['id_coordinador']])
   try {
-    en={
-      coordinador:encarg[0]['nombre']
+    co={
+      coordinador:coor[0]['nombre']
     }
   } catch (error) {
-    en={
+    co={
       coordinador:'sin definir'
     }
   }
 
-  array3 = array2.concat(en);
+  array3 = array2.concat(co);
 
 
 

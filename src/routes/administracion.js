@@ -14,6 +14,15 @@ console.log(etc)
 })
 
 
+router.get('/traertodoelcursado/', async (req, res) => {
+   
+  
+  const etc = await pool.query ('select * from cursado join (select id as idinscripcion, horario as horarioincripcion,uno,dos from inscripciones ) as selec1 on cursado.id_inscripcion = selec1.idinscripcion join (select id as idpersona, nombre as nombrepersona, apellido as apellidopersona from personas) as selec2 on cursado.id_persona=selec2.idpersona join (select id as idturno, id_curso as cursoo, numero from turnos) as selec3 on cursado.id_turno=selec3.idturno ')
+cursos = await pool.query('select * from cursos')
+ 
+res.json([etc,cursos]);
+//res.render('index')
+})
 
 router.get('/sistemas/', async (req, res) => {
    
