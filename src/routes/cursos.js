@@ -235,6 +235,7 @@ router.get('/listadetodoslosturnos/', isLoggedInn2, async (req, res) => {
       faltan = await pool.query('select * from cursado where id_turno= ? and (inscripcion <> "Confirmado" and inscripcion <> "Rechazado") ', [turnos[ii]['id']])
       en = await pool.query('select * from usuarios where id= ?', [turnos[ii]['id_encargado']])
       c1 = await pool.query('select * from usuarios where id= ?', [turnos[ii]['id_coordinador']])
+      rechazados = await pool.query('select * from cursado where id_turno= ? and inscripcion = "Rechazado" ', [turnos[ii]['id']])
       enc = 'sin determinar'
       if (en.length > 0) {
         enc = en[0]['nombre']
@@ -259,7 +260,8 @@ router.get('/listadetodoslosturnos/', isLoggedInn2, async (req, res) => {
         nombrecurso: turnos[ii]['nombrecurso'],
         id_turno: turnos[ii]['id_turno'],
         cant: cat.length,
-        faltanporresp: faltan.length
+        faltanporresp: faltan.length,
+        rechazados:rechazados.length
       }
       todos.push(nuev)
     }
