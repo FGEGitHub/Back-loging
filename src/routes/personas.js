@@ -393,7 +393,7 @@ await pool.query('update inscripciones set estado="pendiente" where id=? ', [cur
 
 
 router.post("/inscribir", isLoggedInn2, async (req, res) => {
-  const { id_curso, dni,   id_inscripcion, id_turno} = req.body
+  const {  dni,   id_inscripcion, id_turno} = req.body
  
 
 
@@ -402,6 +402,8 @@ router.post("/inscribir", isLoggedInn2, async (req, res) => {
   const inscripciones = await pool.query('select * from inscripciones where id =?', [id_inscripcion])
   //////////////////////
   
+tur = await pool.query('select * from turnos where id =?',[id_turno])
+  id_curso = tur[0]['id_curso']
   cat = await caregorizar.asignarcategoria(persona)
 
   ////////////
