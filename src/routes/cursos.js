@@ -669,9 +669,11 @@ router.post("/presente", async (req, res) => {
 
 
 
-
+        if (asistencia==='Sin determinar'){
+          await pool.query('delete  from  asistencia where id = ?', [yatomada[0]['id']])
+        }else{
       await pool.query('update asistencia set asistencia=?, justificacion=? where id=?  ', [asistencia, observaciones, yatomada[0]['id']])
-
+}
     } else {
 
       await pool.query('insert into asistencia set id_persona=?,asistencia=?,id_clase=?,justificacion=? ', [id_alumno, asistencia, id_clase, observaciones])
