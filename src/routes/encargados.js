@@ -46,7 +46,7 @@ router.get('/clases/:id', async (req, res) => {
 router.get('/curso/:id', async (req, res) => {
   const id = req.params.id
 
-  curso = await pool.query('select cursado.id idcursado, personas.nombre, personas.apellido, personas.id, cursado.inscripcion from cursado join personas on cursado.id_persona = personas.id where id_turno=? ', [id])
+  curso = await pool.query('select cursado.id idcursado, personas.nombre, personas.apellido, personas.id, cursado.inscripcion, personas.tel, personas.tel2  from cursado join personas on cursado.id_persona = personas.id where id_turno=? ', [id])
 
 
 
