@@ -50,8 +50,7 @@ res.json('Clase agregada')
 router.post("/modificarclase",  async (req, res) => {
   const { id,observacion,numero_clase,fecha} = req.body
 try {
-console.log(observacion)  
-console.log(numero_clase)  
+
 
   await pool.query('update clases set  numero_clase = ?,observacion= ?,fecha=? where id =?', [numero_clase,observacion, fecha,id])
   res.json('Realizado')
@@ -61,6 +60,22 @@ console.log(numero_clase)
 }
 
 })
+
+
+router.post("/borrarclase",  async (req, res) => {
+  const { id} = req.body
+try {
+console.log(id)  
+await pool.query('delete  from  clases where id = ?',[id])
+ // await pool.query('update clases set  numero_clase = ?,observacion= ?,fecha=? where id =?', [numero_clase,observacion, fecha,id])
+  res.json('Realizado')
+} catch (error) {
+  console.log(error)
+  res.json('No realizado')
+}
+
+})
+
 
 router.get('/clasesdelturno/:id', async (req, res) => {
     const id = req.params.id
