@@ -61,31 +61,35 @@ router.get('/curso/:id', async (req, res) => {
 router.get('/alumnasdelcurso/:id', async (req, res) => {
   const id = req.params.id
   /////id: turno
-  curso = await pool.query('select cursado.id idcursado, personas.nombre, personas.apellido, personas.id as idpers, cursado.inscripcion from cursado join personas on cursado.id_persona = personas.id where id_turno=? and inscripcion="Confirmado"', [id])
+  curso = await pool.query('select cursado.id idcursado,cursado.observaciones, personas.nombre, personas.apellido, personas.id as idpers, cursado.inscripcion from cursado join personas on cursado.id_persona = personas.id where id_turno=? and inscripcion="Confirmado"', [id])
 
   clases = await pool.query('select * from clases where id_turno =?', [id])
-mandar=[]
-totalpresentes=0
-totalausentes=0
-totalsintomar=0
+  mandar = []
+  totalpresentes = 0
+  totalausentes = 0
+  totalsintomar = 0
   for (ii in curso) {
-
+    primerclase = "No"
     presente = 0
     ausente = 0
     sintomar = 0
 
     for (iiii in clases) {
-      asis = await pool.query('select * from asistencia where id_persona=? and id_clase =? ',[curso[ii]['idpers'], clases[iiii]['id']])
+      asis = await pool.query('select * from asistencia where id_persona=? and id_clase =? ', [curso[ii]['idpers'], clases[iiii]['id']])
       if (asis.length === 0) {
         sintomar += 1
-        totalsintomar+= 1
+        totalsintomar += 1
       } else {
         if (asis[0]['asistencia'] === 'Presente') {
           presente += 1
-          totalpresentes+=1
+          totalpresentes += 1
+          console.log(clases[iiii]['numero_clase'] )
+          if (clases[iiii]['numero_clase'] === '1') {//primer clase
+            primerclase = "Si"
+          }
         } else {
           ausente += 1
-          totalausentes+=1
+          totalausentes += 1
         }
       }
 
@@ -95,33 +99,57 @@ totalsintomar=0
       presente,
       ausente,
       sintomar,
-      idcursado:curso[ii]['idcursado'],
-      nombre:curso[ii]['nombre'],
-      apellido:curso[ii]['apellido'],
-      id:curso[ii]['id'],
-      inscripcion:curso[ii]['inscripcion'],
- 
+      observaciones:curso[ii]['observaciones'],
+      idcursado: curso[ii]['idcursado'],
+      nombre: curso[ii]['nombre'],
+      apellido: curso[ii]['apellido'],
+      id: curso[ii]['id'],
+      inscripcion: curso[ii]['inscripcion'],
+      primerclase
+
     }
 
     mandar.push(nuevo)
   }
 
 
-datos = {
-  clases:clases.length,
-  totalpresentes,
-  totalausentes,
-  totalsintomar,
-  total:totalpresentes+totalausentes+totalsintomar,
-  totalreal:totalpresentes+totalausentes
+  datos = {
+    clases: clases.length,
+    totalpresentes,
+    totalausentes,
+    totalsintomar,
+    total: totalpresentes + totalausentes + totalsintomar,
+    totalreal: totalpresentes + totalausentes
 
-}
+  }
 
   ////////id usuario encargado
 
-  res.json([mandar,datos]);
+  res.json([mandar, datos]);
   //res.render('index')
 })
+
+
+
+
+router.post("/cambiarestadocurado", async (req, res) => {
+  let { id_cursado, observaciones } = req.body
+
+  console.log(id_cursado)
+  console.log(observaciones)
+try {
+  await pool.query('update cursado set observaciones = ? where id=?', [ observaciones, id_cursado])
+  res.json('Realizado')
+} catch (error) {
+  console.log(error)
+  res.json('No Realizado')
+}
+
+
+})
+
+
+
 
 router.post("/confirmaciondellamado", async (req, res) => {
   let { confirmacion, id_turno, id_persona, id_cursado, observaciones } = req.body

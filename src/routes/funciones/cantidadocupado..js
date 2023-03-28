@@ -11,16 +11,16 @@ async function cantidadcategoriaporcurso(categoria, id_curso, porcentaje_creiter
 
 
 ///
-    cupo = await pool.query('select count(*) from turnos where id_curso = ? ', [id_curso])
+   // cupo = await pool.query('select count(*) from turnos where id_curso = ? ', [id_curso])
     
     //const cursado = await pool.query('select *, id as idcursado from cursado  join (select *, id as idcurso from cursos ) as selec1 on cursado.id_curso=selec1.idcurso  where cursado.id_curso= ? and  categoria =?', [id_curso, categoria])
     ////cursado son los anotados con esa caracteristicas
-    const cursado = await pool.query('select * from cursado  where cursado.id_curso= ? and  categoria =?', [id_curso, categoria])
+    const cursado = await pool.query('select * from cursado  where cursado.id_turno= ? and  categoria =?', [id_turno, categoria])
 
     cuporeal = await pool.query('select * from turnos where id_curso=?', [id_curso])
 
 
-    try {
+
 
 
         cuporeal = cuporeal.length*44///////////////cambiar a 25
@@ -32,7 +32,7 @@ async function cantidadcategoriaporcurso(categoria, id_curso, porcentaje_creiter
         }else{
 
       ////////preguntar horario antes o despues
-      const curs = await pool.query('select * from cursado  join (select id as idturno from turnos) as select1  on cursado.id_turno=select1.idturno where cursado.id_curso= ? and cursado.id_turno=?', [id_curso,id_turno])
+      const curs = await pool.query('select * from cursado  join (select id as idturno from turnos) as select1  on cursado.id_turno=select1.idturno where cursado.id_turno=?', [id_turno])
      
       if ( 44 <= (curs.length )) {////////+1 par aque se llene ante el redondeo
         haylugar = false
@@ -41,9 +41,7 @@ async function cantidadcategoriaporcurso(categoria, id_curso, porcentaje_creiter
 
         }
 
-    } catch (error) {
-console.log(error)
-    }
+
 
     return haylugar
 
