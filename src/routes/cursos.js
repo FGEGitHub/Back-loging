@@ -209,7 +209,7 @@ router.get('/borrarturno/:id', async (req, res) => {
 
 
     await pool.query('delete  from  cursado where id_turno = ?', [id])
-    await pool.query('delete  from  inscripciones where id = ?', [id])
+    //await pool.query('delete  from  inscripciones where id = ?', [id])
     await pool.query('delete  from  turnos where id = ?', [id])
     console.log('realizado')
     res.json('realizado')
@@ -324,7 +324,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
     const pendientes2 = await pool.query('select inscripciones.id id_inscripcion,personas.hijos,dni_persona, inscripciones.horario,inscripciones.estado,inscripciones.uno,inscripciones.dos,inscripciones.tres, personas.nombre,personas.dni, personas.trabajo, personas.apellido,personas.tipo_trabajo, personas.participante_anterior from inscripciones join personas on inscripciones.dni_persona = personas.dni where dos=? ', [id])
 
-    cursado = await pool.query('select cursado.id, cursado.categoria, cursado.id_persona,cursado.inscripcion, cursado.id_curso,turnos.descripcion horario, personas.nombre, personas.apellido from cursado join personas on cursado.id_persona=personas.id join turnos on cursado.id_turno = turnos.id where cursado.id_curso = ? ', [id])
+    cursado = await pool.query('select cursado.id, cursado.categoria, cursado.id_persona,cursado.inscripcion, cursado.id_curso,turnos.descripcion horario, personas.nombre, personas.apellido from cursado join personas on cursado.id_persona=personas.id join turnos on cursado.id_turno = turnos.id where turnos.id_curso = ? ', [id])
 
 
     array1 = pendientes1.concat(pendientes2);
