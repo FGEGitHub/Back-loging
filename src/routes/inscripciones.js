@@ -148,6 +148,9 @@ router.post('/incripcionesid', async (req, res) => {
 
 
 
+
+
+
 router.post('/cargarinscripciones', async (req, res) => {
   const { id } = req.body
   console.log(id)
@@ -460,10 +463,10 @@ router.post('/cargarinscripciones', async (req, res) => {
         } else {
           objetivo = dataExcel[property]['¿Qué te gustaría hacer con las habilidades aprendidas?']
         }
-        if (dataExcel[property]['Disponibilidad Horaria para cursar'] === undefined) {
+        if (dataExcel[property]['Disponibilidad Horaria para cursar '] === undefined) {
           horario = 'Sin completar'
         } else {
-          horario = dataExcel[property]['Disponibilidad Horaria para cursar']
+          horario = dataExcel[property]['Disponibilidad Horaria para cursar ']
         }
 
 
@@ -676,7 +679,7 @@ router.get('/inscribirauto/', async (req, res) => {
         for (iiii in turno) {
           if (!bandera) {
             haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, inscripciones[ii]['uno'], criterios[criterios.length - 1][cat], turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
-            console.log(iiii)
+            
             if (haycupo) {
 
 
@@ -749,7 +752,7 @@ router.get('/inscribirauto/', async (req, res) => {
 
 
 
-            await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=? ', ["Asignado a curso", persona[0]['id'], inscripciones[ii]['uno'], cat, inscripciones[ii]['id'], turno[iiii]['id']])
+            await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=? ', ["Asignado a curso", persona[0]['id'], listadef[ii]['dos'], cat, listadef[ii]['id'], turno[iiii]['id']])
 
 
 
