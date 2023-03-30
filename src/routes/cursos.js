@@ -5,12 +5,31 @@ const pool = require('../database')
 
 
 
+
 router.get('/lista/', isLoggedInn4, async (req, res) => {
+  console.log('lista')
+  const etc = await pool.query('select * from cursos ')
+  respuesta = []
+  for (iii in etc) {
+
+    turnos = await pool.query('select * from turnos where id_curso =? ', [etc[iii]['id']])
 
 
-  const etc = await pool.query('select * from cursos')
+    nuevo = {
+      id: etc[iii]['id'],
+      nombre: etc[iii]['nombre'],
+      cantidad_turnos: turnos.length,
 
-  res.json(etc);
+    }
+
+    respuesta.push(nuevo)
+  }
+
+
+
+
+
+  res.json(respuesta);
   //res.render('index')
 })
 
@@ -64,7 +83,113 @@ router.get('/datosdelturno/:id', isLoggedInn4, async (req, res) => {
 })
 
 
+router.get('/avancedelcurso/:id', isLoggedInn, async (req, res) => {
+  const id = req.params.id
 
+
+
+  clases = await pool.query('select * from clases join (select id as idturno, id_curso from turnos ) as selec on clases.id_turno = selec.idturno where selec.id_curso=? ', [id])
+
+  let presentes1 = 0
+  let ausentes1 = 0
+  let presentes2 = 0
+  let ausentes2 = 0
+  let presentes3 = 0
+  let ausentes3 = 0
+  let presentes4 = 0
+  let ausentes4 = 0
+  let presentes5 = 0
+  let ausentes5 = 0
+  let clase1 = 0
+  let clase2 = 0
+  let clase3 = 0
+  let clase4 = 0
+  let clase5 = 0
+  try {
+    for (i in clases) {
+      console.log(clases[i]['id'])
+
+
+      let pres = await pool.query('select * from asistencia where id_clase =?  and asistencia="Presente" ', [clases[i]['id']])
+      console.log(clases[i]['numero_clase'])
+
+
+      let aus = await pool.query('select * from asistencia where id_clase =? and asistencia="Ausente"', [clases[i]['id']])
+
+
+      switch (clases[i]['numero_clase']) {
+        case '1':
+
+          presentes1 = presentes1 + pres.length
+
+          ausentes1 = ausentes1 + aus.length
+          break;
+        case '2':
+          presentes2 = presentes2 + pres.length
+          ausentes2 = ausentes2 + aus.length
+          break;
+        case '3':
+          presentes3 = presentes3 + pres.length
+          ausentes3 = ausentes3 + aus.length
+          break;
+        case '4':
+          presentes = presentes4 + pres.length
+          ausentes4 = ausentes4 + aus.length
+          break;
+        case '5':
+          console.log('clase 5')
+          presentes5 = presentes5 + pres.length
+          ausentes5 = ausentes5 + aus.length
+          break;
+
+
+
+      }
+
+    }
+
+    etc = [
+      {
+        dato1: "Clase 1",
+        presentes: presentes1,
+        ausentes: ausentes1,
+      },
+      {
+        dato1: "Clase 2",
+        presentes: presentes2,
+        ausentes: ausentes2,
+      },
+      {
+        dato1: "Clase 3",
+        presentes: presentes3,
+        ausentes: ausentes3,
+      },
+      {
+        dato1: "Clase 4",
+        presentes: presentes4,
+        ausentes: ausentes4,
+      },
+      {
+        dato1: "Clase 5",
+        presentes: presentes5,
+        ausentes: ausentes5,
+      }
+
+
+    ]
+
+    console.log(etc)
+
+
+    ///const etc4 = await pool.query('select * from cursos join  cursado ')
+
+    res.json(etc);
+  } catch (error) {
+    console.log(Error)
+    res.json('Error algo salio mal')
+  }
+  //res.render('index')
+})
 
 /////// lista desde el usuario 1
 router.get('/listaniv1/:usuario', isLoggedInn, async (req, res) => {
@@ -226,16 +351,17 @@ router.get('/borrarturno/:id', async (req, res) => {
 router.get('/listadetodoslosturnos/', isLoggedInn2, async (req, res) => {
   try {
     console.log('listadetodos')
-    turnos = await pool.query('select * from turnos   join  (select id as idcurso, nombre as nombrecurso from cursos) as selec1  on turnos.id_curso= selec1.idcurso ')
+    tur = await pool.query('select * from turnos   join  (select id as idcurso, nombre as nombrecurso from cursos) as selec1  on turnos.id_curso= selec1.idcurso ')
 
 
     todos = []
-    for (ii in turnos) {
-      cat = await pool.query('select * from cursado where id_turno= ?', [turnos[ii]['id']])
-      faltan = await pool.query('select * from cursado where id_turno= ? and (inscripcion <> "Confirmado" and inscripcion <> "Rechazado") ', [turnos[ii]['id']])
-      en = await pool.query('select * from usuarios where id= ?', [turnos[ii]['id_encargado']])
-      c1 = await pool.query('select * from usuarios where id= ?', [turnos[ii]['id_coordinador']])
-      rechazados = await pool.query('select * from cursado where id_turno= ? and inscripcion = "Rechazado" ', [turnos[ii]['id']])
+    for (ii in tur) {
+
+      cat = await pool.query('select * from cursado where id_turno= ?', [tur[ii]['id']])
+      faltan = await pool.query('select * from cursado where id_turno= ? and (inscripcion <> "Confirmado" and inscripcion <> "Rechazado") ', [tur[ii]['id']])
+      en = await pool.query('select * from usuarios where id= ?', [tur[ii]['id_encargado']])
+      c1 = await pool.query('select * from usuarios where id= ?', [tur[ii]['id_coordinador']])
+      rechazados = await pool.query('select * from cursado where id_turno= ? and inscripcion = "Rechazado" ', [tur[ii]['id']])
       enc = 'sin determinar'
       if (en.length > 0) {
         enc = en[0]['nombre']
@@ -247,21 +373,21 @@ router.get('/listadetodoslosturnos/', isLoggedInn2, async (req, res) => {
       }
 
 
-      
+
 
       nuev = {
-        id: turnos[ii]['id'],
-        id_curso: turnos[ii]['id_curso'],
-        numero: turnos[ii]['numero'],
-        descripcion: turnos[ii]['descripcion'],
+        id: tur[ii]['id'],
+        id_curso: tur[ii]['id_curso'],
+        numero: tur[ii]['numero'],
+        descripcion: tur[ii]['descripcion'],
         enc,
         coor,
         idcurso: 123,
-        nombrecurso: turnos[ii]['nombrecurso'],
-        id_turno: turnos[ii]['id_turno'],
+        nombrecurso: tur[ii]['nombrecurso'],
+        id_turno: tur[ii]['id_turno'],
         cant: cat.length,
         faltanporresp: faltan.length,
-        rechazados:rechazados.length
+        rechazados: rechazados.length
       }
       todos.push(nuev)
     }
@@ -538,7 +664,7 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 })
 
 
-router.post("/modificarcurso",  async (req, res) => {
+router.post("/modificarcurso", async (req, res) => {
   const { id, nombre } = req.body
   try {
 
@@ -669,11 +795,11 @@ router.post("/presente", async (req, res) => {
 
 
 
-        if (asistencia==='Sin determinar'){
-          await pool.query('delete  from  asistencia where id = ?', [yatomada[0]['id']])
-        }else{
-      await pool.query('update asistencia set asistencia=?, justificacion=? where id=?  ', [asistencia, observaciones, yatomada[0]['id']])
-}
+      if (asistencia === 'Sin determinar') {
+        await pool.query('delete  from  asistencia where id = ?', [yatomada[0]['id']])
+      } else {
+        await pool.query('update asistencia set asistencia=?, justificacion=? where id=?  ', [asistencia, observaciones, yatomada[0]['id']])
+      }
     } else {
 
       await pool.query('insert into asistencia set id_persona=?,asistencia=?,id_clase=?,justificacion=? ', [id_alumno, asistencia, id_clase, observaciones])
