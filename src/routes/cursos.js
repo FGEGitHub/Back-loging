@@ -37,8 +37,16 @@ router.get('/datosdelturno/:id', isLoggedInn4, async (req, res) => {
   try {
     const id = req.params.id
 
-    turno = await pool.query('select nombrecurso, turnos.id,  id_encargado, id_coordinador from turnos join (Select id as idcurso, nombre as nombrecurso from cursos) as selec1 on turnos.id_curso=selec1.idcurso where turnos.id=?  ', [id])
-    cantidad = await pool.query('select * from cursado where id_turno  =?', [id])
+    let turno = await pool.query('select nombrecurso, turnos.id,  id_encargado, id_coordinador from turnos join (Select id as idcurso, nombre as nombrecurso from cursos) as selec1 on turnos.id_curso=selec1.idcurso where turnos.id=?  ', [id])
+    let cantidad = await pool.query('select * from cursado where id_turno  =?', [id])
+    let presentes = await pool.query('select * from asistencia join (select id as idclase, id_turno as idturno from clases )as selec1 on asistencia.id_clase=selec1.idclase where selec1.idturno =? and asistencia ="Presente" ',[id])
+    let asusentes = await pool.query('select * from asistencia join (select id as idclase, id_turno as idturno from clases )as selec1 on asistencia.id_clase=selec1.idclase where selec1.idturno =? and asistencia <>"Presente" ',[id])
+    
+    let preaaus = {
+      presentes:presentes.length,
+      ausentes:asusentes.length
+    }
+    
     cant = {
       cantidad: cantidad.length
     }
@@ -69,13 +77,14 @@ router.get('/datosdelturno/:id', isLoggedInn4, async (req, res) => {
     }
 
     array3 = array2.concat(co);
-
-
-
-    res.json(array3)
+    
+    array4 = array3.concat(preaaus);
+    console.log('array')
+console.log(array4)
+    res.json(array4)
   } catch (error) {
     console.log(error)
-    res.json(['nd', 'nd', 'nd', 'nd'])
+    res.json(['nd', 'nd', 'nd', 'nd', 'nd'])
   }
 
 
@@ -88,105 +97,145 @@ router.get('/avancedelcurso/:id', isLoggedInn, async (req, res) => {
 
 
 
-  clases = await pool.query('select * from clases join (select id as idturno, id_curso from turnos ) as selec on clases.id_turno = selec.idturno where selec.id_curso=? ', [id])
+  let clases = await pool.query('select * from clases join (select id as idturno, id_curso, descripcion from turnos ) as selec on clases.id_turno = selec.idturno where selec.id_curso=? ', [id])
+  let curso = await pool.query('select * from cursos where id =?', [id])
 
   let presentes1 = 0
   let ausentes1 = 0
+  let ausentesjus1 = 0
+
   let presentes2 = 0
   let ausentes2 = 0
+  let ausentesjus2 = 0
+
   let presentes3 = 0
   let ausentes3 = 0
+  let ausentesjus3 = 0
+
   let presentes4 = 0
   let ausentes4 = 0
+  let ausentesjus4 = 0
+
   let presentes5 = 0
   let ausentes5 = 0
+  let ausentesjus5 = 0
   let clase1 = 0
   let clase2 = 0
   let clase3 = 0
   let clase4 = 0
   let clase5 = 0
-  try {
-    for (i in clases) {
-      console.log(clases[i]['id'])
+  let totalpresentes = 0
+  let totalausentes = 0
+  //let total = await pool.query('select * from cursado join (select id as idturno, id_curso as idcurso from turnos) as selec1 on cursado.id_turno=selec1.idturno where selec1.idcurso=? and inscripcion="Confirmado"',[id])
 
+  try {
+
+    etc = []
+    for (i in clases) {
+
+      console.log(clases[i])
+
+      let total = await pool.query('select * from cursado join (select id as idturno, id_curso as idcurso from turnos) as selec1 on cursado.id_turno=selec1.idturno where selec1.idturno=? and inscripcion="Confirmado"', [[clases[i]['id_turno']]])
 
       let pres = await pool.query('select * from asistencia where id_clase =?  and asistencia="Presente" ', [clases[i]['id']])
-      console.log(clases[i]['numero_clase'])
 
 
-      let aus = await pool.query('select * from asistencia where id_clase =? and asistencia="Ausente"', [clases[i]['id']])
+      let aus = await pool.query('select * from asistencia where id_clase =? and (asistencia<>"Presente" )', [clases[i]['id']])
+
+      let ausjus = await pool.query('select * from asistencia where id_clase =? and (asistencia="Ausente justificado" )', [clases[i]['id']])
+
+      totalpresentes = totalpresentes + pres.length
+      totalausentes = totalausentes + aus.length
 
 
       switch (clases[i]['numero_clase']) {
         case '1':
+          presentes1=presentes1+pres.length
+          ausentes1=ausentes1+ aus.length
+          ausentesjus1= ausentesjus1+ausjus.length
+          break;
+          case '2':
+            presentes2=presentes2+pres.length
+            ausentes2=ausentes2+ aus.length
+            ausentesjus2= ausentesjus2+ausjus.length
+            break;case '3':
+            presentes3=presentes3+pres.length
+            ausentes3=ausentes3+ aus.length
+            ausentesjus3= ausentesjus3+ausjus.length
+            break;case '4':
+            presentes4=presentes4+pres.length
+            ausentes4=ausentes4+ aus.length
+            ausentesjus3= ausentesjus3+ausjus.length
+            break;case '5':
+            presentes5=presentes5+pres.length
+            ausentes5=ausentes5+ aus.length
+            ausentesjus3= ausentesjus3+ausjus.length
+            break;
 
-          presentes1 = presentes1 + pres.length
-
-          ausentes1 = ausentes1 + aus.length
-          break;
-        case '2':
-          presentes2 = presentes2 + pres.length
-          ausentes2 = ausentes2 + aus.length
-          break;
-        case '3':
-          presentes3 = presentes3 + pres.length
-          ausentes3 = ausentes3 + aus.length
-          break;
-        case '4':
-          presentes = presentes4 + pres.length
-          ausentes4 = ausentes4 + aus.length
-          break;
-        case '5':
-          console.log('clase 5')
-          presentes5 = presentes5 + pres.length
-          ausentes5 = ausentes5 + aus.length
-          break;
 
 
 
       }
 
+
+
+      nuevo = {
+        nombre: curso[0]['nombre'],
+        id_clase: clases[i]['id'],
+        id_turno:clases[i]['id_turno'],
+        dato1: "Clase " + clases[i]['numero_clase'],
+        presentes: pres.length,
+        ausentes: aus.length,
+        justificados: ausjus.length,
+        descripcion: clases[i]['descripcion'],
+        total: total.length
+
+
+
+      }
+      etc.push(nuevo)
     }
 
-    etc = [
-      {
-        dato1: "Clase 1",
-        presentes: presentes1,
-        ausentes: ausentes1,
-      },
-      {
-        dato1: "Clase 2",
-        presentes: presentes2,
-        ausentes: ausentes2,
-      },
-      {
-        dato1: "Clase 3",
-        presentes: presentes3,
-        ausentes: ausentes3,
-      },
-      {
-        dato1: "Clase 4",
-        presentes: presentes4,
-        ausentes: ausentes4,
-      },
-      {
-        dato1: "Clase 5",
-        presentes: presentes5,
-        ausentes: ausentes5,
-      }
 
-
-    ]
-
-    console.log(etc)
 
 
     ///const etc4 = await pool.query('select * from cursos join  cursado ')
 
-    res.json(etc);
+    segundo = {
+      totalpresentes,
+      totalausentes,
+      presentes1,
+      ausentes1,
+      ausentesjus1,
+      presentes2,
+      ausentes2,
+      ausentesjus2,
+      presentes3,
+      ausentes3,
+      ausentesjus3,
+      presentes4,
+      ausentes4,
+      ausentesjus4,
+      presentes5, 
+      ausentes5,
+      ausentesjus5 
+    }
+console.log(segundo)
+    res.json([etc, segundo]);
   } catch (error) {
     console.log(Error)
-    res.json('Error algo salio mal')
+    res.json([{
+      nombre: 'Sin clases',
+      dato1: "Clase 5",
+      presentes: "Sin datos",
+      ausentes: "Sin datos"
+    }, {
+
+      totalpresentes: "N/D",
+      totalausentes: "N/D",
+
+    }
+    ])
   }
   //res.render('index')
 })
