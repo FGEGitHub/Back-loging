@@ -37,6 +37,41 @@ res.json([etc,etc2,etc3,etc4]);
 })
 
 
+router.get('/contactos/', async (req, res) => {
+   
+
+  let encargados = await pool.query('select * from usuarios where nivel=4')
+let enviar =[]
+let totalconfirmados=0
+let totalrechazados=0
+
+for (ii in encargados) {
+
+
+let confirmados =  await pool.query('select * from cursado join (select id as idturno, id_encargado from turnos  ) as selec1 on cursado.id_turno=selec1.idturno where selec1.id_encargado =? and inscripcion="Confirmado"',[encargados[ii]['id']])
+let asignados =  await pool.query('select * from cursado join (select id as idturno, id_encargado from turnos  ) as selec1 on cursado.id_turno=selec1.idturno where selec1.id_encargado =? and inscripcion="Asignado a curso"',[encargados[ii]['id']])
+let rechazados =  await pool.query('select * from cursado join (select id as idturno, id_encargado from turnos  ) as selec1 on cursado.id_turno=selec1.idturno where selec1.id_encargado =? and inscripcion="Rechazado"',[encargados[ii]['id']])
+let nuevo ={
+  nombre: encargados[ii]['nombre'],
+  confirmados:confirmados.length,
+  asignados:asignados.length,
+  rechazados:rechazados.length
+}
+totalconfirmados= totalconfirmados + confirmados.length
+totalrechazados =totalrechazados + rechazados.length
+enviar.push(nuevo)
+}
+
+let resumen={
+  totalconfirmados,
+  totalrechazados
+}
+res.json([enviar,resumen])
+
+
+
+//res.render('index')
+})
   router.post('/signupp', isLoggedInn2, passport.authenticate('local.registroadmin', {
     successRedirect: '/exitosignup',
     failureRedirect:'/noexito',
