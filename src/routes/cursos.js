@@ -291,7 +291,7 @@ router.get('/verclases/:id', isLoggedInn2, async (req, res) => {
 
 router.get('/asistencia/:id', isLoggedInn4, async (req, res) => {
   const id = req.params.id
-  console.log('asistencia')
+
   try {
     /// trae la clase
     const clase = await pool.query('select * from clases where id = ?', [id])
@@ -307,8 +307,15 @@ router.get('/asistencia/:id', isLoggedInn4, async (req, res) => {
     asistenciaa = []
     for (ii in alumnos) {
 
-      asis = await pool.query('select * from asistencia where id_persona = ? and id_clase = ?', [alumnos[ii]['id_persona'], id])
-      console.log(asis)
+   let   asis = await pool.query('select * from asistencia where id_persona = ? and id_clase = ?', [alumnos[ii]['id_persona'], id])
+let asisprimera  = await pool.query('select * from asistencia join (select id as idclase, id_turno, numero_clase from clases) as selec1 on asistencia.id_clase=selec1.idclase where id_persona = ? and numero_clase=1 and id_turno = ?', [alumnos[ii]['id_persona'], clase[0]['id_turno']])
+     
+let primera="No"
+if (asisprimera.length>0){
+         primera="Si"
+      }else{
+         primera="No"
+      }
 
       if (asis.length === 0) {
         notomados += 1
@@ -318,7 +325,8 @@ router.get('/asistencia/:id', isLoggedInn4, async (req, res) => {
           apellido: alumnos[ii]['apellido'],
           dni: alumnos[ii]['dni'],
           asistencia: 'No Tomada',
-          id_clase: id
+          id_clase: id,
+          primera
 
         }
         asistenciaa.push(aux)
@@ -335,7 +343,8 @@ router.get('/asistencia/:id', isLoggedInn4, async (req, res) => {
           apellido: alumnos[ii]['apellido'],
           dni: alumnos[ii]['dni'],
           asistencia: asis[0]['asistencia'],
-          id_clase: id
+          id_clase: id,
+          primera
 
         }
         asistenciaa.push(aux)
