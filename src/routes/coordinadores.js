@@ -83,4 +83,47 @@ observaciones='sin definir'
 
 })
 
+
+
+
+router.get('/contactos/:id', async (req, res) => {
+let id = req.params.id
+
+let prueba= await pool.query('select  distinct(id_encargado), id_coordinador from turnos where id_coordinador=?',[id])
+console.log(prueba)
+  let encargados = await pool.query('select distinct(id_encargado) as id, id_coordinador, selec1.nombre from turnos join (select id as idusuario, nombre from usuarios) as selec1 on turnos.id_encargado=selec1.idusuario where turnos.id_coordinador=?  ',[id])
+
+
+let enviar =[]
+let totalconfirmados=0
+let totalrechazados=0
+
+for (ii in encargados) {
+
+
+let confirmados =  await pool.query('select * from cursado join (select id as idturno, id_encargado from turnos  ) as selec1 on cursado.id_turno=selec1.idturno where selec1.id_encargado =? and inscripcion="Confirmado"',[encargados[ii]['id']])
+let asignados =  await pool.query('select * from cursado join (select id as idturno, id_encargado from turnos  ) as selec1 on cursado.id_turno=selec1.idturno where selec1.id_encargado =? and inscripcion="Asignado a curso"',[encargados[ii]['id']])
+let rechazados =  await pool.query('select * from cursado join (select id as idturno, id_encargado from turnos  ) as selec1 on cursado.id_turno=selec1.idturno where selec1.id_encargado =? and inscripcion="Rechazado"',[encargados[ii]['id']])
+let nuevo ={
+  nombre: encargados[ii]['nombre'],
+  confirmados:confirmados.length,
+  asignados:asignados.length,
+  rechazados:rechazados.length
+}
+totalconfirmados= totalconfirmados + confirmados.length
+totalrechazados =totalrechazados + rechazados.length
+enviar.push(nuevo)
+}
+
+let resumen={
+  totalconfirmados,
+  totalrechazados
+}
+res.json([enviar,resumen])
+
+
+
+
+
+})
   module.exports = router
