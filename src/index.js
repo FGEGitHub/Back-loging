@@ -106,6 +106,7 @@ app.use(`/administracion`, require('./routes/administracion'))
 app.use(`/encargados`, require('./routes/encargados'))
 app.use(`/turnos`, require('./routes/turnos'))
 app.use(`/coordinadores`, require('./routes/coordinadores'))
+app.use(`/fiscalizacion`, require('./routes/fiscalizacion'))
 //app.use(`/links`, require('./routes/links'))
 
 
