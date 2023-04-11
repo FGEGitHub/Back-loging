@@ -24,7 +24,7 @@ const fileUpload = multer({
 
 router.get('/todasincripciones', async (req, res,) => {
 
-    let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona join (select id as id_escuelaa, nombre as nombre_escuela from escuelas) as selec2 on inscripciones_fiscales.id_escuela=selec2.id_escuelaa ' )
+    let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona join (select id as id_escuelaa, nombre as nombre_escuela from escuelas) as selec2 on inscripciones_fiscales.id_escuela=selec2.id_escuelaa where inscripciones_fiscales.estado="Pendiente" ' )
     res.json([inscri])
 })
 
@@ -55,7 +55,7 @@ router.get('/datosusuarioporid/:dni',  async (req, res) => {
   
 
 router.get('/todaslasinscripciones', async (req, res,) => {
-    cuil_cuit = req.params.cuil_cuit
+    
 
     try {
         estr = await pool.query('select * from excelfiscalizacion ')
@@ -67,6 +67,88 @@ router.get('/todaslasinscripciones', async (req, res,) => {
 
 
 })
+
+router.get('/listademesas', async (req, res,) => {
+  
+
+    try {
+        estr = await pool.query('select * from mesas_fiscales join (select id as id_esc, nombre from escuelas) as selec1 on mesas_fiscales.id_escuela=selec1.id_esc ')
+    console.log(estr)
+        res.json(estr)
+    } catch (error) {
+        console.log(error)
+        res.json(['algo salio mal'])
+    }
+
+
+})
+
+
+
+
+router.get('/todaslasasignaciones', async (req, res,) => {
+  
+
+    try {
+        estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono, nombre from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela ')
+    
+        res.json([estr])
+    } catch (error) {
+        res.send('algo salio mal')
+    }
+
+
+})
+
+
+
+router.post("/inscribir",  async (req, res) => {
+    const {  dni,   id_inscripcion, id_escuela, mesa} = req.body
+   
+  console.log(dni)
+  
+  
+    const persona = await pool.query('select * from personas where dni =?', [dni])
+    console.log(persona[0])
+    const inscripciones = await pool.query('select * from inscripciones where id =?', [id_inscripcion])
+    //////////////////////
+    
+
+    ////////////
+    try {
+     
+    
+  
+      
+  ///queda id_inscripcion
+   await pool.query('insert into asignaciones_fiscales set id_inscripcion=?, escuela=? ,mesa=?, dni=? ', [id_inscripcion,id_escuela,mesa,dni])
+  //
+  await pool.query('update inscripciones_fiscales set estado="Asignado a mesa" where id=?', [id_inscripcion])
+  
+     
+  
+      res.json('Realizado con exito ')
+  
+    } catch (error) {
+      console.log(error)
+      res.json('Error algo sucedio')
+    }
+  
+  
+  })
+
+  
+
+
+  
+
+  router.post('/crearmesa', async (req, res) => {
+    const { id_escuela,numero } = req.body
+
+    await pool.query('insert into mesas_fiscales set id_escuela=?, numero=?', [id_escuela, numero])
+    res.json('Realizado')
+
+  })
 
 
 router.post('/incripcionesid', async (req, res) => {
