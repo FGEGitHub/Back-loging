@@ -53,6 +53,20 @@ router.get('/datosusuarioporid/:dni',  async (req, res) => {
     
   })
   
+  
+router.get('/todaslasinscripcionesescuelas', async (req, res,) => {
+    
+
+    try {
+        estr = await pool.query('select * from excelescuelas ')
+        console.log(estr)
+        res.json(estr)
+    } catch (error) {
+        res.send('algo salio mal')
+    }
+
+
+})
 
 router.get('/todaslasinscripciones', async (req, res,) => {
     
@@ -73,7 +87,7 @@ router.get('/listademesas', async (req, res,) => {
 
     try {
         estr = await pool.query('select * from mesas_fiscales join (select id as id_esc, nombre from escuelas) as selec1 on mesas_fiscales.id_escuela=selec1.id_esc ')
-    console.log(estr)
+   
         res.json(estr)
     } catch (error) {
         console.log(error)
@@ -85,7 +99,32 @@ router.get('/listademesas', async (req, res,) => {
 
 
 
+router.get('/traermesas/:id_escuela', async (req, res,) => {
+const {id_escuela} = req.params
+console.log(id_escuela)
+const  mesas = await pool.query('select * from mesas_fiscales where id_escuela=?',[id_escuela])
+res.json(mesas)
 
+
+})
+
+
+
+router.get('/datosdemesas', async (req, res,) => {
+  //////  traer cantidad de mesas, mesas libres mesas ocupadas, 
+console.log('datos')
+    try {
+        let cant = await pool.query('select * from mesas_fiscales ')
+        let asig = await pool.query('select * from asignaciones_fiscales ')
+    console.log(cant.length)
+        res.json([cant.length,asig.length])
+    } catch (error) {
+        console.log(error)
+        res.send('algo salio mal')
+    }
+
+
+})
 router.get('/todaslasasignaciones', async (req, res,) => {
   
 
@@ -144,10 +183,16 @@ router.post("/inscribir",  async (req, res) => {
 
   router.post('/crearmesa', async (req, res) => {
     const { id_escuela,numero } = req.body
+    let existe = await pool.query('select * from mesas_fiscales where id_escuela=? and numero=?',[ id_escuela,numero])
+    if(existe.length >0 ){
+        res.json('Error ya existe la mesa')
+    }else{
 
-    await pool.query('insert into mesas_fiscales set id_escuela=?, numero=?', [id_escuela, numero])
-    res.json('Realizado')
-
+        await pool.query('insert into mesas_fiscales set id_escuela=?, numero=?', [id_escuela, numero])
+        res.json('Realizado')
+    
+    }
+   
   })
 
 
@@ -262,6 +307,188 @@ router.post('/incripcionesid', async (req, res) => {
 
 
 
+router.post('/incripcionesidescuelas', async (req, res) => {
+    const { id } = req.body
+
+    const estract = await pool.query('select * from excelescuelas  where id = ? ', [id])
+    const nombree = estract[0]['nombre']
+    console.log(nombree)
+
+    let mandar = []
+    // const workbook = XLSX.readFile(`./src/Excel/${nombree}`)
+
+    // const workbook = XLSX.readFile('./src/Excel/1665706467397-estr-cuentas_PosicionConsolidada.xls')
+
+    try {
+        const workbook = XLSX.readFile(path.join(__dirname, '../Excel/' + nombree))
+        const workbooksheets = workbook.SheetNames
+        const sheet = workbooksheets[0]
+
+        const dataExcel = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
+        //console.log(dataExcel)
+
+        let regex = /(\d+)/g;
+
+        for (const property in dataExcel) {
+
+
+
+
+            try {
+
+
+
+                try {
+
+
+
+
+                    nombre = dataExcel[property]['ESCUELA']
+
+                    circuito = dataExcel[property]['CIR']
+                    DNI = dataExcel[property]['DNI']
+
+                    nuevo = {
+                        nombre,
+                        circuito,
+
+                        DNI,
+
+                    }
+
+
+                    mandar.push(nuevo);
+
+
+                } catch (error) {
+                    console.log(error)
+                    nombre = dataExcel[property]['Nombre']
+                    apellido = dataExcel[property]['Apellido']
+                    dni = dataExcel[property]['D.N.I.']
+                    eleccion1 = dataExcel[property]['Selecciona el primer curso de mayor preferencia (1)']
+                    eleccion2 = dataExcel[property]['Selecciona el primer curso de mayor preferencia (2)']
+                    nuevo = {
+                        nombre: 'no se encontro archivo',
+                        apellido: 'no se encontro archivo',
+                        dni: 'no se encontro archivo',
+                        eleccion1: 'no se encontro archivo',
+                        eleccion2: 'no se encontro archivo',
+
+
+                    }
+                    mandar = [nuevo]
+
+                }
+
+
+
+            } catch (error) {
+                console.log(error)
+            }
+
+
+
+
+
+        }
+
+    } catch (error) {
+        console.log(error)
+    }
+    console.log(mandar)
+    res.json(mandar)
+
+
+})
+
+
+router.post('/cargarinscripcionesescuelas', async (req, res) => {
+    const { id } = req.body
+    console.log(id)
+    const estract = await pool.query('select * from excelescuelas where id = ? ', [id])
+    console.log(estract)
+    const nombree = estract[0]['nombre']
+    console.log(nombree)
+
+    let mandar = []
+    // const workbook = XLSX.readFile(`./src/Excel/${nombree}`)
+
+    // const workbook = XLSX.readFile('./src/Excel/1665706467397-estr-cuentas_PosicionConsolidada.xls')
+
+    try {
+        const workbook = XLSX.readFile(path.join(__dirname, '../Excel/' + nombree))
+        const workbooksheets = workbook.SheetNames
+        const sheet = workbooksheets[0]
+
+        const dataExcel = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
+        //console.log(dataExcel)
+
+
+
+
+
+
+        let a = 1
+
+        for (const property in dataExcel) {
+            a += 1
+        
+            escuela = dataExcel[property]['ESCUELA']
+         console.log(dataExcel[property]['ESCUELA'])
+        
+               
+                existe = await pool.query('select * from escuelas where nombre = ?', [escuela])
+           
+                try {
+                    ///////
+
+                    if (existe.length > 0) {
+
+            
+                        await pool.query('update escuelas set circuito=?  where nombre = ?', [dataExcel[property]['CIR'], dataExcel[property]['ESCUELA']])
+
+                    } else {
+                        ///crear nueva persona 
+
+                       nombre = dataExcel[property]['ESCUELA']
+                       circuito = dataExcel[property]['CIR']
+                       
+
+                        await pool.query('INSERT INTO escuelas set nombre =?, circuito=?', [nombre, circuito]);
+                    }
+                    /////////¿Actualmente  se encuentra estudiando? actividad adicional
+                    /////////////Tipo de empleo
+
+
+
+                }
+                //////
+                catch (error) {
+                    console.log(error)
+                }
+
+
+            
+
+
+            /* if ((dataExcel[property]['Sucursal']).includes(cuil_cuit)) {
+                estado = 'A'
+            }*/
+
+
+        }
+        res.json(mandar)
+    } catch (error) {
+        console.log(error)
+        res.send(error)
+
+    }
+
+
+
+
+})
+
 
 router.post('/cargarinscripciones', async (req, res) => {
     const { id } = req.body
@@ -291,11 +518,11 @@ router.post('/cargarinscripciones', async (req, res) => {
 
 
 
-        let a = 1
+ 
         let dni = undefined
+        let escuela = 'Sin definir'
         for (const property in dataExcel) {
-            a += 1
-            console.log('for')
+   
             dni = dataExcel[property]['DNI']
             console.log(dni)
             if (dni != undefined) {
@@ -308,7 +535,7 @@ router.post('/cargarinscripciones', async (req, res) => {
 
 
 
-                    if (existe.length > 0) {
+                    if (existe.length > 0) {//////si existe la personas
 
                         console.log(dni)
 
@@ -416,7 +643,14 @@ router.post('/cargarinscripciones', async (req, res) => {
                 }
 
 
-                let escuela = dataExcel[property]['Escuela']
+              
+                if ( dataExcel[property]['Escuela'] === undefined) {
+                    escuela = 'Sin definir'
+                } else {
+                    escuela =  dataExcel[property]['Escuela']
+
+                }
+            
                 exi = await pool.query('select * from escuelas where nombre =?', [escuela])
                 if (exi.length > 0) {
                     id_escuela = exi[0]['id']
@@ -426,12 +660,17 @@ router.post('/cargarinscripciones', async (req, res) => {
                     id_escuela = exi[0]['id']
                 }
 
-                console.log(id_escuela)
+              
 
                 try {
+                    let exisinscrip = await pool.query('select * from inscripciones_fiscales where  dni=? ', [])
+                        if (exisinscrip.length  > 0){
+                            console.log('ya inscripto')
+                        }else{
                     await pool.query('INSERT INTO inscripciones_fiscales set id_escuela=?, nombre=?, dni=?', [id_escuela, nombre, dni])
-
                     console.log('cargado')
+                  } 
+              
 
 
 
@@ -484,4 +723,29 @@ router.post('/subirprueba', fileUpload, async (req, res, done) => {
 })
 
 
+
+router.post('/subirpruebaescuelas', fileUpload, async (req, res, done) => {
+    const { formdata, file } = req.body
+
+    try {
+
+
+        const type = req.file.mimetype
+        const name = req.file.originalname
+        // const data = fs.readFileSync(path.join(__dirname, '../Excel' + req.file.filename))
+        fech = (new Date(Date.now())).toLocaleDateString()
+        console.log(9)
+        console.log(req.file.filename)
+
+        await pool.query('insert into excelescuelas set fecha=?, nombre=?', [fech, req.file.filename])
+        res.send('Imagen guardada con exito')
+    } catch (error) {
+        console.log(error)
+    }
+
+
+
+
+
+})
 module.exports = router
