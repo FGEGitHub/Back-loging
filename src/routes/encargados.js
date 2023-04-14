@@ -62,11 +62,34 @@ router.get('/alumnasdelcurso/:id', async (req, res) => {
   const id = req.params.id
   /////id: turno
   curso = await pool.query('select cursado.id idcursado,cursado.observaciones, personas.nombre, personas.apellido, personas.id as idpers, cursado.inscripcion from cursado join personas on cursado.id_persona = personas.id where id_turno=? and inscripcion="Confirmado"', [id])
+///curso es cursado  (lista de alumnas)
+
 
   clases = await pool.query('select * from clases where id_turno =?', [id])
-  mandar = []
-  totalpresentes = 0
-  totalausentes = 0
+let estadisticasclases = []
+
+
+for (xxx  in clases) {
+
+
+  let numero_de_clase= clases[xxx]['numero_clase']
+  let numero_presentes_calse= await pool.query('select * from asistencia  where asistencia="Presente" and id_clase=?',clases[xxx]['id'])
+  let numero_ausentes_calse= await pool.query('select * from asistencia  where asistencia="Ausente" and  id_clase=?',clases[xxx]['id'])
+
+
+  estadisticasclases.push({
+    presenteclase:numero_presentes_calse.length,
+    ausenteclase:numero_ausentes_calse.length,
+    numero:numero_de_clase
+
+  })
+        }
+        console.log(estadisticasclases)
+
+  let mandar = []
+  let totalpresentes = 0
+  let totalausentes = 0
+  let totalausentesjustificadas=0
   totalsintomar = 0
   for (ii in curso) {
     primerclase = "No"
@@ -74,7 +97,10 @@ router.get('/alumnasdelcurso/:id', async (req, res) => {
     ausente = 0
     sintomar = 0
 
+
+
     for (iiii in clases) {
+    
       asis = await pool.query('select * from asistencia where id_persona=? and id_clase =? ', [curso[ii]['idpers'], clases[iiii]['id']])
       if (asis.length === 0) {
         sintomar += 1
@@ -83,15 +109,20 @@ router.get('/alumnasdelcurso/:id', async (req, res) => {
         if (asis[0]['asistencia'] === 'Presente') {
           presente += 1
           totalpresentes += 1
-          console.log(clases[iiii]['numero_clase'] )
+       
           if (clases[iiii]['numero_clase'] === '1') {//primer clase
             primerclase = "Si"
           }
         } else {
           ausente += 1
           totalausentes += 1
+          if (asis[0]['asistencia'] === 'Ausente justificado') {
+            totalausentesjustificadas += 1
+          }
+          
         }
       }
+
 
     }
 
@@ -99,6 +130,7 @@ router.get('/alumnasdelcurso/:id', async (req, res) => {
       presente,
       ausente,
       sintomar,
+      justificadas: totalausentesjustificadas,
       observaciones:curso[ii]['observaciones'],
       idcursado: curso[ii]['idcursado'],
       nombre: curso[ii]['nombre'],
@@ -110,6 +142,7 @@ router.get('/alumnasdelcurso/:id', async (req, res) => {
     }
 
     mandar.push(nuevo)
+    
   }
 
 
@@ -125,9 +158,18 @@ router.get('/alumnasdelcurso/:id', async (req, res) => {
 
   ////////id usuario encargado
 
-  res.json([mandar, datos]);
+
+ 
+
+
+  ////
+
+  res.json([mandar, datos,estadisticasclases]);
   //res.render('index')
 })
+
+
+
 
 
 
