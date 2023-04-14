@@ -66,6 +66,13 @@ router.get('/alumnasdelcurso/:id', async (req, res) => {
 
 
   clases = await pool.query('select * from clases where id_turno =?', [id])
+  let confirmadosc = await pool.query('select * from cursado where inscripcion = "Confirmado" and id_turno =?',[id])
+  let rechazadosc = await pool.query('select * from cursado where inscripcion = "Rechazado" and id_turno =?',[id])
+  let datosconfirmados={
+    confirmados:confirmadosc.length,
+    rechazados:rechazadosc.length
+
+  }
 let estadisticasclases = []
 
 
@@ -164,7 +171,7 @@ for (xxx  in clases) {
 
   ////
 
-  res.json([mandar, datos,estadisticasclases]);
+  res.json([mandar, datos,estadisticasclases,datosconfirmados]);
   //res.render('index')
 })
 
