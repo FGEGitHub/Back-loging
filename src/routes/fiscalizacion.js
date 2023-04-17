@@ -116,8 +116,16 @@ console.log('datos')
     try {
         let cant = await pool.query('select * from mesas_fiscales ')
         let asig = await pool.query('select * from asignaciones_fiscales ')
-    console.log(cant.length)
-        res.json([cant.length,asig.length])
+let mesas_sin_asignar=[]
+        for (const index_mesas in cant) {
+            let existe_aux = await pool.query('select * from inscripciones_fiscales where id_escuela =? ',[cant[index_mesas]['id']])
+            if (existe_aux.length === 0){
+                mesas_sin_asignar.push(cant[index_mesas])
+            }
+        }
+
+  
+        res.json([cant.length,asig.length,mesas_sin_asignar.length])
     } catch (error) {
         console.log(error)
         res.send('algo salio mal')
@@ -139,6 +147,113 @@ router.get('/todaslasasignaciones', async (req, res,) => {
 
 })
 
+
+
+router.post("/enviarinscripcion",  async (req, res) => {
+    const {  dni,   nombre, telefono, domicilio,movilidad,id_escuela,id_escuela2,vegano,fiscal_antes} = req.body
+    
+    console.log('existe')
+    try {
+        ///////
+
+
+        existe = await pool.query('select * from personas_fiscalizacion where dni = ?', [dni])
+
+        if (existe.length > 0) {//////si existe la personas
+
+            console.log(dni)
+
+            ///actualiza
+
+
+            if (nombre === undefined) {
+                nombre = 'No'
+            } 
+            if (domicilio === undefined) {
+                domicilio = 'No'
+            }
+            if (telefono === undefined) {
+                telefono = 'No'
+            } 
+            if (movilidad=== undefined) {
+                movilidad = 'No'
+            } 
+            if (vegano === undefined) {
+                vegano = 'No'
+            } else
+            if (fiscal_antes === undefined) {
+                fiscal_antes = 'No'
+            } 
+            await pool.query('update personas_fiscalizacion set nombre=?,domicilio =?,telefono=?,movilidad=?,vegano=?, fiscal_antes=?  where dni = ?', [nombre, domicilio, telefono, movilidad, vegano, fiscal_antes, dni])
+
+
+        } else {
+            ///crear nueva persona 
+
+            if (nombre=== undefined) {
+                nombre = 'No'
+            } 
+            if (domicilio === undefined) {
+                domicilio = 'No'
+            } 
+            if (telefono === undefined) {
+                telefono = 'No'
+            } 
+            if (movilidad === undefined) {
+                movilidad = 'No'
+            } 
+            if (vegano=== undefined) {
+                vegano = 'No'
+            } 
+            
+            if (fiscal_antes === undefined) {
+                fiscal_antes = 'No'
+            } 
+
+
+            await pool.query('INSERT INTO personas_fiscalizacion set nombre=?,domicilio =?,telefono=?,movilidad=?,vegano=?, fiscal_antes=?,dni=?', [nombre, domicilio, telefono, movilidad, vegano, fiscal_antes, dni]);
+        }
+        /////////¿Actualmente  se encuentra estudiando? actividad adicional
+        /////////////Tipo de empleo
+
+
+
+    }
+    //////
+    catch (error) {
+        console.log(error)
+    }
+
+
+  
+    if ( id_escuela === undefined) {
+        id_escuela = 'Sin definir'
+    }
+
+
+ 
+  
+
+    try {
+        let exisinscrip = await pool.query('select * from inscripciones_fiscales where  dni=? ', [dni])
+            if (exisinscrip.length  > 0){
+                res.json('Error fiscal ya inscripto')
+            }else{
+        await pool.query('INSERT INTO inscripciones_fiscales set id_escuela=?,id_escuela2=?, nombre=?, dni=?', [id_escuela,id_escuela2, nombre, dni])
+        res.json('inscripto correctamente')
+      } 
+  
+
+
+
+    } catch (e) {
+        console.log(e)
+        res.json('Error, algo sucedio')
+    }
+
+
+   
+})
 
 
 router.post("/inscribir",  async (req, res) => {
@@ -467,9 +582,15 @@ router.post('/cargarinscripcionesescuelas', async (req, res) => {
                     console.log(error)
                 }
 
-
-            
-
+                let id_esc = await pool.query('select * from escuelas where nombre = ? ',[dataExcel[property]['ESCUELA']])
+                numero = dataExcel[property]['MESA']
+                let existe_mesa = await pool.query('select * from mesas_fiscales where numero=? and id_escuela =?',[numero,id_esc[0]['id'] ])
+                if (existe_mesa.length>0){
+                    console.log('ya existe mesa')
+                }else{
+                    await pool.query('INSERT INTO mesas_fiscales set numero =?, id_escuela=?', [numero, id_esc[0]['id']]);
+                    console.log('mesa_cargada')
+                }
 
             /* if ((dataExcel[property]['Sucursal']).includes(cuil_cuit)) {
                 estado = 'A'
