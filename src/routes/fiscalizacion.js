@@ -5,7 +5,7 @@ const pool = require('../database')
 const multer = require('multer')
 const XLSX = require('xlsx')
 const path = require('path')
-
+const passport= require('passport')
 
 
 const diskstorage = multer.diskStorage({
@@ -24,7 +24,7 @@ const fileUpload = multer({
 
 router.get('/todasincripciones', async (req, res,) => {
 
-    let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona join (select id as id_escuelaa, nombre as nombre_escuela from escuelas) as selec2 on inscripciones_fiscales.id_escuela=selec2.id_escuelaa where inscripciones_fiscales.estado="Pendiente" ' )
+    let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco, telefono,telefono2 from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona  where inscripciones_fiscales.estado="Pendiente" ' )
     res.json([inscri])
 })
 
@@ -150,7 +150,7 @@ router.get('/todaslasasignaciones', async (req, res,) => {
 
 
 router.post("/enviarinscripcion",  async (req, res) => {
-    const {  dni,   nombre, telefono, domicilio,movilidad,id_escuela,id_escuela2,vegano,fiscal_antes} = req.body
+    let {  dni,   nombre, telefono, telefono2,apellido} = req.body
     
     console.log('existe')
     try {
@@ -159,59 +159,25 @@ router.post("/enviarinscripcion",  async (req, res) => {
 
         existe = await pool.query('select * from personas_fiscalizacion where dni = ?', [dni])
 
-        if (existe.length > 0) {//////si existe la personas
-
-            console.log(dni)
-
-            ///actualiza
+        if (existe.length === 0) {//////si existe la personas
 
 
-            if (nombre === undefined) {
-                nombre = 'No'
-            } 
-            if (domicilio === undefined) {
-                domicilio = 'No'
-            }
-            if (telefono === undefined) {
-                telefono = 'No'
-            } 
-            if (movilidad=== undefined) {
-                movilidad = 'No'
-            } 
-            if (vegano === undefined) {
-                vegano = 'No'
-            } else
-            if (fiscal_antes === undefined) {
-                fiscal_antes = 'No'
-            } 
-            await pool.query('update personas_fiscalizacion set nombre=?,domicilio =?,telefono=?,movilidad=?,vegano=?, fiscal_antes=?  where dni = ?', [nombre, domicilio, telefono, movilidad, vegano, fiscal_antes, dni])
-
-
-        } else {
             ///crear nueva persona 
 
             if (nombre=== undefined) {
                 nombre = 'No'
             } 
-            if (domicilio === undefined) {
-                domicilio = 'No'
-            } 
+        
             if (telefono === undefined) {
                 telefono = 'No'
             } 
-            if (movilidad === undefined) {
-                movilidad = 'No'
-            } 
-            if (vegano=== undefined) {
-                vegano = 'No'
+            if (telefono2 === undefined) {
+                telefono2 = 'No'
             } 
             
-            if (fiscal_antes === undefined) {
-                fiscal_antes = 'No'
-            } 
+      
 
-
-            await pool.query('INSERT INTO personas_fiscalizacion set nombre=?,domicilio =?,telefono=?,movilidad=?,vegano=?, fiscal_antes=?,dni=?', [nombre, domicilio, telefono, movilidad, vegano, fiscal_antes, dni]);
+            await pool.query('INSERT INTO personas_fiscalizacion set nombre=?,apellido =?,telefono=?,telefono2=?,dni=?', [nombre, apellido, telefono, telefono2, dni]);
         }
         /////////¿Actualmente  se encuentra estudiando? actividad adicional
         /////////////Tipo de empleo
@@ -226,12 +192,7 @@ router.post("/enviarinscripcion",  async (req, res) => {
 
 
   
-    if ( id_escuela === undefined) {
-        id_escuela = 'Sin definir'
-    }
 
-
- 
   
 
     try {
@@ -239,7 +200,7 @@ router.post("/enviarinscripcion",  async (req, res) => {
             if (exisinscrip.length  > 0){
                 res.json('Error fiscal ya inscripto')
             }else{
-        await pool.query('INSERT INTO inscripciones_fiscales set id_escuela=?,id_escuela2=?, nombre=?, dni=?', [id_escuela,id_escuela2, nombre, dni])
+        await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?', [nombre,apellido,dni])
         res.json('inscripto correctamente')
       } 
   
@@ -257,7 +218,7 @@ router.post("/enviarinscripcion",  async (req, res) => {
 
 
 router.post("/inscribir",  async (req, res) => {
-    const {  dni,   id_inscripcion, id_escuela, mesa} = req.body
+    const {  dni,   id_inscripcion, id_escuela, mesa,vegano,movilidad,domicilio,fiscal_antes} = req.body
    
   console.log(dni)
   
@@ -275,9 +236,9 @@ router.post("/inscribir",  async (req, res) => {
   
       
   ///queda id_inscripcion
-   await pool.query('insert into asignaciones_fiscales set id_inscripcion=?, escuela=? ,mesa=?, dni=? ', [id_inscripcion,id_escuela,mesa,dni])
+   await pool.query('insert into asignaciones_fiscales set id_inscripcion=?, escuela=? ,mesa=?, dni=? ', [id_inscripcion,id_escuela,id_escuela2,mesa,dni])
   //
-  await pool.query('update inscripciones_fiscales set estado="Asignado a mesa" where id=?', [id_inscripcion])
+  await pool.query('update inscripciones_fiscales set estado="Asignado a mesa",vegano=?, movilidad=?,domicilio=?, fiscal_antes=? where id=?', [vegano,movilidad,domicilio,fiscal_antes,id_inscripcion])
   
      
   
@@ -292,9 +253,21 @@ router.post("/inscribir",  async (req, res) => {
   })
 
   
-
-
+  router.get('/todos/', async (req, res) => {
+   
   
+    const etc = await pool.query ('select * from usuarios where nivel=5 or nivel=6 or nivel=7' )
+console.log(etc)
+  res.json(etc);
+//res.render('index')
+})
+
+router.post('/signupp', passport.authenticate('local.registroadmin', {
+    successRedirect: '/exitosignup',
+    failureRedirect:'/noexito',
+    failureFlash:true
+
+}))
 
   router.post('/crearmesa', async (req, res) => {
     const { id_escuela,numero } = req.body
