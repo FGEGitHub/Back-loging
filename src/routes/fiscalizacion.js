@@ -150,20 +150,27 @@ router.get('/todaslasasignaciones', async (req, res,) => {
 
 
 router.post("/enviarinscripcion",  async (req, res) => {
-    let {  dni,   nombre, telefono, telefono2,apellido} = req.body
+    let {  dni,   nombre, telefono, telefono2,apellido,id_aliado} = req.body
     
-    console.log('existe')
+
     try {
         ///////
-
+        
 
         existe = await pool.query('select * from personas_fiscalizacion where dni = ?', [dni])
-
+        let nombre_aliado =''
+        if (id_aliado=== undefined) {
+            nombre_aliado = 'Autoinscripcion'
+        } else{
+             nombre_aliadoo = await pool.query('select * from usuarios where id =?',[id_aliado])
+              nombre_aliado =nombre_aliadoo[0]['nombre']
+        }
+        console.log(nombre_aliado)
         if (existe.length === 0) {//////si existe la personas
 
 
             ///crear nueva persona 
-
+          
             if (nombre=== undefined) {
                 nombre = 'No'
             } 
@@ -183,24 +190,14 @@ router.post("/enviarinscripcion",  async (req, res) => {
         /////////////Tipo de empleo
 
 
-
-    }
-    //////
-    catch (error) {
-        console.log(error)
-    }
-
-
-  
-
-  
-
-    try {
+  console.log(nombre_aliado)
+    
         let exisinscrip = await pool.query('select * from inscripciones_fiscales where  dni=? ', [dni])
+ 
             if (exisinscrip.length  > 0){
                 res.json('Error fiscal ya inscripto')
             }else{
-        await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?', [nombre,apellido,dni])
+        await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?, cargadopor=?', [nombre,apellido,dni,nombre_aliado])
         res.json('inscripto correctamente')
       } 
   
