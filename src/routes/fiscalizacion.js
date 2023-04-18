@@ -52,6 +52,20 @@ router.get('/datosusuarioporid/:dni',  async (req, res) => {
 
     
   })
+
+  router.get('/traerescuelasymesas/:id',  async (req, res) => {
+    const id = req.params.id
+  
+  
+    const etc = await pool.query('select * from escuelas  ')
+    const mesas = await pool.query('select * from mesas_fiscales where id_escuela=?  ',[id])
+  
+    res.json([etc,mesas]);
+  
+  
+
+    
+  })
   
   
 router.get('/todaslasinscripcionesescuelas', async (req, res,) => {
@@ -87,6 +101,20 @@ router.get('/listademesas', async (req, res,) => {
 
     try {
         estr = await pool.query('select * from mesas_fiscales join (select id as id_esc, nombre from escuelas) as selec1 on mesas_fiscales.id_escuela=selec1.id_esc ')
+   
+        res.json(estr)
+    } catch (error) {
+        console.log(error)
+        res.json(['algo salio mal'])
+    }
+
+
+})
+router.get('/listadeescuelas', async (req, res,) => {
+  
+
+    try {
+        estr = await pool.query('select * from escuelas ')
    
         res.json(estr)
     } catch (error) {
