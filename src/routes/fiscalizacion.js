@@ -112,10 +112,11 @@ res.json(mesas)
 
 router.get('/datosdemesas', async (req, res,) => {
   //////  traer cantidad de mesas, mesas libres mesas ocupadas, 
-console.log('datos')
+
     try {
         let cant = await pool.query('select * from mesas_fiscales ')
         let asig = await pool.query('select * from asignaciones_fiscales ')
+        let esc = await pool.query('select * from escuelas ')
 let mesas_sin_asignar=[]
         for (const index_mesas in cant) {
             let existe_aux = await pool.query('select * from inscripciones_fiscales where id_escuela =? ',[cant[index_mesas]['id']])
@@ -125,7 +126,7 @@ let mesas_sin_asignar=[]
         }
 
   
-        res.json([cant.length,asig.length,mesas_sin_asignar.length])
+        res.json([cant.length,asig.length,mesas_sin_asignar.length,esc.length])
     } catch (error) {
         console.log(error)
         res.send('algo salio mal')
@@ -190,7 +191,7 @@ router.post("/enviarinscripcion",  async (req, res) => {
         /////////////Tipo de empleo
 
 
-  console.log(nombre_aliado)
+ 
     
         let exisinscrip = await pool.query('select * from inscripciones_fiscales where  dni=? ', [dni])
  
