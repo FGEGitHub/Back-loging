@@ -177,6 +177,33 @@ router.get('/todaslasasignaciones', async (req, res,) => {
 })
 
 
+router.post("/borrarescuela",  async (req, res) => {
+    let {  decision,   id, id_escuela} = req.body
+    console.log(decision)
+    console.log(id)
+    console.log(id_escuela)
+
+if (decision==="Si"){
+    await pool.query('update mesas_fiscales set id_escuela=? where  id_escuela = ?', [id_escuela,id])
+    //}
+   // let mesas_a_trasladar   = await pool.query('select * from mesas_fiscales where id_escuela =? ',[id])
+  //  for (mesas_tras in mesas_a_trasladar){
+    //    await pool.query('update mesas_fiscales set id_escuela=?  id = ?', [id_escuela,id])
+//}
+
+}
+await pool.query('delete  from  escuelas where id = ?',[id])
+
+res.json('Realizado')
+
+
+
+
+})
+
+
+
+
 
 router.post("/enviarinscripcion",  async (req, res) => {
     let {  dni,   nombre, telefono, telefono2,apellido,id_aliado} = req.body
