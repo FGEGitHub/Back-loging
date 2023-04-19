@@ -7,7 +7,7 @@ const {isLoggedIn,isLoggedInn,isLoggedInn2, } = require('../lib/auth')
 router.get('/todos/', async (req, res) => {
    
   
-    const etc = await pool.query ('select * from usuarios' )
+    const etc = await pool.query ('select * from usuarios where nivel =1 or nivel = 2 or nivel = 3 or nivel = 4' )
 console.log(etc)
   res.json(etc);
 //res.render('index')

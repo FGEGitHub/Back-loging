@@ -246,8 +246,12 @@ router.post("/enviarinscripcion",  async (req, res) => {
         /////////////Tipo de empleo
 
 
- 
-    
+        let telefonoregistrado = await pool.query('select * from inscripciones_fiscales join (select dni as dni_pers, telefono, telefono2 from personas_fiscalizacion) as selec on inscripciones_fiscales.dni = selec.dni_pers where  telefono=? ', [telefono])
+    if (telefonoregistrado.length>0){
+        let dnicodif = telefonoregistrado[0]['dni']
+        dnicodif = '****'+dnicodif[dnicodif.length-3]+dnicodif[dnicodif.length-2]+dnicodif[dnicodif.length-1]
+        res.json('Error ya se posee ese numero de telefono, pertenece a '+dnicodif)
+    }else{
         let exisinscrip = await pool.query('select * from inscripciones_fiscales where  dni=? ', [dni])
  
             if (exisinscrip.length  > 0){
@@ -255,7 +259,7 @@ router.post("/enviarinscripcion",  async (req, res) => {
             }else{
         await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?, cargadopor=?', [nombre,apellido,dni,nombre_aliado])
         res.json('inscripto correctamente')
-      } 
+      } }
   
 
 
