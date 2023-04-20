@@ -196,6 +196,23 @@ router.get('/todaslasasignaciones', async (req, res,) => {
 })
 
 
+router.post("/crearescuela",  async (req, res) => {
+    let {  nombre,   circuito, observacion} = req.body
+    
+    if (observacion===undefined){
+ 
+        observacion="Ninguna"
+}
+try {
+    await pool.query('insert into escuelas set nombre=?, circuito=? ,observacion=? ', [nombre,circuito,observacion])
+    res.json("Cargado")
+} catch (error) {
+    console.log(error)
+    res.json("No Cargado")
+}
+
+})
+
 router.post("/borrarescuela",  async (req, res) => {
     let {  decision,   id, id_escuela} = req.body
     console.log(decision)
