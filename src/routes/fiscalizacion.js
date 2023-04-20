@@ -24,9 +24,28 @@ const fileUpload = multer({
 
 router.get('/todasincripciones', async (req, res,) => {
 
-    let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco, telefono,telefono2 from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona  where inscripciones_fiscales.estado="Pendiente" ' )
+    let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco, telefono,telefono2 from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona left join (select id as id_aliado, nombre as nombre_aliado from usuarios)  as selec2 on inscripciones_fiscales.cargadopor=selec2.id_aliado  where inscripciones_fiscales.estado="Pendiente" ' )
     res.json([inscri])
 })
+
+
+
+router.get('/traerincripcionesdealiado/:id',  async (req, res) => {
+    const id = req.params.id
+ 
+  try { 
+       const etc= await pool.query('select id, dni, apellidoo, nombree, telefono, telefono2 from inscripciones_fiscales join (select dni as dni_pers, nombre as nombree, apellido as apellidoo, telefono, telefono2 from personas_fiscalizacion)as selec on dni=dni_pers where cargadopor =?', [id])
+       
+    res.json(etc);
+  } catch (error) {
+    console.log(error)
+    res.json([]);
+  }
+
+
+    
+  })
+
 
 router.get('/datosusuarioporid/:dni',  async (req, res) => {
     const dni = req.params.dni
@@ -217,11 +236,7 @@ router.post("/enviarinscripcion",  async (req, res) => {
         let nombre_aliado =''
         if (id_aliado=== undefined) {
             nombre_aliado = 'Autoinscripcion'
-        } else{
-             nombre_aliadoo = await pool.query('select * from usuarios where id =?',[id_aliado])
-              nombre_aliado =nombre_aliadoo[0]['nombre']
-        }
-        console.log(nombre_aliado)
+        } 
         if (existe.length === 0) {//////si existe la personas
 
 
@@ -257,7 +272,7 @@ router.post("/enviarinscripcion",  async (req, res) => {
             if (exisinscrip.length  > 0){
                 res.json('Error fiscal ya inscripto')
             }else{
-        await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?, cargadopor=?', [nombre,apellido,dni,nombre_aliado])
+        await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?, cargadopor=?', [nombre,apellido,dni,id_aliado])
         res.json('inscripto correctamente')
       } }
   
@@ -310,6 +325,23 @@ router.post("/inscribir",  async (req, res) => {
   })
 
   
+
+  
+  router.get('/borrarinscripcion/:id', async (req, res) => {
+    const id = req.params.id
+try {
+  
+       await pool.query('delete  from  inscripciones_fiscales where id = ?',[id])
+       res.json("Realizado")
+} catch (error) {
+    res.json("No Realizado")
+}
+ 
+
+
+    
+})
+
   router.get('/todos/', async (req, res) => {
    
   
