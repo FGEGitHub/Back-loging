@@ -187,7 +187,14 @@ router.post("/cambiarestadocurado", async (req, res) => {
   console.log(id_cursado)
   console.log(observaciones)
 try {
-  await pool.query('update cursado set observaciones = ? where id=?', [ observaciones, id_cursado])
+ await pool.query('update cursado set observaciones = ? where id=?', [ observaciones, id_cursado])
+const nombre_curso = await pool.query('select * from cursado join (select id as idcurso, nombre as nombrecurso from cursos) as selec1 on cursado.id_curso=selec1.idcurso where id =? ',[id_cursado])
+console.log(nombre_curso)
+if (observaciones =='Finalizado'){
+  await pool.query('insert cursos_realizados  set nombre_curso=?, id_cursado=?, id_persona=?, fecha_carga=?', [nombre_curso[0]['nombrecurso'],id_cursado,nombre_curso[0]['id_persona'],(new Date(Date.now())).toLocaleDateString()])
+
+}
+
   res.json('Realizado')
 } catch (error) {
   console.log(error)

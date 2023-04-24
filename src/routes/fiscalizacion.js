@@ -267,9 +267,10 @@ router.post("/enviarinscripcion",  async (req, res) => {
 
         existe = await pool.query('select * from personas_fiscalizacion where dni = ?', [dni])
         let nombre_aliado =''
-        if (id_aliado=== undefined) {
-            nombre_aliado = 'Autoinscripcion'
+        if (id_aliado== undefined) {
+            id_aliado = 'Autoinscripcion'
         } 
+       
         if (existe.length === 0) {//////si existe la personas
 
 
@@ -305,7 +306,8 @@ router.post("/enviarinscripcion",  async (req, res) => {
             if (exisinscrip.length  > 0){
                 res.json('Error fiscal ya inscripto')
             }else{
-        await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?, cargadopor=?', [nombre,apellido,dni,id_aliado])
+               
+        await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?, cargadopor=?, fecha_carga=?', [nombre,apellido,dni,id_aliado,(new Date(Date.now())).toLocaleDateString()])
         res.json('inscripto correctamente')
       } }
   
