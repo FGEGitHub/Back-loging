@@ -213,6 +213,22 @@ try {
 
 })
 
+
+router.post("/modificarescuela",  async (req, res) => {
+    let {  nombre,   circuito, id} = req.body
+    
+
+try {
+    await pool.query('update escuelas set nombre=?, circuito =? where  id = ?', [nombre,   circuito, id])
+    res.json("Modificado")
+} catch (error) {
+    console.log(error)
+    res.json("No modificado")
+}
+
+})
+
+
 router.post("/borrarescuela",  async (req, res) => {
     let {  decision,   id, id_escuela} = req.body
     console.log(decision)
