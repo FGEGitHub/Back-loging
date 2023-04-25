@@ -234,6 +234,15 @@ try {
 })
 
 
+
+
+router.post("/traerestadisticasdeescuelas",  async (req, res) => {
+    let {  id1,id2} = req.body
+    console.log(id1)
+    console.log(id2)
+})
+
+
 router.post("/modificarescuela",  async (req, res) => {
     let {  nombre,   circuito, id} = req.body
     
