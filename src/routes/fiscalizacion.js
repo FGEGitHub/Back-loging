@@ -63,7 +63,7 @@ router.get('/datosusuarioporid/:dni',  async (req, res) => {
     const dni = req.params.dni
   
   
-    const etc = await pool.query('select * from escuelas  ')
+    const etc = await pool.query('select * from escuelas  order by nombre ')
   
     res.json(etc);
   
@@ -181,6 +181,26 @@ let mesas_sin_asignar=[]
 
 
 })
+
+
+
+
+
+router.get('/traerpaso2inscrip', async (req, res,) => {
+  
+
+    try {
+        estr = await pool.query('select * from inscripciones_fiscales join (select dni as dniper,telefono, nombre as nombrepersona, apellido as apellidopersona from personas_fiscalizacion) as selec1 on inscripciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on inscripciones_fiscales.id_escuela=selec2.idescuela join (select id as idescuela2, nombre as nombreescuela2 from escuelas) as selec3 on inscripciones_fiscales.id_escuela2=selec3.idescuela2')
+    
+        res.json(estr)
+    } catch (error) {
+        console.log(error)
+        res.send(['algo salio mal'])
+    }
+
+
+})
+
 router.get('/todaslasasignaciones', async (req, res,) => {
   
 
@@ -325,7 +345,7 @@ router.post("/enviarinscripcion",  async (req, res) => {
 
 
 router.post("/inscribir",  async (req, res) => {
-    const {  dni,   id_inscripcion, id_escuela, mesa,vegano,movilidad,domicilio,fiscal_antes} = req.body
+    const {  dni,   id_inscripcion, id_escuela,id_escuela2, mesa,vegano,movilidad,domicilio,fiscal_antes} = req.body
    
   console.log(dni)
   
@@ -343,9 +363,9 @@ router.post("/inscribir",  async (req, res) => {
   
       
   ///queda id_inscripcion
-   await pool.query('insert into asignaciones_fiscales set id_inscripcion=?, escuela=? ,mesa=?, dni=? ', [id_inscripcion,id_escuela,id_escuela2,mesa,dni])
-  //
-  await pool.query('update inscripciones_fiscales set estado="Asignado a mesa",vegano=?, movilidad=?,domicilio=?, fiscal_antes=? where id=?', [vegano,movilidad,domicilio,fiscal_antes,id_inscripcion])
+ //  await pool.query('insert into asignaciones_fiscales set id_inscripcion=?, escuela=? ,mesa=?, dni=? ', [id_inscripcion,id_escuela,id_escuela2,mesa,dni])
+ await pool.query('update personas_fiscalizacion set vegano=?, movilidad=?,domicilio=?, fiscal_antes=?  where dni=?', [vegano,movilidad,domicilio,fiscal_antes,dni])
+  await pool.query('update inscripciones_fiscales set estado="Contactado", id_escuela=?, id_escuela2=? where id=?', [id_escuela,id_escuela2,id_inscripcion])
   
      
   
