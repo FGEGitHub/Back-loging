@@ -238,8 +238,19 @@ try {
 
 router.post("/traerestadisticasdeescuelas",  async (req, res) => {
     let {  id1,id2} = req.body
-    console.log(id1)
-    console.log(id2)
+
+   
+ const cant1= await pool.query('select * from mesas_fiscales where id_escuela=?',[id1])
+ const cant2= await pool.query('select * from mesas_fiscales where id_escuela=?',[id2])
+ const datos_escuelas={
+    cantidad_escuela1:cant1.length,
+    cantidad_escuela2:cant2.length
+ }
+ res.json(datos_escuelas)
+
+// mostrar  cuantas mesas tiene, cuantas ya se asignaron 
+
+
 })
 
 
