@@ -298,7 +298,7 @@ res.json('Realizado')
 
 
 router.post("/enviarinscripcion",  async (req, res) => {
-    let {  dni,   nombre, telefono, telefono2,apellido,id_aliado} = req.body
+    let {  dni, como_se_entero,nombre_referido, apellido_referido, nombre, telefono, telefono2,apellido,id_aliado} = req.body
     
 
     try {
@@ -310,7 +310,16 @@ router.post("/enviarinscripcion",  async (req, res) => {
         if (id_aliado== undefined) {
             id_aliado = 'Autoinscripcion'
         } 
-       
+        if (como_se_entero== undefined) {
+            como_se_entero = 'Sin definir'
+        } 
+        if (apellido_referido== undefined) {
+            apellido_referido = 'Sin definir'
+        } 
+        
+        if (nombre_referido== undefined) {
+            nombre_referido = 'Sin definir'
+        }
         if (existe.length === 0) {//////si existe la personas
 
 
@@ -347,8 +356,8 @@ router.post("/enviarinscripcion",  async (req, res) => {
                 res.json('Error fiscal ya inscripto')
             }else{
                
-        await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?, cargadopor=?, fecha_carga=?', [nombre,apellido,dni,id_aliado,(new Date(Date.now())).toLocaleDateString()])
-        res.json('inscripto correctamente')
+        await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?, cargadopor=?, fecha_carga=?,como_se_entero=?,apellido_referido=?,nombre_referido=?', [nombre,apellido,dni,id_aliado,(new Date(Date.now())).toLocaleDateString(),como_se_entero,apellido_referido,nombre_referido])
+        res.json('inscripto correctamente, muchas gracias por completar, por favor aguarda en unos dias nos comunicaremos al numero de telefono registrado')
       } }
   
 
