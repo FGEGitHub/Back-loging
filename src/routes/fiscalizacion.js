@@ -508,7 +508,7 @@ try {
   router.get('/todos/', async (req, res) => {
    
   
-    const etc = await pool.query ('select * from usuarios where nivel=5 or nivel=6 or nivel=7' )
+    const etc = await pool.query ('select * from usuarios where nivel=5 or nivel=6 or nivel=7 or nivel=8' )
 console.log(etc)
   res.json(etc);
 //res.render('index')
