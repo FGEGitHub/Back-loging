@@ -123,11 +123,12 @@ passport.use('local.registroadmin', new LocalStrategy({
     passReqToCallback: 'true'
 }, async (req, usuario, password, done) => {
 
-    const { nombre, mail, nivel } = req.body
+    let { nombre, mail, nivel } = req.body
     //  const razon = await pool.query('Select razon from clientes where usuario like  ?', [usuario]) seleccionar razon
+    if (mail== undefined) {
+        mail = 'Sin definir'
+    } 
 
-
-    const habilitado = 'NO'
     const newUser = {
         password,
         usuario,
@@ -148,9 +149,11 @@ passport.use('local.registroadmin', new LocalStrategy({
            newUser.password = await helpers.encryptPassword(password)
 
             try {
+                console.log("asd1")
                 const result = await pool.query('INSERT INTO usuarios  set  usuario=?,nombre=?,mail=?,nivel=?,password=?', [ usuario,nombre, mail,nivel,newUser.password])
+                console.log("asd2")
                 newUser.id = result.insertId// porque newuser no tiene el id
-
+                console.log("asd3")
                 return done(null, newUser)// para continuar, y devuelve el newUser para que almacene en una sesion
 
             } catch (error) {
