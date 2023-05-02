@@ -565,6 +565,18 @@ router.post("/enviarinscripcionadmin", async (req, res) => {
 
 })
 
+router.post("/modificarmesa", async (req, res) => {
+    let { id, cantidad } = req.body
+console.log(cantidad)
+try {
+    await pool.query('update mesas_fiscales set cantidad=?  where id=?', [cantidad,id])
+    res.json('Realizado')
+} catch (error) {
+    console.log(error)
+    res.json('No Realizado')
+}
+
+})
 
 router.post("/enviarinscripcion", async (req, res) => {
     let { dni, como_se_entero, nombre_referido, apellido_referido, nombre, telefono, telefono2, apellido, id_aliado } = req.body
