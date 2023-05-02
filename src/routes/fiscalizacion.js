@@ -23,14 +23,61 @@ const fileUpload = multer({
 router.get('/traerincripcionesdealiadoadmin/:id',  async (req, res) => {
     const id = req.params.id
  
-  try { 
-       const etc= await pool.query('select * from inscripciones_fiscales  where cargadopor =?', [id])
+       const inscri2= await pool.query('select * from inscripciones_fiscales  where cargadopor =?', [id])
+
+       let envi = []
+       for (inscripcion in inscri2) {
+        if (inscri2[inscripcion]['dni']== "Sin definir"){
+
+            if (inscri2[inscripcion]['nombre']== undefined){
+                persona_auxiliar =  await pool.query('select * from personas_fiscalizacion where apellido = ? ', [inscri2[inscripcion]['apellido']])
+            }else{
+              if (inscri2[inscripcion]['apellido']== undefined){
+                persona_auxiliar =  await pool.query('select * from personas_fiscalizacion where nombre = ? ', [inscri2[inscripcion]['nombre']])
+
+                }else{
+                    persona_auxiliar =  await pool.query('select * from personas_fiscalizacion where nombre = ? and apellido =? ', [inscri2[inscripcion]['nombre'],inscri2[inscripcion]['apellido']])
+                 
+                }
+            }
+            
+
+
+
+
+
+        }else{
+            persona_auxiliar= await pool.query('select * from personas_fiscalizacion where dni= ? ', [inscri2[inscripcion]['dni']])
+        }
+     
+
+
+        let nuev = {
+            id: inscri2[inscripcion]['id'],
+            dni: inscri2[inscripcion]['dni'],
+            nombre: inscri2[inscripcion]['nombre'], 
+            apellido: inscri2[inscripcion]['apellido'],
+            fecha_carga: inscri2[inscripcion]['fecha_carga'],
+            telefono: persona_auxiliar[0]['telefono'],
+            telefono2: persona_auxiliar[0]['telefono2'],
+            id_aliado: inscri2[inscripcion]['id_aliado'],
+            nombre_aliado: inscri2[inscripcion]['nombre_aliado']
+        }
+        envi.push(nuev)
+
+
+
+
+
+
+
+
+       }
+
+console.log(envi)
        
-    res.json(etc);
-  } catch (error) {
-    console.log(error)
-    res.json([]);
-  }
+    res.json(envi)
+
 
 
     
