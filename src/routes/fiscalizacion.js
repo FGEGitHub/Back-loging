@@ -20,76 +20,131 @@ const fileUpload = multer({
 
 }).single('image')
 
+router.get('/traerincripcionesdealiadoadmin/:id',  async (req, res) => {
+    const id = req.params.id
+ 
+  try { 
+       const etc= await pool.query('select * from inscripciones_fiscales  where cargadopor =?', [id])
+       
+    res.json(etc);
+  } catch (error) {
+    console.log(error)
+    res.json([]);
+  }
+
+
+    
+  })
 
 
 router.get('/todasincripciones', async (req, res,) => {
 
-    let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco, telefono,telefono2 from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona left join (select id as id_aliado, nombre as nombre_aliado from usuarios)  as selec2 on inscripciones_fiscales.cargadopor=selec2.id_aliado  where inscripciones_fiscales.estado="Pendiente" ')
+  //  let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco, telefono,telefono2 from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona left join (select id as id_aliado, nombre as nombre_aliado from usuarios)  as selec2 on inscripciones_fiscales.cargadopor=selec2.id_aliado  where inscripciones_fiscales.estado="Pendiente" ')
+
+//
+    let inscri2 = await pool.query('select * from inscripciones_fiscales  where inscripciones_fiscales.estado="Pendiente" ')
+
+//
 
     let envi = []
 
-    for (inscripcion in inscri) {
-     
+    for (inscripcion in inscri2) {
+
         try {
-            let usua = await pool.query('select * from usuarios where id = ? ', [inscri[inscripcion]['cargadopor']])
-            let band = true
-                    if (usua[0]['nivel'] == 8) {
-                console.log(8)
-                let idaux = inscri[inscripcion]['id']
-                for (variable in envi) {
-                 
-                    if (envi[variable]['id'] === idaux) {
-                        console.log('igual')
-                         band = false
+            let cargadop =[['Autoinscripcion']]
+            if (inscri2[inscripcion]['cargadopor'] != "Autoinscripcion"){
+                cargadop = await pool.query('select * from usuarios where id =?',inscri2[inscripcion]['cargadopor'])
+            }
+          
+         
+            let persona_auxiliar =[]
+            if (inscri2[inscripcion]['dni']== "Sin definir"){
+
+                if (inscri2[inscripcion]['nombre']== undefined){
+                    persona_auxiliar =  await pool.query('select * from personas_fiscalizacion where apellido = ? ', [inscri2[inscripcion]['apellido']])
+                }else{
+                  if (inscri2[inscripcion]['apellido']== undefined){
+                    persona_auxiliar =  await pool.query('select * from personas_fiscalizacion where nombre = ? ', [inscri2[inscripcion]['nombre']])
+
+                    }else{
+                        persona_auxiliar =  await pool.query('select * from personas_fiscalizacion where nombre = ? and apellido =? ', [inscri2[inscripcion]['nombre'],inscri2[inscripcion]['apellido']])
+                     
                     }
                 }
+                
 
 
+
+
+
+            }else{
+                persona_auxiliar= await pool.query('select * from personas_fiscalizacion where dni= ? ', [inscri2[inscripcion]['dni']])
             }
+         
+            let band = true
+            try {
+                let usua = await pool.query('select * from usuarios where id = ? ', [inscri2[inscripcion]['cargadopor']])
+                if (usua[0]['nivel'] == 8) {
+            console.log(8)
+            let idaux = inscri2[inscripcion]['id']
+            for (variable in envi) {
+             
+                if (envi[variable]['id'] === idaux) {
+                    console.log('igual')
+                     band = false
+                }
+            }
+
+
+        }
+            } catch (error) {
+                console.log(error)
+            }
+     
            
             if (band) {
             let nuev = {
-                id: inscri[inscripcion]['id'],
-                dni: inscri[inscripcion]['dni'],
-                nombre: inscri[inscripcion]['nombre'],
-                estado: inscri[inscripcion]['estado'],
-                cargadopor: inscri[inscripcion]['cargadopor'],
-                apellido: inscri[inscripcion]['apellido'],
-                fecha_carga: inscri[inscripcion]['fecha_carga'],
-                como_se_entero: inscri[inscripcion]['como_se_entero'],
-                apellido_referido: inscri[inscripcion]['apellido_referido'],
-                nombre_referido: inscri[inscripcion]['nombre_referido'],
-                dni_persona: inscri[inscripcion]['dni_persona'],
-                vegano: inscri[inscripcion]['vegano'],
-                celiaco: inscri[inscripcion]['celiaco'],
-                telefono: inscri[inscripcion]['telefono'],
-                telefono2: inscri[inscripcion]['telefono2'],
-                id_aliado: inscri[inscripcion]['id_aliado'],
-                nombre_aliado: inscri[inscripcion]['nombre_aliado']
+                id: inscri2[inscripcion]['id'],
+                dni: inscri2[inscripcion]['dni'],
+                nombre: inscri2[inscripcion]['nombre'],
+                estado: inscri2[inscripcion]['estado'],
+                cargadopor:cargadop[0]['nombre'],
+                apellido: inscri2[inscripcion]['apellido'],
+                fecha_carga: inscri2[inscripcion]['fecha_carga'],
+                como_se_entero: inscri2[inscripcion]['como_se_entero'],
+                apellido_referido: inscri2[inscripcion]['apellido_referido'],
+                nombre_referido: inscri2[inscripcion]['nombre_referido'],
+                dni_persona: inscri2[inscripcion]['dni_persona'],
+                vegano: persona_auxiliar[0]['vegano'],
+                celiaco: persona_auxiliar[0]['celiaco'],
+                telefono: persona_auxiliar[0]['telefono'],
+                telefono2: persona_auxiliar[0]['telefono2'],
+                id_aliado: inscri2[inscripcion]['id_aliado'],
+                nombre_aliado: inscri2[inscripcion]['nombre_aliado']
             }
             envi.push(nuev)}
         } catch (error) {
             console.log(error)
             let nuev = {
-                id: inscri[inscripcion]['id'],
+                id: inscri2[inscripcion]['id'],
 
-                dni: inscri[inscripcion]['dni'],
-                nombre: inscri[inscripcion]['nombre'],
-                estado: inscri[inscripcion]['estado'],
-                cargadopor: inscri[inscripcion]['cargadopor'],
-                apellido: inscri[inscripcion]['apellido'],
-                fecha_carga: inscri[inscripcion]['fecha_carga'],
-                como_se_entero: inscri[inscripcion]['como_se_entero'],
-                apellido_referido: inscri[inscripcion]['apellido_referido'],
-                nombre_referido: inscri[inscripcion]['nombre_referido'],
-                dni_persona: inscri[inscripcion]['dni_persona'],
+                dni: inscri2[inscripcion]['dni'],
+                nombre: inscri2[inscripcion]['nombre'],
+                estado: inscri2[inscripcion]['estado'],
+                cargadopor:cargadop[0]['nombre'],
+                apellido: inscri2[inscripcion]['apellido'],
+                fecha_carga: inscri2[inscripcion]['fecha_carga'],
+                como_se_entero: inscri2[inscripcion]['como_se_entero'],
+                apellido_referido: inscri2[inscripcion]['apellido_referido'],
+                nombre_referido: inscri2[inscripcion]['nombre_referido'],
+                dni_persona: inscri2[inscripcion]['dni_persona'],
 
-                vegano: inscri[inscripcion]['vegano'],
-                celiaco: inscri[inscripcion]['celiaco'],
-                telefono: inscri[inscripcion]['telefono'],
-                telefono2: inscri[inscripcion]['telefono2'],
-                id_aliado: inscri[inscripcion]['id_aliado'],
-                nombre_aliado: inscri[inscripcion]['nombre_aliado']
+                vegano: persona_auxiliar[0]['vegano'],
+                celiaco: persona_auxiliar[0]['celiaco'],
+                telefono: persona_auxiliar[0]['telefono'],
+                telefono2: persona_auxiliar[0]['telefono2'],
+                id_aliado: inscri2[inscripcion]['id_aliado'],
+                nombre_aliado: inscri2[inscripcion]['nombre_aliado']
             }
             envi.push(nuev)
         }
@@ -97,7 +152,7 @@ router.get('/todasincripciones', async (req, res,) => {
 
     }
 
-
+console.log(envi)
     res.json([envi])
 })
 
