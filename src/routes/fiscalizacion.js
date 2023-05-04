@@ -993,6 +993,64 @@ router.post('/incripcionesidescuelas', async (req, res) => {
 })
 
 
+router.post('/cargarcantidades', async (req, res) => {
+    const { id } = req.body
+    console.log(id)
+    const estract = await pool.query('select * from excelescuelas where id = ? ', [id])
+    console.log(estract)
+    const nombree = estract[0]['nombre']
+    console.log(nombree)
+
+    let mandar = []
+    // const workbook = XLSX.readFile(`./src/Excel/${nombree}`)
+
+    // const workbook = XLSX.readFile('./src/Excel/1665706467397-estr-cuentas_PosicionConsolidada.xls')
+
+    try {
+        const workbook = XLSX.readFile(path.join(__dirname, '../Excel/' + nombree))
+        const workbooksheets = workbook.SheetNames
+        const sheet = workbooksheets[0]
+
+        const dataExcel = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
+        //console.log(dataExcel)
+
+
+        for (const property in dataExcel) {
+            
+
+
+            try {
+                ///////
+               
+                    await pool.query('update mesas_fiscales set cantidad=?  where numero = ?', [dataExcel[property]['Cantidad'], dataExcel[property]['Mesa']])
+
+            //////
+        }
+            catch (error) {
+                console.log(error)
+            }
+
+           
+
+            /* if ((dataExcel[property]['Sucursal']).includes(cuil_cuit)) {
+                estado = 'A'
+            }*/
+
+
+        }
+        res.json('realizado')
+    } catch (error) {
+        console.log(error)
+        res.send(error)
+
+    }
+
+
+
+
+})
+
+
 router.post('/cargarinscripcionesescuelas', async (req, res) => {
     const { id } = req.body
     console.log(id)
