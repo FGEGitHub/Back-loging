@@ -428,6 +428,17 @@ router.post("/crearescuela", async (req, res) => {
 router.post("/traerestadisticasdeescuelas", async (req, res) => {
     let { id1, id2 } = req.body
 
+const total = await pool.query('select sum(cantidad) from mesas_fiscales ') 
+const escuelas = await pool.query('select * from escuelas ')
+const promedio = await pool.query('select AVG(cantidad), id_escuela from mesas_fiscales group by id_escuela')
+///total es la cantidad
+////
+const cantid1 = await pool.query('select sum(cantidad) from mesas_fiscales where id_escuela=?', [id1])
+const cantid2 = await pool.query('select sum(cantidad) from mesas_fiscales where id_escuela=?', [id2])
+
+console.log(cantid1[0]['sum(cantidad)'])
+console.log(total[0]['sum(cantidad)']/escuelas.length)
+
 
     const cant1 = await pool.query('select * from mesas_fiscales where id_escuela=?', [id1])
     const cant2 = await pool.query('select * from mesas_fiscales where id_escuela=?', [id2])
@@ -656,9 +667,9 @@ router.post("/enviarinscripcion", async (req, res) => {
 
 
 router.post("/inscribir", async (req, res) => {
-    const { dni,nombre, apellido, id_inscripcion, id_escuela, id_escuela2, mesa, vegano, movilidad, domicilio, fiscal_antes } = req.body
+    const {id_donde_vota, dni,nombre, apellido, id_inscripcion, id_escuela, id_escuela2, mesa, vegano, movilidad, domicilio, fiscal_antes } = req.body
 
-    console.log(dni)
+    console.log(id_donde_vota)
 
 
    
@@ -673,8 +684,7 @@ router.post("/inscribir", async (req, res) => {
 
         ///queda id_inscripcion
         //  await pool.query('insert into asignaciones_fiscales set id_inscripcion=?, escuela=? ,mesa=?, dni=? ', [id_inscripcion,id_escuela,id_escuela2,mesa,dni])
-        console.log(nombre)
-        console.log(apellido)
+      
 let exi=[]
 
 
@@ -684,7 +694,7 @@ exi = await pool.query('select * from personas_fiscalizacion where dni =?',[dni]
                 
      
         if (exi.length>0){
-            await pool.query('update personas_fiscalizacion set vegano=?, movilidad=?,domicilio=?, fiscal_antes=?,dni=?  where id=?', [vegano, movilidad, domicilio, fiscal_antes, dni,exi[0]['id']])
+            await pool.query('update personas_fiscalizacion set vegano=?, movilidad=?,domicilio=?, fiscal_antes=?,dni=?, id_donde_vota=? where id=?', [vegano, movilidad, domicilio, fiscal_antes, dni,id_donde_vota,exi[0]['id']])
             await pool.query('update inscripciones_fiscales set estado="Contactado", id_escuela=?, id_escuela2=?,dni=? where id=?', [id_escuela, id_escuela2,dni, id_inscripcion])
     
         }else{
