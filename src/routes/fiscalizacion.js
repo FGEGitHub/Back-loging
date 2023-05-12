@@ -483,6 +483,11 @@ router.post("/crearescuela", async (req, res) => {
 router.post("/traerestadisticasdeescuelas", async (req, res) => {
     let { id1, id2 } = req.body
 
+    if (id2== undefined){
+        id2=1
+    }
+    console.log(id1)
+    console.log(id2)
     const total = await pool.query('select sum(cantidad) from mesas_fiscales ')
     const escuelas = await pool.query('select * from escuelas ')
     const promedio = await pool.query('select AVG(cantidad), id_escuela from mesas_fiscales group by id_escuela')
@@ -495,11 +500,12 @@ router.post("/traerestadisticasdeescuelas", async (req, res) => {
     console.log(total[0]['sum(cantidad)'] / escuelas.length)
 
 
-    const cant1 = await pool.query('select * from mesas_fiscales where id_escuela=?', [id1])
-    const cant2 = await pool.query('select * from mesas_fiscales where id_escuela=?', [id2])
+   // const cant1 = await pool.query('select * from mesas_fiscales where id_escuela=?', [id1])
+  //  const cant2 = await pool.query('select * from mesas_fiscales where id_escuela=?', [id2])
     const datos_escuelas = {
-        cantidad_escuela1: cant1.length,
-        cantidad_escuela2: cant2.length
+        cantidad_escuela1: cantid1[0]['sum(cantidad)'],
+        cantidad_escuela2: cantid2[0]['sum(cantidad)'],
+        prom:total[0]['sum(cantidad)'] / escuelas.length
     }
     res.json(datos_escuelas)
 

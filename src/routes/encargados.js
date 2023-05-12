@@ -210,6 +210,7 @@ if (observaciones =='Finalizado'){
 router.post("/confirmaciondellamado", async (req, res) => {
   let { confirmacion, id_turno, id_persona, id_cursado, observaciones } = req.body
   try {
+    console.log(id_cursado)
 
     if (observaciones === undefined) {
       observaciones = 'sin definir'
