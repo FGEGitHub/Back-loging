@@ -100,6 +100,134 @@ router.get('/todasincripciones', async (req, res,) => {
         try {
             let cargadop = [['Autoinscripcion']]
             if (inscri2[inscripcion]['cargadopor'] != "Autoinscripcion") {
+                cargadop = await pool.query('select * from usuarios where id =?', [inscri2[inscripcion]['cargadopor']])
+            }
+            
+            let encargado = 'Sin asignar'
+            if (inscri2[inscripcion]['id_encargado'] != undefined) {
+                let encargado_aux = await pool.query('select * from usuarios where id = ?', [inscri2[inscripcion]['id_encargado']])
+                encargado =encargado_aux[0]['nombre']
+            }
+
+            let persona_auxiliar = []
+            if (inscri2[inscripcion]['dni'] == "Sin definir") {
+
+                if (inscri2[inscripcion]['nombre'] == undefined) {
+                    persona_auxiliar = await pool.query('select * from personas_fiscalizacion where apellido = ? ', [inscri2[inscripcion]['apellido']])
+                } else {
+                    if (inscri2[inscripcion]['apellido'] == undefined) {
+                        persona_auxiliar = await pool.query('select * from personas_fiscalizacion where nombre = ? ', [inscri2[inscripcion]['nombre']])
+
+                    } else {
+                        persona_auxiliar = await pool.query('select * from personas_fiscalizacion where nombre = ? and apellido =? ', [inscri2[inscripcion]['nombre'], inscri2[inscripcion]['apellido']])
+
+                    }
+                }
+
+
+
+
+
+
+            } else {
+                persona_auxiliar = await pool.query('select * from personas_fiscalizacion where dni= ? ', [inscri2[inscripcion]['dni']])
+            }
+
+            let band = true
+            try {
+                let usua = await pool.query('select * from usuarios where id = ? ', [inscri2[inscripcion]['cargadopor']])
+                if (usua[0]['nivel'] == 8) {
+
+                    let idaux = inscri2[inscripcion]['id']
+                    for (variable in envi) {
+
+                        if (envi[variable]['id'] === idaux) {
+                            console.log('igual')
+                            band = false
+                        }
+                    }
+
+
+                }
+            } catch (error) {
+                console.log(error)
+            }
+
+
+            if (band) {
+                let nuev = {
+                    id: inscri2[inscripcion]['id'],
+                    dni: inscri2[inscripcion]['dni'],
+                    nombre: inscri2[inscripcion]['nombre'],
+                    estado: inscri2[inscripcion]['estado'],
+                    cargadopor: cargadop[0]['nombre'],
+                    apellido: inscri2[inscripcion]['apellido'],
+                    fecha_carga: inscri2[inscripcion]['fecha_carga'],
+                    como_se_entero: inscri2[inscripcion]['como_se_entero'],
+                    apellido_referido: inscri2[inscripcion]['apellido_referido'],
+                    nombre_referido: inscri2[inscripcion]['nombre_referido'],
+                    dni_persona: inscri2[inscripcion]['dni_persona'],
+                    vegano: persona_auxiliar[0]['vegano'],
+                    celiaco: persona_auxiliar[0]['celiaco'],
+                    telefono: persona_auxiliar[0]['telefono'],
+                    telefono2: persona_auxiliar[0]['telefono2'],
+                    id_aliado: inscri2[inscripcion]['id_aliado'],
+                    nombre_aliado: inscri2[inscripcion]['nombre_aliado'],
+                    encargado: encargado
+                }
+                envi.push(nuev)
+            }
+        } catch (error) {
+            console.log(error)
+            let nuev = {
+                id: inscri2[inscripcion]['id'],
+
+                dni: inscri2[inscripcion]['dni'],
+                nombre: inscri2[inscripcion]['nombre'],
+                estado: inscri2[inscripcion]['estado'],
+                cargadopor: cargadop[0]['nombre'],
+                apellido: inscri2[inscripcion]['apellido'],
+                fecha_carga: inscri2[inscripcion]['fecha_carga'],
+                como_se_entero: inscri2[inscripcion]['como_se_entero'],
+                apellido_referido: inscri2[inscripcion]['apellido_referido'],
+                nombre_referido: inscri2[inscripcion]['nombre_referido'],
+                dni_persona: inscri2[inscripcion]['dni_persona'],
+
+                vegano: persona_auxiliar[0]['vegano'],
+                celiaco: persona_auxiliar[0]['celiaco'],
+                telefono: persona_auxiliar[0]['telefono'],
+                telefono2: persona_auxiliar[0]['telefono2'],
+                id_aliado: inscri2[inscripcion]['id_aliado'],
+                nombre_aliado: inscri2[inscripcion]['nombre_aliado'],
+                encargado: encargado
+            }
+            envi.push(nuev)
+        }
+
+
+    }
+
+
+    res.json([envi])
+})
+
+
+router.get('/todasincripciones2/:id', async (req, res,) => {
+const id = req.params.id
+    //  let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco, telefono,telefono2 from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona left join (select id as id_aliado, nombre as nombre_aliado from usuarios)  as selec2 on inscripciones_fiscales.cargadopor=selec2.id_aliado  where inscripciones_fiscales.estado="Pendiente" ')
+console.log(id)
+    //
+    let inscri2 = await pool.query('select * from inscripciones_fiscales  where inscripciones_fiscales.estado="Pendiente" and id_encargado=? ',[id])
+
+    //
+
+    let envi = []
+
+    for (inscripcion in inscri2) {
+
+        try {
+            let cargadop = [['Autoinscripcion']]
+            if (inscri2[inscripcion]['cargadopor'] != "Autoinscripcion") {
                 cargadop = await pool.query('select * from usuarios where id =?', inscri2[inscripcion]['cargadopor'])
             }
 
@@ -203,7 +331,6 @@ router.get('/todasincripciones', async (req, res,) => {
 
     res.json([envi])
 })
-
 
 
 router.get('/traerincripcionesdealiado/:id', async (req, res) => {
@@ -415,6 +542,22 @@ router.get('/estadisticas1', async (req, res,) => {
 
 })
 
+
+router.get('/traerpaso2inscrip2/:id', async (req, res,) => {
+const id = req.params.id
+
+    try {
+        estr = await pool.query('select * from inscripciones_fiscales join (select dni as dniper,telefono, nombre as nombrepersona, apellido as apellidopersona,id_donde_vota from personas_fiscalizacion) as selec1 on inscripciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on inscripciones_fiscales.id_escuela=selec2.idescuela join (select id as idescuela2, nombre as nombreescuela2 from escuelas) as selec3 on inscripciones_fiscales.id_escuela2=selec3.idescuela2    join (select id as idescuelavota, nombre as donde_vota from escuelas) as selec4 on selec1.id_donde_vota=selec4.idescuelavota where estado="Contactado" and id_encargado =?',[id])
+
+        console.log(estr)
+        res.json(estr)
+    } catch (error) {
+        console.log(error)
+        res.send(['algo salio mal'])
+    }
+
+
+})
 
 router.get('/traerpaso2inscrip', async (req, res,) => {
 
@@ -852,10 +995,19 @@ router.get('/borrarinscripcion/:id', async (req, res) => {
 
 })
 
+
+router.get('/traerencargados/', async (req, res) => {
+    const encargados = await pool.query('select * from usuarios where nivel =9')
+    res.json(encargados)
+})
+
+
+
+
 router.get('/todos/', async (req, res) => {
 
 
-    const etc = await pool.query('select * from usuarios where nivel=5 or nivel=6 or nivel=7 or nivel=8')
+    const etc = await pool.query('select * from usuarios where nivel=5 or nivel=6 or nivel=7 or nivel=8 or nivel=9')
     console.log(etc)
     res.json(etc);
     //res.render('index')
@@ -867,6 +1019,22 @@ router.post('/signupp', passport.authenticate('local.registroadmin', {
     failureFlash: true
 
 }))
+
+
+
+
+router.post('/asignarencargado', async (req, res) => {
+const {id_inscripcion, id_encargado} = req.body
+
+try {
+    await pool.query('update inscripciones_fiscales set id_encargado=? where  id = ?', [id_encargado,id_inscripcion])
+    res.json('asignado')
+
+} catch (error) {
+    res.json('error')
+}
+})
+
 
 router.post('/crearmesa', async (req, res) => {
     const { id_escuela, numero } = req.body
