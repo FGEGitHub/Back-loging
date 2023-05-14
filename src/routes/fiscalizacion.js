@@ -720,11 +720,17 @@ router.post("/modificardatosdemesa", async (req, res) => {
 })
 
 router.post("/modificarescuela", async (req, res) => {
-    let { nombre, circuito, id } = req.body
+    let { nombre, circuito, id, dato1,dato2 } = req.body
 
 
     try {
-        await pool.query('update escuelas set nombre=?, circuito =? where  id = ?', [nombre, circuito, id])
+        if (dato1== undefined){
+            dato1="Sin definir"
+        }
+        if (dato2== undefined){
+            dato1="Sin definir"
+        }
+        await pool.query('update escuelas set nombre=?, circuito =?,dato1=? ,dato2=? where  id = ?', [nombre, circuito,dato1,dato2, id])
         res.json("Modificado")
     } catch (error) {
         console.log(error)
