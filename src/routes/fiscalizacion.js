@@ -104,7 +104,8 @@ router.get('/todasincripciones', async (req, res,) => {
             }
 
             let encargado = 'Sin asignar'
-            if (inscri2[inscripcion]['id_encargado'] != undefined) {
+            if (inscri2[inscripcion]['id_encargado'] != undefined &&inscri2[inscripcion]['id_encargado'] != 0 ) {
+                console.log()
                 let encargado_aux = await pool.query('select * from usuarios where id = ?', [inscri2[inscripcion]['id_encargado']])
                 encargado = encargado_aux[0]['nombre']
             }
