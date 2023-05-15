@@ -561,9 +561,9 @@ router.get('/estadisticas1', async (req, res,) => {
 
 router.get('/traerinscripcionesdeunencargado/:id', async (req, res,) => {
     const id = req.params.id
-
+console.log(91)
     try {
-        estr = await pool.query('select * from inscripciones_fiscales join (select dni as dniper,telefono, nombre as nombrepersona, apellido as apellidopersona,id_donde_vota from personas_fiscalizacion) as selec1 on inscripciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on inscripciones_fiscales.id_escuela=selec2.idescuela join (select id as idescuela2, nombre as nombreescuela2 from escuelas) as selec3 on inscripciones_fiscales.id_escuela2=selec3.idescuela2    join (select id as idescuelavota, nombre as donde_vota from escuelas) as selec4 on selec1.id_donde_vota=selec4.idescuelavota where estado="Contactado" and id_encargado =?', [id])
+        estr = await pool.query('select * from inscripciones_fiscales  where  id_encargado =?', [id])
 
         console.log(estr)
         res.json(estr)
