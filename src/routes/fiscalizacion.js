@@ -694,6 +694,20 @@ router.post("/crearescuela", async (req, res) => {
 
 
 
+router.post("/borrarmesa", async (req, res) => {
+    let { id} = req.body
+    try {
+            await pool.query('delete  from  mesas_fiscales where id = ?', [id])
+            res.json('Realizado')
+    } catch (error) {
+        console.log(error)
+        res.json('Realizado')
+    }
+
+
+})
+
+
 router.post("/traerestadisticasdeescuelas", async (req, res) => {
     let { id1, id2 } = req.body
     console.log(id1)
@@ -708,6 +722,8 @@ router.post("/traerestadisticasdeescuelas", async (req, res) => {
     ///total es la cantidad
     ////
     const cantid1 = await pool.query('select sum(cantidad) from mesas_fiscales where id_escuela=?', [id1])
+    console.log("cantid1")
+console.log(cantid1)
     const cantid2 = await pool.query('select sum(cantidad) from mesas_fiscales where id_escuela=?', [id2])
 
     const mesas = await pool.query('select * from mesas_fiscales where id_escuela=?', [id1])
@@ -724,20 +740,25 @@ router.post("/traerestadisticasdeescuelas", async (req, res) => {
 
     }
     
-
-
-  
-
-
+   let  cantidad_escuela1 =0
+   let  cantidad_escuela2 =0
+  if( cantid1.length >0){
+    cantidad_escuela1 =cantid1[0]['sum(cantidad)']
+  }
+  if( cantid2.length >0){
+    cantidad_escuela2 =cantid2[0]['sum(cantidad)']
+  }
 
     // const cant1 = await pool.query('select * from mesas_fiscales where id_escuela=?', [id1])
     //  const cant2 = await pool.query('select * from mesas_fiscales where id_escuela=?', [id2])
     const datos_escuelas = {
-        cantidad_escuela1: cantid1[0]['sum(cantidad)'],
-        cantidad_escuela2: cantid2[0]['sum(cantidad)'],
+        cantidad_escuela1,
+        cantidad_escuela2,
         prom: total[0]['sum(cantidad)'] / escuelas.length,
         mesas:mesas.length,
-        libres: libres
+        libres: libres,
+        Encargado:escuelas_1[0]['dato1'],
+        tel:escuelas_1[0]['dato2'],
     }
     console.log(datos_escuelas)
     res.json(datos_escuelas)
