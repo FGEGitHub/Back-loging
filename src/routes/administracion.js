@@ -80,7 +80,7 @@ res.json([enviar,resumen])
 }))
 
 
-router.post('/modificarusuario', isLoggedInn2, passport.authenticate('local.modificadoradmin', {
+router.post('/modificarusuario',  passport.authenticate('local.modificadoradmin', {
   successRedirect: '/exitosignupp',
   failureRedirect:'/exitosignupp',
   failureFlash:true
