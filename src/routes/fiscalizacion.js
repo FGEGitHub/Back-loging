@@ -104,7 +104,7 @@ router.get('/todasincripciones', async (req, res,) => {
             }
 
             let encargado = 'Sin asignar'
-            if (inscri2[inscripcion]['id_encargado'] != undefined &&inscri2[inscripcion]['id_encargado'] != 0 ) {
+            if (inscri2[inscripcion]['id_encargado'] != undefined && inscri2[inscripcion]['id_encargado'] != 0) {
                 console.log()
                 let encargado_aux = await pool.query('select * from usuarios where id = ?', [inscri2[inscripcion]['id_encargado']])
                 encargado = encargado_aux[0]['nombre']
@@ -369,9 +369,9 @@ router.get('/traerinscripcionesenc/:id', async (req, res) => {
     const id = req.params.id
 
 
-    const etc = await pool.query('select * from inscripciones_fiscales where  id_encargado is null',[id])
-console.log(etc)
- 
+    const etc = await pool.query('select * from inscripciones_fiscales where  id_encargado is null', [id])
+    console.log(etc)
+
     res.json(etc);
 
 
@@ -470,7 +470,27 @@ router.get('/traermesas/:id_escuela', async (req, res,) => {
     const { id_escuela } = req.params
     console.log(id_escuela)
     const mesas = await pool.query('select * from mesas_fiscales where id_escuela=?', [id_escuela])
-    res.json(mesas)
+    let evi = []
+
+    for (mes in mesas) {
+        let disponibilidad = 'Libre'
+        let mesaux = await pool.query('select * from asignaciones_fiscales where mesa=?', [mesas[mes]['id']])
+        if (mesaux.length > 0) {
+            disponibilidad = 'Ocupada'
+        }
+        nuevo = {
+            disponibilidad,
+            id: mesas[mes]['id'],
+            numero: mesas[mes]['numero'],
+            id_escuela: mesas[mes]['id_escuela'],
+            cantidad: mesas[mes]['cantidad'],
+
+        }
+        evi.push(nuevo)
+    }
+
+
+    res.json(evi)
 
 
 })
@@ -562,7 +582,7 @@ router.get('/estadisticas1', async (req, res,) => {
 
 router.get('/traerinscripcionesdeunencargado/:id', async (req, res,) => {
     const id = req.params.id
-console.log(91)
+    console.log(91)
     try {
         estr = await pool.query('select * from inscripciones_fiscales  where  id_encargado =?', [id])
 
@@ -586,7 +606,7 @@ router.get('/desasignarencargado/:id', async (req, res,) => {
     try {
         await pool.query('update inscripciones_fiscales set id_encargado = 0  where  id = ?', [id])
 
-      
+
         res.json('realizado')
     } catch (error) {
         console.log(error)
@@ -662,13 +682,13 @@ router.post("/asignarinscripciones", async (req, res) => {
     let { id, inscrip } = req.body
 
 
-for (ins in inscrip){  
-    
-    console.log(ins)
+    for (ins in inscrip) {
 
-    await pool.query('update inscripciones_fiscales set id_encargado =?  where  id = ?', [id,inscrip[ins]])
-}
-res.json('realizado')
+        console.log(ins)
+
+        await pool.query('update inscripciones_fiscales set id_encargado =?  where  id = ?', [id, inscrip[ins]])
+    }
+    res.json('realizado')
 
 })
 
@@ -695,10 +715,10 @@ router.post("/crearescuela", async (req, res) => {
 
 
 router.post("/borrarmesa", async (req, res) => {
-    let { id} = req.body
+    let { id } = req.body
     try {
-            await pool.query('delete  from  mesas_fiscales where id = ?', [id])
-            res.json('Realizado')
+        await pool.query('delete  from  mesas_fiscales where id = ?', [id])
+        res.json('Realizado')
     } catch (error) {
         console.log(error)
         res.json('Realizado')
@@ -717,37 +737,37 @@ router.post("/traerestadisticasdeescuelas", async (req, res) => {
 
     const total = await pool.query('select sum(cantidad) from mesas_fiscales ')
     const escuelas = await pool.query('select * from escuelas ')
-    const escuelas_1 = await pool.query('select * from escuelas where id=?',[id1])
+    const escuelas_1 = await pool.query('select * from escuelas where id=?', [id1])
     const promedio = await pool.query('select AVG(cantidad), id_escuela from mesas_fiscales group by id_escuela')
     ///total es la cantidad
     ////
     const cantid1 = await pool.query('select sum(cantidad) from mesas_fiscales where id_escuela=?', [id1])
     console.log("cantid1")
-console.log(cantid1)
+    console.log(cantid1)
     const cantid2 = await pool.query('select sum(cantidad) from mesas_fiscales where id_escuela=?', [id2])
 
     const mesas = await pool.query('select * from mesas_fiscales where id_escuela=?', [id1])
-    let libres=0
+    let libres = 0
 
-    if (escuelas_1[0]['circuito']  != 2 && escuelas_1[0]['nombre'] != 'ESC. Nº 353 "DR. FÉLIX MARÍA GÓMEZ"'  && escuelas_1[0]['nombre'] != 'ESC. Nº 34 "EL SANTO DE LA ESPADA"'  ){
+    if (escuelas_1[0]['circuito'] != 2 && escuelas_1[0]['nombre'] != 'ESC. Nº 353 "DR. FÉLIX MARÍA GÓMEZ"' && escuelas_1[0]['nombre'] != 'ESC. Nº 34 "EL SANTO DE LA ESPADA"') {
         for (mesa in mesas) {
-            let auxcont =  await pool.query('select * from asignaciones_fiscales  where mesa=?', [mesas[mesa]['numero']] )
+            let auxcont = await pool.query('select * from asignaciones_fiscales  where mesa=?', [mesas[mesa]['numero']])
             console.log(auxcont)
-            if (auxcont.length==0   ){
-                libres+=1
+            if (auxcont.length == 0) {
+                libres += 1
             }
         }
 
     }
-    
-   let  cantidad_escuela1 =0
-   let  cantidad_escuela2 =0
-  if( cantid1.length >0){
-    cantidad_escuela1 =cantid1[0]['sum(cantidad)']
-  }
-  if( cantid2.length >0){
-    cantidad_escuela2 =cantid2[0]['sum(cantidad)']
-  }
+
+    let cantidad_escuela1 = 0
+    let cantidad_escuela2 = 0
+    if (cantid1.length > 0) {
+        cantidad_escuela1 = cantid1[0]['sum(cantidad)']
+    }
+    if (cantid2.length > 0) {
+        cantidad_escuela2 = cantid2[0]['sum(cantidad)']
+    }
 
     // const cant1 = await pool.query('select * from mesas_fiscales where id_escuela=?', [id1])
     //  const cant2 = await pool.query('select * from mesas_fiscales where id_escuela=?', [id2])
@@ -755,10 +775,10 @@ console.log(cantid1)
         cantidad_escuela1,
         cantidad_escuela2,
         prom: total[0]['sum(cantidad)'] / escuelas.length,
-        mesas:mesas.length,
+        mesas: mesas.length,
         libres: libres,
-        Encargado:escuelas_1[0]['dato1'],
-        tel:escuelas_1[0]['dato2'],
+        Encargado: escuelas_1[0]['dato1'],
+        tel: escuelas_1[0]['dato2'],
     }
     console.log(datos_escuelas)
     res.json(datos_escuelas)
@@ -782,17 +802,17 @@ router.post("/modificardatosdemesa", async (req, res) => {
 })
 
 router.post("/modificarescuela", async (req, res) => {
-    let { nombre, circuito, id, dato1,dato2 } = req.body
+    let { nombre, circuito, id, dato1, dato2 } = req.body
 
 
     try {
-        if (dato1== undefined){
-            dato1="Sin definir"
+        if (dato1 == undefined) {
+            dato1 = "Sin definir"
         }
-        if (dato2== undefined){
-            dato1="Sin definir"
+        if (dato2 == undefined) {
+            dato1 = "Sin definir"
         }
-        await pool.query('update escuelas set nombre=?, circuito =?,dato1=? ,dato2=? where  id = ?', [nombre, circuito,dato1,dato2, id])
+        await pool.query('update escuelas set nombre=?, circuito =?,dato1=? ,dato2=? where  id = ?', [nombre, circuito, dato1, dato2, id])
         res.json("Modificado")
     } catch (error) {
         console.log(error)
@@ -1129,23 +1149,23 @@ router.get('/todoslosencargados/', async (req, res) => {
     const encargados = await pool.query('select * from usuarios where nivel =9')
 
     let envio = []
-   asignados = 0
-    for (encargado in encargados){
-     let asignados = await pool.query('select * from inscripciones_fiscales where id_encargado =? ',[encargados[encargado]['id']])
-     let sinc = await pool.query('select * from inscripciones_fiscales where id_encargado =? and estado="Pendiente" ',[encargados[encargado]['id']])
+    asignados = 0
+    for (encargado in encargados) {
+        let asignados = await pool.query('select * from inscripciones_fiscales where id_encargado =? ', [encargados[encargado]['id']])
+        let sinc = await pool.query('select * from inscripciones_fiscales where id_encargado =? and estado="Pendiente" ', [encargados[encargado]['id']])
 
-    let objeto_nuevo ={
-        id:encargados[encargado]['id'],
-        nombre:encargados[encargado]['nombre'],
-        asignados:asignados.length,
-        sinc:sinc.length
-        
+        let objeto_nuevo = {
+            id: encargados[encargado]['id'],
+            nombre: encargados[encargado]['nombre'],
+            asignados: asignados.length,
+            sinc: sinc.length
+
+        }
+        envio.push(objeto_nuevo)
     }
-    envio.push(objeto_nuevo)
-    }
 
 
-console.log(envio)
+    console.log(envio)
     res.json([envio])
 })
 router.get('/traerencargados/', async (req, res) => {
