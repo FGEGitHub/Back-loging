@@ -369,7 +369,7 @@ router.get('/traerinscripcionesenc/:id', async (req, res) => {
     const id = req.params.id
 
 
-    const etc = await pool.query('select * from inscripciones_fiscales where  id_encargado is null', [id])
+    const etc = await pool.query('select * from inscripciones_fiscales where  id_encargado is null or id_encargado= 0 ', [id])
     console.log(etc)
 
     res.json(etc);
