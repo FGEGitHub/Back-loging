@@ -218,7 +218,7 @@ router.get('/todasincripciones2/:id', async (req, res,) => {
     //  let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco, telefono,telefono2 from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona left join (select id as id_aliado, nombre as nombre_aliado from usuarios)  as selec2 on inscripciones_fiscales.cargadopor=selec2.id_aliado  where inscripciones_fiscales.estado="Pendiente" ')
     console.log(id)
     //
-    let inscri2 = await pool.query('select * from inscripciones_fiscales  where inscripciones_fiscales.estado="Pendiente" and id_encargado=? ', [id])
+    let inscri2 = await pool.query('select * from inscripciones_fiscales  where (inscripciones_fiscales.estado="Pendiente" or inscripciones_fiscales.estado="Rechazado")  and id_encargado=? ', [id])
 
     //
 
@@ -1179,13 +1179,21 @@ router.get('/todoslosencargados/', async (req, res) => {
     asignados = 0
     for (encargado in encargados) {
         let asignados = await pool.query('select * from inscripciones_fiscales where id_encargado =? ', [encargados[encargado]['id']])
+    
+    
         let sinc = await pool.query('select * from inscripciones_fiscales where id_encargado =? and estado="Pendiente" ', [encargados[encargado]['id']])
+        let rech = await pool.query('select * from inscripciones_fiscales where id_encargado =? and estado="Rechazado" ', [encargados[encargado]['id']])
+        let cont = await pool.query('select * from inscripciones_fiscales where id_encargado =? and estado="Contactado" ', [encargados[encargado]['id']])
+        conf = await pool.query('select * from inscripciones_fiscales join (select id_inscripcion  from asignaciones_fiscales) as selec on inscripciones_fiscales.id=selec.id_inscripcion where id_encargado =? ', [encargados[encargado]['id']])
 
         let objeto_nuevo = {
             id: encargados[encargado]['id'],
             nombre: encargados[encargado]['nombre'],
             asignados: asignados.length,
-            sinc: sinc.length
+            sinc: sinc.length,
+            conf:conf.length,
+            rech:rech.length,
+            cont:cont.length
 
         }
         envio.push(objeto_nuevo)
