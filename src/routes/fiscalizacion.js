@@ -274,7 +274,7 @@ router.get('/todasincripciones2/:id', async (req, res,) => {
 
                 }
             } catch (error) {
-                console.log(error)
+                
             }
 
 
@@ -658,6 +658,33 @@ router.get('/todaslasasignaciones', async (req, res,) => {
         res.send('algo salio mal')
     }
 
+
+})
+
+
+router.post("/rechazarincrip", async (req, res) => {
+    let { id_inscripcion, observaciones, id_donde_vota,dni} = req.body
+
+    try {
+        if (dni ==undefined){
+            dni = "Sin definir"
+        }
+   
+        exi = await pool.query('select * from personas_fiscalizacion where dni =?', [dni])
+      //  await pool.query('update inscripciones_fiscales set estado="Pendiente" and observaciones = ? where id=?', [ observaciones,id_inscripcion])
+        await pool.query('update inscripciones_fiscales set estado="Rechazado", observaciones = ? where  id = ?', [observaciones,id_inscripcion])
+       
+        if (exi.length > 0) {
+            await pool.query('update personas_fiscalizacion set id_donde_vota=? where id=?', [ id_donde_vota, exi[0]['id']])
+        
+
+        } 
+    
+        res.json("Rechazado")
+    } catch (error) {
+        console.log(error)
+        res.json("Error")
+    }
 
 })
 
