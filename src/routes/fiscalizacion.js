@@ -92,6 +92,7 @@ router.get('/todasincripciones', async (req, res,) => {
     let inscri2 = await pool.query('select * from inscripciones_fiscales  where inscripciones_fiscales.estado="Pendiente" ')
 
     //
+    console.log(inscri2.length)
 
     let envi = []
 
@@ -105,7 +106,7 @@ router.get('/todasincripciones', async (req, res,) => {
 
             let encargado = 'Sin asignar'
             if (inscri2[inscripcion]['id_encargado'] != undefined && inscri2[inscripcion]['id_encargado'] != 0) {
-                console.log()
+              
                 let encargado_aux = await pool.query('select * from usuarios where id = ?', [inscri2[inscripcion]['id_encargado']])
                 encargado = encargado_aux[0]['nombre']
             }
@@ -143,7 +144,7 @@ router.get('/todasincripciones', async (req, res,) => {
                     for (variable in envi) {
 
                         if (envi[variable]['id'] === idaux) {
-                            console.log('igual')
+                           
                             band = false
                         }
                     }
@@ -151,7 +152,7 @@ router.get('/todasincripciones', async (req, res,) => {
 
                 }
             } catch (error) {
-                console.log(error)
+               
             }
 
 
@@ -471,13 +472,17 @@ router.get('/traermesas/:id_escuela', async (req, res,) => {
     console.log(id_escuela)
     const mesas = await pool.query('select * from mesas_fiscales where id_escuela=?', [id_escuela])
     let evi = []
-
+  const escuela =  await pool.query('select * from escuelas where id=?', [id_escuela])
     for (mes in mesas) {
         let disponibilidad = 'Libre'
         let mesaux = await pool.query('select * from asignaciones_fiscales where mesa=?', [mesas[mes]['id']])
         if (mesaux.length > 0) {
             disponibilidad = 'Ocupada'
         }
+        if(escuela[0]['circuito']==2){
+            disponibilidad = 'Ocupada'
+        }
+
         nuevo = {
             disponibilidad,
             id: mesas[mes]['id'],
@@ -646,6 +651,23 @@ router.get('/traerpaso2inscrip', async (req, res,) => {
 
 
 })
+
+
+router.get('/todaslasasignacionesdeun/:id', async (req, res,) => {
+const id = req.params.id
+
+    try {
+        estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono, nombre from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip where id_encargado =? ',[id])
+
+        res.json([estr])
+    } catch (error) {
+        res.send('algo salio mal')
+    }
+
+
+})
+
+
 
 router.get('/todaslasasignaciones', async (req, res,) => {
 
