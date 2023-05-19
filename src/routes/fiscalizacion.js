@@ -482,6 +482,13 @@ router.get('/traermesas/:id_escuela', async (req, res,) => {
         if(escuela[0]['circuito']==2){
             disponibilidad = 'Ocupada'
         }
+        console.log(escuela[0]['nombre'])
+        if((escuela[0]['nombre']=='ESC. Nº 353 "DR. FÉLIX MARÍA GÓMEZ"') || (escuela[0]['nombre']=='ESC. Nº 34 "EL SANTO DE LA ESPADA"')){
+            disponibilidad = 'Ocupada'
+        }
+        
+
+        
 
         nuevo = {
             disponibilidad,
