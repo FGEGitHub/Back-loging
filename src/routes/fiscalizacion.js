@@ -1108,7 +1108,7 @@ router.post("/asignarmesaafiscal", async (req, res) => {
 
 })
 router.post("/inscribir", async (req, res) => {
-    const { id_donde_vota, dni, nombre, apellido, observaciones, id_inscripcion, id_escuela, id_escuela2, celiaco, vegano, movilidad, domicilio, fiscal_antes } = req.body
+    const { id_donde_vota, telefono, telefono2, dni, nombre, apellido, observaciones, id_inscripcion, id_escuela, id_escuela2, celiaco, vegano, movilidad, domicilio, fiscal_antes } = req.body
 
 
 
@@ -1153,6 +1153,7 @@ router.post("/inscribir", async (req, res) => {
                         await pool.query('update inscripciones_fiscales set estado="Contactado", observaciones=?, id_escuela=?, id_escuela2=?,dni=? where id=?', [observaciones, id_escuela, id_escuela2, dni, id_inscripcion])
 
                     } else {
+                   
                         await pool.query('insert into personas_fiscalizacion set vegano=?,celiaco=?,  movilidad=?,domicilio=?, fiscal_antes=?, dni =?, nombre=?, apellido=?, telefono=?, telefono2=?,id_donde_vota=? ', [vegano, celiaco, movilidad, domicilio, fiscal_antes, dni, nombre, apellido, telefono, telefono2, id_donde_vota])
 
                         await pool.query('update inscripciones_fiscales set estado="Contactado",observaciones=?, id_escuela=?, id_escuela2=?,dni=? where id=?', [observaciones, id_escuela, id_escuela2, dni, id_inscripcion])
