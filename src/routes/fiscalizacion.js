@@ -734,7 +734,7 @@ router.get('/todaslasasignacionesdeun/:id', async (req, res,) => {
 const id = req.params.id
 
     try {
-        estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono, nombre from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip where id_encargado =? ',[id])
+        estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono, nombre, id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip where id_encargado =? ',[id])
 
         res.json([estr])
     } catch (error) {
@@ -750,7 +750,7 @@ router.get('/todaslasasignaciones', async (req, res,) => {
 
 
     try {
-        estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono, nombre from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela ')
+        estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono, nombre, id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela ')
 
         res.json([estr])
     } catch (error) {
