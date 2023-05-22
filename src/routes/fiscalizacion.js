@@ -92,12 +92,13 @@ router.get('/listadealiados/', async (req, res,) => {
             for (recor in personas){
                 let canti = await pool.query('select * from inscripciones_fiscales where cargadopor=?',[personas[recor]['id']])
                
-
+                let canti2 = await pool.query('select * from asignaciones_fiscales join (select id as idinscrip, cargadopor from inscripciones_fiscales ) as selec on asignaciones_fiscales.id_inscripcion=selec.idinscrip where cargadopor=?',[personas[recor]['id']])
                 
                 let nu = {
                     id : personas[recor]['id'],
                     nombre:personas[recor]['nombre'],
-                    cantidad : canti.length
+                    cantidad : canti.length,
+                    cantidadasig : canti2.length
                 }
                 enviar.push(nu)
             }
