@@ -583,7 +583,10 @@ router.get('/datosdemesas', async (req, res) => {
         let cant = await pool.query('select * from mesas_fiscales ')
         let asig = await pool.query('select * from asignaciones_fiscales ')
         let esc = await pool.query('select * from escuelas ')
-
+        let yassig =await pool.query('select * from mesas_fiscales join (select id as ide, circuito, nombre from escuelas) as sele on mesas_fiscales.id_escuela=sele.ide where circuito =2 ',['ESC. Nº 353 "DR. FÉLIX MARÍA GÓMEZ"','ESC. Nº 34 "EL SANTO DE LA ESPADA"'])
+       //let yassig =await pool.query('select * from mesas_fiscales join (select id as ide, circuito, nombre from escuelas) as sele on mesas_fiscales.id_escuela=sele.ide  ') 
+       console.log("yasig")
+        console.log(yassig.length)
         let mesas_sin_asignar = []
 
         for (const index_mesas in cant) {
@@ -786,16 +789,24 @@ router.post("/rechazarincrip", async (req, res) => {
 
 
 router.post("/modificarpersonafisca", async (req, res) => {
-    let { id, dni, nombre, apellido, celiaco, vegano, movilidad, domicilio } = req.body
+    let { id, dni, nombre, apellido, celiaco, vegano, movilidad, domicilio, telefono,telefono2 } = req.body
+    console.log(id, dni, nombre, apellido, celiaco, vegano, movilidad, domicilio, telefono,telefono2)
 if (movilidad == undefined){
     movilidad='sin definir'
 }
 if (domicilio == undefined){
     domicilio='sin definir'
 }
-    
+if (telefono == undefined){
+    telefono='sin definir'
+}
+if (telefono2 == undefined){
+    telefono2='sin definir'
+}
+
     try {
-         await pool.query('update personas_fiscalizacion set  dni=?, nombre=?, apellido=?, celiaco=?, vegano=?, movilidad=?, domicilio=? where  id = ?', [  dni, nombre, apellido, celiaco, vegano, movilidad,domicilio, id])
+         await pool.query('update personas_fiscalizacion set  dni=?, nombre=?, apellido=?, celiaco=?, vegano=?, movilidad=?, domicilio=?,telefono=?,telefono2=? where  id = ?', [  dni, nombre, apellido, celiaco, vegano, movilidad,domicilio, telefono,telefono2,id])
+         console.log('realizado')
          res.json('Realizado')
     } catch (error) {
         console.log(error)
