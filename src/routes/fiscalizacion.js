@@ -84,6 +84,54 @@ router.get('/traerincripcionesdealiadoadmin/:id', async (req, res) => {
 })
 
 
+router.get('/listadealiados/', async (req, res,) => {
+    
+    try {
+            let personas = await pool.query('select * from usuarios where nivel=7')
+        let enviar=[]
+            for (recor in personas){
+                let canti = await pool.query('select * from inscripciones_fiscales where cargadopor=?',[personas[recor]['id']])
+               
+
+                
+                let nu = {
+                    id : personas[recor]['id'],
+                    nombre:personas[recor]['nombre'],
+                    cantidad : canti.length
+                }
+                enviar.push(nu)
+            }
+            res.json(enviar)
+    } catch (error) {
+        console.log(error)
+    }
+
+
+})
+
+router.get('/traerdatosdepersona/:id', async (req, res,) => {
+    const id = req.params.id
+    try {
+            let personas = await pool.query('select * from personas_fiscalizacion where id=?',[id])
+            res.json(personas)
+    } catch (error) {
+        console.log(error)
+    }
+
+
+})
+router.get('/traerpersonas', async (req, res,) => {
+    try {
+            let personas = await pool.query('select * from personas_fiscalizacion left join (select id as idescuela, nombre as nombreescuela from escuelas) as selec on personas_fiscalizacion.id_donde_vota=selec.idescuela ')
+            res.json(personas)
+    } catch (error) {
+        console.log(error)
+    }
+
+
+})
+
+
 router.get('/todasincripciones', async (req, res,) => {
 
     //  let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco, telefono,telefono2 from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona left join (select id as id_aliado, nombre as nombre_aliado from usuarios)  as selec2 on inscripciones_fiscales.cargadopor=selec2.id_aliado  where inscripciones_fiscales.estado="Pendiente" ')
@@ -159,6 +207,7 @@ router.get('/todasincripciones', async (req, res,) => {
             if (band) {
                 let nuev = {
                     id: inscri2[inscripcion]['id'],
+                    observaciones: inscri2[inscripcion]['observaciones'],
                     dni: inscri2[inscripcion]['dni'],
                     nombre: inscri2[inscripcion]['nombre'],
                     estado: inscri2[inscripcion]['estado'],
@@ -183,7 +232,7 @@ router.get('/todasincripciones', async (req, res,) => {
             console.log(error)
             let nuev = {
                 id: inscri2[inscripcion]['id'],
-
+                observaciones: inscri2[inscripcion]['observaciones'],
                 dni: inscri2[inscripcion]['dni'],
                 nombre: inscri2[inscripcion]['nombre'],
                 estado: inscri2[inscripcion]['estado'],
@@ -282,6 +331,7 @@ router.get('/todasincripciones2/:id', async (req, res,) => {
             if (band) {
                 let nuev = {
                     id: inscri2[inscripcion]['id'],
+                    observaciones: inscri2[inscripcion]['observaciones'],
                     dni: inscri2[inscripcion]['dni'],
                     nombre: inscri2[inscripcion]['nombre'],
                     estado: inscri2[inscripcion]['estado'],
@@ -305,7 +355,7 @@ router.get('/todasincripciones2/:id', async (req, res,) => {
             console.log(error)
             let nuev = {
                 id: inscri2[inscripcion]['id'],
-
+                observaciones: inscri2[inscripcion]['observaciones'],
                 dni: inscri2[inscripcion]['dni'],
                 nombre: inscri2[inscripcion]['nombre'],
                 estado: inscri2[inscripcion]['estado'],
