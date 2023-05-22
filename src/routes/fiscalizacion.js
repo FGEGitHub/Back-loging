@@ -550,7 +550,7 @@ router.get('/traermesas/:id_escuela', async (req, res,) => {
             disponibilidad = 'Ocupada'
         }
         console.log(escuela[0]['nombre'])
-        if((escuela[0]['nombre']=='ESC. Nº 353 "DR. FÉLIX MARÍA GÓMEZ"') || (escuela[0]['nombre']=='ESC. Nº 34 "EL SANTO DE LA ESPADA"')){
+        if((escuela[0]['nombre']=='ESC. Nº 353 "DR. FÉLIX MARÍA GÓMEZ"') || (escuela[0]['nombre']=='ESC. Nº 34 "EL SANTO DE LA ESPADA"')|| (escuela[0]['nombre']=='COLEGIO "MANUEL VICENTE FIGUERERO"'|| (escuela[0]['nombre']=='ESCUELA TECNICA U.O.C.R.A.'))){
             disponibilidad = 'Ocupada'
         }
         
@@ -903,8 +903,8 @@ router.post("/traerestadisticasdeescuelas", async (req, res) => {
 
     const mesas = await pool.query('select * from mesas_fiscales where id_escuela=?', [id1])
     let libres = 0
-
-    if (escuelas_1[0]['circuito'] != 2 && escuelas_1[0]['nombre'] != 'ESC. Nº 353 "DR. FÉLIX MARÍA GÓMEZ"' && escuelas_1[0]['nombre'] != 'ESC. Nº 34 "EL SANTO DE LA ESPADA"') {
+ 
+    if (escuelas_1[0]['circuito'] != 2 && escuelas_1[0]['nombre'] != 'ESC. Nº 353 "DR. FÉLIX MARÍA GÓMEZ"' && escuelas_1[0]['nombre'] != 'ESC. Nº 34 "EL SANTO DE LA ESPADA"' && escuelas_1[0]['nombre'] != 'COLEGIO "MANUEL VICENTE FIGUERERO"' && escuelas_1[0]['nombre'] != 'ESCUELA TECNICA U.O.C.R.A.') {
         for (mesa in mesas) {
             let auxcont = await pool.query('select * from asignaciones_fiscales  where mesa=?', [mesas[mesa]['numero']])
             console.log(auxcont)
