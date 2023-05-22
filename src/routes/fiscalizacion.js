@@ -113,7 +113,7 @@ router.get('/listadealiados/', async (req, res,) => {
 router.get('/traerdatosdepersona/:id', async (req, res,) => {
     const id = req.params.id
     try {
-            let personas = await pool.query('select * from personas_fiscalizacion where id=?',[id])
+            let personas = await pool.query('select * from personas_fiscalizacion  left join (select id as ide, nombre as nombreescuela from escuelas) as selec on personas_fiscalizacion.id_donde_vota=selec.ide where id=?',[id])
             res.json(personas)
     } catch (error) {
         console.log(error)
@@ -132,6 +132,22 @@ router.get('/traerpersonas', async (req, res,) => {
 
 })
 
+
+router.get('/traerpersonasdeunenc/:id', async (req, res,) => {
+    const id = req.params.id
+    try {
+            //let personas = await pool.query('select * from personas_fiscalizacion join (select id as idins, id_encargado, dni as dni2 from inscripciones_fiscales) as selec2 on personas_fiscalizacion.dni=selec2.dni2 left join (select id as idescuela, nombre as nombreescuela from escuelas) as selec on personas_fiscalizacion.id_donde_vota=selec.idescuela where id_encargado=? ',[id])
+        
+            
+        let personas = await pool.query('select * from personas_fiscalizacion join (select id as idins, id_encargado, dni as dni2 from inscripciones_fiscales) as selec2 on personas_fiscalizacion.dni=selec2.dni2  where id_encargado=? and dni2<>"Sin definir"',[id])
+        res.json(personas)
+
+    } catch (error) {
+        console.log(error)
+    }
+
+
+})
 
 router.get('/todasincripciones', async (req, res,) => {
 
@@ -768,6 +784,27 @@ router.post("/rechazarincrip", async (req, res) => {
 
 })
 
+
+router.post("/modificarpersonafisca", async (req, res) => {
+    let { id, dni, nombre, apellido, celiaco, vegano, movilidad, domicilio } = req.body
+if (movilidad == undefined){
+    movilidad='sin definir'
+}
+if (domicilio == undefined){
+    domicilio='sin definir'
+}
+    
+    try {
+         await pool.query('update personas_fiscalizacion set  dni=?, nombre=?, apellido=?, celiaco=?, vegano=?, movilidad=?, domicilio=? where  id = ?', [  dni, nombre, apellido, celiaco, vegano, movilidad,domicilio, id])
+         res.json('Realizado')
+    } catch (error) {
+        console.log(error)
+        res.json('No Realizado')
+
+    }
+   
+
+})
 
 
 router.post("/volverapaso1", async (req, res) => {
