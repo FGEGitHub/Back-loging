@@ -551,6 +551,15 @@ escuelastodas.push(enviaraux)
 })
 
 
+router.get('/traerdetallesdeunaescuela/:id_escuela', async (req, res,) => {
+    const { id_escuela } = req.params
+
+    const mesass = await pool.query('select * from mesas_fiscales left join ( select mesa as mesaasig, dni from asignaciones_fiscales) as selec1 on mesas_fiscales.id= selec1.mesaasig    where id_escuela=? ', [id_escuela])
+console.log(mesass)
+res.json(mesass)
+
+
+})
 
 router.get('/traermesas/:id_escuela', async (req, res,) => {
     const { id_escuela } = req.params
