@@ -507,7 +507,7 @@ router.get('/listademesas', async (req, res,) => {
 
 
     try {
-        estr = await pool.query('select * from mesas_fiscales join (select id as id_esc, nombre from escuelas) as selec1 on mesas_fiscales.id_escuela=selec1.id_esc ')
+        estr = await pool.query('select * from mesas_fiscales join (select id as id_esc, nombre from escuelas) as selec1 on mesas_fiscales.id_escuela=selec1.id_esc left join (select mesa as mesaf, dni from asignaciones_fiscales) as selec2 on mesas_fiscales.id=selec2.mesaf left join (select dni as dnipers, apellido, nombre as nombrepers from personas_fiscalizacion) as selec3 on selec2.dni=selec3.dnipers')
 
         res.json(estr)
     } catch (error) {
@@ -522,8 +522,26 @@ router.get('/listadeescuelas', async (req, res,) => {
 
     try {
         estr = await pool.query('select * from escuelas ')
+let escuelastodas = []
 
-        res.json(estr)
+for (auxiescuela in estr){
+let cantidad_mesas = await pool.query('select * from mesas_fiscales where id_escuela=?',[estr[auxiescuela]['id']])
+let cantidad_asig = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa where id_escuela=?',[estr[auxiescuela]['id']])
+
+let enviaraux={
+    cantidad_mesas:cantidad_mesas.length,
+    cantidad_asig:cantidad_asig.length,
+    id:estr[auxiescuela]['id'],
+    nombre:estr[auxiescuela]['nombre'],
+    circuito:estr[auxiescuela]['circuito'],
+    dato1:estr[auxiescuela]['dato1'],
+    dato2:estr[auxiescuela]['dato2'],
+}
+escuelastodas.push(enviaraux)
+}
+
+
+        res.json(escuelastodas)
     } catch (error) {
         console.log(error)
         res.json(['algo salio mal'])
