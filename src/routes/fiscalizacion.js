@@ -154,7 +154,7 @@ router.get('/todasincripciones', async (req, res,) => {
     //  let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco, telefono,telefono2 from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona left join (select id as id_aliado, nombre as nombre_aliado from usuarios)  as selec2 on inscripciones_fiscales.cargadopor=selec2.id_aliado  where inscripciones_fiscales.estado="Pendiente" ')
 
     //
-    let inscri2 = await pool.query('select * from inscripciones_fiscales  where inscripciones_fiscales.estado="Pendiente" or inscripciones_fiscales.estado="Rechazado" ')
+    let inscri2 = await pool.query('select * from inscripciones_fiscales  where inscripciones_fiscales.estado="Pendiente" or inscripciones_fiscales.estado="Rechazado" or inscripciones_fiscales.estado="No contestado" ')
 
     //
     console.log(inscri2.length)
@@ -285,7 +285,7 @@ router.get('/todasincripciones2/:id', async (req, res,) => {
     //  let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco, telefono,telefono2 from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona left join (select id as id_aliado, nombre as nombre_aliado from usuarios)  as selec2 on inscripciones_fiscales.cargadopor=selec2.id_aliado  where inscripciones_fiscales.estado="Pendiente" ')
     console.log(id)
     //
-    let inscri2 = await pool.query('select * from inscripciones_fiscales  where (inscripciones_fiscales.estado="Pendiente" or inscripciones_fiscales.estado="Rechazado")  and id_encargado=? ', [id])
+    let inscri2 = await pool.query('select * from inscripciones_fiscales  where (inscripciones_fiscales.estado="Pendiente" or inscripciones_fiscales.estado="Rechazado" or inscripciones_fiscales.estado="No contestado")  and id_encargado=? ', [id])
 
     //
 
@@ -1367,11 +1367,18 @@ router.get('/traerencargados/', async (req, res) => {
 
 
 
+router.get('/traerescparasig/', async (req, res) => {
 
+
+    const etc = await pool.query('select * from usuarios where  nivel=10')
+    console.log(etc)
+    res.json(etc);
+    //res.render('index')
+})
 router.get('/todos/', async (req, res) => {
 
 
-    const etc = await pool.query('select * from usuarios where nivel=5 or nivel=6 or nivel=7 or nivel=8 or nivel=9')
+    const etc = await pool.query('select * from usuarios where nivel=5 or nivel=6 or nivel=7 or nivel=8 or nivel=9 or nivel=10')
     console.log(etc)
     res.json(etc);
     //res.render('index')
@@ -1415,6 +1422,37 @@ router.post('/crearmesa', async (req, res) => {
 })
 
 
+
+router.post('/marcarnocontestado', async (req, res) => {
+    const { id_inscripcion } = req.body
+   try {
+    const inc = await pool.query('select * from inscripciones_fiscales where id =?', [id_inscripcion])
+    if (inc[0]['estado']=='No contestado'){
+        await pool.query('update inscripciones_fiscales set estado="Pendiente"  where id = ?', [id_inscripcion])
+    }else {
+        await pool.query('update inscripciones_fiscales set estado="No contestado"  where id = ?', [id_inscripcion])
+    }
+   
+res.json('realizado')
+   } catch (error) {
+    console.log(error)
+    res.json('No realizado')
+   }
+
+})
+
+
+router.post('/asignarencardadodeesc', async (req, res) => {
+    const { id, id_encargado } = req.body
+   try {
+    await pool.query('update escuelas set id_usuario=?  where id = ?', [id_encargado,id])
+res.json('realizado')
+   } catch (error) {
+    console.log(error)
+    res.json('No realizado')
+   }
+
+})
 router.post('/incripcionesid', async (req, res) => {
     const { id } = req.body
 
