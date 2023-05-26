@@ -154,7 +154,7 @@ router.get('/todasincripciones', async (req, res,) => {
     //  let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco, telefono,telefono2 from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona left join (select id as id_aliado, nombre as nombre_aliado from usuarios)  as selec2 on inscripciones_fiscales.cargadopor=selec2.id_aliado  where inscripciones_fiscales.estado="Pendiente" ')
 
     //
-    let inscri2 = await pool.query('select * from inscripciones_fiscales  where inscripciones_fiscales.estado="Pendiente" or inscripciones_fiscales.estado="Rechazado" or inscripciones_fiscales.estado="No contestado" ')
+    let inscri2 = await pool.query('select * from inscripciones_fiscales   ')
 
     //
     console.log(inscri2.length)
@@ -577,7 +577,7 @@ router.get('/traermesas/:id_escuela', async (req, res,) => {
             disponibilidad = 'Ocupada'
         }
         console.log(escuela[0]['nombre'])
-        if((escuela[0]['nombre']=='ESC. Nº 353 "DR. FÉLIX MARÍA GÓMEZ"') || (escuela[0]['nombre']=='ESC. Nº 34 "EL SANTO DE LA ESPADA"')|| (escuela[0]['nombre']=='COLEGIO "MANUEL VICENTE FIGUERERO"'|| (escuela[0]['nombre']=='ESCUELA TECNICA U.O.C.R.A.'))){
+        if( (escuela[0]['nombre']=='ESC. Nº 34 "EL SANTO DE LA ESPADA"')|| (escuela[0]['nombre']=='COLEGIO "MANUEL VICENTE FIGUERERO"'|| (escuela[0]['nombre']=='ESCUELA TECNICA U.O.C.R.A.'))){
             disponibilidad = 'Ocupada'
         }
         
@@ -610,9 +610,10 @@ router.get('/datosdemesas', async (req, res) => {
         let cant = await pool.query('select * from mesas_fiscales ')
         let asig = await pool.query('select * from asignaciones_fiscales ')
         let esc = await pool.query('select * from escuelas ')
-        let yassig =await pool.query('select * from mesas_fiscales join (select id as ide, circuito, nombre from escuelas) as sele on mesas_fiscales.id_escuela=sele.ide where circuito =2 ',['ESC. Nº 353 "DR. FÉLIX MARÍA GÓMEZ"','ESC. Nº 34 "EL SANTO DE LA ESPADA"'])
-       //let yassig =await pool.query('select * from mesas_fiscales join (select id as ide, circuito, nombre from escuelas) as sele on mesas_fiscales.id_escuela=sele.ide  ') 
+        let yassig =await pool.query('select * from mesas_fiscales join (select id as ide, circuito, nombre from escuelas) as sele on mesas_fiscales.id_escuela=sele.ide where circuito ="2" or nombre=? or nombre=? or nombre=? ',['COLEGIO "MANUEL VICENTE FIGUERERO"','ESC. Nº 34 "EL SANTO DE LA ESPADA"',"ESCUELA TECNICA U.O.C.R.A."])
        console.log("yasig")
+       let yassig2 =await pool.query('select * from mesas_fiscales join (select id as ide, circuito, nombre from escuelas) as sele on mesas_fiscales.id_escuela=sele.ide where nombre=? or nombre=? or nombre=?',['COLEGIO "MANUEL VICENTE FIGUERERO"','ESC. Nº 34 "EL SANTO DE LA ESPADA"',"ESCUELA TECNICA U.O.C.R.A."])
+
         console.log(yassig.length)
         let mesas_sin_asignar = []
 
@@ -624,7 +625,7 @@ router.get('/datosdemesas', async (req, res) => {
         }
 
 
-        res.json([cant.length, asig.length, mesas_sin_asignar.length, esc.length])
+        res.json([cant.length, asig.length, mesas_sin_asignar.length-(yassig.length), esc.length])
     } catch (error) {
         console.log(error)
         res.send('algo salio mal')
@@ -932,7 +933,7 @@ router.post("/traerestadisticasdeescuelas", async (req, res) => {
     const mesas = await pool.query('select * from mesas_fiscales where id_escuela=?', [id1])
     let libres = 0
  
-    if (escuelas_1[0]['circuito'] != 2 && escuelas_1[0]['nombre'] != 'ESC. Nº 353 "DR. FÉLIX MARÍA GÓMEZ"' && escuelas_1[0]['nombre'] != 'ESC. Nº 34 "EL SANTO DE LA ESPADA"' && escuelas_1[0]['nombre'] != 'COLEGIO "MANUEL VICENTE FIGUERERO"' && escuelas_1[0]['nombre'] != 'ESCUELA TECNICA U.O.C.R.A.') {
+    if (escuelas_1[0]['circuito'] != 2 &&  escuelas_1[0]['nombre'] != 'ESC. Nº 34 "EL SANTO DE LA ESPADA"' && escuelas_1[0]['nombre'] != 'COLEGIO "MANUEL VICENTE FIGUERERO"' && escuelas_1[0]['nombre'] != 'ESCUELA TECNICA U.O.C.R.A.') {
         for (mesa in mesas) {
             let auxcont = await pool.query('select * from asignaciones_fiscales  where mesa=?', [mesas[mesa]['numero']])
             console.log(auxcont)
