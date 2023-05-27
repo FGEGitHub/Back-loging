@@ -711,6 +711,10 @@ router.get('/estadisticas1', async (req, res,) => {
     let Amigo = 0
     let Autoin = 0
     let aliado = 0
+
+    let celiaco =  await pool.query('select * from asignaciones_fiscales join (select dni as dnip,celiaco from personas_fiscalizacion) as selec on asignaciones_fiscales.dni=selec.dnip where celiaco="Si"')
+    let vegano =  await pool.query('select * from asignaciones_fiscales join (select dni as dnip,vegano from personas_fiscalizacion) as selec on asignaciones_fiscales.dni=selec.dnip where vegano="Si"')
+   
     let contactado = await pool.query('select * from inscripciones_fiscales where estado !="Pendiente"')
     let asigna = await pool.query('select * from asignaciones_fiscales ')
     let asigna2 = await pool.query('select * from inscripciones_fiscales where estado ="Asignado"')
@@ -761,7 +765,9 @@ router.get('/estadisticas1', async (req, res,) => {
         contactado: contactado.length,
         asigna: asigna.length,
         recha: recha.length,
-        nocont: nocont.length
+        nocont: nocont.length,
+        celiaco:celiaco.length,
+        vegano:vegano.length
     }
     res.json(respuesta)
 
