@@ -625,7 +625,7 @@ router.get('/datosdemesas', async (req, res) => {
         }
 
 
-        res.json([cant.length, asig.length, mesas_sin_asignar.length-(yassig.length), esc.length])
+        res.json([cant.length, asig.length+(yassig.length), mesas_sin_asignar.length-(yassig.length), esc.length])
     } catch (error) {
         console.log(error)
         res.send('algo salio mal')
