@@ -643,6 +643,11 @@ router.get('/estadisticas1', async (req, res,) => {
     let Amigo = 0
     let Autoin = 0
     let aliado = 0
+    let contactado = await pool.query('select * from inscripciones_fiscales where estado !="Pendiente"')
+    let asigna =await pool.query('select * from asignaciones_fiscales ')
+  
+    let recha = await pool.query('select * from inscripciones_fiscales where estado ="Rechazado"')
+    let nocont = await pool.query('select * from inscripciones_fiscales where estado ="No contestado"')
     for (indexx in insc) {
 
         switch (insc[indexx]['como_se_entero']) {
@@ -682,8 +687,11 @@ router.get('/estadisticas1', async (req, res,) => {
         Fly: Fly,
         Amigo: Amigo,
         Autoinscripcion: Autoin,
-        aliado: aliado
-
+        aliado: aliado,
+        contactado:contactado.length,
+        asigna:asigna.length,
+        recha:recha.length,
+        nocont:nocont.length
     }
     res.json(respuesta)
 
