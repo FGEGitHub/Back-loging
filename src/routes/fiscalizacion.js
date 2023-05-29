@@ -1032,9 +1032,10 @@ router.post("/traerestadisticasdeescuelas", async (req, res) => {
 
     if (escuelas_1[0]['circuito'] != 2 && escuelas_1[0]['nombre'] != 'ESC. Nº 34 "EL SANTO DE LA ESPADA"' && escuelas_1[0]['nombre'] != 'COLEGIO "MANUEL VICENTE FIGUERERO"' && escuelas_1[0]['nombre'] != 'ESCUELA TECNICA U.O.C.R.A.') {
         for (mesa in mesas) {
-            let auxcont = await pool.query('select * from asignaciones_fiscales  where mesa=?', [mesas[mesa]['numero']])
-
+            let auxcont = await pool.query('select * from asignaciones_fiscales  where mesa=?', [mesas[mesa]['id']])
+          
             if (auxcont.length == 0) {
+                console.log(mesas[mesa]['numero'])
                 libres += 1
             }
         }
