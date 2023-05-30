@@ -848,7 +848,7 @@ router.get('/todaslasasignacionesdeunaescuela/:id', async (req, res,) => {
     const id = req.params.id
 
     try {
-        estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip join (select id as idmesa, numero from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa where id_usuario =? ', [id])
+        estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip join (select id as idmesa, numero from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa where id_usuario =? ', [id])
 
         res.json(estr)
     } catch (error) {
