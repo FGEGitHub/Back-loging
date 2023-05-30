@@ -876,6 +876,28 @@ router.get('/todaslasasignacionesdeun/:id', async (req, res,) => {
 
 
 
+
+router.get('/contactada/:id', async (req, res,) => {
+const id = req.params.id
+try {
+    const asignacion = await pool.query('select * from asignaciones_fiscales where id =? ',[id])
+if (asignacion[0]['dato1'] == null || asignacion[0]['dato1'] == 'No'){
+    await pool.query('update asignaciones_fiscales set dato1="Si"  where id=?', [ id])
+   
+}else{
+    console.log('no')
+    await pool.query('update asignaciones_fiscales set dato1="No"  where id=?', [ id])
+}
+res.json('realizado')
+} catch (error) {
+    console.log(error)
+    res.json('No realizado')
+}
+
+})
+
+
+
 router.get('/todaslasasignaciones', async (req, res,) => {
 
 
