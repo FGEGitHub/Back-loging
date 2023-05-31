@@ -866,7 +866,7 @@ router.get('/todaslasasignacionesdeunaescuela/:id', async (req, res,) => {
     const id = req.params.id
 
     try {
-        estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip join (select id as idmesa, numero from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa where id_usuario =? ', [id])
+        estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip join (select id as idmesa, numero from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa where numero !="Suplente 1" and numero !="Suplente 2" and  id_usuario =? ', [id])
 
         res.json(estr)
     } catch (error) {
@@ -1092,12 +1092,14 @@ router.post("/traerestadisticasdeescuelas", async (req, res) => {
 
     const cantid2 = await pool.query('select sum(cantidad) from mesas_fiscales where id_escuela=?', [id2])
 
-    const mesas = await pool.query('select * from mesas_fiscales where id_escuela=?', [id1])
+    const mesas = await pool.query('select * from mesas_fiscales where id_escuela=? ', [id1])
+
+    const suplentes = await pool.query('select * from mesas_fiscales where id_escuela=? and (numero = "Suplente 1" or numero = "Suplente 2")', [id1])
     let libres = 0
 
     if (escuelas_1[0]['circuito'] != 2 && escuelas_1[0]['nombre'] != 'ESC. Nº 34 "EL SANTO DE LA ESPADA"' && escuelas_1[0]['nombre'] != 'COLEGIO "MANUEL VICENTE FIGUERERO"' && escuelas_1[0]['nombre'] != 'ESCUELA TECNICA U.O.C.R.A.') {
         for (mesa in mesas) {
-            let auxcont = await pool.query('select * from asignaciones_fiscales  where mesa=?', [mesas[mesa]['id']])
+            let auxcont = await pool.query('select * from asignaciones_fiscales  where mesa=? ', [mesas[mesa]['id']])
           
             if (auxcont.length == 0) {
                 console.log(mesas[mesa]['numero'])
@@ -1115,7 +1117,7 @@ router.post("/traerestadisticasdeescuelas", async (req, res) => {
     if (cantid2.length > 0) {
         cantidad_escuela2 = cantid2[0]['sum(cantidad)']
     }
-
+console.log(suplentes.length)
     // const cant1 = await pool.query('select * from mesas_fiscales where id_escuela=?', [id1])
     //  const cant2 = await pool.query('select * from mesas_fiscales where id_escuela=?', [id2])
     const datos_escuelas = {
@@ -1126,6 +1128,7 @@ router.post("/traerestadisticasdeescuelas", async (req, res) => {
         libres: libres,
         Encargado: escuelas_1[0]['dato1'],
         tel: escuelas_1[0]['dato2'],
+        suplentes: suplentes.length,
     }
 
     res.json(datos_escuelas)
