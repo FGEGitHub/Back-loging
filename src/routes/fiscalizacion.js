@@ -1016,6 +1016,31 @@ router.post("/asignarinscripciones", async (req, res) => {
 
 
 
+router.post("/modificarestadodeinscrip", async (req, res) => {
+    let { id,  estado } = req.body
+   
+    try {
+        console.log(estado)
+        await pool.query('update inscripciones_fiscales set estado =?  where  id = ?', [estado,id])
+        res.json('Cambiado el estado')
+    } catch (error) {
+        console.log(error)
+       res.json('error') 
+    }
+})
+
+router.post("/modificarobservaciones", async (req, res) => {
+    let { id,  observaciones } = req.body
+   
+    try {
+        await pool.query('update inscripciones_fiscales set observaciones =?  where  id = ?', [observaciones,id])
+        res.json('Cambiada las observaciones')
+    } catch (error) {
+        console.log(error)
+       res.json('error') 
+    }
+})
+
 router.post("/crearescuela", async (req, res) => {
     let { nombre, circuito, observacion } = req.body
 
