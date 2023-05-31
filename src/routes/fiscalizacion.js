@@ -113,7 +113,7 @@ router.get('/listadealiados/', async (req, res,) => {
 router.get('/traerdatosdepersona/:id', async (req, res,) => {
     const id = req.params.id
     try {
-        let personas = await pool.query('select * from personas_fiscalizacion  left join (select id as ide, nombre as nombreescuela from escuelas) as selec on personas_fiscalizacion.id_donde_vota=selec.ide where id=?', [id])
+        let personas = await pool.query('select * from personas_fiscalizacion  left join (select id as ide, nombre as nombreescuela from escuelas) as selec on personas_fiscalizacion.id_donde_vota=selec.ide left join (select dni as dniinscrip, observaciones from inscripciones_fiscales) as selec3 on personas_fiscalizacion.dni=selec3.dniinscrip where id=?', [id])
         res.json(personas)
     } catch (error) {
         console.log(error)
@@ -507,7 +507,7 @@ router.get('/listademesas', async (req, res,) => {
 
 
     try {
-        estr = await pool.query('select * from mesas_fiscales join (select id as id_esc, nombre from escuelas) as selec1 on mesas_fiscales.id_escuela=selec1.id_esc left join (select mesa as mesaf, dni from asignaciones_fiscales) as selec2 on mesas_fiscales.id=selec2.mesaf left join (select dni as dnipers, apellido, nombre as nombrepers from personas_fiscalizacion) as selec3 on selec2.dni=selec3.dnipers')
+        estr = await pool.query('select * from mesas_fiscales join (select id as id_esc, nombre from escuelas) as selec1 on mesas_fiscales.id_escuela=selec1.id_esc left join (select mesa as mesaf, dni from asignaciones_fiscales) as selec2 on mesas_fiscales.id=selec2.mesaf left join (select dni as dnipers, apellido, nombre as nombrepers,id_donde_vota from personas_fiscalizacion) as selec3 on selec2.dni=selec3.dnipers join (select id as idescuelaa, nombre as nombredondevota from escuelas) as selec5 on selec3.id_donde_vota=selec5.idescuelaa')
 
         res.json(estr)
     } catch (error) {
