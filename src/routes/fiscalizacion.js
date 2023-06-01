@@ -658,12 +658,12 @@ router.get('/datosdemesas', async (req, res) => {
     //////  traer cantidad de mesas, mesas libres mesas ocupadas, 
 
     try {
-        let cant = await pool.query('select * from mesas_fiscales ')
-        let asig = await pool.query('select * from asignaciones_fiscales ')
+        let cant = await pool.query('select * from mesas_fiscales where numero !="Suplente 1" and numero !="Suplente 2"')
+        let asig = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales.mesa=selec.idmesa where numero !="Suplente 1" and numero !="Suplente 2" ')
         let esc = await pool.query('select * from escuelas ')
         let yassig = await pool.query('select * from mesas_fiscales join (select id as ide, circuito, nombre from escuelas) as sele on mesas_fiscales.id_escuela=sele.ide where circuito ="2" or nombre=? or nombre=? or nombre=? ', ['COLEGIO "MANUEL VICENTE FIGUERERO"', 'ESC. Nº 34 "EL SANTO DE LA ESPADA"', "ESCUELA TECNICA U.O.C.R.A."])
         console.log("yasig")
-        let yassig2 = await pool.query('select * from mesas_fiscales join (select id as ide, circuito, nombre from escuelas) as sele on mesas_fiscales.id_escuela=sele.ide where nombre=? or nombre=? or nombre=?', ['COLEGIO "MANUEL VICENTE FIGUERERO"', 'ESC. Nº 34 "EL SANTO DE LA ESPADA"', "ESCUELA TECNICA U.O.C.R.A."])
+        let capaacitados = await pool.query('select * from asignaciones_fiscales where capacitado="Si"')
 
         console.log(yassig.length)
         let mesas_sin_asignar = []
@@ -676,7 +676,7 @@ router.get('/datosdemesas', async (req, res) => {
         }
 
 
-        res.json([cant.length, asig.length + (yassig.length), cant.length - asig.length - (yassig.length), esc.length])
+        res.json([cant.length, asig.length + (yassig.length), cant.length - asig.length - (yassig.length), esc.length,capaacitados.length])
     } catch (error) {
         console.log(error)
         res.send('algo salio mal')
