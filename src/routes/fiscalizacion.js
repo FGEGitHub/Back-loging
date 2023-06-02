@@ -734,7 +734,7 @@ router.get('/datosdemesas', async (req, res) => {
         }
 
 
-        res.json([cant.length, asig.length , cant.length - asig.length - (yassig.length), esc.length,capaacitados.length])
+        res.json([cant.length, asig.length , cant.length - asig.length, esc.length,capaacitados.length])
     } catch (error) {
         console.log(error)
         res.send('algo salio mal')
