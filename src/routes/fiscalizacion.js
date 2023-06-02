@@ -734,7 +734,7 @@ router.get('/datosdemesas', async (req, res) => {
         }
 
 
-        res.json([cant.length, asig.length + (yassig.length), cant.length - asig.length - (yassig.length), esc.length,capaacitados.length])
+        res.json([cant.length, asig.length , cant.length - asig.length - (yassig.length), esc.length,capaacitados.length])
     } catch (error) {
         console.log(error)
         res.send('algo salio mal')
@@ -826,10 +826,9 @@ router.get('/estadisticas1', async (req, res,) => {
     let vegano = await pool.query('select * from asignaciones_fiscales join (select dni as dnip,vegano from personas_fiscalizacion) as selec on asignaciones_fiscales.dni=selec.dnip where vegano="Si"')
 
     let contactado = await pool.query('select * from inscripciones_fiscales where estado !="Pendiente"')
-    let asigna = await pool.query('select * from asignaciones_fiscales ')
-    let asigna2 = await pool.query('select * from inscripciones_fiscales where estado ="Asignado"')
-    console.log(asigna.length)
-    console.log(asigna2.length)
+    let asigna = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales.mesa=selec.idmesa where numero != "Suplente 1" and numero != "Suplente 2"')
+    let asigna2 = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales.mesa=selec.idmesa where numero = "Suplente 1" or numero = "Suplente 2"')
+
     let recha = await pool.query('select * from inscripciones_fiscales where estado ="Rechazado"')
     let nocont = await pool.query('select * from inscripciones_fiscales where estado ="No contestado"')
     for (indexx in insc) {
@@ -874,6 +873,7 @@ router.get('/estadisticas1', async (req, res,) => {
         aliado: aliado,
         contactado: contactado.length,
         asigna: asigna.length,
+        asigna2:asigna2.length,
         recha: recha.length,
         nocont: nocont.length,
         celiaco: celiaco.length,
