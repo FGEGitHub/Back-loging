@@ -544,7 +544,7 @@ router.get('/listadeescuelas', async (req, res,) => {
 
         for (auxiescuela in estr) {
             let cantidad_mesas = await pool.query('select * from mesas_fiscales where id_escuela=? and numero !="Suplente 1"and numero !="Suplente 2"', [estr[auxiescuela]['id']])
-            let cantidad_asig = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa where id_escuela=?', [estr[auxiescuela]['id']])
+            let cantidad_asig = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa where id_escuela=? and numero != "Suplente 1" and numero != "Suplente 2"', [estr[auxiescuela]['id']])
             let cantidad_movil = 0
         
             for (auximesa in cantidad_mesas) {
