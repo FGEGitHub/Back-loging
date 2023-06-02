@@ -601,6 +601,22 @@ router.get('/listadeescuelas', async (req, res,) => {
 
 })
 
+router.get('/rechazarcapacitacion/:id', async (req, res,) => {
+    const id = req.params.id
+
+    try {
+
+
+        await pool.query('update asignaciones_fiscales set capacitado="No"  where id=?', [id])
+
+
+        res.json('realizado con exito')
+    } catch (error) {
+        console.log(error)
+        res.json('No realizado')
+    }
+
+})
 router.get('/confirmarcapa/:id', async (req, res,) => {
     const id = req.params.id
     console.log('no')
