@@ -455,6 +455,31 @@ router.get('/traerescuelas', async (req, res) => {
 
     res.json(etc);
 
+})
+
+router.get('/traerescuelasfalt', async (req, res) => {
+    
+
+
+    const etc = await pool.query('select * from escuelas  order by nombre ')
+
+    let envioo = []
+    for (axilliarmesas in etc ){
+
+        let mesass = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa from asignaciones_fiscales) as selec2 on mesas_fiscales.id=selec2.mesaa where selec2.mesaa IS NULL and id_escuela=?',[etc[axilliarmesas]['id']])
+
+if (mesass.length>1){
+    envioo.push(etc[axilliarmesas])
+}
+
+    }
+
+
+
+
+
+    res.json(envioo);
+
 
 
 
@@ -685,7 +710,6 @@ router.get('/traermesas/:id_escuela', async (req, res,) => {
 
 
 })
-
 
 
 router.get('/datosdemesas', async (req, res) => {
@@ -932,10 +956,11 @@ router.get('/traerpaso2inscrip', async (req, res,) => {
 
 router.get('/todaslasasignacionesdeunaescuela/:id', async (req, res,) => {
     const id = req.params.id
-
+console.log(id)
     try {
-        estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip join (select id as idmesa, numero from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa where numero !="Suplente 1" and numero !="Suplente 2" and  id_usuario =? ', [id])
-
+      
+      estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa where numero !="Suplente 1" and numero !="Suplente 2" and  id_usuario =? ', [id])
+     
         res.json(estr)
     } catch (error) {
         console.log(error)
