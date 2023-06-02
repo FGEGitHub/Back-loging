@@ -458,19 +458,19 @@ router.get('/traerescuelas', async (req, res) => {
 })
 
 router.get('/traerescuelasfalt', async (req, res) => {
-    
+
 
 
     const etc = await pool.query('select * from escuelas  order by nombre ')
 
     let envioo = []
-    for (axilliarmesas in etc ){
+    for (axilliarmesas in etc) {
 
-        let mesass = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa from asignaciones_fiscales) as selec2 on mesas_fiscales.id=selec2.mesaa where selec2.mesaa IS NULL and id_escuela=?',[etc[axilliarmesas]['id']])
-
-if (mesass.length>1){
-    envioo.push(etc[axilliarmesas])
-}
+        let mesass = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa from asignaciones_fiscales) as selec2 on mesas_fiscales.id=selec2.mesaa where selec2.mesaa IS NULL and id_escuela=?', [etc[axilliarmesas]['id']])
+   
+        if (mesass.length > 0) {
+            envioo.push(etc[axilliarmesas])
+        }
 
     }
 
@@ -571,35 +571,35 @@ router.get('/listadeescuelas', async (req, res,) => {
             let cantidad_mesas = await pool.query('select * from mesas_fiscales where id_escuela=? and numero !="Suplente 1"and numero !="Suplente 2"', [estr[auxiescuela]['id']])
             let cantidad_asig = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa where id_escuela=? and numero != "Suplente 1" and numero != "Suplente 2"', [estr[auxiescuela]['id']])
             let cantidad_movil = 0
-        
+
             for (auximesa in cantidad_mesas) {
-               // let mesarecorrido = await pool.query('select * from mesas_fiscales join (select mesa as mesaa, dni  from asignaciones_fiscales) as selec1 on mesas_fiscales.id=selec1.mesaa join (select dni as dnipers, id_donde_vota from personas_fiscalizacion) as selec2 on selec1.dni=selec2.dnipers where id=? ',[cantidad_mesas[auximesa]['id']])
-             //  let escuelarecorrido = await pool.query('select * from mesas_fiscales  where id=? ',[cantidad_mesas[auximesa]['id']])
+                // let mesarecorrido = await pool.query('select * from mesas_fiscales join (select mesa as mesaa, dni  from asignaciones_fiscales) as selec1 on mesas_fiscales.id=selec1.mesaa join (select dni as dnipers, id_donde_vota from personas_fiscalizacion) as selec2 on selec1.dni=selec2.dnipers where id=? ',[cantidad_mesas[auximesa]['id']])
+                //  let escuelarecorrido = await pool.query('select * from mesas_fiscales  where id=? ',[cantidad_mesas[auximesa]['id']])
 
 
-        let dondevota= await pool.query('select * from asignaciones_fiscales join (select dni as dnipers, id_donde_vota from personas_fiscalizacion) as selec on asignaciones_fiscales.dni=selec.dnipers where mesa =?',cantidad_mesas[auximesa]['id'])
+                let dondevota = await pool.query('select * from asignaciones_fiscales join (select dni as dnipers, id_donde_vota from personas_fiscalizacion) as selec on asignaciones_fiscales.dni=selec.dnipers where mesa =?', cantidad_mesas[auximesa]['id'])
 
-        if (dondevota.length==0){
-            console.log('no suma')         
-            
-        }else{
-            if ((dondevota[0]['id_donde_vota'] != estr[auxiescuela]['id']) ){
-                console.log('suma')
-                cantidad_movil+=1
-            } 
+                if (dondevota.length == 0) {
+                    console.log('no suma')
 
-        }
-         
-    }
+                } else {
+                    if ((dondevota[0]['id_donde_vota'] != estr[auxiescuela]['id'])) {
+                        console.log('suma')
+                        cantidad_movil += 1
+                    }
 
+                }
 
+            }
 
 
-               //////////
-             
-              
-              
-               ////
+
+
+            //////////
+
+
+
+            ////
 
 
 
@@ -734,7 +734,7 @@ router.get('/datosdemesas', async (req, res) => {
         }
 
 
-        res.json([cant.length, asig.length , cant.length - asig.length, esc.length,capaacitados.length])
+        res.json([cant.length, asig.length, cant.length - asig.length, esc.length, capaacitados.length])
     } catch (error) {
         console.log(error)
         res.send('algo salio mal')
@@ -873,7 +873,7 @@ router.get('/estadisticas1', async (req, res,) => {
         aliado: aliado,
         contactado: contactado.length,
         asigna: asigna.length,
-        asigna2:asigna2.length,
+        asigna2: asigna2.length,
         recha: recha.length,
         nocont: nocont.length,
         celiaco: celiaco.length,
@@ -951,12 +951,12 @@ router.get('/traerpaso2inscrip', async (req, res,) => {
 
 })
 router.get('/verfaltantesescuelas/', async (req, res,) => {
-  
+
 
     try {
-      
+
         let estr = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa from asignaciones_fiscales) as selec2 on mesas_fiscales.id=selec2.mesaa join (select id as idescuela, nombre as nombre_escuela from escuelas) as selec4 on mesas_fiscales.id_escuela=selec4.idescuela  where selec2.mesaa IS NULL')
-console.log(estr)
+        console.log(estr)
         res.json(estr)
     } catch (error) {
         console.log(error)
@@ -971,11 +971,11 @@ console.log(estr)
 
 router.get('/todaslasasignacionesdeunaescuela/:id', async (req, res,) => {
     const id = req.params.id
-console.log(id)
+    console.log(id)
     try {
-      
-      estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa where numero !="Suplente 1" and numero !="Suplente 2" and  id_usuario =? ', [id])
-     
+
+        estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa where numero !="Suplente 1" and numero !="Suplente 2" and  id_usuario =? ', [id])
+
         res.json(estr)
     } catch (error) {
         console.log(error)
