@@ -1308,6 +1308,7 @@ router.post("/traerestadisticasdeescuelas", async (req, res) => {
         mesas: mesas.length,
         libres: libres,
         Encargado: escuelas_1[0]['dato1'],
+        ubicacion: escuelas_1[0]['ubicacion'],
         tel: escuelas_1[0]['dato2'],
         suplentes: suplentes.length,
     }
@@ -1324,6 +1325,22 @@ router.post("/modificardatosdemesa", async (req, res) => {
     let { numero, id, id_escuela } = req.body
     try {
         await pool.query('update mesas_fiscales set numero=?, id_escuela =? where  id = ?', [numero, id_escuela, id])
+        res.json("Modificado")
+    } catch (error) {
+        console.log(error)
+        res.json("No modificado")
+    }
+
+})
+
+
+router.post("/modificarescuelaubicacion", async (req, res) => {
+    let { ubicacion, id } = req.body
+
+
+    try {
+        
+        await pool.query('update escuelas set ubicacion=? where  id = ?', [ubicacion, id ])
         res.json("Modificado")
     } catch (error) {
         console.log(error)
