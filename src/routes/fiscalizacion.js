@@ -660,7 +660,15 @@ router.get('/confirmarcapa/:id', async (req, res,) => {
 
 })
 
+router.get('/traerdetallesdeunaescuelatraslado/:id_escuela', async (req, res,) => {
+    const { id_escuela } = req.params
 
+    const mesass = await pool.query('select * from mesas_fiscales left join ( select mesa as mesaasig, dni, escuela as escualasig from asignaciones_fiscales) as selec1 on mesas_fiscales.id= selec1.mesaasig  join (select dni as dnipersona, nombre as nombrepers, apellido, id_donde_vota, telefono, telefono2 from personas_fiscalizacion) as selec2 on selec1.dni=selec2.dnipersona join (select id as idesc, nombre as nombreesc from escuelas) as selec5 on selec2.id_donde_vota=selec5.idesc where id_escuela=? and selec1.escualasig != selec2.id_donde_vota ', [id_escuela])
+    console.log(mesass)
+    res.json(mesass)
+
+
+})
 router.get('/traerdetallesdeunaescuela/:id_escuela', async (req, res,) => {
     const { id_escuela } = req.params
 
