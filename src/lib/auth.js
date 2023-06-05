@@ -59,6 +59,35 @@ module.exports = {
         
         next()
     },
+    isLoggedInn5(req,res, next){
+        
+        //
+        const authorization = req.get('authorization')
+        
+        let token =null
+        console.log('authorization2')
+        console.log(authorization)
+        if (authorization && authorization.startsWith('Bearer')){
+          
+            token = authorization.substring(7) 
+        }
+        let decodedToken = {}
+        
+        try{
+             decodedToken = jwt.verify(token, 'fideicomisocs121')
+             console.log('5')
+           
+        }catch{}
+      
+        if (!token || !decodedToken.id || (decodedToken.nivel !=5) ){
+            console.log('error token')
+            return res.send('error login')
+        }
+      
+       // res.send(decodedToken.cuil_cuit)
+        
+        next()
+    },
 
     isLoggedInn4(req,res, next){
         console.log('entra1')
@@ -78,7 +107,8 @@ module.exports = {
              console.log(decodedToken)
            
         }catch{}
-      
+        console.log('decodedToken.nivel')
+      console.log(decodedToken.nivel)
         if (!token || !decodedToken.id || (decodedToken.nivel !=4 && decodedToken.nivel !=2 && decodedToken.nivel !=3 ) ){
             console.log('error token')
             return res.send('error login')
@@ -89,7 +119,7 @@ module.exports = {
         next()
     },
     isLoggedInn5(req,res, next){
-        console.log('entra1')
+      
         //
         const authorization = req.get('authorization')
         let token =null

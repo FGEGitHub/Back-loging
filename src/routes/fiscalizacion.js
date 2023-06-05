@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { isLoggedIn, isLoggedInn, isLoggedInn2 } = require('../lib/auth') //proteger profile
+const { isLoggedIn, isLoggedInn, isLoggedInn2,isLoggedInn5 } = require('../lib/auth') //proteger profile
 const pool = require('../database')
 const multer = require('multer')
 const XLSX = require('xlsx')
@@ -546,6 +546,22 @@ router.get('/listademesassuplentes', async (req, res,) => {
 })
 
 
+router.get('/verlogueo', isLoggedInn5,async (req, res,) => {
+
+
+    try {
+        estr = await pool.query('select * from mesas_fiscales left join (select id as id_esc, nombre from escuelas) as selec1 on mesas_fiscales.id_escuela=selec1.id_esc left join (select mesa as mesaf, dni from asignaciones_fiscales) as selec2 on mesas_fiscales.id=selec2.mesaf left join (select dni as dnipers, apellido, nombre as nombrepers,id_donde_vota, telefono, telefono2 from personas_fiscalizacion) as selec3 on selec2.dni=selec3.dnipers left join (select id as idescuelaa, nombre as nombredondevota from escuelas) as selec5 on selec3.id_donde_vota=selec5.idescuelaa')
+
+        res.json(estr)
+    } catch (error) {
+        console.log(error)
+        res.json(['algo salio mal'])
+    }
+
+
+})
+
+
 router.get('/listademesas', async (req, res,) => {
 
 
@@ -765,7 +781,7 @@ router.get('/datosdemesas', async (req, res) => {
     //////  traer cantidad de mesas, mesas libres mesas ocupadas, 
 
     try {
-        let cant = await pool.query('select * from mesas_fiscales where numero !="Suplente 1" and numero !="Suplente 2"')
+        let cant = await pool.query('select * from mesas_fiscales where numero !="Suplente 1" and numero !="Suplente 2" ')
         let asig = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales.mesa=selec.idmesa where numero !="Suplente 1" and numero !="Suplente 2" ')
         let esc = await pool.query('select * from escuelas ')
         let yassig = await pool.query('select * from mesas_fiscales join (select id as ide, circuito, nombre from escuelas) as sele on mesas_fiscales.id_escuela=sele.ide where circuito ="2" or nombre=? or nombre=? or nombre=? ', ['COLEGIO "MANUEL VICENTE FIGUERERO"', 'ESC. Nº 34 "EL SANTO DE LA ESPADA"', "ESCUELA TECNICA U.O.C.R.A."])
@@ -1737,7 +1753,7 @@ router.get('/traerescparasig/', async (req, res) => {
 router.get('/todos/', async (req, res) => {
 
 
-    const etc = await pool.query('select * from usuarios where nivel=5 or nivel=6 or nivel=7 or nivel=8 or nivel=9 or nivel=10')
+    const etc = await pool.query('select * from usuarios where nivel=5 or nivel=6 or nivel=7 or nivel=8 or nivel=9 or nivel=10 or nivel=50')
     console.log(etc)
     res.json(etc);
     //res.render('index')
