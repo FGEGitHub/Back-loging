@@ -587,7 +587,7 @@ router.get('/listadeescuelas', async (req, res,) => {
             let cantidad_mesas = await pool.query('select * from mesas_fiscales where id_escuela=? and numero !="Suplente 1"and numero !="Suplente 2"', [estr[auxiescuela]['id']])
             let cantidad_asig = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa where id_escuela=? and numero != "Suplente 1" and numero != "Suplente 2"', [estr[auxiescuela]['id']])
             let cantidad_movil = 0
-
+            let cantidad_suplentes = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa where id_escuela=? and (numero = "Suplente 1" or numero = "Suplente 2")', [estr[auxiescuela]['id']])
             for (auximesa in cantidad_mesas) {
                 // let mesarecorrido = await pool.query('select * from mesas_fiscales join (select mesa as mesaa, dni  from asignaciones_fiscales) as selec1 on mesas_fiscales.id=selec1.mesaa join (select dni as dnipers, id_donde_vota from personas_fiscalizacion) as selec2 on selec1.dni=selec2.dnipers where id=? ',[cantidad_mesas[auximesa]['id']])
                 //  let escuelarecorrido = await pool.query('select * from mesas_fiscales  where id=? ',[cantidad_mesas[auximesa]['id']])
@@ -627,6 +627,7 @@ router.get('/listadeescuelas', async (req, res,) => {
                 circuito: estr[auxiescuela]['circuito'],
                 dato1: estr[auxiescuela]['dato1'],
                 dato2: estr[auxiescuela]['dato2'],
+                cantidad_suplentes:cantidad_suplentes.length,
                 cantidad_movil
             }
             escuelastodas.push(enviaraux)
