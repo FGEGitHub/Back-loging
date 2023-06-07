@@ -198,7 +198,7 @@ router.get('/todasincripciones', async (req, res,) => {
 
 
             } else {
-                console.log(inscri2[inscripcion]['dni'])
+                
                 persona_auxiliar = await pool.query('select * from personas_fiscalizacion where dni= ? ', [inscri2[inscripcion]['dni']])
             }
 
