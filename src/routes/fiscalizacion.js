@@ -165,6 +165,7 @@ router.get('/todasincripciones', async (req, res,) => {
 
         try {
             let cargadop = [['Autoinscripcion']]
+       
             if (inscri2[inscripcion]['cargadopor'] != "Autoinscripcion") {
                 cargadop = await pool.query('select * from usuarios where id =?', [inscri2[inscripcion]['cargadopor']])
             }
@@ -220,7 +221,16 @@ router.get('/todasincripciones', async (req, res,) => {
 
             }
 
-
+            try {
+                if (cargadop.length==0){
+                    cargadop=[{nombre:"autoincripcion"}]
+                }
+             } catch (error) {
+                cargadop=[{nombre:"autoincripcion"}]
+                persona_auxiliar= [{vegano: "verificar",celiaco:"verificar",telefono: "verificar",telefono2: "verificar",id_aliado: "verificar"}] 
+                encargado = "verificar"
+        
+             }
             if (band) {
                 let nuev = {
                     id: inscri2[inscripcion]['id'],
@@ -247,6 +257,16 @@ router.get('/todasincripciones', async (req, res,) => {
             }
         } catch (error) {
             console.log(error)
+         try {
+            if (cargadop.length==0){
+                cargadop=[{nombre:"autoincripcion"}]
+            }
+         } catch (error) {
+            cargadop=[{nombre:"autoincripcion"}]
+            persona_auxiliar= [{vegano: "verificar",celiaco:"verificar",telefono: "verificar",telefono2: "verificar",id_aliado: "verificar"}] 
+            encargado = "verificar"
+    
+         }
             let nuev = {
                 id: inscri2[inscripcion]['id'],
                 observaciones: inscri2[inscripcion]['observaciones'],
