@@ -198,6 +198,7 @@ router.get('/todasincripciones', async (req, res,) => {
 
 
             } else {
+                console.log(inscri2[inscripcion]['dni'])
                 persona_auxiliar = await pool.query('select * from personas_fiscalizacion where dni= ? ', [inscri2[inscripcion]['dni']])
             }
 
@@ -221,16 +222,6 @@ router.get('/todasincripciones', async (req, res,) => {
 
             }
 
-            try {
-                if (cargadop.length==0){
-                    cargadop=[{nombre:"autoincripcion"}]
-                }
-             } catch (error) {
-                cargadop=[{nombre:"autoincripcion"}]
-                persona_auxiliar= [{vegano: "verificar",celiaco:"verificar",telefono: "verificar",telefono2: "verificar",id_aliado: "verificar"}] 
-                encargado = "verificar"
-        
-             }
             if (band) {
                 let nuev = {
                     id: inscri2[inscripcion]['id'],
@@ -257,16 +248,7 @@ router.get('/todasincripciones', async (req, res,) => {
             }
         } catch (error) {
             console.log(error)
-         try {
-            if (cargadop.length==0){
-                cargadop=[{nombre:"autoincripcion"}]
-            }
-         } catch (error) {
-            cargadop=[{nombre:"autoincripcion"}]
-            persona_auxiliar= [{vegano: "verificar",celiaco:"verificar",telefono: "verificar",telefono2: "verificar",id_aliado: "verificar"}] 
-            encargado = "verificar"
-    
-         }
+        
             let nuev = {
                 id: inscri2[inscripcion]['id'],
                 observaciones: inscri2[inscripcion]['observaciones'],
@@ -1046,7 +1028,7 @@ router.get('/verfaltantesescuelas/', async (req, res,) => {
 
     try {
 
-        let estr = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa from asignaciones_fiscales) as selec2 on mesas_fiscales.id=selec2.mesaa join (select id as idescuela, nombre as nombre_escuela from escuelas) as selec4 on mesas_fiscales.id_escuela=selec4.idescuela  where selec2.mesaa IS NULL')
+        let estr = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa from asignaciones_fiscales) as selec2 on mesas_fiscales.id=selec2.mesaa join (select id as idescuela, nombre as nombre_escuela from escuelas) as selec4 on mesas_fiscales.id_escuela=selec4.idescuela  where selec2.mesaa IS NULL and numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5"')
         console.log(estr)
         res.json(estr)
     } catch (error) {
