@@ -606,6 +606,9 @@ router.get('/listadeescuelas', async (req, res,) => {
         for (auxiescuela in estr) {
             let cantidad_mesas = await pool.query('select * from mesas_fiscales where id_escuela=? and numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5"', [estr[auxiescuela]['id']])
             let cantidad_asig = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa where id_escuela=? and numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5"', [estr[auxiescuela]['id']])
+            let cantidad_veg = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa join (select dni as dnipers, vegano from personas_fiscalizacion) as selec5 on asignaciones_fiscales.dni=selec5.dnipers where vegano ="Si" and id_escuela=? ', [estr[auxiescuela]['id']])
+            let cantidad_cel = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa join (select dni as dnipers, celiaco from personas_fiscalizacion) as selec5 on asignaciones_fiscales.dni=selec5.dnipers where celiaco ="Si" and id_escuela=? ', [estr[auxiescuela]['id']])
+
             let cantidad_movil = 0
             let cantidad_suplentes = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa where id_escuela=? and (numero = "Suplente 1" or numero = "Suplente 2" or numero = "Suplente 3" or numero = "Suplente 4" or numero = "Suplente 5")', [estr[auxiescuela]['id']])
             for (auximesa in cantidad_mesas) {
@@ -648,6 +651,8 @@ router.get('/listadeescuelas', async (req, res,) => {
                 dato1: estr[auxiescuela]['dato1'],
                 dato2: estr[auxiescuela]['dato2'],
                 cantidad_suplentes:cantidad_suplentes.length,
+                cantidad_veg:cantidad_veg.length,
+                cantidad_cel:cantidad_cel.length,
                 cantidad_movil
             }
             escuelastodas.push(enviaraux)
