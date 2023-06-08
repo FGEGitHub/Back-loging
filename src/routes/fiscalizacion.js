@@ -1042,6 +1042,26 @@ router.get('/traerpaso2inscrip', async (req, res,) => {
 
 
 })
+
+
+
+
+router.get('/verfaltantesescuelassuplentes/', async (req, res,) => {
+
+
+    try {
+
+        let estr = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa from asignaciones_fiscales) as selec2 on mesas_fiscales.id=selec2.mesaa join (select id as idescuela, nombre as nombre_escuela from escuelas) as selec4 on mesas_fiscales.id_escuela=selec4.idescuela  where selec2.mesaa IS NULL and (numero = "Suplente 1" or numero = "Suplente 2" or numero = "Suplente 3" or numero = "Suplente 4" or numero = "Suplente 5" or numero = "Suplente 6" or numero = "Suplente 7")')
+        console.log(estr)
+        res.json(estr)
+    } catch (error) {
+        console.log(error)
+        res.json(['algo salio mal'])
+    }
+
+})
+
+
 router.get('/verfaltantesescuelas/', async (req, res,) => {
 
 
