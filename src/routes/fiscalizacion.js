@@ -1161,6 +1161,18 @@ router.get('/contactada/:id', async (req, res,) => {
 })
 
 
+router.get('/determinardecero', async (req, res) => {
+
+    try {
+        await pool.query('update asignaciones_fiscales set dato1="No"')
+
+        res.send('re si')
+    } catch (error) {
+        console.log(error)
+        res.send('re no')
+    }
+    
+})
 
 router.get('/todaslasasignaciones', async (req, res,) => {
 
