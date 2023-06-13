@@ -1102,6 +1102,41 @@ router.get('/todaslasasignacionesdeunaescuela/:id', async (req, res,) => {
 
 })
 
+router.get('/traerasistenciasporescuela/', async (req, res,) => {
+
+    try {
+        
+        estr = await pool.query('select * from escuelas ')
+        let enviar = []
+        for (auxipres in estr){
+
+            let pres = await pool.query(`select * from asignaciones_fiscales join (select id as id_mesa, id_escuela from mesas_fiscales) as selec1 on asignaciones_fiscales.mesa=selec1.id_mesa join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on selec1.id_escuela=selec2.idescuela where idescuela=? and dato1="Si" `,[estr[auxipres]['id']])
+            let aus = await pool.query(`select * from asignaciones_fiscales join (select id as id_mesa, id_escuela from mesas_fiscales) as selec1 on asignaciones_fiscales.mesa=selec1.id_mesa join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on selec1.id_escuela=selec2.idescuela where idescuela=? and dato1="No" `,[estr[auxipres]['id']])
+            let sd = await pool.query(`select * from asignaciones_fiscales join (select id as id_mesa, id_escuela from mesas_fiscales) as selec1 on asignaciones_fiscales.mesa=selec1.id_mesa join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on selec1.id_escuela=selec2.idescuela where idescuela=? and dato1 is null `,[estr[auxipres]['id']])
+            let cantidad_mesas = await pool.query('select * from mesas_fiscales where id_escuela=?',[estr[auxipres][`id`]])
+            let cantidad_supl = await pool.query('select * from mesas_fiscales where id_escuela=? and numero in ("Suplente 1","Suplente 2","Suplente 3","Suplente 4","Suplente 5","Suplente 6","Suplente 7")',[estr[auxipres][`id`]])
+
+            console.log(cantidad_mesas.length)
+            let nuevo_escuela = {
+                presentes:pres.length,
+                nombre: estr[auxipres][`nombre`],
+                ausentes:aus.length,
+                sin_det:sd.length,
+                cantidad_mesas:cantidad_mesas.length,
+                cantidad_supl:cantidad_supl.length
+            }
+            enviar.push(nuevo_escuela)
+        }
+
+        res.json(enviar)
+    } catch (error) {
+        console.log(error)
+        res.send('algo salio mal')
+    }
+
+
+})
+
 
 router.get('/todaslasasignacionesdeun/:id', async (req, res,) => {
     const id = req.params.id
