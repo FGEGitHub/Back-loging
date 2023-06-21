@@ -2298,6 +2298,7 @@ router.post('/cargarpresentes', async (req, res) => {
     console.log(nombree)
 
     let mandar = []
+    let mandar2 = []
     // const workbook = XLSX.readFile(`./src/Excel/${nombree}`)
 
     // const workbook = XLSX.readFile('./src/Excel/1665706467397-estr-cuentas_PosicionConsolidada.xls')
@@ -2337,7 +2338,7 @@ router.post('/cargarpresentes', async (req, res) => {
                     if (existe.length > 0) {//////si existe la personas
 
                         let mesa = await pool.query('select * from mesas_fiscales where id =?',[existe[0]['mesa']])
-
+                        let persona = await pool.query('select * from personas_fiscalizacion where dni =?',[dni])
                         ///actualiza
                         let misma= 'distinta mesa, estaba en la '+ mesa[0]['numero']+ ' y fiscalizo en la '+dataExcel[property]['MESA ']
                         if (mesa[0]['numero'] ==dataExcel[property]['MESA ']){
@@ -2346,16 +2347,22 @@ router.post('/cargarpresentes', async (req, res) => {
 
                       let nuevo= {
                         dni:dataExcel[property]['DNI'],
-                        
+                        nombre: persona[0]['apellido']+ ' '+persona[0]['nombre'],
                         misma:misma
                       }
 
                       mandar.push(nuevo)
+                      console.log(existe[0]['dato1'])
+                        await pool.query('update asignaciones_fiscales set dato1="Si"  where dni=?', [dni])
 
                     } else {
                         ///crear nueva persona 
-                        console.log('no existe ')
-                        console.log(dni)
+                       // console.log('no existe el dni '+dni)
+                        let nuevo= {
+                            dni:dataExcel[property]['DNI'],
+                          
+                          }
+                          mandar2.push(nuevo)
 
 
                     }
@@ -2383,7 +2390,7 @@ router.post('/cargarpresentes', async (req, res) => {
 
 
         }
-        res.json(mandar)
+        res.json([mandar,mandar2])
     } catch (error) {
         console.log(error)
         res.send(error)
