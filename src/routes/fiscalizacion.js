@@ -953,8 +953,16 @@ router.get('/estadisticas1', async (req, res,) => {
         switch (insc[indexx]['cargadopor']) {
             case 'Autoinscripcion':
                 Autoin += 1
-                //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
+                //Declaraciones ejecutadas cuando el resultado de expresión coincide con Autoinscripcion
                 break;
+                case '87':
+                    Autoin += 1
+                    //Declaraciones ejecutadas cuando el resultado de expresión coincide con el 87
+                    break;
+                    case 87:
+                        Autoin += 1
+                        //Declaraciones ejecutadas cuando el resultado de expresión coincide con el valor1
+                        break;
 
             default:
                 aliado += 1
@@ -2290,8 +2298,8 @@ router.post('/cargarinscripcionesescuelas', async (req, res) => {
 
 
 router.post('/cargarpresentes', async (req, res) => {
-   const id = 1
-   console.lo
+   const id = 2
+
     const estract = await pool.query('select * from excelfiscalizacion where id = ? ', [id])
     console.log(estract)
     const nombree = estract[0]['nombre']
@@ -2390,6 +2398,7 @@ router.post('/cargarpresentes', async (req, res) => {
 
 
         }
+        console.log(mandar2.length)
         res.json([mandar,mandar2])
     } catch (error) {
         console.log(error)
