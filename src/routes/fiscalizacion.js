@@ -989,6 +989,14 @@ router.get('/estadisticas1', async (req, res,) => {
 })
 
 
+
+
+router.get('/veramigos', async (req, res,) => {
+  const amigos = await pool.query('select * from inscripciones_fiscales where como_se_entero = "Amigo"')
+
+  res.json(amigos)
+
+})
 router.get('/traerinscripcionesdeunencargado/:id', async (req, res,) => {
     const id = req.params.id
     console.log(91)
