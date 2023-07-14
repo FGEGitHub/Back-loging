@@ -149,12 +149,32 @@ router.get('/traerpersonasdeunenc/:id', async (req, res,) => {
 
 })
 
+
+
+router.get('/traerobservaciones/:dni', async (req, res,) => {
+const dni = req.params.dni
+
+try {
+
+    const obser = await pool.query('select * from observaciones where id_ref =? ',[dni])
+
+
+    res.json(obser)
+} catch (error) {
+    console.log(error)
+    res.json(['error'])
+}
+
+
+})
+
+
 router.get('/todasincripciones', async (req, res,) => {
 
     //  let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco, telefono,telefono2 from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona left join (select id as id_aliado, nombre as nombre_aliado from usuarios)  as selec2 on inscripciones_fiscales.cargadopor=selec2.id_aliado  where inscripciones_fiscales.estado="Pendiente" ')
 
     //
-    let inscri2 = await pool.query('select * from inscripciones_fiscales2   ')
+    let inscri2 = await pool.query('select * from inscripciones_fiscales2 ')
 
     //
 
@@ -219,20 +239,25 @@ router.get('/todasincripciones', async (req, res,) => {
 
                 }
             } catch (error) {
-
+                    console.log('catch1')
+                
             }
             try {
+                console.log('llega')
+                console.log('llega' + cargadop)
                 if (cargadop.length==0){
-                    cargadop=[{nombre:"autoincripcion"}]
+                    cargadop=[{nombre:"Autoinscripcion"}]
                 }
              } catch (error) {
-                cargadop=[{nombre:"autoincripcion"}]
+                console.log('catch2')
+                cargadop=[{nombre:"Autoinscripcion"}]
                 persona_auxiliar= [{vegano: "verificar",celiaco:"verificar",telefono: "verificar",telefono2: "verificar",id_aliado: "verificar"}] 
                 encargado = "verificar"
 
              }
             if (band) {
                 let nuev = {
+                    fiscalizo: inscri2[inscripcion]['asignado_ant'],
                     id: inscri2[inscripcion]['id'],
                     observaciones: inscri2[inscripcion]['observaciones'],
                     dni: inscri2[inscripcion]['dni'],
@@ -259,15 +284,18 @@ router.get('/todasincripciones', async (req, res,) => {
             console.log(error)
             try {
                 if (cargadop.length==0){
-                    cargadop=[{nombre:"autoincripcion"}]
+                    cargadop=[{nombre:"Autoinscripcion"}]
                 }
              } catch (error) {
-                cargadop=[{nombre:"autoincripcion"}]
+                console.log('catch3')
+                console.log(error)
+                cargadop=[{nombre:"Autoinscripcion"}]
                 persona_auxiliar= [{vegano: "verificar",celiaco:"verificar",telefono: "verificar",telefono2: "verificar",id_aliado: "verificar"}] 
                 encargado = "verificar"
 
              }
             let nuev = {
+                fiscalizo: inscri2[inscripcion]['asignado_ant'],
                 id: inscri2[inscripcion]['id'],
                 observaciones: inscri2[inscripcion]['observaciones'],
                 dni: inscri2[inscripcion]['dni'],
@@ -289,13 +317,14 @@ router.get('/todasincripciones', async (req, res,) => {
                 nombre_aliado: inscri2[inscripcion]['nombre_aliado'],
                 encargado: encargado
             }
+         
             envi.push(nuev)
         }
 
 
     }
 
-
+  
     res.json([envi])
 })
 
@@ -1681,7 +1710,7 @@ router.post("/enviarinscripcion", async (req, res) => {
                 
                 
                 if (asignado_ant=='Si'  && asignadoo.length==0 ){
-                    let detalle='Observacion no estuvo  pero dijo que si'
+                    let detalle='Selecciono que fiscalizo pero no se encuentra en la lista de asignados'
                     await pool.query('INSERT INTO observaciones set detalle=?,id_ref=?', [detalle, dni]);
                    
 
@@ -1827,7 +1856,7 @@ router.get('/borrarinscripcion/:id', async (req, res) => {
     const id = req.params.id
     try {
 
-        await pool.query('delete  from  inscripciones_fiscales where id = ?', [id])
+        await pool.query('delete  from  inscripciones_fiscales2 where id = ?', [id])
         res.json("Realizado")
     } catch (error) {
         res.json("No Realizado")
