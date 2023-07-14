@@ -1629,6 +1629,24 @@ router.post("/enviarinscripcionadmin", async (req, res) => {
 
 })
 
+
+
+
+
+router.post("/buscarestadopordni", async (req, res) => {
+    let { dni, edicion } = req.body
+console.log(dni)
+console.log(edicion)
+let respuesta_consulta = []
+    const asi = await pool.query ('select * from inscripciones_fiscales left join (select  id as idasig, dni as dniasig,mesa from asignaciones_fiscales ) as selec on inscripciones_fiscales.dni = selec.dniasig    where dni like ?',['%'+dni+'%'])
+    console.log(asi)
+
+
+
+res.json(asi)
+})
+
+
 router.post("/modificarmesa", async (req, res) => {
     let { id, cantidad } = req.body
     console.log(cantidad)
