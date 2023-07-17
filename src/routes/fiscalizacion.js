@@ -1637,7 +1637,7 @@ router.post("/buscarestadopordni", async (req, res) => {
     let { dni, edicion } = req.body
 
     const asi = await pool.query ('select * from inscripciones_fiscales left join (select  id as idasig, dni as dniasig,mesa from asignaciones_fiscales ) as selec on inscripciones_fiscales.dni = selec.dniasig    where dni like ?',['%'+dni+'%'])
-    console.log(asi)
+
 
 
 
@@ -1649,7 +1649,7 @@ router.post("/buscarestadopornombre", async (req, res) => {
 
 
     const asi = await pool.query ('select * from inscripciones_fiscales left join (select  id as idasig, dni as dniasig,mesa from asignaciones_fiscales ) as selec on inscripciones_fiscales.dni = selec.dniasig    where nombre like ? or apellido like ?',['%'+nombre+'%','%'+nombre+'%'])
-    console.log(asi)
+
 
 
 
