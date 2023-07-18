@@ -1636,7 +1636,7 @@ router.post("/enviarinscripcionadmin", async (req, res) => {
 router.post("/buscarestadopordni", async (req, res) => {
     let { dni, edicion } = req.body
 try {
-    const asi = await pool.query ('select * from inscripciones_fiscales left join (select  id as idasig, dni as dniasig,mesa from asignaciones_fiscales ) as selec on inscripciones_fiscales.dni = selec.dniasig    where dni like ?',['%'+dni+'%'])
+    const asi = await pool.query ('select * from inscripciones_fiscales left join (select  id as idasig, dni as dniasig,mesa, dato1 as presente from asignaciones_fiscales ) as selec on inscripciones_fiscales.dni = selec.dniasig    where dni like ?',['%'+dni+'%'])
     res.json(asi)
 } catch (error) {
     console.log(error)
@@ -1652,7 +1652,7 @@ try {
 router.post("/buscarestadopornombre", async (req, res) => {
     let { nombre, edicion } = req.body
 try {
-    const asi = await pool.query ('select * from inscripciones_fiscales left join (select  id as idasig, dni as dniasig,mesa from asignaciones_fiscales ) as selec on inscripciones_fiscales.dni = selec.dniasig    where nombre like ? or apellido like ?',['%'+nombre+'%','%'+nombre+'%'])
+    const asi = await pool.query ('select * from inscripciones_fiscales left join (select  id as idasig, dni as dniasig,mesa, dato1 as presente from asignaciones_fiscales ) as selec on inscripciones_fiscales.dni = selec.dniasig    where nombre like ? or apellido like ?',['%'+nombre+'%','%'+nombre+'%'])
 
     res.json(asi)
 } catch (error) {
