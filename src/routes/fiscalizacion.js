@@ -174,7 +174,7 @@ router.get('/todasincripciones', async (req, res,) => {
     //  let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco, telefono,telefono2 from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona left join (select id as id_aliado, nombre as nombre_aliado from usuarios)  as selec2 on inscripciones_fiscales.cargadopor=selec2.id_aliado  where inscripciones_fiscales.estado="Pendiente" ')
 
     //
-    let inscri2 = await pool.query('select * from inscripciones_fiscales2 ')
+    let inscri2 = await pool.query('select * from inscripciones_fiscales ')
 
     //
 
@@ -1659,9 +1659,8 @@ try {
     console.log(error)
     res.json([{nombre:'error'}])
 }
-
-
 })
+ 
 router.post("/modificarmesa", async (req, res) => {
     let { id, cantidad } = req.body
     console.log(cantidad)
@@ -1721,13 +1720,13 @@ router.post("/enviarinscripcion", async (req, res) => {
         /////////////Tipo de empleo
 
 
-        let telefonoregistrado = await pool.query('select * from inscripciones_fiscales2 join (select dni as dni_pers, telefono, telefono2 from personas_fiscalizacion) as selec on inscripciones_fiscales2.dni = selec.dni_pers where  telefono = ? ', [telefono])
+        let telefonoregistrado = await pool.query('select * from inscripciones_fiscales join (select dni as dni_pers, telefono, telefono2 from personas_fiscalizacion) as selec on inscripciones_fiscales.dni = selec.dni_pers where  telefono = ? ', [telefono])
         if (telefonoregistrado.length > 0) {
             let dnicodif = telefonoregistrado[0]['dni']
             dnicodif = '****' + dnicodif[dnicodif.length - 3] + dnicodif[dnicodif.length - 2] + dnicodif[dnicodif.length - 1]
             res.json('Error ya se posee ese numero de telefono, pertenece a ' + dnicodif)
         } else {
-            let exisinscrip = await pool.query('select * from inscripciones_fiscales2 where  dni=? ', [dni])
+            let exisinscrip = await pool.query('select * from inscripciones_fiscales where  dni=? ', [dni])
 
             if (exisinscrip.length > 0) {
                 res.json('Error fiscal ya inscripto')
@@ -1755,7 +1754,7 @@ router.post("/enviarinscripcion", async (req, res) => {
 
                 }
                   
-              await pool.query('INSERT INTO inscripciones_fiscales2 set  nombre=?,apellido=?, dni=?, cargadopor=?, fecha_carga=?,como_se_entero=?,apellido_referido=?,nombre_referido=?,asignado_ant=?,pres_ant=?', [nombre, apellido, dni, id_aliado, (new Date(Date.now())).toLocaleDateString(), como_se_entero, apellido_referido, nombre_referido,asignado_ant,press])
+              await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?, cargadopor=?, fecha_carga=?,como_se_entero=?,apellido_referido=?,nombre_referido=?,asignado_ant=?,pres_ant=?', [nombre, apellido, dni, id_aliado, (new Date(Date.now())).toLocaleDateString(), como_se_entero, apellido_referido, nombre_referido,asignado_ant,press])
                 res.json('inscripto correctamente, muchas gracias por completar, por favor aguarda en unos dias nos comunicaremos al numero de telefono registrado')
             }
         }
@@ -1889,7 +1888,7 @@ router.get('/borrarinscripcion/:id', async (req, res) => {
     const id = req.params.id
     try {
 
-        await pool.query('delete  from  inscripciones_fiscales2 where id = ?', [id])
+        await pool.query('delete  from  inscripciones_fiscales where id = ?', [id])
         res.json("Realizado")
     } catch (error) {
         res.json("No Realizado")
