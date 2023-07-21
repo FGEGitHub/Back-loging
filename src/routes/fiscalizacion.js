@@ -1270,6 +1270,7 @@ router.get('/todaslasasignaciones', async (req, res,) => {
 
 
 })
+
 router.get('/asignarautolasetc', async (req, res,) => {
 
     const asignaciones = await pool.query('select * from asignaciones_fiscales')
@@ -1291,6 +1292,36 @@ router.get('/asignarautolasetc', async (req, res,) => {
                 }
             }
         }
+    }
+res.json('ok')
+
+})
+
+router.get('/asignarautolasetc2', async (req, res,) => {
+
+    const asignaciones = await pool.query('select * from asignaciones_fiscales')
+
+    for (asignacion in asignaciones) {
+      try {
+        
+    
+       
+      
+            fecha_carga=(new Date(Date.now())).toLocaleDateString()
+         
+                let donde = await pool.query('select * from personas_fiscalizacion where dni =?', [asignaciones[asignacion]['dni']])
+                if (asignaciones[asignacion]['escuela'] == donde[0]['id_donde_vota']) {/////redundante
+                   // await pool.query('update inscripciones_fiscales2 set    where id=?', [ observaciones,id_inscripcion])
+                console.log('misma')
+                }else {
+                    
+                    await pool.query('update inscripciones_fiscales2 set  id_escuela=?, id_escuela2=? where dni=?', [ donde[0]['id_donde_vota'],asignaciones[asignacion]['escuela'],donde[0]['dni']])
+                    console.log('cambio '+donde[0]['dni']+' '+donde[0]['id_donde_vota'])
+                }
+            } catch (error) {
+        
+            }
+        
     }
 res.json('ok')
 
