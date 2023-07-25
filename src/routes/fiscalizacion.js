@@ -1243,6 +1243,36 @@ router.get('/contactada/:id', async (req, res,) => {
 })
 
 
+
+router.get('/listadecircuitos/', async (req, res,) => {
+    const id = req.params.id
+    try {
+        const Circuitos = await pool.query('select circuito  from escuelas group by circuito ')
+      let Respuesta = []
+
+      for (circ in Circuitos){
+
+        let cantidad_datos =  await pool.query('select * from inscripciones_fiscales2 join (select id as id_esc, circuito from escuelas) as selec on inscripciones_fiscales2.id_escuela = selec.id_esc  where circuito=?',[Circuitos[circ]['circuito']])
+        let cantidad_mesas =  await pool.query('select * from mesas_fiscales join (select id as id_e, circuito from escuelas) as selec on mesas_fiscales.id_escuela=selec.id_e where circuito = ? and numero not in ("Suplente 1","Suplente 2","Suplente 3","Suplente 4","Suplente 5","Suplente 6","Suplente 7","Suplente 8","Suplente 9")',[Circuitos[circ]['circuito']])
+        let env_a = {
+            circuito:Circuitos[circ]['circuito'],
+            cantidad:cantidad_datos.length,
+            cantidad_m:cantidad_mesas.length,
+            dif:cantidad_mesas.length-cantidad_datos.length,
+            porc:cantidad_datos.length/cantidad_mesas.length*100
+        }
+        Respuesta.push(env_a)
+      }
+
+
+
+        res.json(Respuesta)
+    } catch (error) {
+        console.log(error)
+        res.json('No realizado')
+    }
+
+})
 /* router.get('/determinardecero', async (req, res) => {
 
     try {
