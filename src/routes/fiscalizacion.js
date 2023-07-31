@@ -495,6 +495,32 @@ router.get('/traerinscripcionesenc/:id', async (req, res) => {
 
 })
 
+
+router.get('/traerinscripcionesenc/:id', async (req, res) => {
+    const id = req.params.id
+
+
+    const etc = await pool.query('select * from inscripciones_fiscales where  id_encargado is null or id_encargado= 0 ', [id])
+    console.log(etc)
+
+    res.json(etc);
+
+
+
+
+})
+
+router.get('/traercircuitos', async (req, res) => {
+    const dni = req.params.dni
+
+
+    const etc = await pool.query('select circuito from escuelas  group by circuito ')
+
+    res.json(etc);
+
+})
+
+
 router.get('/traerescuelas', async (req, res) => {
     const dni = req.params.dni
 
@@ -504,7 +530,15 @@ router.get('/traerescuelas', async (req, res) => {
     res.json(etc);
 
 })
+router.get('/traerescuelas2', async (req, res) => {
+    const dni = req.params.dni
 
+
+    const etc = await pool.query('select * from escuelas  order by nombre ')
+    const etc2 = await pool.query('select * from escuelas   where etapa2="Si" order by nombre')
+    res.json([etc,etc2]);
+
+})
 router.get('/traerescuelasfalt', async (req, res) => {
 
 
@@ -840,13 +874,14 @@ router.get('/datosdemesas', async (req, res) => {
     //////  traer cantidad de mesas, mesas libres mesas ocupadas, 
 
     try {
-        let cant = await pool.query('select * from mesas_fiscales where numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6" and numero != "Suplente 7" ')
+        let cant = await pool.query('select * from mesas_fiscales join (select id as ides, etapa2 from escuelas) as selec on mesas_fiscales.id_escuela=selec.ides where numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6" and numero != "Suplente 7" and etapa2="Si"')
         console.log(cant.length)
-        let asig = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales.mesa=selec.idmesa where numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6"  and numero != "Suplente 7"')
-        let esc = await pool.query('select * from escuelas ')
-        let yassig = await pool.query('select * from mesas_fiscales join (select id as ide, circuito, nombre from escuelas) as sele on mesas_fiscales.id_escuela=sele.ide where circuito ="2" or nombre=? or nombre=? or nombre=? ', ['COLEGIO "MANUEL VICENTE FIGUERERO"', 'ESC. Nº 34 "EL SANTO DE LA ESPADA"', "ESCUELA TECNICA U.O.C.R.A."])
+        let asig = await pool.query('select * from asignaciones_fiscales2 join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales2.mesa=selec.idmesa where numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6"  and numero != "Suplente 7"')
+        let esc = await pool.query('select * from escuelas where etapa2="Si"')
+       // let yassig = await pool.query('select * from mesas_fiscales join (select id as ide, circuito, nombre from escuelas) as sele on mesas_fiscales.id_escuela=sele.ide where circuito ="2" or nombre=? or nombre=? or nombre=? ', ['COLEGIO "MANUEL VICENTE FIGUERERO"', 'ESC. Nº 34 "EL SANTO DE LA ESPADA"', "ESCUELA TECNICA U.O.C.R.A."])
         console.log("yasig")
-        let capaacitados = await pool.query('select * from asignaciones_fiscales where capacitado="Si"')
+        let yassig = await pool.query('select * from mesas_fiscales join (select id as ide, circuito, nombre from escuelas) as sele on mesas_fiscales.id_escuela=sele.ide ')
+        let capaacitados = await pool.query('select * from asignaciones_fiscales2 where capacitado="Si"')
 
         console.log(yassig.length)
         let mesas_sin_asignar = []
@@ -1438,6 +1473,21 @@ router.post("/volverapaso1", async (req, res) => {
 
 })
 
+
+
+router.post("/asignarcircuitos", async (req, res) => {
+    let { id, inscrip } = req.body
+
+
+    for (ins in inscrip) {
+
+        console.log(ins)
+
+        await pool.query('update escuelas set etapa2 =?  where  circuito= ?', ["Si", inscrip[ins]])
+    }
+    res.json('realizado')
+
+})
 
 
 router.post("/asignarinscripciones", async (req, res) => {
