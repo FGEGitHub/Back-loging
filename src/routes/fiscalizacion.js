@@ -1785,8 +1785,16 @@ router.post("/enviarinscripcionadmin", async (req, res) => {
 router.post("/buscarestadopordni", async (req, res) => {
     let { dni, edicion } = req.body
     try {
-        const asi = await pool.query('select * from inscripciones_fiscales left join (select  id as idasig, dni as dniasig,mesa, dato1 as presente from asignaciones_fiscales ) as selec on inscripciones_fiscales.dni = selec.dniasig  left join (select id as idmesa, numero,id_escuela as id_esc  from mesas_fiscales) as selec2 on selec.mesa=selec2.idmesa left join (select id as idesc, nombre as nombreesc from escuelas) as selec3 on selec2.id_esc=selec3.idesc    where dni like ?', ['%' + dni + '%'])
+
+        if (edicion == "junio"){
+        let asi = await pool.query('select * from inscripciones_fiscales left join (select  id as idasig, dni as dniasig,mesa, dato1 as presente from asignaciones_fiscales ) as selec on inscripciones_fiscales.dni = selec.dniasig  left join (select id as idmesa, numero,id_escuela as id_esc  from mesas_fiscales) as selec2 on selec.mesa=selec2.idmesa left join (select id as idesc, nombre as nombreesc from escuelas) as selec3 on selec2.id_esc=selec3.idesc    where dni like ?', ['%' + dni + '%'])
         res.json(asi)
+        }else{
+            let asi = await pool.query('select * from inscripciones_fiscales2 left join (select  id as idasig, dni as dniasig,mesa, dato1 as presente from asignaciones_fiscales2 ) as selec on inscripciones_fiscales2.dni = selec.dniasig  left join (select id as idmesa, numero,id_escuela as id_esc  from mesas_fiscales) as selec2 on selec.mesa=selec2.idmesa left join (select id as idesc, nombre as nombreesc from escuelas) as selec3 on selec2.id_esc=selec3.idesc    where dni like ?', ['%' + dni + '%'])
+            res.json(asi)
+        }
+
+
     } catch (error) {
         console.log(error)
         res.json([{ nombre: 'error' }])
@@ -1801,9 +1809,17 @@ router.post("/buscarestadopordni", async (req, res) => {
 router.post("/buscarestadopornombre", async (req, res) => {
     let { nombre, edicion } = req.body
     try {
+
+        if (edicion =="junio"){
         const asi = await pool.query('select * from inscripciones_fiscales left join (select  id as idasig, dni as dniasig,mesa, dato1 as presente from asignaciones_fiscales ) as selec on inscripciones_fiscales.dni = selec.dniasig left join (select id as idmesa, numero, id_escuela as id_esc from mesas_fiscales) as selec2 on selec.mesa=selec2.idmesa left join (select id as idesc, nombre as nombreesc from escuelas) as selec3 on selec2.id_esc=selec3.idesc   where nombre like ? or apellido like ?', ['%' + nombre + '%', '%' + nombre + '%'])
 
+        res.json(asi)}else {
+            const asi = await pool.query('select * from inscripciones_fiscales2 left join (select  id as idasig, dni as dniasig,mesa, dato1 as presente from asignaciones_fiscales2 ) as selec on inscripciones_fiscales2.dni = selec.dniasig left join (select id as idmesa, numero, id_escuela as id_esc from mesas_fiscales) as selec2 on selec.mesa=selec2.idmesa left join (select id as idesc, nombre as nombreesc from escuelas) as selec3 on selec2.id_esc=selec3.idesc   where nombre like ? or apellido like ?', ['%' + nombre + '%', '%' + nombre + '%'])
+
         res.json(asi)
+        }
+
+
     } catch (error) {
         console.log(error)
         res.json([{ nombre: 'error' }])
