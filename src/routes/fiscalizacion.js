@@ -803,17 +803,17 @@ router.get('/traermesas/:id_escuela', async (req, res,) => {
     const escuela = await pool.query('select * from escuelas where id=?', [id_escuela])
     for (mes in mesas) {
         let disponibilidad = 'Libre'
-        let mesaux = await pool.query('select * from asignaciones_fiscales where mesa=?', [mesas[mes]['id']])
+        let mesaux = await pool.query('select * from asignaciones_fiscales2 where mesa=?', [mesas[mes]['id']])
         if (mesaux.length > 0) {
             disponibilidad = 'Ocupada'
         }
         if (escuela[0]['circuito'] == 2) {
             disponibilidad = 'Ocupada'
         }
-        console.log(escuela[0]['nombre'])
+    /*     console.log(escuela[0]['nombre'])
         if ((escuela[0]['nombre'] == 'ESC. Nº 34 "EL SANTO DE LA ESPADA"') || (escuela[0]['nombre'] == 'COLEGIO "MANUEL VICENTE FIGUERERO"' || (escuela[0]['nombre'] == 'ESCUELA TECNICA U.O.C.R.A.'))) {
             disponibilidad = 'Ocupada'
-        }
+        } */
 
 
 
@@ -1363,8 +1363,8 @@ router.get('/todaspaso4', async (req, res,) => {
   //  estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono, nombre, apellido,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela join (select id as idmesa, numero from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa join (select id as id_auxesc,nombre as nombredondevota from escuelas ) as selec3 on selec1.id_donde_vota=selec3.id_auxesc ')
 
    // res.json([estr])
-   estr = await pool.query('select * from inscripciones_fiscales2 join (select dni as dniper,telefono,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on inscripciones_fiscales2.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on inscripciones_fiscales2.id_escuela=selec2.idescuela left join (select id as id_auxesc,nombre as dondevoto from escuelas ) as selec3 on inscripciones_fiscales2.id_escuela2=selec3.id_auxesc left join (select id_ref, detalle from observaciones) as selec4 on inscripciones_fiscales2.dni = id_ref')
-
+   estr = await pool.query('select * from inscripciones_fiscales2 join (select dni as dniper,telefono,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on inscripciones_fiscales2.dni=selec1.dniper left join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on inscripciones_fiscales2.id_escuela=selec2.idescuela left join (select id as id_auxesc,nombre as dondevoto from escuelas ) as selec3 on inscripciones_fiscales2.id_escuela2=selec3.id_auxesc left join (select id_ref, detalle from observaciones) as selec4 on inscripciones_fiscales2.dni = id_ref join (select id as  id_es, nombre as donde_vota from escuelas) as selec5 on selec1.id_donde_vota = selec5.id_es')
+console.log(estr)
    //const tod = await pool.query('select * from inscripciones_fiscales2 join (select id as idp from personas )as selec on ')
 res.json([estr])
 
@@ -1819,13 +1819,13 @@ router.post("/enviarinscripcion", async (req, res) => {
         /////////////Tipo de empleo
 
 
-        let telefonoregistrado = await pool.query('select * from inscripciones_fiscales join (select dni as dni_pers, telefono, telefono2 from personas_fiscalizacion) as selec on inscripciones_fiscales.dni = selec.dni_pers where  telefono = ? ', [telefono])
+        let telefonoregistrado = await pool.query('select * from inscripciones_fiscales2 join (select dni as dni_pers, telefono, telefono2 from personas_fiscalizacion) as selec on inscripciones_fiscales2.dni = selec.dni_pers where  telefono = ? ', [telefono])
         if (telefonoregistrado.length > 0) {
             let dnicodif = telefonoregistrado[0]['dni']
             dnicodif = '****' + dnicodif[dnicodif.length - 3] + dnicodif[dnicodif.length - 2] + dnicodif[dnicodif.length - 1]
             res.json('Error ya se posee ese numero de telefono, pertenece a ' + dnicodif)
         } else {
-            let exisinscrip = await pool.query('select * from inscripciones_fiscales where  dni=? ', [dni])
+            let exisinscrip = await pool.query('select * from inscripciones_fiscales2 where  dni=? ', [dni])
 
             if (exisinscrip.length > 0) {
                 res.json('Error fiscal ya inscripto')
@@ -1841,7 +1841,7 @@ router.post("/enviarinscripcion", async (req, res) => {
 
 
                 if (asignado_ant == 'Si' && asignadoo.length == 0) {
-                    let detalle = 'Selecciono que fiscalizo pero no se encuentra en la lista de asignados'
+                    let detalle = 'Selecciono que fiscalizo pero no se encuentra en la lista'
                     await pool.query('INSERT INTO observaciones set detalle=?,id_ref=?', [detalle, dni]);
 
 
@@ -1853,7 +1853,7 @@ router.post("/enviarinscripcion", async (req, res) => {
 
                 }
 
-                await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?, cargadopor=?, fecha_carga=?,como_se_entero=?,apellido_referido=?,nombre_referido=?,asignado_ant=?,pres_ant=?', [nombre, apellido, dni, id_aliado, (new Date(Date.now())).toLocaleDateString(), como_se_entero, apellido_referido, nombre_referido, asignado_ant, press])
+                await pool.query('INSERT INTO inscripciones_fiscales2 set  nombre=?,apellido=?, dni=?, cargadopor=?, fecha_carga=?,como_se_entero=?,apellido_referido=?,nombre_referido=?,asignado_ant=?,pres_ant=?', [nombre, apellido, dni, id_aliado, (new Date(Date.now())).toLocaleDateString(), como_se_entero, apellido_referido, nombre_referido, asignado_ant, press])
                 res.json('inscripto correctamente, muchas gracias por completar, por favor aguarda en unos dias nos comunicaremos al numero de telefono registrado')
             }
         }
