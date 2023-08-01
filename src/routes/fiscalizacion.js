@@ -1791,25 +1791,25 @@ router.post("/enviarinscripcionadmin", async (req, res) => {
 
 
 
-            await pool.query('INSERT INTO personas_fiscalizacion set nombre=?,apellido =?,telefono=?,telefono2=?,dni=?', [nombre, apellido, telefono, telefono2, dni]);
+            await pool.query('INSERT INTO personas_fiscalizacion2 set nombre=?,apellido =?,telefono=?,telefono2=?,dni=?', [nombre, apellido, telefono, telefono2, dni]);
         }
         /////////¿Actualmente  se encuentra estudiando? actividad adicional
         /////////////Tipo de empleo
 
 
-        let telefonoregistrado = await pool.query('select * from inscripciones_fiscales join (select dni as dni_pers, telefono, telefono2 from personas_fiscalizacion) as selec on inscripciones_fiscales.dni = selec.dni_pers where  telefono=? ', [telefono])
+        let telefonoregistrado = await pool.query('select * from inscripciones_fiscales2 join (select dni as dni_pers, telefono, telefono2 from personas_fiscalizacion) as selec on inscripciones_fiscales2.dni = selec.dni_pers where  telefono=? ', [telefono])
         if (telefonoregistrado.length > 0 && dni != "Sin definir") {
             let dnicodif = telefonoregistrado[0]['dni']
             dnicodif = '****' + dnicodif[dnicodif.length - 3] + dnicodif[dnicodif.length - 2] + dnicodif[dnicodif.length - 1]
             res.json('Error ya se posee ese numero de telefono, pertenece a ' + dnicodif)
         } else {
-            let exisinscrip = await pool.query('select * from inscripciones_fiscales where  dni=? ', [dni])
+            let exisinscrip = await pool.query('select * from inscripciones_fiscales2 where  dni=? ', [dni])
 
             if (exisinscrip.length > 0 && dni != "Sin definir") {
                 res.json('Error fiscal ya inscripto')
             } else {
 
-                await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?, cargadopor=?, fecha_carga=?,como_se_entero=?,apellido_referido=?,nombre_referido=?', [nombre, apellido, dni, id_aliado, (new Date(Date.now())).toLocaleDateString(), como_se_entero, apellido_referido, nombre_referido])
+                await pool.query('INSERT INTO inscripciones_fiscales2 set  nombre=?,apellido=?, dni=?, cargadopor=?, fecha_carga=?,como_se_entero=?,apellido_referido=?,nombre_referido=?', [nombre, apellido, dni, id_aliado, (new Date(Date.now())).toLocaleDateString(), como_se_entero, apellido_referido, nombre_referido])
                 res.json('inscripto correctamente, muchas gracias por completar, por favor aguarda en unos dias nos comunicaremos al numero de telefono registrado')
             }
         }
