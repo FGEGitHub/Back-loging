@@ -1791,7 +1791,7 @@ router.post("/enviarinscripcionadmin", async (req, res) => {
 
 
 
-            await pool.query('INSERT INTO personas_fiscalizacion2 set nombre=?,apellido =?,telefono=?,telefono2=?,dni=?', [nombre, apellido, telefono, telefono2, dni]);
+            await pool.query('INSERT INTO personas_fiscalizacion set nombre=?,apellido =?,telefono=?,telefono2=?,dni=?', [nombre, apellido, telefono, telefono2, dni]);
         }
         /////////¿Actualmente  se encuentra estudiando? actividad adicional
         /////////////Tipo de empleo
