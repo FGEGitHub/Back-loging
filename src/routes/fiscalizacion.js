@@ -1636,7 +1636,7 @@ router.post("/traerestadisticasdeescuelas", async (req, res) => {
     let libres = 0
 
         for (mesa in mesas) {
-            let auxcont = await pool.query('select * from asignaciones_fiscales  where mesa=? ', [mesas[mesa]['id']])
+            let auxcont = await pool.query('select * from asignaciones_fiscales2  where mesa=? ', [mesas[mesa]['id']])
 
             if (auxcont.length == 0) {
                 console.log(mesas[mesa]['numero'])
