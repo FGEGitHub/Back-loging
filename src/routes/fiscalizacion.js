@@ -485,7 +485,7 @@ router.get('/traerinscripcionesenc/:id', async (req, res) => {
     const id = req.params.id
 
 
-    const etc = await pool.query('select * from inscripciones_fiscales where  id_encargado is null or id_encargado= 0 ', [id])
+    const etc = await pool.query('select * from inscripciones_fiscales2 where  id_encargado is null or id_encargado= 0 ', [id])
     console.log(etc)
 
     res.json(etc);
@@ -1321,6 +1321,25 @@ router.get('/listadecircuitos/', async (req, res,) => {
     
 })
  */
+
+
+
+
+router.get('/todaslasasignaciones2', async (req, res,) => {
+
+
+    try {
+        estr = await pool.query('select * from asignaciones_fiscales2 join (select dni as dniper,telefono, nombre, apellido,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on asignaciones_fiscales2.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on asignaciones_fiscales2.escuela=selec2.idescuela join (select id as idmesa, numero from mesas_fiscales) as sele on asignaciones_fiscales2.mesa=sele.idmesa join (select id as id_auxesc,nombre as nombredondevota from escuelas ) as selec3 on selec1.id_donde_vota=selec3.id_auxesc ')
+
+        res.json([estr])
+    } catch (error) {
+        console.log(error)
+        res.send('algo salio mal')
+    }
+
+
+})
+
 router.get('/todaslasasignaciones', async (req, res,) => {
 
 
@@ -1392,6 +1411,18 @@ res.json('ok')
 
 })
 
+
+router.get('/todaspaso42/:id', async (req, res,) => {
+const id = req.params.id
+    //  estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono, nombre, apellido,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela join (select id as idmesa, numero from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa join (select id as id_auxesc,nombre as nombredondevota from escuelas ) as selec3 on selec1.id_donde_vota=selec3.id_auxesc ')
+  
+     // res.json([estr])
+     estr = await pool.query('select * from inscripciones_fiscales2 join (select dni as dniper,telefono,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on inscripciones_fiscales2.dni=selec1.dniper   left join (select id_ref, detalle from observaciones) as selec4 on inscripciones_fiscales2.dni = id_ref left join (select id as  id_es, nombre as donde_vota from escuelas) as selec5 on selec1.id_donde_vota = selec5.id_es where id_encargado=?',[id])
+  console.log(estr)
+     //const tod = await pool.query('select * from inscripciones_fiscales2 join (select id as idp from personas )as selec on ')
+  res.json([estr])
+  
+  })
 
 router.get('/todaspaso4', async (req, res,) => {
 
@@ -1498,7 +1529,7 @@ router.post("/asignarinscripciones", async (req, res) => {
 
         console.log(ins)
 
-        await pool.query('update inscripciones_fiscales set id_encargado =?  where  id = ?', [id, inscrip[ins]])
+        await pool.query('update inscripciones_fiscales2 set id_encargado =?  where  id = ?', [id, inscrip[ins]])
     }
     res.json('realizado')
 
@@ -1953,22 +1984,71 @@ router.post("/volverapaso3", async (req, res) => {
 
 
 router.post("/asignarmesaafiscal", async (req, res) => {
-    const { dni, id_inscripcion, id_escuela, mesa } = req.body
+    const { dni, id_inscripcion, id_escuela,id_donde_vota, mesa, celiaco, vegano, movilidad, domicilio, fiscal_antes } = req.body
 
     try {
+        //paso 1
+
+        exi = await pool.query('select * from personas_fiscalizacion where dni =?', [dni])
+
+
+
+
+        if (exi.length > 0) {
+           
+            await pool.query('update personas_fiscalizacion set vegano=?,celiaco=?, movilidad=?,domicilio=?, fiscal_antes=?,dni=?, id_donde_vota=? where id=?', [vegano, celiaco, movilidad, domicilio, fiscal_antes, dni, id_donde_vota, exi[0]['id']])
+            
+            await pool.query('update inscripciones_fiscales2 set estado="Asignado"   where id=?', [ id_inscripcion])
+           
+        } else {
+        
+            exi = await pool.query('select * from personas_fiscalizacion where nombre = ? and apellido =? and dni ="Sin definir" ', [nombre, apellido])
+            console.log(exi)
+            if (exi.length > 0) {
+                await pool.query('update personas_fiscalizacion set nombre=?, apellido=?,celiaco=?,  vegano=?, movilidad=?,domicilio=?, fiscal_antes=?,dni=?,id_donde_vota=?  where id=?', [nombre, apellido, celiaco, vegano, movilidad, domicilio, fiscal_antes, dni, id_donde_vota, exi[0]['id']])
+            } else {
+                exi = await pool.query('select * from personas_fiscalizacion where apellido =? and dni ="Sin definir" ', [apellido])
+
+                if (exi.length > 0) {
+                    await pool.query('update personas_fiscalizacion set nombre=?, apellido=?,celiaco=?, vegano=?, movilidad=?,domicilio=?, fiscal_antes=?,dni=?,id_donde_vot=? where id=?', [nombre, apellido, celiaco, vegano, movilidad, domicilio, fiscal_antes, dni, id_donde_vota, exi[0]['id']])
+
+                } else {
+                    exi = await pool.query('select * from personas_fiscalizacion where nombre =? and dni ="Sin definir" ', [nombre])
+
+                    if (exi.length > 0) {
+                        await pool.query('update personas_fiscalizacion set nombre=?, apellido=?,vegano=?, movilidad=?,domicilio=?, fiscal_antes=?,dni=?,id_donde_vota=?  where id=?', [nombre, apellido, vegano, movilidad, domicilio, fiscal_antes, dni, id_donde_vota, exi[0]['id']])
+                     
+                    } else {
+
+                        await pool.query('insert into personas_fiscalizacion set vegano=?,celiaco=?,  movilidad=?,domicilio=?, fiscal_antes=?, dni =?, nombre=?, apellido=?, telefono=?, telefono2=?,id_donde_vota=? ', [vegano, celiaco, movilidad, domicilio, fiscal_antes, dni, nombre, apellido, telefono, telefono2, id_donde_vota])
+
+                      
+                    }
+                }
+
+
+            }
+
+
+
+        }
+
+        ///paso 2
         const es = await pool.query('select * from escuelas where id=?', [id_escuela])
 
-        ///queda id_inscripcion
-        await pool.query('insert into asignaciones_fiscales set id_inscripcion=?, escuela=? ,mesa=?, dni=?, zona=? ', [id_inscripcion, id_escuela, mesa, dni, es[0]['circuito']])
-        await pool.query('update inscripciones_fiscales set estado="Asignado" where id=?', [id_inscripcion])
+        await pool.query('insert into asignaciones_fiscales2 set id_inscripcion=?, escuela=? ,mesa=?, dni=?, zona=? ', [id_inscripcion, id_escuela, mesa, dni, es[0]['circuito']])
+        await pool.query('update inscripciones_fiscales2 set estado="Asignado" where id=?', [id_inscripcion])
 
         res.json('Realizado')
     } catch (error) {
+        console.log(error)
         res.json('error')
     }
 
 
 })
+
+
 router.post("/inscribir", async (req, res) => {
     const { id_donde_vota, telefono, telefono2, dni, nombre, apellido, observaciones, id_inscripcion, id_escuela, id_escuela2, celiaco, vegano, movilidad, domicilio, fiscal_antes } = req.body
 
@@ -1989,13 +2069,13 @@ router.post("/inscribir", async (req, res) => {
 
 
         if (exi.length > 0) {
-            console.log(1)
+           
             await pool.query('update personas_fiscalizacion set vegano=?,celiaco=?, movilidad=?,domicilio=?, fiscal_antes=?,dni=?, id_donde_vota=? where id=?', [vegano, celiaco, movilidad, domicilio, fiscal_antes, dni, id_donde_vota, exi[0]['id']])
-            console.log(1)
+            
             await pool.query('update inscripciones_fiscales set estado="Contactado", observaciones=?,id_escuela=?, id_escuela2=?,dni=? where id=?', [observaciones, id_escuela, id_escuela2, dni, id_inscripcion])
-            console.log(1)
+           
         } else {
-            console.log('nya')
+        
             exi = await pool.query('select * from personas_fiscalizacion where nombre = ? and apellido =? and dni ="Sin definir" ', [nombre, apellido])
             console.log(exi)
             if (exi.length > 0) {
