@@ -841,9 +841,9 @@ router.get('/traermesas/:id_escuela', async (req, res,) => {
         if (mesaux.length > 0) {
             disponibilidad = 'Ocupada'
         }
-        if (escuela[0]['circuito'] == 2) {
-            disponibilidad = 'Ocupada'
-        }
+       
+         
+        
     /*     console.log(escuela[0]['nombre'])
         if ((escuela[0]['nombre'] == 'ESC. Nº 34 "EL SANTO DE LA ESPADA"') || (escuela[0]['nombre'] == 'COLEGIO "MANUEL VICENTE FIGUERERO"' || (escuela[0]['nombre'] == 'ESCUELA TECNICA U.O.C.R.A.'))) {
             disponibilidad = 'Ocupada'
