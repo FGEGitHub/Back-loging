@@ -974,7 +974,7 @@ router.get('/estadisticasescuelas', async (req, res,) => {
 
 
 router.get('/estadisticas1', async (req, res,) => {
-    const insc = await pool.query('select * from inscripciones_fiscales')
+    const insc = await pool.query('select * from inscripciones_fiscales2')
 
     let Pagw = 0
     let Fly = 0
@@ -982,15 +982,15 @@ router.get('/estadisticas1', async (req, res,) => {
     let Autoin = 0
     let aliado = 0
 
-    let celiaco = await pool.query('select * from asignaciones_fiscales join (select dni as dnip,celiaco from personas_fiscalizacion) as selec on asignaciones_fiscales.dni=selec.dnip where celiaco="Si"')
-    let vegano = await pool.query('select * from asignaciones_fiscales join (select dni as dnip,vegano from personas_fiscalizacion) as selec on asignaciones_fiscales.dni=selec.dnip where vegano="Si"')
+    let celiaco = await pool.query('select * from asignaciones_fiscales2 join (select dni as dnip,celiaco from personas_fiscalizacion) as selec on asignaciones_fiscales2.dni=selec.dnip where celiaco="Si"')
+    let vegano = await pool.query('select * from asignaciones_fiscales2 join (select dni as dnip,vegano from personas_fiscalizacion) as selec on asignaciones_fiscales2.dni=selec.dnip where vegano="Si"')
 
-    let contactado = await pool.query('select * from inscripciones_fiscales where estado !="Pendiente"')
-    let asigna = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales.mesa=selec.idmesa where numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5"and numero != "Suplente 6"  and numero != "Suplente 7"')
-    let asigna2 = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales.mesa=selec.idmesa where numero = "Suplente 1" or numero = "Suplente 2" or numero = "Suplente 3" or numero = "Suplente 4" or numero = "Suplente 5" or numero = "Suplente 6" or numero = "Suplente 7"')
+    let contactado = await pool.query('select * from inscripciones_fiscales2 where estado !="Pendiente"')
+    let asigna = await pool.query('select * from asignaciones_fiscales2 join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales2.mesa=selec.idmesa where numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5"and numero != "Suplente 6"  and numero != "Suplente 7"')
+    let asigna2 = await pool.query('select * from asignaciones_fiscales2 join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales2.mesa=selec.idmesa where numero = "Suplente 1" or numero = "Suplente 2" or numero = "Suplente 3" or numero = "Suplente 4" or numero = "Suplente 5" or numero = "Suplente 6" or numero = "Suplente 7"')
 
-    let recha = await pool.query('select * from inscripciones_fiscales where estado ="Rechazado"')
-    let nocont = await pool.query('select * from inscripciones_fiscales where estado ="No contestado"')
+    let recha = await pool.query('select * from inscripciones_fiscales2 where estado ="Rechazado"')
+    let nocont = await pool.query('select * from inscripciones_fiscales2 where estado ="No contestado"')
     for (indexx in insc) {
 
         switch (insc[indexx]['como_se_entero']) {
@@ -1556,10 +1556,10 @@ router.post("/asignarinscripciones", async (req, res) => {
 
 router.post("/modificarestadodeinscrip", async (req, res) => {
     let { id, estado } = req.body
-
+console.log(id)
     try {
         console.log(estado)
-        await pool.query('update inscripciones_fiscales set estado =?  where  id = ?', [estado, id])
+        await pool.query('update inscripciones_fiscales2 set estado =?  where  id = ?', [estado, id])
         res.json('Cambiado el estado')
     } catch (error) {
         console.log(error)
@@ -2000,16 +2000,48 @@ router.post("/volverapaso3", async (req, res) => {
 
 
 router.post("/asignarmesaafiscal", async (req, res) => {
-    const { dni, id_inscripcion, id_escuela,id_donde_vota, mesa, celiaco, vegano, movilidad, domicilio, fiscal_antes } = req.body
+    let { dni, id_inscripcion, id_escuela,id_donde_vota, mesa, celiaco, vegano, movilidad, domicilio, fiscal_antes, observaciones} = req.body
 
     try {
         //paso 1
 
         exi = await pool.query('select * from personas_fiscalizacion where dni =?', [dni])
+        if (domicilio == undefined){
+            if (exi.length>0){
+                domicilio=exi[0]['domicilio']
+            }else{
+                domicilio='sin definir'
+            }
+        }
+        if (celiaco == undefined){
+            if (exi.length>0){
+                celiaco=exi[0]['celiaco']
+            }else{
+                celiaco='sin definir'
+            }
+        }
+        if (vegano == undefined){
+            if (exi.length>0){
+                vegano=exi[0]['vegano']
+            }else{
+                vegano='sin definir'
+            }
+        }
+        if (fiscal_antes == undefined){
+            if (exi.length>0){
+                fiscal_antes=exi[0]['fiscal_antes']
+            }else{
+                fiscal_antes='sin definir'
+            }
+        }
 
-
-
-
+        if (movilidad == undefined){
+            if (exi.length>0){
+                movilidad=exi[0]['movilidad']
+            }else{
+                movilidad='sin definir'
+            }
+        }
         if (exi.length > 0) {
            
             await pool.query('update personas_fiscalizacion set vegano=?,celiaco=?, movilidad=?,domicilio=?, fiscal_antes=?,dni=?, id_donde_vota=? where id=?', [vegano, celiaco, movilidad, domicilio, fiscal_antes, dni, id_donde_vota, exi[0]['id']])
@@ -2054,7 +2086,10 @@ router.post("/asignarmesaafiscal", async (req, res) => {
 
         await pool.query('insert into asignaciones_fiscales2 set id_inscripcion=?, escuela=? ,mesa=?, dni=?, zona=? ', [id_inscripcion, id_escuela, mesa, dni, es[0]['circuito']])
         await pool.query('update inscripciones_fiscales2 set estado="Asignado" where id=?', [id_inscripcion])
+        if (observaciones != undefined){
+            await pool.query('insert into observaciones set detalle=?, id_ref=? ', [observaciones, dni])
 
+        }
         res.json('Realizado')
     } catch (error) {
         console.log(error)
@@ -2234,7 +2269,7 @@ router.post('/asignarencargado', async (req, res) => {
     const { id_inscripcion, id_encargado } = req.body
 
     try {
-        await pool.query('update inscripciones_fiscales set id_encargado=? where  id = ?', [id_encargado, id_inscripcion])
+        await pool.query('update inscripciones_fiscales2 set id_encargado=? where  id = ?', [id_encargado, id_inscripcion])
         res.json('asignado')
 
     } catch (error) {
