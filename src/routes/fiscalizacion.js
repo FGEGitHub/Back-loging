@@ -2168,13 +2168,13 @@ router.get('/todoslosencargados/', async (req, res) => {
     let envio = []
     asignados = 0
     for (encargado in encargados) {
-        let asignados = await pool.query('select * from inscripciones_fiscales where id_encargado =? ', [encargados[encargado]['id']])
+        let asignados = await pool.query('select * from inscripciones_fiscales2 where id_encargado =? ', [encargados[encargado]['id']])
 
 
-        let sinc = await pool.query('select * from inscripciones_fiscales where id_encargado =? and estado="Pendiente" ', [encargados[encargado]['id']])
-        let rech = await pool.query('select * from inscripciones_fiscales where id_encargado =? and estado="Rechazado" ', [encargados[encargado]['id']])
-        let cont = await pool.query('select * from inscripciones_fiscales where id_encargado =? and estado="Contactado" ', [encargados[encargado]['id']])
-        conf = await pool.query('select * from inscripciones_fiscales join (select id_inscripcion  from asignaciones_fiscales) as selec on inscripciones_fiscales.id=selec.id_inscripcion where id_encargado =? ', [encargados[encargado]['id']])
+        let sinc = await pool.query('select * from inscripciones_fiscales2 where id_encargado =? and estado="Pendiente" ', [encargados[encargado]['id']])
+        let rech = await pool.query('select * from inscripciones_fiscales2 where id_encargado =? and estado="Rechazado" ', [encargados[encargado]['id']])
+        let cont = await pool.query('select * from inscripciones_fiscales2 where id_encargado =? and estado="Contactado" ', [encargados[encargado]['id']])
+        conf = await pool.query('select * from inscripciones_fiscales2 join (select id_inscripcion  from asignaciones_fiscales2) as selec on inscripciones_fiscales2.id=selec.id_inscripcion where id_encargado =? ', [encargados[encargado]['id']])
 
         let objeto_nuevo = {
             id: encargados[encargado]['id'],
