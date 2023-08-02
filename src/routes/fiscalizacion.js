@@ -1083,7 +1083,7 @@ router.get('/traerinscripcionesdeunencargado/:id', async (req, res,) => {
     const id = req.params.id
     console.log(91)
     try {
-        estr = await pool.query('select * from inscripciones_fiscales  where  id_encargado =?', [id])
+        estr = await pool.query('select * from inscripciones_fiscales2  where  id_encargado =?', [id])
 
         console.log(estr)
         res.json(estr)
@@ -1103,7 +1103,7 @@ router.get('/desasignarencargado/:id', async (req, res,) => {
     const id = req.params.id
 
     try {
-        await pool.query('update inscripciones_fiscales set id_encargado = 0  where  id = ?', [id])
+        await pool.query('update inscripciones_fiscales2 set id_encargado = 0  where  id = ?', [id])
 
 
         res.json('realizado')
