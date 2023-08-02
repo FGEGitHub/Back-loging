@@ -1454,7 +1454,7 @@ const id = req.params.id
   console.log(id)
      // res.json([estr])
    //  estr = await pool.query('select * from inscripciones_fiscales2 left join (select dni as dniper,telefono,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on inscripciones_fiscales2.dni=selec1.dniper   left join (select id_ref, detalle from observaciones) as selec4 on inscripciones_fiscales2.dni = id_ref left join (select id as  id_es, nombre as donde_vota from escuelas) as selec5 on selec1.id_donde_vota = selec5.id_es  left join (select id as idant,escuela as id_don from asignaciones_fiscales) as selec6 on inscripciones_fiscales2.dni=selec6.idant left join (select id as idescant, nombre as dondefiscal from escuelas) as selec7 on selec6.id_don=selec7.idescant where id_encargado=?',[id])
-     estr = await pool.query('select * from inscripciones_fiscales2 left join (select dni as dniper,telefono,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on inscripciones_fiscales2.dni=selec1.dniper   left join (select id_ref, detalle from observaciones) as selec4 on inscripciones_fiscales2.dni = id_ref left join (select id as  id_es, nombre as donde_vota from escuelas) as selec5 on selec1.id_donde_vota = selec5.id_es  left join (select id as idant,escuela as id_don from asignaciones_fiscales) as selec6 on inscripciones_fiscales2.dni=selec6.idant left join (select id as idescant, nombre as dondefiscal from escuelas) as selec7 on selec6.id_don=selec7.idescant where id_encargado=?',[id])
+     estr = await pool.query('select * from inscripciones_fiscales2 left join (select dni as dniper,telefono,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on inscripciones_fiscales2.dni=selec1.dniper   left join (select id as  id_es, nombre as donde_vota from escuelas) as selec5 on selec1.id_donde_vota = selec5.id_es  left join (select id as idant,escuela as id_don from asignaciones_fiscales) as selec6 on inscripciones_fiscales2.dni=selec6.idant left join (select id as idescant, nombre as dondefiscal from escuelas) as selec7 on selec6.id_don=selec7.idescant where id_encargado=?',[id])
 
   
      console.log(estr)
@@ -1477,6 +1477,18 @@ res.json([estr])
 
 
 
+router.post("/enviarobservacionnueva", async (req, res) => {
+    const { id,detalle } = req.body
+try {
+    await pool.query('insert into observaciones set detalle=?, id_ref=?  ', [detalle, id])
+    res.json('realizado')
+} catch (error) {
+    console.log(error)
+    res.json('error')
+}
+
+ 
+})
 router.post("/rechazarincrip", async (req, res) => {
     let { id_inscripcion, observaciones, id_donde_vota, dni } = req.body
 
