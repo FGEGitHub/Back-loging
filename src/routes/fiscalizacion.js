@@ -1365,7 +1365,7 @@ router.get('/todaslasasignaciones2', async (req, res,) => {
 
 
     try {
-        estr = await pool.query('select * from asignaciones_fiscales2 join (select dni as dniper,telefono, nombre, apellido,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on asignaciones_fiscales2.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on asignaciones_fiscales2.escuela=selec2.idescuela join (select id as idmesa, numero from mesas_fiscales) as sele on asignaciones_fiscales2.mesa=sele.idmesa join (select id as id_auxesc,nombre as nombredondevota from escuelas ) as selec3 on selec1.id_donde_vota=selec3.id_auxesc ')
+        estr = await pool.query('select * from asignaciones_fiscales2 join (select dni as dniper,telefono, nombre, apellido,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on asignaciones_fiscales2.dni=selec1.dniper  join (select id as idmesa, numero, id_escuela as idescuelamesa from mesas_fiscales) as sele on asignaciones_fiscales2.mesa=sele.idmesa join (select id as id_auxesc,nombre as nombredondevota from escuelas ) as selec3 on selec1.id_donde_vota=selec3.id_auxesc join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on sele.idescuelamesa=selec2.idescuela')
 
         res.json([estr])
     } catch (error) {
