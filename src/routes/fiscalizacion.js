@@ -158,7 +158,7 @@ router.get('/traerpersonasdeunenc/:id', async (req, res,) => {
         //let personas = await pool.query('select * from personas_fiscalizacion join (select id as idins, id_encargado, dni as dni2 from inscripciones_fiscales) as selec2 on personas_fiscalizacion.dni=selec2.dni2 left join (select id as idescuela, nombre as nombreescuela from escuelas) as selec on personas_fiscalizacion.id_donde_vota=selec.idescuela where id_encargado=? ',[id])
 
 
-        let personas = await pool.query('select * from personas_fiscalizacion join (select id as idins, id_encargado, dni as dni2 from inscripciones_fiscales) as selec2 on personas_fiscalizacion.dni=selec2.dni2  where id_encargado=? and dni2<>"Sin definir"', [id])
+        let personas = await pool.query('select * from personas_fiscalizacion join (select id as idins, id_encargado, dni as dni2 from inscripciones_fiscales2) as selec2 on personas_fiscalizacion.dni=selec2.dni2  where id_encargado=? and dni2<>"Sin definir"', [id])
         res.json(personas)
 
     } catch (error) {
