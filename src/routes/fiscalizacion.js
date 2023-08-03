@@ -504,7 +504,7 @@ router.get('/traerinscripcionesenc/:id', async (req, res) => {
     const id = req.params.id
 
 
-    const etc = await pool.query('select * from inscripciones_fiscales2 left join (select dni as dnip, id_donde_vota from personas_fiscalizacion) as selec on inscripciones_fiscales2.dni=selec.dnip join (select id as idesc, nombre as nombreesc from escuelas) as selec2 on selec.id_donde_vota=selec2.idesc  where  (id_encargado is null or id_encargado= 0) and inscripciones_fiscales2.estado="Pendiente"  order by nombreesc', [id])
+    const etc = await pool.query('select * from inscripciones_fiscales2 left join (select dni as dnip, id_donde_vota from personas_fiscalizacion) as selec on inscripciones_fiscales2.dni=selec.dnip join (select id as idesc, nombre as nombreesc,etapa2 from escuelas) as selec2 on selec.id_donde_vota=selec2.idesc  where  (id_encargado is null or id_encargado= 0) and inscripciones_fiscales2.estado="Pendiente"  order by nombreesc', [id])
     console.log(etc)
 
     res.json(etc);
@@ -686,20 +686,20 @@ router.get('/listadeescuelas', async (req, res,) => {
 
         for (auxiescuela in estr) {
             let cantidad_mesas = await pool.query('select * from mesas_fiscales where id_escuela=? and numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6"  and numero != "Suplente 7"', [estr[auxiescuela]['id']])
-            let cantidad_asig = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa where id_escuela=? and numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6"  and numero != "Suplente 7"', [estr[auxiescuela]['id']])
-            let cantidad_veg = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa join (select dni as dnipers, vegano from personas_fiscalizacion) as selec5 on asignaciones_fiscales.dni=selec5.dnipers where vegano ="Si" and id_escuela=? ', [estr[auxiescuela]['id']])
-            let cantidad_cel = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa join (select dni as dnipers, celiaco from personas_fiscalizacion) as selec5 on asignaciones_fiscales.dni=selec5.dnipers where celiaco ="Si" and id_escuela=? ', [estr[auxiescuela]['id']])
-            let cantidad_pres = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa join (select dni as dnipers, celiaco from personas_fiscalizacion) as selec5 on asignaciones_fiscales.dni=selec5.dnipers where dato1 ="Si" and id_escuela=? ', [estr[auxiescuela]['id']])
-            let cantidad_aus = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa join (select dni as dnipers, celiaco from personas_fiscalizacion) as selec5 on asignaciones_fiscales.dni=selec5.dnipers where dato1 ="No" and id_escuela=? ', [estr[auxiescuela]['id']])
+            let cantidad_asig = await pool.query('select * from asignaciones_fiscales2 join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales2.mesa=selec1.idmesa where id_escuela=? and numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6"  and numero != "Suplente 7"', [estr[auxiescuela]['id']])
+            let cantidad_veg = await pool.query('select * from asignaciones_fiscales2 join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales2.mesa=selec1.idmesa join (select dni as dnipers, vegano from personas_fiscalizacion) as selec5 on asignaciones_fiscales2.dni=selec5.dnipers where vegano ="Si" and id_escuela=? ', [estr[auxiescuela]['id']])
+            let cantidad_cel = await pool.query('select * from asignaciones_fiscales2 join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales2.mesa=selec1.idmesa join (select dni as dnipers, celiaco from personas_fiscalizacion) as selec5 on asignaciones_fiscales2.dni=selec5.dnipers where celiaco ="Si" and id_escuela=? ', [estr[auxiescuela]['id']])
+            let cantidad_pres = await pool.query('select * from asignaciones_fiscales2 join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales2.mesa=selec1.idmesa join (select dni as dnipers, celiaco from personas_fiscalizacion) as selec5 on asignaciones_fiscales2.dni=selec5.dnipers where dato1 ="Si" and id_escuela=? ', [estr[auxiescuela]['id']])
+            let cantidad_aus = await pool.query('select * from asignaciones_fiscales2 join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales2.mesa=selec1.idmesa join (select dni as dnipers, celiaco from personas_fiscalizacion) as selec5 on asignaciones_fiscales2.dni=selec5.dnipers where dato1 ="No" and id_escuela=? ', [estr[auxiescuela]['id']])
             let cantidad_movil = 0
-            let cantidad_suplentes = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa where id_escuela=? and (numero = "Suplente 1" or numero = "Suplente 2" or numero = "Suplente 3" or numero = "Suplente 4" or numero = "Suplente 5" or numero = "Suplente 6" or numero = "Suplente 7")', [estr[auxiescuela]['id']])
-            let lestr = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa from asignaciones_fiscales) as selec2 on mesas_fiscales.id=selec2.mesaa join (select id as idescuela, nombre as nombre_escuela from escuelas) as selec4 on mesas_fiscales.id_escuela=selec4.idescuela  where selec2.mesaa IS NULL and (numero = "Suplente 1" or numero = "Suplente 2" or numero = "Suplente 3" or numero = "Suplente 4" or numero = "Suplente 5" or numero = "Suplente 6" or numero = "Suplente 7")and id_escuela=?', [estr[auxiescuela]['id']])
+            let cantidad_suplentes = await pool.query('select * from asignaciones_fiscales2 join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales2.mesa=selec1.idmesa where id_escuela=? and (numero = "Suplente 1" or numero = "Suplente 2" or numero = "Suplente 3" or numero = "Suplente 4" or numero = "Suplente 5" or numero = "Suplente 6" or numero = "Suplente 7")', [estr[auxiescuela]['id']])
+            let lestr = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa from asignaciones_fiscales2) as selec2 on mesas_fiscales.id=selec2.mesaa join (select id as idescuela, nombre as nombre_escuela from escuelas) as selec4 on mesas_fiscales.id_escuela=selec4.idescuela  where selec2.mesaa IS NULL and (numero = "Suplente 1" or numero = "Suplente 2" or numero = "Suplente 3" or numero = "Suplente 4" or numero = "Suplente 5" or numero = "Suplente 6" or numero = "Suplente 7")and id_escuela=?', [estr[auxiescuela]['id']])
             for (auximesa in cantidad_mesas) {
                 // let mesarecorrido = await pool.query('select * from mesas_fiscales join (select mesa as mesaa, dni  from asignaciones_fiscales) as selec1 on mesas_fiscales.id=selec1.mesaa join (select dni as dnipers, id_donde_vota from personas_fiscalizacion) as selec2 on selec1.dni=selec2.dnipers where id=? ',[cantidad_mesas[auximesa]['id']])
                 //  let escuelarecorrido = await pool.query('select * from mesas_fiscales  where id=? ',[cantidad_mesas[auximesa]['id']])
 
 
-                let dondevota = await pool.query('select * from asignaciones_fiscales join (select dni as dnipers, id_donde_vota from personas_fiscalizacion) as selec on asignaciones_fiscales.dni=selec.dnipers where mesa =?', cantidad_mesas[auximesa]['id'])
+                let dondevota = await pool.query('select * from asignaciones_fiscales2 join (select dni as dnipers, id_donde_vota from personas_fiscalizacion) as selec on asignaciones_fiscales2.dni=selec.dnipers where mesa =?', cantidad_mesas[auximesa]['id'])
 
                 if (dondevota.length == 0) {
 
@@ -929,27 +929,26 @@ router.get('/estadisticasescuelas', async (req, res,) => {
     let veinte = 0
     let menos = 0
 
-    const escuelasrecorrido = await pool.query('select * from escuelas ')
+    const escuelasrecorrido = await pool.query('select * from escuelas where etapa2="Si"')
     for (indice in escuelasrecorrido) {
 
         let canmesas = await pool.query('select * from mesas_fiscales where id_escuela=? ', [escuelasrecorrido[indice]['id']])
         let cantidadocup = 0
         for (indice2 in canmesas) {
 
-            let exiss = await pool.query('select * from asignaciones_fiscales where mesa=? ', [canmesas[indice2]['id']])
+            let exiss = await pool.query('select * from asignaciones_fiscales2 where mesa=? ', [canmesas[indice2]['id']])
 
             if (exiss.length > 0) {
 
                 cantidadocup = cantidadocup + 1
             }
         }
-        console.log(escuelasrecorrido[indice]['nombre'])
-        if (escuelasrecorrido[indice]['circuito'] == "2" || escuelasrecorrido[indice]['nombre'] == "ESCUELA TECNICA U.O.C.R.A." || escuelasrecorrido[indice]['nombre'] == 'COLEGIO "MANUEL VICENTE FIGUERERO"' || escuelasrecorrido[indice]['nombre'] == 'ESC. Nº 34 "EL SANTO DE LA ESPADA"') {
+    
             cien = cien + 1
             ochenta = ochenta + 1
             cincuenta = cincuenta + 1
             veinte = veinte + 1
-        } else {
+     
             if ((cantidadocup / canmesas.length) > 0.99) {
                 cien = cien + 1
                 ochenta = ochenta + 1
@@ -980,7 +979,7 @@ router.get('/estadisticasescuelas', async (req, res,) => {
 
 
             }
-        }
+        
     }
 
     res.json({ cien, ochenta, cincuenta, veinte, menos })
@@ -1463,6 +1462,7 @@ const id = req.params.id
   
   })
 
+  
 router.get('/todaspaso4', async (req, res,) => {
 
   //  estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono, nombre, apellido,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela join (select id as idmesa, numero from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa join (select id as id_auxesc,nombre as nombredondevota from escuelas ) as selec3 on selec1.id_donde_vota=selec3.id_auxesc ')
