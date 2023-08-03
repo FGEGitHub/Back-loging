@@ -681,7 +681,7 @@ router.get('/listadeescuelas', async (req, res,) => {
 
 
     try {
-        estr = await pool.query('select * from escuelas ')
+        estr = await pool.query('select * from escuelas where etapa2="Si')
         let escuelastodas = []
 
         for (auxiescuela in estr) {
