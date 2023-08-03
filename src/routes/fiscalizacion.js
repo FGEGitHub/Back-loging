@@ -504,7 +504,7 @@ router.get('/traerinscripcionesenc/:id', async (req, res) => {
     const id = req.params.id
 
 
-    const etc = await pool.query('select * from inscripciones_fiscales2 left join (select dni as dnip, id_donde_vota from personas_fiscalizacion) as selec on inscripciones_fiscales2.dni=selec.dnip join (select id as idesc, nombre as nombreesc from escuelas) as selec2 on selec.id_donde_vota=selec2.idesc  where  id_encargado is null or id_encargado= 0  order by nombreesc', [id])
+    const etc = await pool.query('select * from inscripciones_fiscales2 left join (select dni as dnip, id_donde_vota from personas_fiscalizacion) as selec on inscripciones_fiscales2.dni=selec.dnip join (select id as idesc, nombre as nombreesc from escuelas) as selec2 on selec.id_donde_vota=selec2.idesc  where  (id_encargado is null or id_encargado= 0) and inscripciones_fiscales2.estado="Pendiente"  order by nombreesc', [id])
     console.log(etc)
 
     res.json(etc);
