@@ -1477,6 +1477,22 @@ res.json([estr])
 
 
 
+router.post("/modificardondevota", async (req, res) => {
+    const { id_donde_vota,id } = req.body
+try {
+
+    console.log(id_donde_vota)
+    console.log(id)
+ await pool.query('update personas_fiscalizacion set id_donde_vota=? where id=?  ', [id_donde_vota, id])
+    res.json('realizado')
+} catch (error) {
+    console.log(error)
+    res.json('error')
+}
+
+ 
+})
+
 router.post("/enviarobservacionnueva", async (req, res) => {
     const { id,detalle } = req.body
 try {
