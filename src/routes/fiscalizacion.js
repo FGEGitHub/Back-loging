@@ -1460,12 +1460,8 @@ const id = req.params.id
   
 router.get('/todaspaso4', async (req, res,) => {
 
-  //  estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono, nombre, apellido,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela join (select id as idmesa, numero from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa join (select id as id_auxesc,nombre as nombredondevota from escuelas ) as selec3 on selec1.id_donde_vota=selec3.id_auxesc ')
+   estr = await pool.query('select * from inscripciones_fiscales2 left join (select id as idpers, dni as dniper,telefono,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on inscripciones_fiscales2.dni=selec1.dniper  left join (select id as  id_es, nombre as donde_vota, etapa2,circuito from escuelas) as selec5 on selec1.id_donde_vota = selec5.id_es  left join (select id as idant,escuela as id_don from asignaciones_fiscales) as selec6 on inscripciones_fiscales2.dni=selec6.idant left join (select id as idescant, nombre as dondefiscal from escuelas) as selec7 on selec6.id_don=selec7.idescant left join (select id as idencar, nombre as nombrequienllama from usuarios) as sele8 on inscripciones_fiscales2.id_encargado=sele8.idencar')
 
-   // res.json([estr])
-   estr = await pool.query('select * from inscripciones_fiscales2 left join (select id as idpers, dni as dniper,telefono,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on inscripciones_fiscales2.dni=selec1.dniper  left join (select id as  id_es, nombre as donde_vota, etapa2 from escuelas) as selec5 on selec1.id_donde_vota = selec5.id_es  left join (select id as idant,escuela as id_don from asignaciones_fiscales) as selec6 on inscripciones_fiscales2.dni=selec6.idant left join (select id as idescant, nombre as dondefiscal from escuelas) as selec7 on selec6.id_don=selec7.idescant left join (select id as idencar, nombre as nombrequienllama from usuarios) as sele8 on inscripciones_fiscales2.id_encargado=sele8.idencar')
-console.log(estr)
-   //const tod = await pool.query('select * from inscripciones_fiscales2 join (select id as idp from personas )as selec on ')
 res.json([estr])
 
 })
