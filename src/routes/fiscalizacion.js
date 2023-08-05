@@ -31,14 +31,20 @@ router.get('/traerrecomendaciones', async (req, res) => {
     for (esc in escuelas){
 
         // buscar las mesas que le faltan
-         mesas = await pool.query('select * from mesas_fiscales left join (select mesa as mesaid from asignaciones_fiscales )  as selec on mesas_fiscales.id = selec.mesaid where id_escuela=? and mesaid is null and numero not in ("Suplente 1","Suplente 2","Suplente 3","Suplente 4","Suplente 5","Suplente 6","Suplente 7") ',[escuelas[esc]['id']])
-
+         mesas = await pool.query('select * from mesas_fiscales where id_escuela=? and numero not in ("Suplente 1","Suplente 2","Suplente 3","Suplente 4","Suplente 5")',[escuelas[esc]['id']])
+let cant =0
+         for (mes in mesas ){
+            exi = await pool.query('select * from asignaciones_fiscales2 where mesa=?',[mesas[mes]['id']])
+            if (exi.length==0){
+                cant+=1
+            }
+         }
         /// buscar los pendientes q votan ahi  
         personas =await pool.query('select * from inscripciones_fiscales2 join (select dni as dnip, id_donde_vota from personas_fiscalizacion) as selec on inscripciones_fiscales2.dni=selec.dnip where id_donde_vota=?',[escuelas[esc]['id']])
 
         let nuevo={
             escuela:escuelas[esc]['nombre'],
-            mesas:mesas.length,
+            mesas:cant,
             personas:personas.length,
         }
         enviar.push(nuevo)
