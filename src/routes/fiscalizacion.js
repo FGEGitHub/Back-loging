@@ -41,11 +41,14 @@ let cant =0
          }
         /// buscar los pendientes q votan ahi  
         personas =await pool.query('select * from inscripciones_fiscales2 join (select dni as dnip, id_donde_vota from personas_fiscalizacion) as selec on inscripciones_fiscales2.dni=selec.dnip where id_donde_vota=?',[escuelas[esc]['id']])
+        personasno =await pool.query('select * from inscripciones_fiscales2 join (select dni as dnip, id_donde_vota from personas_fiscalizacion) as selec on inscripciones_fiscales2.dni=selec.dnip  left join (select dni as dnia from asignaciones_fiscales2) as sele2 on     inscripciones_fiscales2.dni=sele2.dnia    where id_donde_vota=? and dnia = null',[escuelas[esc]['id']])
 
         let nuevo={
             escuela:escuelas[esc]['nombre'],
+            mesascant:mesas.length,
             mesas:cant,
             personas:personas.length,
+            personasno:personasno.length
         }
         enviar.push(nuevo)
 
