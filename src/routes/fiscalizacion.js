@@ -1052,6 +1052,7 @@ router.get('/estadisticas1', async (req, res,) => {
 
     let recha = await pool.query('select * from inscripciones_fiscales2 where estado ="Rechazado"')
     let nocont = await pool.query('select * from inscripciones_fiscales2 where estado ="No contestado"')
+    let pend = await pool.query('select * from inscripciones_fiscales2 where estado ="Pendiente"')
     for (indexx in insc) {
 
         switch (insc[indexx]['como_se_entero']) {
@@ -1106,7 +1107,9 @@ router.get('/estadisticas1', async (req, res,) => {
         recha: recha.length,
         nocont: nocont.length,
         celiaco: celiaco.length,
-        vegano: vegano.length
+        vegano: vegano.length,
+        pend:pend.length
+
     }
     res.json(respuesta)
 
