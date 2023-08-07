@@ -24,7 +24,7 @@ const fileUpload = multer({
 
 
 router.get('/traerrecomendaciones', async (req, res) => {
-    const mesass = await pool.query('select * from mesas_fiscales left join ( select mesa as mesaasig, dni, escuela as escualasig from asignaciones_fiscales2) as selec1 on mesas_fiscales.id= selec1.mesaasig  join (select dni as dnipersona, nombre as nombrepers, apellido, id_donde_vota, telefono, telefono2 from personas_fiscalizacion) as selec2 on selec1.dni=selec2.dnipersona join (select id as idesc, nombre as nombreesc, ubicacion from escuelas) as selec5 on selec2.id_donde_vota=selec5.idesc where id_escuela=? and selec1.escualasig != selec2.id_donde_vota ', [id_escuela])
+    const mesass = await pool.query('select * from mesas_fiscales left join ( select mesa as mesaasig, dni, escuela as escualasig from asignaciones_fiscales2) as selec1 on mesas_fiscales.id= selec1.mesaasig  join (select dni as dnipersona, nombre as nombrepers, apellido, id_donde_vota, telefono, telefono2 from personas_fiscalizacion) as selec2 on selec1.dni=selec2.dnipersona join (select id as idesc, nombre as nombreesc, ubicacion from escuelas) as selec5 on selec2.id_donde_vota=selec5.idesc where id_escuela=? and selec1.escualasig != selec2.id_donde_vota ')
 
     console.log(mesass)
 
@@ -597,7 +597,7 @@ router.get('/traerescuelas', async (req, res) => {
 
 })
 router.get('/traerescuelas2', async (req, res) => {
-    const dni = req.params.dni
+    
 
 
     const etc = await pool.query('select * from escuelas  order by nombre ')
@@ -605,6 +605,21 @@ router.get('/traerescuelas2', async (req, res) => {
     res.json([etc,etc2]);
 
 })
+
+
+router.get('/traerescuelas3', async (req, res) => {
+    
+
+
+    const etc = await pool.query('select * from escuelas  order by nombre ')
+    const etc2 = await pool.query('select * from escuelas   where etapa2="Si" order by nombre')
+
+    
+    res.json([etc,etc2]);
+
+})
+
+
 router.get('/traerescuelasfalt', async (req, res) => {
 
 
@@ -1511,6 +1526,9 @@ const id = req.params.id
 router.get('/todaspaso4', async (req, res,) => {
 
    estr = await pool.query('select * from inscripciones_fiscales2 left join (select id as idpers, dni as dniper,telefono,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on inscripciones_fiscales2.dni=selec1.dniper  left join (select id as  id_es, nombre as donde_vota, etapa2,circuito from escuelas) as selec5 on selec1.id_donde_vota = selec5.id_es  left join (select id as idant,escuela as id_don from asignaciones_fiscales) as selec6 on inscripciones_fiscales2.dni=selec6.idant left join (select id as idescant, nombre as dondefiscal from escuelas) as selec7 on selec6.id_don=selec7.idescant left join (select id as idencar, nombre as nombrequienllama from usuarios) as sele8 on inscripciones_fiscales2.id_encargado=sele8.idencar left join (select dni as idasig, mesa as mesaasig from asignaciones_fiscales2) as selec90 on inscripciones_fiscales2.dni=selec90.idasig left join (select id as idm, id_escuela as id_escuelaaa from mesas_fiscales) as selec91 on selec90.mesaasig=selec91.idm left join (select id as idescuelaultimo,nombre as nombrevota from escuelas) as selec92 on selec91.id_escuelaaa=selec92.idescuelaultimo ')
+console.log(estr.length)
+estr2 = await pool.query('select * from inscripciones_fiscales2')
+console.log(estr2.length)
 
 res.json([estr])
 
