@@ -614,7 +614,7 @@ router.get('/traerescuelas3', async (req, res) => {
     const etc = await pool.query('select * from escuelas  order by nombre ')
     const etc2 = await pool.query('select * from escuelas   where etapa2="Si" order by nombre')
 
-    
+
     res.json([etc,etc2]);
 
 })
@@ -1664,11 +1664,16 @@ router.post("/asignarinscripciones", async (req, res) => {
 
 
 router.post("/modificarestadodeinscrip", async (req, res) => {
-    let { id, estado } = req.body
+    let { id, estado, observaciones } = req.body
 
     try {
         console.log(estado)
         await pool.query('update inscripciones_fiscales2 set estado =?  where  id = ?', [estado, id])
+if (observaciones!= undefined){
+    const ins =  await pool.query('select * from inscripciones_fiscales2 where id =?', [id])
+    await pool.query('insert into observaciones set detalle=?,id_ref=? ', [observaciones, ins[0]['dni']])
+}
+
         res.json('Cambiado el estado')
     } catch (error) {
         console.log(error)
