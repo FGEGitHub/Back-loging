@@ -834,7 +834,7 @@ router.get('/Confirmarcapasupl/:id', async (req, res,) => {
     const id = req.params.id
     console.log('no')
     console.log(id)
-    const asignacionm = await pool.query('select * from asignaciones_fiscales where mesa =?', [id])
+    const asignacionm = await pool.query('select * from asignaciones_fiscales2 where mesa =?', [id])
     try {
 
 
@@ -856,7 +856,7 @@ router.get('/confirmarcapa/:id', async (req, res,) => {
     try {
 
 
-        await pool.query('update asignaciones_fiscales set capacitado="Si"  where id=?', [id])
+        await pool.query('update asignaciones_fiscales2 set capacitado="Si"  where id=?', [id])
 
 
         res.json('realizado con exito')
