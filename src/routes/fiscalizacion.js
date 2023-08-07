@@ -1357,7 +1357,24 @@ router.get('/contactada/:id', async (req, res,) => {
 })
 
 
+router.get('/contactada2/:id', async (req, res,) => {
+    const id = req.params.id
+    try {
+        const asignacion = await pool.query('select * from asignaciones_fiscales where id =? ', [id])
+        if (asignacion[0]['checkk'] == null || asignacion[0]['checkk'] == 'No') {
+            await pool.query('update asignaciones_fiscales set checkk="Si"  where id=?', [id])
 
+        } else {
+            console.log('no')
+            await pool.query('update asignaciones_fiscales set checkk="No"  where id=?', [id])
+        }
+        res.json('realizado')
+    } catch (error) {
+        console.log(error)
+        res.json('No realizado')
+    }
+
+})
 router.get('/listadecircuitos/', async (req, res,) => {
     const id = req.params.id
     try {
