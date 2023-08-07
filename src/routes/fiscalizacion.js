@@ -24,10 +24,19 @@ const fileUpload = multer({
 
 
 router.get('/traerrecomendaciones', async (req, res) => {
+    const mesass = await pool.query('select * from mesas_fiscales left join ( select mesa as mesaasig, dni, escuela as escualasig from asignaciones_fiscales2) as selec1 on mesas_fiscales.id= selec1.mesaasig  join (select dni as dnipersona, nombre as nombrepers, apellido, id_donde_vota, telefono, telefono2 from personas_fiscalizacion) as selec2 on selec1.dni=selec2.dnipersona join (select id as idesc, nombre as nombreesc, ubicacion from escuelas) as selec5 on selec2.id_donde_vota=selec5.idesc where id_escuela=? and selec1.escualasig != selec2.id_donde_vota ', [id_escuela])
 
+    console.log(mesass)
 
+    
     const escuelas = await pool.query('select * from escuelas where etapa2="Si"')
     let enviar = []
+/////
+
+
+
+
+    /////
     for (esc in escuelas){
 
         // buscar las mesas que le faltan
@@ -54,7 +63,7 @@ let cant =0
 
     }
 
-console.log(enviar)
+
 res.json(enviar)
 
 
