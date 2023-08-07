@@ -798,9 +798,9 @@ router.get('/rechazarcapacitacionmesa/:id', async (req, res,) => {
     const id = req.params.id
 
     try {
-        const asignacionm = await pool.query('select * from asignaciones_fiscales where mesa =?', [id])
+        const asignacionm = await pool.query('select * from asignaciones_fiscales2 where mesa =?', [id])
 
-        await pool.query('update asignaciones_fiscales set capacitado="No"  where id=?', [asignacionm[0]['id']])
+        await pool.query('update asignaciones_fiscales2 set capacitado="No"  where id=?', [asignacionm[0]['id']])
 
 
         res.json('realizado con exito')
@@ -816,7 +816,7 @@ router.get('/rechazarcapacitacion/:id', async (req, res,) => {
     try {
 
 
-        await pool.query('update asignaciones_fiscales set capacitado="No"  where id=?', [id])
+        await pool.query('update asignaciones_fiscales2 set capacitado="No"  where id=?', [id])
 
 
         res.json('realizado con exito')
