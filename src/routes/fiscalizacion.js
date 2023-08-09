@@ -1253,7 +1253,9 @@ router.get('/todaslasasignacionesdeunaescuela/:id', async (req, res,) => {
 
         cant = await pool.query('select * from mesas_fiscales join (select id_usuario, id as idescuela from escuelas) as sele on mesas_fiscales.id_escuela=sele.idescuela where id_usuario=? and numero not in ("Suplente 1","Suplente 2","Suplente 3","Suplente 4","Suplente 5","Suplente 6","Suplente 7")',[id])
 console.log(cant.length)
-        res.json([estr,cant.length])
+supl = await pool.query('select * from mesas_fiscales join (select id_usuario, id as idescuela from escuelas) as sele on mesas_fiscales.id_escuela=sele.idescuela where id_usuario=? and numero in ("Suplente 1","Suplente 2","Suplente 3","Suplente 4","Suplente 5","Suplente 6","Suplente 7")',[id])
+
+        res.json([estr,cant.length,supl.length])
     } catch (error) {
         console.log(error)
         res.send('algo salio mal')
