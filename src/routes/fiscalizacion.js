@@ -1244,6 +1244,17 @@ router.get('/verfaltantesescuelas/', async (req, res,) => {
 
 
 
+router.get('/revisto/:id', async (req, res,) => {
+    const id = req.params.id
+    mesas = await pool.query('select * from mesas_fiscales join(select id as  idme, id_usuario from escuelas) as sele on mesas_fiscales.id_escuela=sele.idme where id_usuario=? ',[id])
+    console.log(mesas)
+
+for (aus in mesas){
+    await pool.query('update asignaciones_fiscales2 set nuevo="No"  where mesa=?', [mesas[aus]['id']])
+}
+res.json('Visto')
+})
+
 router.get('/todaslasasignacionesdeunaescuela/:id', async (req, res,) => {
     const id = req.params.id
     console.log(id)
@@ -1252,10 +1263,14 @@ router.get('/todaslasasignacionesdeunaescuela/:id', async (req, res,) => {
         estr = await pool.query('select * from asignaciones_fiscales2 join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales2.dni=selec1.dniper  left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales2.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero, id_escuela as idescc from mesas_fiscales) as sele on asignaciones_fiscales2.mesa=sele.idmesa left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on sele.idescc=selec2.idescuela where  id_usuario =? order by apellido', [id])
 
         cant = await pool.query('select * from mesas_fiscales join (select id_usuario, id as idescuela from escuelas) as sele on mesas_fiscales.id_escuela=sele.idescuela where id_usuario=? and numero not in ("Suplente 1","Suplente 2","Suplente 3","Suplente 4","Suplente 5","Suplente 6","Suplente 7")',[id])
-console.log(cant.length)
+const esc =  await pool.query('select * from asignaciones_fiscales2 join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales2.dni=selec1.dniper  left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales2.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero, id_escuela as idescc from mesas_fiscales) as sele on asignaciones_fiscales2.mesa=sele.idmesa left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on sele.idescc=selec2.idescuela where  id_usuario =? and nuevo="Si"', [id])
+
+
+
+
 supl = await pool.query('select * from mesas_fiscales join (select id_usuario, id as idescuela from escuelas) as sele on mesas_fiscales.id_escuela=sele.idescuela where id_usuario=? and numero in ("Suplente 1","Suplente 2","Suplente 3","Suplente 4","Suplente 5","Suplente 6","Suplente 7")',[id])
 
-        res.json([estr,cant.length,supl.length])
+        res.json([estr,cant.length,supl.length,esc.length])
     } catch (error) {
         console.log(error)
         res.send('algo salio mal')
