@@ -1224,6 +1224,21 @@ router.get('/verfaltantesescuelassuplentes/', async (req, res,) => {
 
 })
 
+router.get('/asignarsi/', async (req, res) => {
+const todas = await pool.query('select * from asignaciones_fiscales2')
+
+
+for (a in todas ){
+    await pool.query('update asignaciones_fiscales2 set nuevo="No"  where id =?', [todas[a]['id']])
+
+}
+
+res.send('listo')
+})
+
+
+
+
 
 router.get('/verfaltantesescuelas/', async (req, res,) => {
 
