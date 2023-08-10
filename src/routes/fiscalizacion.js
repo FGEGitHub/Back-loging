@@ -1223,7 +1223,7 @@ router.get('/verfaltantesescuelassuplentes/', async (req, res,) => {
     }
 
 })
-
+/* 
 router.get('/asignarsi/', async (req, res) => {
 const todas = await pool.query('select * from asignaciones_fiscales2')
 
@@ -1235,7 +1235,7 @@ for (a in todas ){
 
 res.send('listo')
 })
-
+ */
 
 
 
