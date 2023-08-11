@@ -1245,7 +1245,7 @@ router.get('/verfaltantesescuelas/', async (req, res,) => {
 
     try {
 
-        let estr = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa from asignaciones_fiscales) as selec2 on mesas_fiscales.id=selec2.mesaa join (select id as idescuela, nombre as nombre_escuela from escuelas) as selec4 on mesas_fiscales.id_escuela=selec4.idescuela  where selec2.mesaa IS NULL and numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6"  and numero != "Suplente 7"')
+        let estr = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa from asignaciones_fiscales2) as selec2 on mesas_fiscales.id=selec2.mesaa join (select id as idescuela, nombre as nombre_escuela, etapa2 from escuelas) as selec4 on mesas_fiscales.id_escuela=selec4.idescuela  where selec2.mesaa IS NULL and numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6"  and numero != "Suplente 7" and etapa2="Si"')
         console.log(estr)
         res.json(estr)
     } catch (error) {
