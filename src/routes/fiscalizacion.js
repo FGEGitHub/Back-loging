@@ -739,6 +739,7 @@ router.get('/listademesas', async (req, res,) => {
 
 
 })
+
 router.get('/listadeescuelas', async (req, res,) => {
 
 
@@ -1374,13 +1375,13 @@ router.get('/checksuplente/:id', async (req, res,) => {
 router.get('/contactada/:id', async (req, res,) => {
     const id = req.params.id
     try {
-        const asignacion = await pool.query('select * from asignaciones_fiscales where id =? ', [id])
+        const asignacion = await pool.query('select * from asignaciones_fiscales2 where id =? ', [id])
         if (asignacion[0]['dato1'] == null || asignacion[0]['dato1'] == 'No') {
-            await pool.query('update asignaciones_fiscales set dato1="Si"  where id=?', [id])
+            await pool.query('update asignaciones_fiscales2 set dato1="Si"  where id=?', [id])
 
         } else {
             console.log('no')
-            await pool.query('update asignaciones_fiscales set dato1="No"  where id=?', [id])
+            await pool.query('update asignaciones_fiscales2 set dato1="No"  where id=?', [id])
         }
         res.json('realizado')
     } catch (error) {
