@@ -904,7 +904,7 @@ router.get('/traerdetallesdeunaescuelatraslado/:id_escuela', async (req, res,) =
 router.get('/traerdetallesdeunaescuela/:id_escuela', async (req, res,) => {
     const { id_escuela } = req.params
 
-    const mesass = await pool.query('select * from mesas_fiscales left join ( select mesa as mesaasig, dni,dato1 from asignaciones_fiscales2) as selec1 on mesas_fiscales.id= selec1.mesaasig  join (select dni as dnipersona, nombre as nombrepers, apellido, id_donde_vota, telefono, telefono2 from personas_fiscalizacion) as selec2 on selec1.dni=selec2.dnipersona join (select id as idesc, nombre as nombreesc from escuelas) as selec5 on selec2.id_donde_vota=selec5.idesc where id_escuela=? ', [id_escuela])
+    const mesass = await pool.query('select * from mesas_fiscales left join ( select mesa as mesaasig, dni,dato1,nuevo from asignaciones_fiscales2) as selec1 on mesas_fiscales.id= selec1.mesaasig  join (select dni as dnipersona, nombre as nombrepers, apellido, id_donde_vota, telefono, telefono2 from personas_fiscalizacion) as selec2 on selec1.dni=selec2.dnipersona join (select id as idesc, nombre as nombreesc from escuelas) as selec5 on selec2.id_donde_vota=selec5.idesc where id_escuela=? ', [id_escuela])
 
     res.json(mesass)
 
@@ -1653,6 +1653,12 @@ router.post("/modificarpersonafisca", async (req, res) => {
     }
     if (telefono2 == undefined) {
         telefono2 = 'sin definir'
+    }
+    if (vegano == undefined) {
+        vegano = 'sin definir'
+    }
+    if (celiaco == undefined) {
+        celiaco = 'sin definir'
     }
 
     try {
