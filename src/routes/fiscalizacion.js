@@ -2860,8 +2860,8 @@ router.get('/cargarpresentes', async (req, res) => {
 
 
     const pres = await pool.query('select * from asignaciones_fiscales2 join (select id as idme, id_escuela from mesas_fiscales) as sel on asignaciones_fiscales2.mesa=sel.idme join (select id as ides, nombre from escuelas) as sel2 on sel.id_escuela=sel2.ides where dato1="Si"')
-    const aus = await pool.query('select * from asignaciones_fiscales2 where dato1="No"')
-    const sin = await pool.query('select * from asignaciones_fiscales2 where dato1 is null')
+    const aus = await pool.query('select * from asignaciones_fiscales2  join (select id as idme, id_escuela from mesas_fiscales) as sel on asignaciones_fiscales2.mesa=sel.idme join (select id as ides, nombre from escuelas) as sel2 on sel.id_escuela=sel2.ides  where dato1="No"')
+    const sin = await pool.query('select * from asignaciones_fiscales2  join (select id as idme, id_escuela from mesas_fiscales) as sel on asignaciones_fiscales2.mesa=sel.idme join (select id as ides, nombre from escuelas) as sel2 on sel.id_escuela=sel2.ides where dato1 is null')
     res.json([pres,aus,sin])
 
 })
