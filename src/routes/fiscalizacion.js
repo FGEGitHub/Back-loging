@@ -2856,117 +2856,13 @@ router.post('/cargarinscripcionesescuelas', async (req, res) => {
 
 
 
-router.post('/cargarpresentes', async (req, res) => {
-    const id = 2
-
-    const estract = await pool.query('select * from excelfiscalizacion where id = ? ', [id])
-    console.log(estract)
-    const nombree = estract[0]['nombre']
-    console.log(nombree)
-
-    let mandar = []
-    let mandar2 = []
-    // const workbook = XLSX.readFile(`./src/Excel/${nombree}`)
-
-    // const workbook = XLSX.readFile('./src/Excel/1665706467397-estr-cuentas_PosicionConsolidada.xls')
-
-    try {
-        const workbook = XLSX.readFile(path.join(__dirname, '../Excel/' + nombree))
-        const workbooksheets = workbook.SheetNames
-        const sheet = workbooksheets[0]
-
-        const dataExcel = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
-        //console.log(dataExcel)
-
-        let regex = /(\d+)/g;
+router.get('/cargarpresentes', async (req, res) => {
 
 
-
-
-
-
-
-        let dni = undefined
-
-        for (const property in dataExcel) {
-
-            dni = dataExcel[property]['DNI']
-
-            if (dni != undefined) {
-
-                existe = await pool.query('select * from asignaciones_fiscales where dni = ?', [dni])
-
-                try {
-                    ///////
-
-
-
-
-                    if (existe.length > 0) {//////si existe la personas
-
-                        let mesa = await pool.query('select * from mesas_fiscales where id =?', [existe[0]['mesa']])
-                        let persona = await pool.query('select * from personas_fiscalizacion where dni =?', [dni])
-                        ///actualiza
-                        let misma = 'distinta mesa, estaba en la ' + mesa[0]['numero'] + ' y fiscalizo en la ' + dataExcel[property]['MESA ']
-                        if (mesa[0]['numero'] == dataExcel[property]['MESA ']) {
-                            misma = "misma mesa, la " + dataExcel[property]['MESA ']
-                        }
-
-                        let nuevo = {
-                            dni: dataExcel[property]['DNI'],
-                            nombre: persona[0]['apellido'] + ' ' + persona[0]['nombre'],
-                            misma: misma
-                        }
-
-                        mandar.push(nuevo)
-                        console.log(existe[0]['dato1'])
-                        await pool.query('update asignaciones_fiscales set dato1="Si"  where dni=?', [dni])
-
-                    } else {
-                        ///crear nueva persona 
-                        // console.log('no existe el dni '+dni)
-                        let nuevo = {
-                            dni: dataExcel[property]['DNI'],
-
-                        }
-                        mandar2.push(nuevo)
-
-
-                    }
-                    /////////¿Actualmente  se encuentra estudiando? actividad adicional
-                    /////////////Tipo de empleo
-
-
-
-                }
-                //////
-                catch (error) {
-                    console.log(error)
-                }
-
-
-
-
-
-
-
-            }
-            /* if ((dataExcel[property]['Sucursal']).includes(cuil_cuit)) {
-                estado = 'A'
-            }*/
-
-
-        }
-        console.log(mandar2.length)
-        res.json([mandar, mandar2])
-    } catch (error) {
-        console.log(error)
-        res.send(error)
-
-    }
-
-
-
+    const pres = await pool.query('select * from asignaciones_fiscales2 where dato1="Si"')
+    const aus = await pool.query('select * from asignaciones_fiscales2 where dato1="No"')
+    const sin = await pool.query('select * from asignaciones_fiscales2 where dato1 is null')
+    res.json([pres.length,aus.length,sin.length])
 
 })
 
