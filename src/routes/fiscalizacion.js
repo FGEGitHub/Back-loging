@@ -2862,7 +2862,7 @@ router.get('/cargarpresentes', async (req, res) => {
     const pres = await pool.query('select * from asignaciones_fiscales2 where dato1="Si"')
     const aus = await pool.query('select * from asignaciones_fiscales2 where dato1="No"')
     const sin = await pool.query('select * from asignaciones_fiscales2 where dato1 is null')
-    res.json([pres.length,aus.length,sin.length])
+    res.json([pres,aus,sin])
 
 })
 
