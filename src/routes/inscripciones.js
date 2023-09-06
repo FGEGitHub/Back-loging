@@ -34,7 +34,7 @@ router.post('/incripcionesid', async (req, res) => {
 
   const estract = await pool.query('select * from excelinscripciones where id = ? ', [id])
   const nombree = estract[0]['ruta']
-  console.log(nombree)
+ 
 
   let mandar = []
   // const workbook = XLSX.readFile(`./src/Excel/${nombree}`)
@@ -500,6 +500,133 @@ router.post('/cargarinscripciones', async (req, res) => {
 
 })
 
+
+
+router.post('/cargarexcelpersonas', async (req, res) => {
+  const { id } = req.body
+  console.log(id)
+  const estract = await pool.query('select * from excelinscripciones where id = ? ', [id])
+  
+  const nombree = estract[0]['ruta']
+ 
+
+  let mandar = []
+  // const workbook = XLSX.readFile(`./src/Excel/${nombree}`)
+
+  // const workbook = XLSX.readFile('./src/Excel/1665706467397-estr-cuentas_PosicionConsolidada.xls')
+
+  try {
+    const workbook = XLSX.readFile(path.join(__dirname, '../Excel/' + nombree))
+    const workbooksheets = workbook.SheetNames
+    const sheet = workbooksheets[0]
+
+    const dataExcel = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
+    //console.log(dataExcel)
+
+    let regex = /(\d+)/g;
+
+
+
+
+ 
+    let a = 1
+    for (const property in dataExcel) {
+      a += 1
+      aux = dataExcel[property]['DNI']
+      existe = await pool.query('select * from personas where dni = ?', [aux])
+      try {
+        ///////
+        if (dataExcel[property]['Nombre'] === undefined) {
+          nombre = 'No'
+        } else {
+          nombre = dataExcel[property]['Nombre']
+
+        }
+        if (dataExcel[property]['Apellido'] === undefined) {
+          apellido = 'No'
+        } else {
+          apellido = dataExcel[property]['Apellido']
+        }
+       
+        if (dataExcel[property]['barrio_id'] === undefined) {
+          barrio = 'No'
+        } else {
+          barrio = dataExcel[property]['barrio_id']
+        }
+     
+        if (dataExcel[property]['telefono'] === undefined) {
+          tel = 'No'
+        } else {
+          tel = dataExcel[property]['telefono']
+        }
+     
+        if (dataExcel[property]['nivelestudio_id'] === undefined) {
+          nivel_secundario = 'Sin determinar'
+        } else {
+          nivel_secundario = dataExcel[property]['nivelestudio_id']
+        }
+        if (dataExcel[property]['empleo'] === undefined) {
+          trabajo = 'Sin determinar'
+        } else {
+          trabajo = dataExcel[property]['empleo']
+        }
+        if (dataExcel[property]['empleotipo_id'] === undefined) {
+          tipo_trabajo = 'Sin determinar'
+        } else {
+          tipo_trabajo = dataExcel[property]['empleotipo_id']
+        }
+        if (dataExcel[property]['correo'] === undefined) {
+          mail = 'Sin determinar'
+        } else {
+          mail = dataExcel[property]['correo']
+        }
+        if (dataExcel[property]['domicilio'] === undefined) {
+          direccion = 'Sin determinar'
+        } else {
+          direccion = dataExcel[property]['domicilio']
+        }
+        if (existe.length > 0) {
+
+          console.log('viejo')
+        
+          await pool.query('update personas set direccion=?, barrio=?, tel=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,mail=? where dni = ?', [ direccion,barrio,  tel,nivel_secundario, trabajo, tipo_trabajo, mail, aux])
+          console.log('viejo guardado')
+
+        } else {
+          ///crear nueva persona 
+        console.log('nuevo')
+      
+
+          await pool.query('INSERT INTO personas set direccion=?, nombre=?,apellido=?,dni=?,barrio=?,tel=?, nivel_secundario=?, trabajo=?,tipo_trabajo=?,mail=?', [direccion,nombre, apellido, aux,  barrio, tel, nivel_secundario, trabajo, tipo_trabajo, mail]);
+         console.log('nuevo guardado')
+        }
+
+        /////////¿Actualmente  se encuentra estudiando? actividad adicional
+        /////////////Tipo de empleo
+
+
+
+      }
+      //////
+      catch (error) {
+        console.log(error)
+      }
+
+    
+
+
+    }
+    res.json(mandar)
+  } catch (error) {
+    console.log(error)
+    res.send(error)
+
+  }
+
+
+
+
+})
 
 
 
