@@ -23,7 +23,7 @@ const fileUpload = multer({
 
 
 
-router.get('/traerpersona/:id', isLoggedInn,async (req, res) => {
+router.get('/traerpersona/:id', async (req, res) => {
   const id = req.params.id
 
 
