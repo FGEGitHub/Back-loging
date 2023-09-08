@@ -33,6 +33,15 @@ router.get('/lista/', isLoggedInn4, async (req, res) => {
   //res.render('index')
 })
 
+
+
+router.get('/traercursos', async (req, res) => {
+
+const cursos = await pool.query('select * from cursos where id>131')
+res.json(cursos)
+})
+
+
 router.get('/datosdelturno/:id', isLoggedInn4, async (req, res) => {
   try {
     const id = req.params.id

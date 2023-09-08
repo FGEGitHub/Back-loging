@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { isLoggedIn, isLoggedInn, isLoggedInn2,isLoggedInn4 } = require('../lib/auth') //proteger profile
+const { isLoggedIn, isLoggedInn, isLoggedInn2, isLoggedInn4 } = require('../lib/auth') //proteger profile
 const pool = require('../database')
 const XLSX = require('xlsx')
 const caregorizar = require('./funciones/caregorizar')
@@ -12,7 +12,7 @@ const fs = require('fs')
 const diskstorage = multer.diskStorage({
   destination: path.join(__dirname, '../Excel'),
   filename: (req, file, cb) => {
-      cb(null,  Date.now() + '-inscrip-' + file.originalname)
+    cb(null, Date.now() + '-inscrip-' + file.originalname)
 
   }
 }) //para que almacene temporalmente la imagen
@@ -33,7 +33,7 @@ router.get('/traerpersona/:id', async (req, res) => {
   //res.render('index')
 })
 
-router.get('/traerusuario/:id', isLoggedInn,async (req, res) => {
+router.get('/traerusuario/:id', isLoggedInn, async (req, res) => {
   const id = req.params.id
 
 
@@ -78,7 +78,7 @@ router.get('/datospersona/:id', async (req, res) => {
 
     const aux = await pool.query('select * from personas where id =?', [id])
 
-console.log(aux)
+    console.log(aux)
 
     res.json(aux);
 
@@ -95,10 +95,10 @@ router.get('/lista', async (req, res) => {
   const usuario = req.params.usuario
 
   const etc = await pool.query('select * from personas  ')
-  listadef=[]
+  listadef = []
   for (ii in etc) {
- 
-    cat = await caregorizar.asignarcategoria([etc[ii]]) 
+
+    cat = await caregorizar.asignarcategoria([etc[ii]])
 
 
 
@@ -106,7 +106,7 @@ router.get('/lista', async (req, res) => {
       id: etc[ii]['id'],
       nombre: etc[ii]['nombre'],
       id_persona: etc[ii]['id'],
-      apellido:  etc[ii]['apellido'],
+      apellido: etc[ii]['apellido'],
       dni: etc[ii]['dni'],
       categoria: cat,
       curso: etc[ii]['id'],
@@ -116,7 +116,7 @@ router.get('/lista', async (req, res) => {
     }
     listadef.push(nuevo)
   }
-  
+
 
   res.json(listadef);
   //res.render('index')
@@ -126,7 +126,7 @@ router.get('/lista', async (req, res) => {
 
 
 ///////////detalleusuarioparainscripcion
-router.get('/datosusuarioporid/:dni',  async (req, res) => {
+router.get('/datosusuarioporid/:dni', async (req, res) => {
   const dni = req.params.dni
 
 
@@ -135,243 +135,289 @@ router.get('/datosusuarioporid/:dni',  async (req, res) => {
   const curso1 = await pool.query('select cursos.nombre prioridaduno from inscripciones join cursos on inscripciones.uno =cursos.id where inscripciones.dni_persona =?', [dni])
   const curso2 = await pool.query('select cursos.nombre prioridaddos from inscripciones join cursos on inscripciones.dos =cursos.id where inscripciones.dni_persona =?', [dni])
   console.log(dni)
-let cursado = await pool.query('select selec2.nombrecurso from cursado  join (select id as idturnos, id_curso as idcurso from turnos) as selec1 on cursado.id_turno = selec1.idturnos join (select nombre as nombrecurso,  id as idcurso2 from cursos ) as selec2 on selec1.idcurso=selec2.idcurso2  where cursado.id_persona=?',[etc[0]['id']])
+  let cursado = await pool.query('select selec2.nombrecurso from cursado  join (select id as idturnos, id_curso as idcurso from turnos) as selec1 on cursado.id_turno = selec1.idturnos join (select nombre as nombrecurso,  id as idcurso2 from cursos ) as selec2 on selec1.idcurso=selec2.idcurso2  where cursado.id_persona=?', [etc[0]['id']])
 
-  if (cursado.length === 0){
-    cursado=[{anotado:null}]
-  }
-
-
-
-  try {
-    nombre= etc[0]['apellido'] + etc[0]['nombre']
-  } catch (error) {
-    nombre= 'no determinado'
+  if (cursado.length === 0) {
+    cursado = [{ anotado: null }]
   }
 
+
+
   try {
-    prioridad1= curso1[0]['prioridaduno']
+    nombre = etc[0]['apellido'] + etc[0]['nombre']
   } catch (error) {
-    prioridad1='no determinado'
+    nombre = 'no determinado'
   }
+
   try {
-    prioridad2= curso2[0]['prioridaddos']
+    prioridad1 = curso1[0]['prioridaduno']
   } catch (error) {
-    prioridad2='no determinado'
-  }
-  try {
-    anotado= cursado[0]['nombrecurso']
-  } catch (error) {
-    anotado='no determinado'
+    prioridad1 = 'no determinado'
   }
   try {
-    hijos= etc[0]['hijos']
+    prioridad2 = curso2[0]['prioridaddos']
   } catch (error) {
-    hijos='no determinado'
+    prioridad2 = 'no determinado'
   }
   try {
-    trabajo= etc[0]['trabajo']
+    anotado = cursado[0]['nombrecurso']
   } catch (error) {
-    trabajo='no determinado'
+    anotado = 'no determinado'
   }
   try {
-    tipo_trabajo=  etc[0]['tipo_trabajo']
+    hijos = etc[0]['hijos']
   } catch (error) {
-    tipo_trabajo='no determinado'
+    hijos = 'no determinado'
   }
-try {
-  ficha = {
-    nombre,
-    prioridad1,
-    prioridad2,
-    anotado,
-    hijos,
-    trabajo,
-    tipo_trabajo
+  try {
+    trabajo = etc[0]['trabajo']
+  } catch (error) {
+    trabajo = 'no determinado'
   }
-} catch (error) {
-  ficha = {
-    nombre: 'no determinado',
-    prioridad1: 'no determinado',
-    prioridad2: 'no determinado',
-    anotado: 'no determinado'
+  try {
+    tipo_trabajo = etc[0]['tipo_trabajo']
+  } catch (error) {
+    tipo_trabajo = 'no determinado'
   }
-}
+  try {
+    ficha = {
+      nombre,
+      prioridad1,
+      prioridad2,
+      anotado,
+      hijos,
+      trabajo,
+      tipo_trabajo
+    }
+  } catch (error) {
+    ficha = {
+      nombre: 'no determinado',
+      prioridad1: 'no determinado',
+      prioridad2: 'no determinado',
+      anotado: 'no determinado'
+    }
+  }
 
 
   cat = await caregorizar.asignarcategoria(etc)
 
-  criterios= await pool.query(' select * from criterios ' )
-  porcentaje=criterios[criterios.length-1][cat]
+  criterios = await pool.query(' select * from criterios ')
+  porcentaje = criterios[criterios.length - 1][cat]
 
 
-  res.json([ficha, porcentaje,cat]);
+  res.json([ficha, porcentaje, cat]);
 
 
 
 
-/* 
-  participante_ant = "No"
-  if (etc[0]['participante_anterior'] == "Sí") {
-    participante_ant = "Si"
-  }
-
-  tiene_hijos = "Si"
-
-  if ((etc[0]['hijos'] == "0") || (etc[0]['hijos'] == null)) {
-    tiene_hijos = "No"
-  }
-
-  trabaja = "No"
-  tipot = ""
-  console.log('revision')
-  console.log(etc[0]['trabajo'])
-  console.log(trabaja)
-  if (etc[0]['trabajo'] == "Si") {
-    trabaja = "Si"
-    tipot = etc[0]['tipo_trabajo']
-
-
-  }
-  console.log(trabaja)
-
+  /* 
+    participante_ant = "No"
+    if (etc[0]['participante_anterior'] == "Sí") {
+      participante_ant = "Si"
+    }
   
-  categoria=''
-  console.log(ficha)
-  porcentaje_real = 100
-  if (participante_ant === "Si") {
-    // porcentaje_real=45
-    console.log('Participante anteirior')
-    ///45%   PARTICIPO  TIENE HIJOS
-    if (tiene_hijos === "Si") {
-      console.log('Tiene hijos')
-      ///78% tiene hijos
-      //  porcentaje_real=35.1
-      if (trabaja === "Si") {
-        console.log('Trabaja')
-        if (tipot === "Formal") {
-          console.log('formalmente')
-          ///trabaja formal 3.5
-          porcentaje_real = 1.2285
-          categoria='K'
-        } else {
-          console.log('Informalmente')
-          ///// trabaja informalñ 6.5
-          porcentaje_real = 2.2815
-          categoria='I'
-        }
-
-
-      } else {
-        ///No trabaja 90%
-        console.log('No trabaja')
-        porcentaje_real = 31.59
-        categoria='A'
-
-
-
-      }
-    } else {
-      ///22%  Notiene hijos
-      //  porcentaje_real=9.9
-      console.log('No tiene hijos')
-      if (trabaja === "Si") {
-        ///15%
-        console.log('Trabaja')
-        porcentaje_real = 1.485
-        categoria='J'
-
-      } else {
-        ///No trabaja 85%
-        console.log('no trabaja')
-        porcentaje_real = 8.415
-        categoria='E'
-
-      }
-
-
-
+    tiene_hijos = "Si"
+  
+    if ((etc[0]['hijos'] == "0") || (etc[0]['hijos'] == null)) {
+      tiene_hijos = "No"
     }
-
-
-
-  } else {///////////////////////NO PARTICIPARON 
-    ////55% 
-    console.log('No participaron')
-    //   porcentaje_real=55
-    if (tiene_hijos === "Si") {
-      ///68&  
-      console.log('Tiene hijos')
-      //  porcentaje_real=37.4
-      if (trabaja === "Si") {
-        console.log('Trabaja')
-        if (tipot === "Formal") {
-          /////15%
-          console.log('formalmente')
-          porcentaje_real = 5.61
-          categoria='F'
-        } else {
-          console.log('Informalmente')
-          porcentaje_real = 13.09
-          categoria='C'
-          ///35%
-
-        }
-
-      } else {
-        porcentaje_real = 18.7
-        console.log('No trabaja')
-        categoria='B'
-        //no trabaja 50%
-      }
-
-    } else {
-      ///no tiene hijos
-      //  porcentaje_real=17.6
-      ///32%
-      console.log('No tiene hijos')
-
-      if (trabaja === "Si") {
-        console.log('trabaja')
-        if (tipot === "Formal") {
-          console.log('formal')
-          /////15
-          porcentaje_real = 2.64
-          categoria='H'
-        } else {
-          porcentaje_real = 2.64
-          categoria='G'
-          ///15
-
-        }
-
-      } else {
-        porcentaje_real = 12.32
-        categoria='D'
-        //no trabaja 70%
-      }
-
+  
+    trabaja = "No"
+    tipot = ""
+    console.log('revision')
+    console.log(etc[0]['trabajo'])
+    console.log(trabaja)
+    if (etc[0]['trabajo'] == "Si") {
+      trabaja = "Si"
+      tipot = etc[0]['tipo_trabajo']
+  
+  
     }
+    console.log(trabaja)
+  
+    
+    categoria=''
+    console.log(ficha)
+    porcentaje_real = 100
+    if (participante_ant === "Si") {
+      // porcentaje_real=45
+      console.log('Participante anteirior')
+      ///45%   PARTICIPO  TIENE HIJOS
+      if (tiene_hijos === "Si") {
+        console.log('Tiene hijos')
+        ///78% tiene hijos
+        //  porcentaje_real=35.1
+        if (trabaja === "Si") {
+          console.log('Trabaja')
+          if (tipot === "Formal") {
+            console.log('formalmente')
+            ///trabaja formal 3.5
+            porcentaje_real = 1.2285
+            categoria='K'
+          } else {
+            console.log('Informalmente')
+            ///// trabaja informalñ 6.5
+            porcentaje_real = 2.2815
+            categoria='I'
+          }
+  
+  
+        } else {
+          ///No trabaja 90%
+          console.log('No trabaja')
+          porcentaje_real = 31.59
+          categoria='A'
+  
+  
+  
+        }
+      } else {
+        ///22%  Notiene hijos
+        //  porcentaje_real=9.9
+        console.log('No tiene hijos')
+        if (trabaja === "Si") {
+          ///15%
+          console.log('Trabaja')
+          porcentaje_real = 1.485
+          categoria='J'
+  
+        } else {
+          ///No trabaja 85%
+          console.log('no trabaja')
+          porcentaje_real = 8.415
+          categoria='E'
+  
+        }
+  
+  
+  
+      }
+  
+  
+  
+    } else {///////////////////////NO PARTICIPARON 
+      ////55% 
+      console.log('No participaron')
+      //   porcentaje_real=55
+      if (tiene_hijos === "Si") {
+        ///68&  
+        console.log('Tiene hijos')
+        //  porcentaje_real=37.4
+        if (trabaja === "Si") {
+          console.log('Trabaja')
+          if (tipot === "Formal") {
+            /////15%
+            console.log('formalmente')
+            porcentaje_real = 5.61
+            categoria='F'
+          } else {
+            console.log('Informalmente')
+            porcentaje_real = 13.09
+            categoria='C'
+            ///35%
+  
+          }
+  
+        } else {
+          porcentaje_real = 18.7
+          console.log('No trabaja')
+          categoria='B'
+          //no trabaja 50%
+        }
+  
+      } else {
+        ///no tiene hijos
+        //  porcentaje_real=17.6
+        ///32%
+        console.log('No tiene hijos')
+  
+        if (trabaja === "Si") {
+          console.log('trabaja')
+          if (tipot === "Formal") {
+            console.log('formal')
+            /////15
+            porcentaje_real = 2.64
+            categoria='H'
+          } else {
+            porcentaje_real = 2.64
+            categoria='G'
+            ///15
+  
+          }
+  
+        } else {
+          porcentaje_real = 12.32
+          categoria='D'
+          //no trabaja 70%
+        }
+  
+      }
+  
+    }
+   */
 
-  }
- */
 
 
- 
   //res.render('index')
 })
 
 
 
 
+router.post("/enviarinscripcion", async (req, res) => {
+  let { nombre, apellido, dni, tel, tel2, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, motivacion } = req.body
+  if (tipo_trabajo === undefined) {
+    tipo_trabajo = 'Sin determinar'
+  }
 
-router.post("/cambiarestadocursado",  async (req, res) => {
+  if (tipo_empleo === undefined) {
+    tipo_empleo = 'Sin determinar'
+  }
+  ///fecha
+  if (cantidad_hijos === undefined) {
+    cantidad_hijos = 'Sin determinar'
+  }
+  
+  console.log(nombre, apellido, dni, tel, tel2, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, motivacion)
+
+  try {
+    const pers = await pool.query('select * from personas where dni =?', [dni])
+    if (pers.length > 0) {
+      await pool.query('update personas set nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=? where dni=? ', [nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior,  dni])
+    } else {
+      await pool.query('insert into personas set nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?  ', [nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, ])
+
+    }
+    const yainsc = await pool.query('select * from inscripciones where id_persona =? and edicion=2', [pers[0]['id']])
+   let mensaje = ''
+    if (yainsc.length > 0) {
+      mensaje = 'Ya estas inscripta!'
+    }
+    else {
+      await pool.query('insert into inscripciones set dni_persona=?, uno=?,dos=?,motivacion=?,id_persona=?,edicion=?', [dni, prioridad1, prioridad2, motivacion, pers[0]['id'], 2])
+      mensaje = 'Inscripcion realizada, te solicitamos que aguardes contacto'
+    }
+
+
+    res.json(mensaje)
+
+  } catch (error) {
+    console.log(error)
+    res.json('Error algo sucedio, verifica que hayas completado todos los campos')
+  }
+
+
+
+
+})
+
+router.post("/cambiarestadocursado", async (req, res) => {
   const { estado, id_cursado } = req.body
 
   try {
-    await pool.query('update cursado set inscripcion=? where id=? ', [estado,id_cursado])
-    cursado = await pool.query('select * from cursado where id =?',[id_cursado])
-    await pool.query('update inscipciones set estado=? where id=? ', [estado,cursado[0]['id_inscripcion']])
+    await pool.query('update cursado set inscripcion=? where id=? ', [estado, id_cursado])
+    cursado = await pool.query('select * from cursado where id =?', [id_cursado])
+    await pool.query('update inscipciones set estado=? where id=? ', [estado, cursado[0]['id_inscripcion']])
     res.json('Realizado')
   } catch (error) {
     console.log(error)
@@ -383,20 +429,20 @@ router.post("/cambiarestadocursado",  async (req, res) => {
 
 
 router.post("/desinscribir", isLoggedInn2, async (req, res) => {
-  const { id_cursado} = req.body
-try {
-  cursado = await pool.query('select * from cursado where id=?',[id_cursado])  
-await pool.query('update inscripciones set estado="pendiente" where id=? ', [cursado[0]['id_inscripcion']])
+  const { id_cursado } = req.body
+  try {
+    cursado = await pool.query('select * from cursado where id=?', [id_cursado])
+    await pool.query('update inscripciones set estado="pendiente" where id=? ', [cursado[0]['id_inscripcion']])
 
 
-  await pool.query('delete  from  cursado where id = ?',[id_cursado])
+    await pool.query('delete  from  cursado where id = ?', [id_cursado])
 
 
-  res.json('Realizado')
-} catch (error) {
-  console.log(error)
-  res.json('Error algo sucedio')
-}
+    res.json('Realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('Error algo sucedio')
+  }
 
 
 
@@ -404,31 +450,31 @@ await pool.query('update inscripciones set estado="pendiente" where id=? ', [cur
 
 
 router.post("/inscribir", isLoggedInn2, async (req, res) => {
-  const {  dni,   id_inscripcion, id_turno} = req.body
- 
+  const { dni, id_inscripcion, id_turno } = req.body
+
 
 
 
   const persona = await pool.query('select * from personas where dni =?', [dni])
   const inscripciones = await pool.query('select * from inscripciones where id =?', [id_inscripcion])
   //////////////////////
-  
-tur = await pool.query('select * from turnos where id =?',[id_turno])
+
+  tur = await pool.query('select * from turnos where id =?', [id_turno])
   id_curso = tur[0]['id_curso']
   cat = await caregorizar.asignarcategoria(persona)
 
   ////////////
   try {
-   
-  
 
-    
-///queda id_inscripcion
-    await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=? ', ["Asignado a curso", persona[0]['id'], id_curso, cat,id_inscripcion, id_turno])
+
+
+
+    ///queda id_inscripcion
+    await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=? ', ["Asignado a curso", persona[0]['id'], id_curso, cat, id_inscripcion, id_turno])
 
     await pool.query('update inscripciones set estado="Asignado a curso" where id=? ', [inscripciones[0]['id']])
 
-   
+
 
     res.json('Realizado con exito ')
 
@@ -442,19 +488,19 @@ tur = await pool.query('select * from turnos where id =?',[id_turno])
 
 
 router.post("/modificarpersona", isLoggedInn4, async (req, res) => {
-  const {id, nombre, apellido, mail,tel, tel2, direccion, adicional_direccion} = req.body
-try {
-  console.log(id)
-  act ={
-    nombre, apellido, mail,tel, tel2, direccion, adicional_direccion
-  }
+  const { id, nombre, apellido, mail, tel, tel2, direccion, adicional_direccion } = req.body
+  try {
+    console.log(id)
+    act = {
+      nombre, apellido, mail, tel, tel2, direccion, adicional_direccion
+    }
 
-  await pool.query('UPDATE personas set nombre=?,apellido=?,mail=?,tel=?,tel2=?,direccion=?,adicional_direccion=?  where id = ?  ', [ nombre, apellido, mail,tel, tel2, direccion, adicional_direccion, id])
-  res.json('realizado')
-} catch (error) {
-  console.log(error)
-  res.json('realizado')
-}
+    await pool.query('UPDATE personas set nombre=?,apellido=?,mail=?,tel=?,tel2=?,direccion=?,adicional_direccion=?  where id = ?  ', [nombre, apellido, mail, tel, tel2, direccion, adicional_direccion, id])
+    res.json('realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('realizado')
+  }
 
 
 
@@ -489,18 +535,18 @@ router.post("/modificardatosadic", isLoggedInn4, async (req, res) => {
 
 
 router.post("/asignarcoordinador", isLoggedInn4, async (req, res) => {
-  const  { id_coordinador, id }= req.body
+  const { id_coordinador, id } = req.body
   console.log(id_coordinador)
   console.log(id)
-try {
-  
+  try {
 
-await pool.query('update turnos set id_coordinador=? where id = ?',[id_coordinador,id])
-res.json('realizado')
-} catch (error) {
-  console.log(error)
-  res.json('Error algo sucedio')
-}
+
+    await pool.query('update turnos set id_coordinador=? where id = ?', [id_coordinador, id])
+    res.json('realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('Error algo sucedio')
+  }
 
 
 })
@@ -508,29 +554,29 @@ res.json('realizado')
 
 
 router.post("/asignarencargado", isLoggedInn, async (req, res) => {
-  const  { id_encargado, id }= req.body
+  const { id_encargado, id } = req.body
   console.log(id_encargado)
   console.log(id) // id turno
-try {
- 
-  
+  try {
 
 
-await pool.query('update turnos set id_encargado=? where id = ?',[id_encargado,id])
 
 
-turno = await pool.query('select * from turnos where id = ?',[id])
-  
+    await pool.query('update turnos set id_encargado=? where id = ?', [id_encargado, id])
 
 
-await pool.query('update cursado set inscripcion=? where id_turno = ?',['Asignado a llamado',id])
+    turno = await pool.query('select * from turnos where id = ?', [id])
 
 
-res.json('realizado')
-} catch (error) {
-  console.log(error)
-  res.json('Error algo sucedio')
-}
+
+    await pool.query('update cursado set inscripcion=? where id_turno = ?', ['Asignado a llamado', id])
+
+
+    res.json('realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('Error algo sucedio')
+  }
 
 
 })
@@ -538,23 +584,24 @@ res.json('realizado')
 
 
 router.post("/asignarllamado", isLoggedInn, async (req, res) => {
-const  { id_profesor, id_cursado,}= req.body
-console.log(id_profesor)
-console.log(id_cursado)
+  const { id_profesor, id_cursado, } = req.body
+  console.log(id_profesor)
+  console.log(id_cursado)
 
-  act = {profesor:id_profesor,
-        
+  act = {
+    profesor: id_profesor,
+
   }
 
-await pool.query('update cursado set ? where id = ?',[act,id_cursado])
+  await pool.query('update cursado set ? where id = ?', [act, id_cursado])
 
-curs = await pool.query('select * from cursado where id =?',[id_cursado])
-act = {
-  estado:"Asignado a llamado"
-}
-await pool.query('update inscripciones set ? where id = ?',[act,curs[0]['id_inscripcion']])
+  curs = await pool.query('select * from cursado where id =?', [id_cursado])
+  act = {
+    estado: "Asignado a llamado"
+  }
+  await pool.query('update inscripciones set ? where id = ?', [act, curs[0]['id_inscripcion']])
 
-res.json('realizado')
+  res.json('realizado')
 })
 
 
@@ -562,28 +609,28 @@ res.json('realizado')
 
 
 router.post("/asignarllamadoatodas", isLoggedInn, async (req, res) => {
-  const  { id  }= req.body
+  const { id } = req.body
   console.log(id) //////id turno
 
-  turno = await pool.query('select * from turnos where id = ?',[id])
-  
+  turno = await pool.query('select * from turnos where id = ?', [id])
 
 
-    act = {
-          inscripcion:"Asignado a llamado"
-    }
-  
-  await pool.query('update cursado set ? where id_turno = ?',[act,id])
-  
- /*  curs = await pool.query('select * from cursado where id =?',[id_cursado])
+
   act = {
-    estado:"Asignado a llamado"
-  } */
+    inscripcion: "Asignado a llamado"
+  }
+
+  await pool.query('update cursado set ? where id_turno = ?', [act, id])
+
+  /*  curs = await pool.query('select * from cursado where id =?',[id_cursado])
+   act = {
+     estado:"Asignado a llamado"
+   } */
   //await pool.query('update inscripciones set ? where id = ?',[act,curs[0]['id_inscripcion']])
-  
+
   res.json('realizado')
-  })
-  
+})
+
 
 
 
@@ -595,7 +642,7 @@ router.post("/crear", isLoggedInn, async (req, res) => {
 
     etc = { nombre, apellido, fecha_nac, trabajo, hijos, dni }
     console.log(etc)
-    await pool.query('insert personas  set nombre=?,apellido=?,fecha_nac=?,nombre=?,trabajo', [nombre,apellido,fecha_nac,trabajo,hijos,dni])
+    await pool.query('insert personas  set nombre=?,apellido=?,fecha_nac=?,nombre=?,trabajo', [nombre, apellido, fecha_nac, trabajo, hijos, dni])
     console.log(1)
     res.json('Guardado con exito')
   } catch (error) {
@@ -664,7 +711,7 @@ router.get('/cargarpersonas111', async (req, res) => {
           como_se_entero: dataExcel[property]['¿Cómo te enteraste de los cursos?'],
         }
 
-        await pool.query('INSERT INTO personas set apellido=?,nombre=?,dni=?,usuario=?,direccion=?,barrio=?,residencia=?,tel=?,tel2=?,participante_anterior=?,nivel_secundario=?,hijos=?,como_se_entero=?', [dataExcel[property]['Apellido'], dataExcel[property]['Nombre'],dataExcel[property]['D.N.I.'],'No',dataExcel[property]['Dirección calle'] + '-' + dataExcel[property][' Altura'] + '-' + dataExcel[property]['Piso y departamento (en caso que corresponda)'],dataExcel[property]['Barrio'],dataExcel[property]['Donde vivís'],dataExcel[property]['Número de teléfono de contacto'], dataExcel[property]['Número de teléfono alternativo'],dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres? '],dataExcel[property]['Nivel educativo alcanzado'],dataExcel[property]['¿Cómo te enteraste de los cursos?']]);
+        await pool.query('INSERT INTO personas set apellido=?,nombre=?,dni=?,usuario=?,direccion=?,barrio=?,residencia=?,tel=?,tel2=?,participante_anterior=?,nivel_secundario=?,hijos=?,como_se_entero=?', [dataExcel[property]['Apellido'], dataExcel[property]['Nombre'], dataExcel[property]['D.N.I.'], 'No', dataExcel[property]['Dirección calle'] + '-' + dataExcel[property][' Altura'] + '-' + dataExcel[property]['Piso y departamento (en caso que corresponda)'], dataExcel[property]['Barrio'], dataExcel[property]['Donde vivís'], dataExcel[property]['Número de teléfono de contacto'], dataExcel[property]['Número de teléfono alternativo'], dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres? '], dataExcel[property]['Nivel educativo alcanzado'], dataExcel[property]['¿Cómo te enteraste de los cursos?']]);
 
 
         console.log('cargado')
@@ -728,7 +775,7 @@ router.get('/cargarcursos111', async (req, res) => {
             console.log('Curso ya existe')
           } else {
             try {
-            
+
 
 
               await pool.query('INSERT INTO cursos set nombre=?', [aux]);
@@ -762,23 +809,23 @@ router.get('/prueba', async (req, res) => {
 ///////////Guardar inscripciones
 
 router.post('/subirprueba', fileUpload, async (req, res, done) => {
-  const {formdata, file} = req.body
+  const { formdata, file } = req.body
 
-try {
-  
+  try {
 
-  const type = req.file.mimetype
-  const name = req.file.originalname
- // const data = fs.readFileSync(path.join(__dirname, '../Excel' + req.file.filename))
-  fech = (new Date(Date.now())).toLocaleDateString()
- 
 
-  
-  await pool.query('insert into excelinscripciones set fecha=?, ruta=?', [fech,req.file.filename])
-  res.send('Imagen guardada con exito')
-} catch (error) {
-  console.log(error)
-}
+    const type = req.file.mimetype
+    const name = req.file.originalname
+    // const data = fs.readFileSync(path.join(__dirname, '../Excel' + req.file.filename))
+    fech = (new Date(Date.now())).toLocaleDateString()
+
+
+
+    await pool.query('insert into excelinscripciones set fecha=?, ruta=?', [fech, req.file.filename])
+    res.send('Imagen guardada con exito')
+  } catch (error) {
+    console.log(error)
+  }
 
 
 
@@ -910,7 +957,7 @@ router.get('/cargarinscripciones', async (req, res) => {
         dni_persona: dataExcel[property]['D.N.I.'],
         objetivo: dataExcel[property]['¿Qué te gustaría  hacer con las habilidades aprendidas?'],
         horario: dataExcel[property]['Disponibilidad Horaria para cursar'],
-         horario2: dataExcel[property]['Disponibilidad Horaria para cursar2'],
+        horario2: dataExcel[property]['Disponibilidad Horaria para cursar2'],
         estado: 'pendiente',
 
         uno,
