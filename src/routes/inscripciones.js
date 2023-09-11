@@ -589,7 +589,7 @@ router.post('/cargarexcelpersonas', async (req, res) => {
 
           console.log('viejo')
         
-          await pool.query('update personas set direccion=?, barrio=?, tel=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,mail=? where dni = ?', [ direccion,barrio,  tel,nivel_secundario, trabajo, tipo_trabajo, mail, aux])
+          await pool.query('update personas set  tel=?,mail=? where dni = ?', [   tel, mail, aux])
           console.log('viejo guardado')
 
         } else {
