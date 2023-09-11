@@ -642,7 +642,7 @@ router.get('/incriptas2da/', async (req, res) => {
 
 
   inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2 where edicion=2')
-  console.log(inscriptos)
+
   res.json([inscriptos])
 })
 
