@@ -745,8 +745,41 @@ router.get('/incriptoss/', async (req, res) => {
 
 
 
+router.post("/buscarestadopornombre", async (req, res) => {
+  let { nombre, edicion } = req.body
+  try {
 
 
+      const asi = await pool.query('select * from inscripciones join (select nombre, apellido, dni from personas) as sel on inscripciones.dni_persona=sel.dni  where nombre like ? or apellido like ? and edicion=2', ['%' + nombre + '%', '%' + nombre + '%'])
+
+  
+      res.json(asi)
+    
+
+
+  } catch (error) {
+      console.log(error)
+      res.json([{ nombre: 'error' }])
+  }
+})
+
+router.post("/buscarestadopordni", async (req, res) => {
+  let { dni } = req.body
+  try {
+
+
+      const asi = await pool.query('select * from inscripciones join (select nombre, apellido, dni from personas) as sel on inscripciones.dni_persona=sel.dni  where dni like ?  and edicion=2', ['%' + dni + '%'])
+
+  
+      res.json(asi)
+    
+
+
+  } catch (error) {
+      console.log(error)
+      res.json([{ nombre: 'error' }])
+  }
+})
 
 
 ////// desinscribir 
