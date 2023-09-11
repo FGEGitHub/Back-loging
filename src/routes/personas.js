@@ -381,13 +381,14 @@ router.post("/enviarinscripcion", async (req, res) => {
   console.log(nombre, apellido, dni, tel, tel2, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, motivacion)
 
   try {
-    const pers = await pool.query('select * from personas where dni =?', [dni])
+    let pers = await pool.query('select * from personas where dni =?', [dni])
     if (pers.length > 0) {
       await pool.query('update personas set nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=? where dni=? ', [nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior,  dni])
     } else {
       await pool.query('insert into personas set nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?  ', [nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, ])
 
     }
+     pers = await pool.query('select * from personas where dni =?', [dni])
     const yainsc = await pool.query('select * from inscripciones where id_persona =? and edicion=2', [pers[0]['id']])
    let mensaje = ''
     if (yainsc.length > 0) {
@@ -395,7 +396,7 @@ router.post("/enviarinscripcion", async (req, res) => {
     }
     else {
       await pool.query('insert into inscripciones set dni_persona=?, uno=?,dos=?,motivacion=?,id_persona=?,edicion=?', [dni, prioridad1, prioridad2, motivacion, pers[0]['id'], 2])
-      mensaje = 'Inscripcion realizada, te solicitamos que aguardes contacto'
+      mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto'
     }
 
 
