@@ -694,27 +694,34 @@ if (inscriptos.length === 0) {
 
     const dato1 = {
         'datoa': 'Cantidad de inscriptas',
-        'datob': inscriptos.length
+        'datob': inscriptos.length,
+        'datoc': inscriptos.length*100/inscriptos.length
+        
     }
     const dato2 = {
         'datoa': 'Elaboracion de mesa de dulces para eventos',
-        'datob': curso1.length
+        'datob': curso1.length,
+        'datoc': curso1.length*100/inscriptos.length
     }
     const dato3 = {
       'datoa': 'Maquillaje y peinado para eventos',
-      'datob': curso2.length
+      'datob': curso2.length,
+      'datoc': curso2.length*100/inscriptos.length
   }
     const dato4 = {
         'datoa': 'Diseño de lenceria femenina',
-        'datob': curso3.length
+        'datob': curso3.length,
+        'datoc': curso3.length*100/inscriptos.length
     }
     const dato5 = {
       'datoa': 'Textiles y accesorios para el verano',
-      'datob': curso4.length
+      'datob': curso4.length,
+      'datoc': curso4.length*100/inscriptos.length
   }
   const dato6 = {
     'datoa': 'Refaccion integral para el hogar',
-    'datob': curso5.length
+    'datob': curso5.length,
+    'datoc': curso5.length*100/inscriptos.length
 }
      deuda_exigible = [dato1, dato2, dato3, dato4, dato5, dato6]
 
