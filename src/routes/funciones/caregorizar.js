@@ -7,10 +7,10 @@ const pool = require('../../database')
 
 async function asignarcategoria (persona) {
     
-    let caregoria ='cero'
+    let categoria ='cero'
     try {
       
-   
+      if (((persona[0]['hijos'] === "Sí") || (persona[0]['hijos'] === "No")) && ((persona[0]['trabajo'] === "Sí") || (persona[0]['trabajo'] === "No")) ) {
 if ((persona[0]['participante_anterior'] === "Sí") || (persona[0]['participante_anterior'] === "Si")) {
 
     /// 
@@ -129,7 +129,7 @@ if ((persona[0]['participante_anterior'] === "Sí") || (persona[0]['participante
 
     }
 
-  }
+  }}
 
 } catch (error) {
       

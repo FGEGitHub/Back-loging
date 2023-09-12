@@ -651,6 +651,8 @@ router.get('/incriptas2da/', async (req, res) => {
   curso5 = await pool.query('select * from inscripciones where uno =136')
 
   let deuda_exigible=[]
+
+
 if (inscriptos.length === 0) {
 
     const dato1 = {
@@ -695,33 +697,39 @@ if (inscriptos.length === 0) {
     const dato1 = {
         'datoa': 'Cantidad de inscriptas',
         'datob': inscriptos.length,
-        'datoc': inscriptos.length*100/inscriptos.length
+        'datoc': inscriptos.length*100/inscriptos.length,
+        'datod': (25*(inscriptos.length/inscriptos.length)).toFixed(2)
         
     }
     const dato2 = {
         'datoa': 'Elaboracion de mesa de dulces para eventos',
         'datob': curso1.length,
-        'datoc': curso1.length*100/inscriptos.length
+        'datoc': (curso1.length*100/inscriptos.length).toFixed(2),
+        'datod': (25*(curso1.length/inscriptos.length)).toFixed(2)
     }
     const dato3 = {
       'datoa': 'Maquillaje y peinado para eventos',
       'datob': curso2.length,
-      'datoc': curso2.length*100/inscriptos.length
+      'datoc': (curso2.length*100/inscriptos.length).toFixed(2),
+      'datod': (25*(curso2.length/inscriptos.length)).toFixed(2)
   }
     const dato4 = {
         'datoa': 'Diseño de lenceria femenina',
         'datob': curso3.length,
-        'datoc': curso3.length*100/inscriptos.length
+        'datoc': (curso3.length*100/inscriptos.length).toFixed(2),
+        'datod': (25*(curso3.length/inscriptos.length)).toFixed(2)
     }
     const dato5 = {
       'datoa': 'Textiles y accesorios para el verano',
       'datob': curso4.length,
-      'datoc': curso4.length*100/inscriptos.length
+      'datoc': (curso4.length*100/inscriptos.length).toFixed(2),
+      'datod': (25*(curso4.length/inscriptos.length)).toFixed(2)
   }
   const dato6 = {
     'datoa': 'Refaccion integral para el hogar',
     'datob': curso5.length,
-    'datoc': curso5.length*100/inscriptos.length
+    'datoc': (curso5.length*100/inscriptos.length).toFixed(2),
+    'datod': (25*(curso5.length/inscriptos.length)).toFixed(2)
 }
      deuda_exigible = [dato1, dato2, dato3, dato4, dato5, dato6]
 
@@ -732,6 +740,55 @@ if (inscriptos.length === 0) {
 })
 
 
+
+router.get('/crearcursos2daetapa/', async (req, res) => {
+  inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2 where edicion=2')
+
+  curso1 = await pool.query('select * from inscripciones where uno =132')
+  curso2 = await pool.query('select * from inscripciones where uno =133')
+  curso3 = await pool.query('select * from inscripciones where uno =134')
+  curso4 = await pool.query('select * from inscripciones where uno =135')
+  curso5 = await pool.query('select * from inscripciones where uno =136')
+
+ uno = Math.round(25*(curso1.length/inscriptos.length))
+ dos = Math.round(25*(curso2.length/inscriptos.length))
+ tres = Math.round(25*(curso3.length/inscriptos.length))
+ cuatro = Math.round(25*(curso4.length/inscriptos.length))
+ cinco = Math.round(25*(curso5.length/inscriptos.length))
+
+ for (let i = 1; i < uno; i++) {
+
+  await pool.query('insert into turnos set id_curso=132, numero=?, Descripcion="Septiembre" ', [i])
+
+
+}
+for (let i = 1; i < dos; i++) {
+
+  await pool.query('insert into turnos set id_curso=133, numero=?, Descripcion="Septiembre" ', [i])
+
+
+}
+for (let i = 1; i < tres; i++) {
+
+  await pool.query('insert into turnos set id_curso=134, numero=?, Descripcion="Septiembre" ', [i])
+
+
+}
+for (let i = 1; i < cuatro; i++) {
+
+  await pool.query('insert into turnos set id_curso=135, numero=?, Descripcion="Septiembre" ', [i])
+
+
+}
+for (let i = 1; i < cinco; i++) {
+
+  await pool.query('insert into turnos set id_curso=136, numero=?, Descripcion="Septiembre" ', [i])
+
+
+}
+
+res.json (uno,dos,tres,cuatro,cinco)
+})
 
 router.get('/incriptoss/', async (req, res) => {
 
@@ -1077,7 +1134,7 @@ router.get('/listaaclaracioncriterios/', async (req, res) => {
     {
       Categoria: "2.1.1",
       Aclaracion: "Siete",
-      Detalle: "Participo/Tiene hijos/ trabaja",
+      Detalle: "Participo/Tiene hijos/No trabaja",
       porcentaje: criterios[criterios.length - 1]['siete']
     },
     {

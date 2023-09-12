@@ -90,6 +90,25 @@ router.get('/datospersona/:id', async (req, res) => {
 })
 
 
+router.get('/categorizarpersonas', async (req, res) => {
+  const etc = await pool.query('select * from personas  ')
+
+
+  for (ii in etc) {
+
+    cat = await caregorizar.asignarcategoria([etc[ii]])
+   // await pool.query('update personas set categoria where id =?',[cat,etc[0]['id']])
+
+console.log(cat)
+
+
+    
+  }
+res.json ('listo')
+
+})
+
+
 ///// lista
 router.get('/lista', async (req, res) => {
   const usuario = req.params.usuario
