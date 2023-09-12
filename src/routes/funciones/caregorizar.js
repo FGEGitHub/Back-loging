@@ -10,7 +10,7 @@ async function asignarcategoria (persona) {
     let categoria ='cero'
     try {
       
-      if (((persona[0]['hijos'] === "Sí") || (persona[0]['hijos'] === "No")) && ((persona[0]['trabajo'] === "Sí") || (persona[0]['trabajo'] === "No")) ) {
+      if (((persona[0]['hijos'] === "Si") || (persona[0]['hijos'] === "No")) && ((persona[0]['trabajo'] === "Si") || (persona[0]['trabajo'] === "No")) ) {
 if ((persona[0]['participante_anterior'] === "Sí") || (persona[0]['participante_anterior'] === "Si")) {
 
     /// 
