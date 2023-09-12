@@ -8,7 +8,7 @@ const pool = require('../database')
 
 router.get('/lista/', isLoggedInn4, async (req, res) => {
   console.log('lista')
-  const etc = await pool.query('select * from cursos ')
+  const etc = await pool.query('select * from cursos where id = 132 or id = 133 or id = 134 or id = 135 or id = 136')
   respuesta = []
   for (iii in etc) {
 
@@ -38,9 +38,20 @@ router.get('/lista/', isLoggedInn4, async (req, res) => {
 router.get('/traercursos', async (req, res) => {
 
 const cursos = await pool.query('select * from cursos where id>131')
+
 res.json(cursos)
 })
 
+
+
+router.get('/getturnos/:id', async (req, res) => {
+  const id = req.params.id
+
+  const turnos = await pool.query('select * from turnos where id_curso=?',[id])
+  console.log(turnos)
+  res.json(turnos)
+
+})
 
 router.get('/datosdelturno/:id', isLoggedInn4, async (req, res) => {
   try {
