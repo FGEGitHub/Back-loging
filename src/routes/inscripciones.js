@@ -638,6 +638,107 @@ router.post('/cargarexcelpersonas', async (req, res) => {
 
 
 
+router.get('/preinscriptas/', async (req, res) => {
+
+
+  inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2 where edicion=2 and estado="Preasignada"')
+
+  curso1 = await pool.query('select * from inscripciones where uno =132')
+  curso2 = await pool.query('select * from inscripciones where uno =133')
+  curso3 = await pool.query('select * from inscripciones where uno =134')
+  curso4 = await pool.query('select * from inscripciones where uno =135')
+  curso5 = await pool.query('select * from inscripciones where uno =136')
+
+  let deuda_exigible=[]
+
+
+if (inscriptos.length === 0) {
+
+    const dato1 = {
+        'datoa': 'Cantidad de inscriptas',
+        'datob': "No hay cuotas Calculadas"
+    }
+    const dato2 = {
+        'datoa': 'Monto devengado hasta la cuota',
+        'datob': "No hay cuotas Calculadas"
+    }
+    const dato3 = {
+        'datoa': 'Monto abonado hasta la cuota',
+        'datob': "No hay cuotas Calculadas"
+    }
+    const dato4 = {
+        'datoa': 'Deuda Exigible',
+        'datob': "No hay cuotas Calculadas"
+    }
+    const deuda_exigible = [dato1, dato2, dato3, dato4]
+    const dato5 = {
+        'datoa': 'Cantidad de cuotas sin pago',
+        'datob': 'no calculado'
+    }
+    const dato6 = {
+        'datoa': 'Monto cuota pura',
+        'datob': 'no calculado'
+    }
+    const dato7 = {
+        'datoa': 'Saldo de capital a vencer',
+        'datob': 'no calculado'
+    }
+
+    const cuotas_pendientes = [dato5, dato6, dato7]
+    const respuesta = [inscriptos,cuotas_pendientes]
+
+
+    res.json(respuesta)
+} else {
+
+
+
+    const dato1 = {
+        'datoa': 'Cantidad de inscriptas',
+        'datob': inscriptos.length,
+        'datoc': inscriptos.length*100/inscriptos.length,
+        'datod': (25*(inscriptos.length/inscriptos.length)).toFixed(2)
+        
+    }
+    const dato2 = {
+        'datoa': 'Elaboracion de mesa de dulces para eventos',
+        'datob': curso1.length,
+        'datoc': (curso1.length*100/inscriptos.length).toFixed(2),
+        'datod': (25*(curso1.length/inscriptos.length)).toFixed(2)
+    }
+    const dato3 = {
+      'datoa': 'Maquillaje y peinado para eventos',
+      'datob': curso2.length,
+      'datoc': (curso2.length*100/inscriptos.length).toFixed(2),
+      'datod': (25*(curso2.length/inscriptos.length)).toFixed(2)
+  }
+    const dato4 = {
+        'datoa': 'Diseño de lenceria femenina',
+        'datob': curso3.length,
+        'datoc': (curso3.length*100/inscriptos.length).toFixed(2),
+        'datod': (25*(curso3.length/inscriptos.length)).toFixed(2)
+    }
+    const dato5 = {
+      'datoa': 'Textiles y accesorios para el verano',
+      'datob': curso4.length,
+      'datoc': (curso4.length*100/inscriptos.length).toFixed(2),
+      'datod': (25*(curso4.length/inscriptos.length)).toFixed(2)
+  }
+  const dato6 = {
+    'datoa': 'Refaccion integral para el hogar',
+    'datob': curso5.length,
+    'datoc': (curso5.length*100/inscriptos.length).toFixed(2),
+    'datod': (25*(curso5.length/inscriptos.length)).toFixed(2)
+}
+     deuda_exigible = [dato1, dato2, dato3, dato4, dato5, dato6]
+
+
+}
+
+  res.json([inscriptos,deuda_exigible])
+})
+
+
 
 router.get('/incriptas2da/', async (req, res) => {
 

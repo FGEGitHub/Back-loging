@@ -93,14 +93,13 @@ router.get('/datospersona/:id', async (req, res) => {
 router.get('/categorizarpersonas', async (req, res) => {
  
 criterios =  await pool.query('select * from criterios ')
-
+console.log(criterios[criterios.length-1])
+console.log(criterios[criterios.length])
   const etc2 = await pool.query('select * from inscripciones where edicion=2  ')
   for (ii in etc2) {
      etc = await pool.query('select * from personas where dni=? ',[etc2[ii]['dni_persona']])
     cat = await caregorizar.asignarcategoria([etc[0]])
    await pool.query('update personas set categoria=? where dni =?',[cat,etc2[ii]['dni_persona']])
-
-console.log(cat)
 
 
     
@@ -108,37 +107,143 @@ console.log(cat)
 res.json ('listo')
 
 })
+router.get('/preasignar', async (req, res) => {
+ 
+  criterios =  await pool.query('select * from criterios ')
+  
+  uno=10*criterios[criterios.length-1]['uno']
+  dos=10*criterios[criterios.length-1]['dos']
+  tres=10*criterios[criterios.length-1]['tres']
+  cuatro=10*criterios[criterios.length-1]['cuatro']
+  cinco=10*criterios[criterios.length-1]['cinco']
+  seis=10*criterios[criterios.length-1]['seis'] 
+  siete=10*criterios[criterios.length-1]['siete']
+  ocho=10*criterios[criterios.length-1]['ocho']
+  nueve=10*criterios[criterios.length-1]['nueve']
+  diez=10*criterios[criterios.length-1]['diez']
+  once=10*criterios[criterios.length-1]['once']
+  const etc2 = await pool.query('select * from inscripciones where edicion=2  ')
+  console.log(uno,dos,tres,cuatro,cinco,seis,siete,ocho,nueve,diez,once)
+  for (ii in etc2) {
+     etc = await pool.query('select * from personas where dni=? ',[etc2[ii]['dni_persona']])
+    cat = await caregorizar.asignarcategoria([etc[0]])
+   await pool.query('update personas set categoria=? where dni =?',[cat,etc2[ii]['dni_persona']])
 
+   switch (cat) {
+    case "uno":
+      if (uno>0){
+        await pool.query('update inscripciones set estado="Preasignada" where id =?',[etc2[ii]['id']])
+        uno-=1
+      }
+
+      break;
+    case "dos":
+      if (dos>0){
+        await pool.query('update inscripciones set estado="Preasignada" where id =?',[etc2[ii]['id']])
+        dos-=1
+      }
+      break;
+    case "tres":
+      if (tres>0){
+        await pool.query('update inscripciones set estado="Preasignada" where id =?',[etc2[ii]['id']])
+        tres-=1
+      }
+      break;
+    case "cuatro":
+      if (cuatro>0){
+        await pool.query('update inscripciones set estado="Preasignada" where id =?',[etc2[ii]['id']])
+        cuatro-=1
+      }
+      break;
+    case "cinco":
+      if (cinco>0){
+        await pool.query('update inscripciones set estado="Preasignada" where id =?',[etc2[ii]['id']])
+        cinco-=1
+      }
+      break;
+      case "seis":
+        if (seis>0){
+          await pool.query('update inscripciones set estado="Preasignada" where id =?',[etc2[ii]['id']])
+          seis-=1
+        }
+        break;
+      case "siete":
+        if (siete>0){
+          await pool.query('update inscripciones set estado="Preasignada" where id =?',[etc2[ii]['id']])
+          siete-=1
+        }
+        break;
+      case "ocho":
+        if (ocho>0){
+          await pool.query('update inscripciones set estado="Preasignada" where id =?',[etc2[ii]['id']])
+          ocho-=1
+        }
+        break;
+      case "nueve":
+        if (nueve>0){
+          await pool.query('update inscripciones set estado="Preasignada" where id =?',[etc2[ii]['id']])
+          nueve-=1
+        }
+        break;
+      case "diez":
+        if (diez>0){
+          await pool.query('update inscripciones set estado="Preasignada" where id =?',[etc2[ii]['id']])
+          diez-=1
+        }
+        break;
+        case "once":
+          if (once>0){
+            await pool.query('update inscripciones set estado="Preasignada" where id =?',[etc2[ii]['id']])
+            once-=1
+          }
+          break;
+    default:
+ 
+      break;
+  }
+
+  }
+console.log(uno,dos,tres,cuatro,cinco,seis,siete,ocho,nueve,diez,once)
+
+  res.json (siete)
+  
+  })
+
+
+
+
+router.get('/categorizarpersonastodas', async (req, res) => {
+ 
+  criterios =  await pool.query('select * from criterios ')
+  
+   
+    etc = await pool.query('select * from personas')
+    for (ii in etc) {
+  
+      cat = await caregorizar.asignarcategoria([etc[ii]])
+     await pool.query('update personas set categoria=? where dni =?',[cat,etc[ii]['dni']])
+  
+  
+  ///////
+  
+  
+  ///
+  
+  
+      
+    }
+  res.json ('listo')
+  
+  })
 
 ///// lista
 router.get('/lista', async (req, res) => {
   const usuario = req.params.usuario
 
   const etc = await pool.query('select * from personas  ')
-  listadef = []
-  for (ii in etc) {
+  
 
-    cat = await caregorizar.asignarcategoria([etc[ii]])
-
-
-
-    nuevo = {
-      id: etc[ii]['id'],
-      nombre: etc[ii]['nombre'],
-      id_persona: etc[ii]['id'],
-      apellido: etc[ii]['apellido'],
-      dni: etc[ii]['dni'],
-      categoria: cat,
-      curso: etc[ii]['id'],
-      id_turno: etc[ii]['id_turno'],
-      /////////////////
-
-    }
-    listadef.push(nuevo)
-  }
-
-
-  res.json(listadef);
+  res.json(etc);
   //res.render('index')
 })
 
