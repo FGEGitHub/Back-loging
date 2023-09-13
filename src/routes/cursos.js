@@ -750,6 +750,9 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 })
 
 
+
+
+
 router.post("/modificarcurso", async (req, res) => {
   const { id, nombre } = req.body
   try {
