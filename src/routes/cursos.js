@@ -518,6 +518,14 @@ router.get('/listadeturnos/:id', isLoggedInn2, async (req, res) => {
 })
 
 
+router.get('/traerturnos/:id',  async (req, res) => {
+  const id = req.params.id
+
+  const turnos = await pool.query('select * from turnos where id_curso=?',[id])
+
+  res.json(turnos)
+  
+})
 router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
   const id = req.params.id
   try {
