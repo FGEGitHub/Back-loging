@@ -500,7 +500,17 @@ router.post('/cargarinscripciones', async (req, res) => {
 
 })
 
+router.post('/modificarestadodeinscrip', async (req, res) => {
+  const { id , estado} = req.body
+try {
+  await pool.query('update inscripciones set  estado=? where  id = ?', [   estado, id])
+  res.json('Realizado')
+} catch (error) {
+  console.log(error)
+  res.json('No Realizado')
+}
 
+})
 
 router.post('/cargarexcelpersonas', async (req, res) => {
   const { id } = req.body
