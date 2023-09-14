@@ -23,8 +23,21 @@ try {
 //res.render('index')
 })
 
+router.get('/todoslosencargadosllamados', async (req, res) => {
+  console.log('hola')
+  console.log()
+try {
+ pipo= await pool.query('select * from usuarios where nivel=6')
+ res.json([pipo]);
+} catch (error) {
+res.json(['error'])
+}
+ 
 
 
+
+//res.render('index')
+})
 router.get('/exitosignupp', async (req, res) => {
 res.json('Modificado correctamente')
 
@@ -35,7 +48,21 @@ router.get('/noexitop', async (req, res) => {
 
 })
 
+router.get('/prueba', async (req, res) => {
+  console.log((new Date(Date.now())).toLocaleDateString())
+  console.log((new Date(Date.now())))
+  console.log((new Date.now()))
+try {
 
+} catch (error) {
+res.json(['error'])
+}
+ 
+
+
+
+//res.render('index')
+})
 
 
 module.exports = router

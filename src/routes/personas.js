@@ -520,7 +520,7 @@ router.post("/enviarinscripcion", async (req, res) => {
       mensaje = 'Ya estas inscripta!'
     }
     else {
-      fecha=(new Date(Date.now())).toLocaleDateString()
+      fecha=(new Date(Date.now()))
       await pool.query('insert into inscripciones set fecha=?,dni_persona=?, uno=?,dos=?,motivacion=?,id_persona=?,edicion=?', [fecha,dni, prioridad1, prioridad2, motivacion, pers[0]['id'], 2])
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto'
     }
