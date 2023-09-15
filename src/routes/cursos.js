@@ -751,6 +751,57 @@ router.get('/detalledelcurso/:id', isLoggedInn2, async (req, res) => {
 
 
 
+router.post("/rechazarinscrip", async (req, res) => {
+  let { dni, id_inscripcion, observaciones} = req.body
+
+  try {
+    
+  await pool.query('update inscripciones set estado="Rechazada"   where id=?', [ id_inscripcion])
+  const es = await pool.query('select * from personas where dni=?', [dni])
+  if (observaciones != undefined){
+    await pool.query('insert into observaciones set detalle=?, id_ref=? ', [observaciones, es])
+
+}
+res.json('Inscripcion rechazada ')
+} catch (error) {
+    console.log(error)
+    res.json('No realizado, contacta al administrador')
+}
+})
+
+router.post("/asignarcurso", async (req, res) => {
+  let { dni, id_inscripcion, id_turno, observaciones} = req.body
+
+  try {
+     
+      const tu = await pool.query('select * from turnos where id=?', [id_turno])
+      cup =parseInt(tu[0]['cupo'])-1
+      const per = await pool.query('select * from personas where dni=?', [dni])
+        
+          await pool.query('insert into cursado set id_inscripcion=?, id_turno=?, id_persona=?,motivo=?', [id_inscripcion,id_turno,per[0]['id'],(new Date(Date.now())).toLocaleDateString()])
+         
+
+          await pool.query('update inscripciones set estado="Asignada a curso"   where id=?', [ id_inscripcion])
+
+          await pool.query('update turnos set cupo=?  where id=?', [cup, id_turno])
+
+           const es = await pool.query('select * from personas where dni=?', [dni])
+
+
+      if (observaciones != undefined){
+          await pool.query('insert into observaciones set detalle=?, id_ref=? ', [observaciones, es])
+
+      }
+      const mensaje = 'Listo! Alumna asignada a curso '+tu[0]['descripcion']+', en ese turno quedan '+cup+' Cupos disponibles'
+      console.log(mensaje)
+      res.json(mensaje)
+  } catch (error) {
+      console.log(error)
+      res.json('error')
+  }
+
+
+})
 
 
 router.post("/modificarcurso", async (req, res) => {

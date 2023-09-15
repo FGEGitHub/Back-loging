@@ -662,11 +662,11 @@ router.get('/traerinscripcionesenc/', async (req, res) => {
 
 router.get('/preinscriptascall/:id', async (req, res) => {
 const id = req.params.id
-console.log(id)
+
   try {
   
     inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2 where encargado=? ',[id])
-    console.log(inscriptos)
+ 
     res.json([inscriptos])
     
   } catch (error) {
@@ -781,6 +781,19 @@ if (inscriptos.length === 0) {
 }
 })
 
+router.post("/asignarinscripciones", async (req, res) => {
+  let { id, inscrip } = req.body
+
+
+  for (ins in inscrip) {
+
+      console.log(ins)
+
+      await pool.query('update inscripciones set encargado =?  where  id = ?', [id, inscrip[ins]])
+  }
+  res.json('realizado')
+
+})
 
 ////
 router.post('/asignarencargado', async (req, res) => {
