@@ -906,16 +906,19 @@ if (inscriptos.length === 0) {
 const turnosss = await pool.query('select * from turnos where id_curso in (132,133,134,135,136)')
 console.log(turnosss)
 let cantidadturnos=0
+let cantidaddisp=0
 for (variable in turnosss){
 cantidadturnos+= parseInt(turnosss[variable]['cupo'])
-
+cantidaddisp+=parseInt(turnosss[variable]['disponibles'])
 }
+
 cant_pre = await pool.query('select * from inscripciones where edicion=2 and estado in ("Preinscripta","Asignada a curso")')
 cant_conf = await pool.query('select * from inscripciones where edicion=2 and estado = "Asignada a curso"')
 datos33={
   cantidadturnos,
   cant_preasig:cant_pre.length,
-  cant_conf:cant_conf.length
+  cant_conf:cant_conf.length,
+  cantidaddis:cantidaddisp
 }
     
   res.json([inscriptos,deuda_exigible,datos33])
