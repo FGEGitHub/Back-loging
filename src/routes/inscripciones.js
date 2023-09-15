@@ -910,9 +910,12 @@ for (variable in turnosss){
 cantidadturnos+= parseInt(turnosss[variable]['cupo'])
 
 }
-
+cant_pre = await pool.query('select * from inscripciones where edicion=2 and estado in ("Preinscripta","Asignada a curso")')
+cant_conf = await pool.query('select * from inscripciones where edicion=2 and estado = "Asignada a curso"')
 datos33={
   cantidadturnos,
+  cant_preasig:cant_pre.length,
+  cant_conf:cant_conf.length
 }
     
   res.json([inscriptos,deuda_exigible,datos33])
