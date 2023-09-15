@@ -776,8 +776,8 @@ if (inscriptos.length === 0) {
   res.json([inscriptos,deuda_exigible])
     
 } catch (error) {
-
- res.json(["error"]) 
+console.log(error)
+ 
 }
 })
 
@@ -807,8 +807,8 @@ router.post('/asignarencargado', async (req, res) => {
       res.json('error')
   }
 })
-router.get('/incriptas2da/', async (req, res) => {
 
+router.get('/incriptas2da/', async (req, res) => {
 
   inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2 where edicion=2')
 
@@ -819,7 +819,6 @@ router.get('/incriptas2da/', async (req, res) => {
   curso5 = await pool.query('select * from inscripciones where uno =136')
 
   let deuda_exigible=[]
-
 
 if (inscriptos.length === 0) {
 
@@ -854,7 +853,8 @@ if (inscriptos.length === 0) {
     }
 
     const cuotas_pendientes = [dato5, dato6, dato7]
-    const respuesta = [inscriptos,cuotas_pendientes]
+
+
 
 
     res.json(respuesta)
@@ -903,8 +903,19 @@ if (inscriptos.length === 0) {
 
 
 }
+const turnosss = await pool.query('select * from turnos where id_curso in (132,133,134,135,136)')
+console.log(turnosss)
+let cantidadturnos=0
+for (variable in turnosss){
+cantidadturnos+= parseInt(turnosss[variable]['cupo'])
 
-  res.json([inscriptos,deuda_exigible])
+}
+
+datos33={
+  cantidadturnos,
+}
+    
+  res.json([inscriptos,deuda_exigible,datos33])
   
 })
 

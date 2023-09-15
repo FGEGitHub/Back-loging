@@ -775,7 +775,7 @@ router.post("/asignarcurso", async (req, res) => {
   try {
      
       const tu = await pool.query('select * from turnos where id=?', [id_turno])
-      cup =parseInt(tu[0]['cupo'])-1
+      cup =parseInt(tu[0]['disponibles'])-1
       const per = await pool.query('select * from personas where dni=?', [dni])
         
           await pool.query('insert into cursado set id_inscripcion=?, id_turno=?, id_persona=?,motivo=?', [id_inscripcion,id_turno,per[0]['id'],(new Date(Date.now())).toLocaleDateString()])
@@ -783,7 +783,7 @@ router.post("/asignarcurso", async (req, res) => {
 
           await pool.query('update inscripciones set estado="Asignada a curso"   where id=?', [ id_inscripcion])
 
-          await pool.query('update turnos set cupo=?  where id=?', [cup, id_turno])
+          await pool.query('update turnos set dispònibles=?  where id=?', [cup, id_turno])
 
            const es = await pool.query('select * from personas where dni=?', [dni])
 
