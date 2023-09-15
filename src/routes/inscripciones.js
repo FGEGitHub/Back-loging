@@ -912,7 +912,7 @@ cantidadturnos+= parseInt(turnosss[variable]['cupo'])
 cantidaddisp+=parseInt(turnosss[variable]['disponibles'])
 }
 
-cant_pre = await pool.query('select * from inscripciones where edicion=2 and estado in ("Preinscripta","Asignada a curso")')
+cant_pre = await pool.query('select * from inscripciones where edicion=2 and estado in ("Preasignada","Asignada a curso")')
 cant_conf = await pool.query('select * from inscripciones where edicion=2 and estado = "Asignada a curso"')
 datos33={
   cantidadturnos,

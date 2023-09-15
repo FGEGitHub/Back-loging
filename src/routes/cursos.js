@@ -783,7 +783,7 @@ router.post("/asignarcurso", async (req, res) => {
 
           await pool.query('update inscripciones set estado="Asignada a curso"   where id=?', [ id_inscripcion])
 
-          await pool.query('update turnos set dispònibles=?  where id=?', [cup, id_turno])
+          await pool.query('update turnos set disponibles=?  where id=?', [cup, id_turno])
 
            const es = await pool.query('select * from personas where dni=?', [dni])
 
