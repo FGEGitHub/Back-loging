@@ -942,31 +942,31 @@ router.get('/crearcursos2daetapa/', async (req, res) => {
  cuatro = Math.round(25*(curso4.length/inscriptos.length))
  cinco = Math.round(25*(curso5.length/inscriptos.length))
 
- for (let i = 1; i < uno; i++) {
+ for (let i = 0; i < uno; i++) {
 
   await pool.query('insert into turnos set id_curso=132, numero=?, Descripcion="Septiembre" ', [i])
 
 
 }
-for (let i = 1; i < dos; i++) {
+for (let i = 0; i < dos; i++) {
 
   await pool.query('insert into turnos set id_curso=133, numero=?, Descripcion="Septiembre" ', [i])
 
 
 }
-for (let i = 1; i < tres; i++) {
+for (let i = 0; i < tres; i++) {
 
   await pool.query('insert into turnos set id_curso=134, numero=?, Descripcion="Septiembre" ', [i])
 
 
 }
-for (let i = 1; i < cuatro; i++) {
+for (let i = 0; i < cuatro; i++) {
 
   await pool.query('insert into turnos set id_curso=135, numero=?, Descripcion="Septiembre" ', [i])
 
 
 }
-for (let i = 1; i < cinco; i++) {
+for (let i = 0; i < cinco; i++) {
 
   await pool.query('insert into turnos set id_curso=136, numero=?, Descripcion="Septiembre" ', [i])
 

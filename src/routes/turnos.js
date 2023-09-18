@@ -5,14 +5,36 @@ const pool = require('../database')
 
 
 
-
-router.post("/modificarturno",  async (req, res) => {
-  const { id,descripcion} = req.body
+router.post("/desasignar",  async (req, res) => {
+  const { id_inscripcion,observaciones,dni} = req.body
 try {
   
-
-
+if (id_encargado!=undefined){
+  await pool.query('update turnos set descripcion=?,id_encargado=? where id =?', [descripcion,id_encargado,id])
+}else{
   await pool.query('update turnos set descripcion=? where id =?', [descripcion,id])
+}
+
+  
+  res.json('Realizado')
+} catch (error) {
+  console.log(error)
+  res.json('No realizado')
+}
+
+})
+
+router.post("/modificarturno",  async (req, res) => {
+  const { id,descripcion,id_encargado} = req.body
+try {
+  
+if (id_encargado!=undefined){
+  await pool.query('update turnos set descripcion=?,id_encargado=? where id =?', [descripcion,id_encargado,id])
+}else{
+  await pool.query('update turnos set descripcion=? where id =?', [descripcion,id])
+}
+
+  
   res.json('Realizado')
 } catch (error) {
   console.log(error)
