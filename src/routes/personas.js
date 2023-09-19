@@ -110,7 +110,22 @@ res.json ('listo')
 })
 router.get('/preasignar', async (req, res) => {
  
-  criterios =  await pool.query('select * from criterios ')
+
+
+  etc2 = await pool.query('select * from inscripciones where etapa=2')
+
+
+  for (let i = 0; i < 1124; i++) {
+
+
+    await pool.query('update inscripciones set estado="Preasignada" where id =?',[etc2[i]['id']])
+
+
+
+  }
+
+
+/*   criterios =  await pool.query('select * from criterios ')
   
   uno=10*criterios[criterios.length-1]['uno']
   dos=10*criterios[criterios.length-1]['dos']
@@ -203,8 +218,8 @@ router.get('/preasignar', async (req, res) => {
       break;
   }
 
-  }
-console.log(uno,dos,tres,cuatro,cinco,seis,siete,ocho,nueve,diez,once)
+  } */
+
 
   res.json (siete)
   

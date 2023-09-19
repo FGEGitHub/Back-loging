@@ -108,8 +108,6 @@ router.get('/clasesdelturno/:id', async (req, res) => {
     const id = req.params.id
   
   
-  
-  
     const clases = await pool.query('select * from clases where id_turno =?', [id])
     etc=[]
     for (ii in clases) {

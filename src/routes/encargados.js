@@ -8,11 +8,11 @@ const pool = require('../database')
 
 
 
-
+///////////////aca agregar etapa
 router.get('/clases/:id', async (req, res) => {
   const id = req.params.id
 
-  turnos = await pool.query('select *  from turnos join (select  id as idcurso, nombre from cursos  )as cursoss on turnos.id_curso=cursoss.idcurso where turnos.id_encargado =? and etapa=2', [id])
+  turnos = await pool.query('select *  from turnos join (select  id as idcurso, nombre from cursos  )as cursoss on turnos.id_curso=cursoss.idcurso where turnos.id_encargado =?', [id])
 console.log(turnos)
 
 
