@@ -108,6 +108,23 @@ console.log(criterios[criterios.length])
 res.json ('listo')
 
 })
+
+router.get('/preasignarllamados', async (req, res) => {
+  etc2 = await pool.query('select * from inscripciones where estado="Preasignada"')
+ const callcenter = await pool.query('select * from usuarios where nivel = 6')
+  for (ii in etc2) {
+    await pool.query('update inscripciones set id_call=? where id =?',[callcenter[ii % callcenter.length]['id'],etc2[ii]['id']])
+
+  }
+res.json('listo')
+
+
+
+})
+
+
+///funcion preasignar 
+/* 
 router.get('/preasignar', async (req, res) => {
  
 
@@ -122,7 +139,7 @@ router.get('/preasignar', async (req, res) => {
 
 
 
-  }
+  } */
 
 
 /*   criterios =  await pool.query('select * from criterios ')
@@ -218,13 +235,13 @@ router.get('/preasignar', async (req, res) => {
       break;
   }
 
-  } */
+  }
 
 
   res.json ('')
   
   })
-
+ */
 
 
 

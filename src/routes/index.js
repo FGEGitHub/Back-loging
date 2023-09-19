@@ -32,12 +32,12 @@ try {
   let envio = []
   asignados = 0
   for (encargado in encargados) {
-      let asignados = await pool.query('select * from inscripciones where encargado =? ', [encargados[encargado]['id']])
+      let asignados = await pool.query('select * from inscripciones where id_call =? ', [encargados[encargado]['id']])
 
 
-      let sinc = await pool.query('select * from inscripciones where encargado =? and estado="Preasignada" ', [encargados[encargado]['id']])
-      let asig = await pool.query('select * from inscripciones where encargado =? and estado="Asignada a curso" ', [encargados[encargado]['id']])
-      let rech = await pool.query('select * from inscripciones where encargado =? and estado="Rechazada" ', [encargados[encargado]['id']])
+      let sinc = await pool.query('select * from inscripciones where id_call =? and estado="Preasignada" ', [encargados[encargado]['id']])
+      let asig = await pool.query('select * from inscripciones where id_call =? and estado="Asignada a curso" ', [encargados[encargado]['id']])
+      let rech = await pool.query('select * from inscripciones where id_call =? and estado="Rechazada" ', [encargados[encargado]['id']])
 
       let objeto_nuevo = {
           id: encargados[encargado]['id'],

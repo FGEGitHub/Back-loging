@@ -650,7 +650,7 @@ router.get('/traerinscripcionesenc/', async (req, res) => {
   const id = req.params.id
 
 
-  const etc = await pool.query('select * from inscripciones left join (select dni as dnip, nombre, apellido from personas) as selec on inscripciones.dni_persona=selec.dnip   where  (encargado is null or encargado= 0) and inscripciones.estado="Preasignada"  ')
+  const etc = await pool.query('select * from inscripciones left join (select dni as dnip, nombre, apellido from personas) as selec on inscripciones.dni_persona=selec.dnip   where  (id_call is null or id_call= 0) and inscripciones.estado="Preasignada"  ')
   console.log(etc)
 
   res.json(etc);
@@ -665,7 +665,7 @@ const id = req.params.id
 
   try {
   
-    inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2 where encargado=? ',[id])
+    inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2 where id_call=? ',[id])
  
     res.json([inscriptos])
     
@@ -789,7 +789,7 @@ router.post("/asignarinscripciones", async (req, res) => {
 
       console.log(ins)
 
-      await pool.query('update inscripciones set encargado =?  where  id = ?', [id, inscrip[ins]])
+      await pool.query('update inscripciones set id_call =?  where  id = ?', [id, inscrip[ins]])
   }
   res.json('realizado')
 
@@ -925,8 +925,8 @@ datos33={
   
 })
 
-
-
+////////  FUNCION PARA CREAR CURSOS
+/* 
 router.get('/crearcursos2daetapa/', async (req, res) => {
   inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2 where edicion=2')
 
@@ -975,7 +975,7 @@ for (let i = 0; i < cinco; i++) {
 
 res.json (uno,dos,tres,cuatro,cinco)
 })
-
+ */
 router.get('/incriptoss/', async (req, res) => {
 
 
