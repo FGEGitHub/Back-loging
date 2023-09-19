@@ -12,8 +12,8 @@ const pool = require('../database')
 router.get('/clases/:id', async (req, res) => {
   const id = req.params.id
 
-  turnos = await pool.query('select *, id as turnoid  from turnos join (select  id as idcurso, nombre from cursos  )as cursoss on turnos.id_curso=cursoss.idcurso where turnos.id_encargado =? ', [id])
-
+  turnos = await pool.query('select *  from turnos join (select  id as idcurso, nombre from cursos  )as cursoss on turnos.id_curso=cursoss.idcurso where turnos.id_encargado =? and etapa=2', [id])
+console.log(turnos)
 
 
   todos = []
@@ -61,10 +61,10 @@ router.get('/curso/:id', async (req, res) => {
 router.get('/alumnasdelcurso/:id', async (req, res) => {
   const id = req.params.id
   /////id: turno
-  curso = await pool.query('select cursado.id idcursado,cursado.observaciones, personas.nombre, personas.apellido, personas.id as idpers, cursado.inscripcion from cursado join personas on cursado.id_persona = personas.id where id_turno=? and inscripcion="Confirmado"', [id])
+  curso = await pool.query('select * from cursado join (select id as idp, nombre, apellido, dni from personas) as sel on cursado.id_persona=sel.idp where id_turno=?', [id])
 ///curso es cursado  (lista de alumnas)
-
-
+console.log('curso')
+console.log(curso)
   clases = await pool.query('select * from clases where id_turno =?', [id])
   let confirmadosc = await pool.query('select * from cursado where inscripcion = "Confirmado" and id_turno =?',[id])
   let rechazadosc = await pool.query('select * from cursado where inscripcion = "Rechazado" and id_turno =?',[id])

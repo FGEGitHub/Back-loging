@@ -808,6 +808,9 @@ router.post("/modificarcurso", async (req, res) => {
   const { id, nombre } = req.body
   try {
 
+
+    
+
     await pool.query('update cursos set nombre=? where id=?  ', [nombre, id])
     res.json('Realizado')
   } catch (error) {
