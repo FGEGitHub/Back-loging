@@ -112,10 +112,10 @@ router.get('/preasignar', async (req, res) => {
  
 
 
-  etc2 = await pool.query('select * from inscripciones where etapa=2')
+  etc2 = await pool.query('select * from inscripciones where edicion=2')
 
 
-  for (let i = 0; i < 1124; i++) {
+  for (let i = 0; i < 1125; i++) {
 
 
     await pool.query('update inscripciones set estado="Preasignada" where id =?',[etc2[i]['id']])
@@ -221,7 +221,7 @@ router.get('/preasignar', async (req, res) => {
   } */
 
 
-  res.json (siete)
+  res.json ('')
   
   })
 
