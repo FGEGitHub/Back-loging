@@ -34,9 +34,26 @@ router.post("/modificarturno",  async (req, res) => {
 try {
   
 if (id_encargado!=undefined){
-  await pool.query('update turnos set descripcion=?,id_encargado=? where id =?', [descripcion,id_encargado,id])
+
+  if (descripcion!=undefined){
+    await pool.query('update turnos set descripcion=?,id_encargado=? where id =?', [descripcion,id_encargado,id])
+  
+  }else{
+    await pool.query('update turnos set id_encargado=? where id =?', [id_encargado,id])
+ 
+  }
+
+
+
 }else{
-  await pool.query('update turnos set descripcion=? where id =?', [descripcion,id])
+  if (descripcion!=undefined){
+    await pool.query('update turnos set descripcion=? where id =?', [descripcion,id])
+  
+  }
+ 
+
+
+
 }
 
   
