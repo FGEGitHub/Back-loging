@@ -810,8 +810,10 @@ router.post('/asignarencargado', async (req, res) => {
 
 router.get('/incriptas2da/', async (req, res) => {
 
-  inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2 where edicion=2')
+  inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2 left join (select id_inscripcion , id_turno  from cursado) as sel8 on inscripciones.id=sel8.id_inscripcion left join (select id as idt, descripcion, id_curso from turnos) as sel9 on sel8.id_turno=sel9.idt left join(select id as idc, nombre as nombrecurso from cursos) as sel10 on sel9.id_curso=sel10.idc where edicion=2')
 
+  
+  //inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2 left join (select id as idc, id_turno from cursado) as sel8 on inscripciones.id=sel8.idt where edicion=2')
   curso1 = await pool.query('select * from inscripciones where uno =132')
   curso2 = await pool.query('select * from inscripciones where uno =133')
   curso3 = await pool.query('select * from inscripciones where uno =134')
