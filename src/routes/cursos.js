@@ -304,11 +304,6 @@ router.get('/verclases/:id', isLoggedInn2, async (req, res) => {
 
 
 
-
-
-
-
-
 router.get('/asistencia/:id', isLoggedInn4, async (req, res) => {
   const id = req.params.id
 
@@ -317,7 +312,7 @@ router.get('/asistencia/:id', isLoggedInn4, async (req, res) => {
     const clase = await pool.query('select * from clases where id = ?', [id])
     //// trae el listado de alumnos  que cursan en ese turno
 
-    const alumnos = await pool.query('select *, id as idcursado from cursado join   (select nombre,apellido, id as idpersona,dni from personas) as  personaa on cursado.id_persona=personaa.idpersona  where cursado.id_turno = ?  and cursado.inscripcion= "Confirmado" ORDER BY personaa.apellido', [clase[0]['id_turno']])
+    const alumnos = await pool.query('select * from cursado join   (select nombre,apellido, id as idpersona,dni from personas) as  personaa on cursado.id_persona=personaa.idpersona  where cursado.id_turno = ?  ORDER BY personaa.apellido', [clase[0]['id_turno']])
 
     total = alumnos.length
     presentes = 0
@@ -380,7 +375,7 @@ if (asisprimera.length>0){
       notomados,
 
     }
-
+console.log(asistenciaa)
     res.json([clase, asistenciaa, estadisticas])
   } catch (error) {
     console.log(error)
@@ -945,7 +940,7 @@ router.post("/presente", async (req, res) => {
       }
     } else {
 
-      await pool.query('insert into asistencia set id_persona=?,asistencia=?,id_clase=?,justificacion=? ', [id_alumno, asistencia, id_clase, observaciones])
+      await pool.query('insert into asistencia set id_persona=?,asistencia="Si",id_clase=?,justificacion="Ninguna"', [id_alumno,  id_clase])
     }
     res.json('Realizado')
 
@@ -955,5 +950,37 @@ router.post("/presente", async (req, res) => {
   }
 
 })
+router.post("/ausente", async (req, res) => {
+  const { id_alumno, asistencia, id_clase, observaciones } = req.body ///
+
+  ///asistencia (presente ausente)
+  try {
+
+    console.log(id_alumno)
+    console.log(id_clase)
+    const yatomada = await pool.query('select * from asistencia where id_persona = ? and id_clase =? ', [id_alumno, id_clase])
+    if (yatomada.length > 0) {
+
+
+
+      if (asistencia === 'Sin determinar') {
+        await pool.query('delete  from  asistencia where id = ?', [yatomada[0]['id']])
+      } else {
+        await pool.query('update asistencia set asistencia=?, justificacion=? where id=?  ', [asistencia, observaciones, yatomada[0]['id']])
+      }
+    } else {
+
+      await pool.query('insert into asistencia set id_persona=?,asistencia="No",id_clase=?,justificacion="Ninguna"', [id_alumno,  id_clase])
+    }
+    res.json('Realizado')
+
+  } catch (error) {
+    console.log(error)
+    res.json('Error algo sucedio')
+  }
+
+})
+
+
 
 module.exports = router
