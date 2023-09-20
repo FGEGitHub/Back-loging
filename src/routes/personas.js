@@ -124,7 +124,7 @@ res.json('listo')
 
 
 ///funcion preasignar 
-/* 
+ 
 router.get('/preasignar', async (req, res) => {
  
 
@@ -132,16 +132,16 @@ router.get('/preasignar', async (req, res) => {
   etc2 = await pool.query('select * from inscripciones where edicion=2')
 
 
-  for (let i = 0; i < 1125; i++) {
+  for (let i = 0; i < 1250; i++) {
 
 
     await pool.query('update inscripciones set estado="Preasignada" where id =?',[etc2[i]['id']])
 
 
 
-  } */
+  } 
 
-
+})
 /*   criterios =  await pool.query('select * from criterios ')
   
   uno=10*criterios[criterios.length-1]['uno']
@@ -334,7 +334,7 @@ router.get('/datosusuarioporid/:dni', async (req, res) => {
   }
   try {
     tipo_trabajo = etc[0]['tipo_trabajo']
-  } catch (error) {
+  } catch (error) {5
     tipo_trabajo = 'no determinado'
   }
   try {
