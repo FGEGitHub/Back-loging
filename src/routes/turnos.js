@@ -37,8 +37,9 @@ if (id_encargado!=undefined){
 
   if (descripcion!=undefined){
     await pool.query('update turnos set descripcion=?,id_encargado=? where id =?', [descripcion,id_encargado,id])
-  
+  console.log(1)
   }else{
+    console.log(2)
     await pool.query('update turnos set id_encargado=? where id =?', [id_encargado,id])
  
   }
@@ -46,6 +47,7 @@ if (id_encargado!=undefined){
 
 
 }else{
+  console.log(3)
   if (descripcion!=undefined){
     await pool.query('update turnos set descripcion=? where id =?', [descripcion,id])
   

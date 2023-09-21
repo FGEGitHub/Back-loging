@@ -48,7 +48,7 @@ router.get('/traerusuario/:id', isLoggedInn, async (req, res) => {
 router.get('/traerencargados/', async (req, res) => {
 
   profesores = await pool.query('select * from usuarios where nivel=4')
-  console.log(profesores)
+ 
   res.json(profesores)
 })
 router.get('/traercoordiandores/', async (req, res) => {

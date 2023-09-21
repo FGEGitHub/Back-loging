@@ -48,7 +48,7 @@ router.get('/getturnos/:id', async (req, res) => {
   const id = req.params.id
 
   const turnos = await pool.query('select * from turnos where id_curso=?',[id])
-  console.log(turnos)
+
   res.json(turnos)
 
 })
@@ -956,8 +956,6 @@ router.post("/ausente", async (req, res) => {
   ///asistencia (presente ausente)
   try {
 
-    console.log(id_alumno)
-    console.log(id_clase)
     const yatomada = await pool.query('select * from asistencia where id_persona = ? and id_clase =? ', [id_alumno, id_clase])
     if (yatomada.length > 0) {
 
