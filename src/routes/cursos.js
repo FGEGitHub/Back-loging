@@ -312,7 +312,7 @@ router.get('/asistencia/:id', isLoggedInn4, async (req, res) => {
     const clase = await pool.query('select * from clases where id = ?', [id])
     //// trae el listado de alumnos  que cursan en ese turno
 
-    const alumnos = await pool.query('select * from cursado join   (select nombre,apellido, id as idpersona,dni from personas) as  personaa on cursado.id_persona=personaa.idpersona  where cursado.id_turno = ?  ORDER BY personaa.apellido', [clase[0]['id_turno']])
+    const alumnos = await pool.query('select * from cursado join   (select nombre,apellido, id as idpersona,dni, tel from personas) as  personaa on cursado.id_persona=personaa.idpersona  where cursado.id_turno = ?  ORDER BY personaa.apellido', [clase[0]['id_turno']])
 
     total = alumnos.length
     presentes = 0
