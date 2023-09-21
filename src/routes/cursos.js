@@ -718,7 +718,7 @@ router.post("/rechazarinscrip", async (req, res) => {
   await pool.query('update inscripciones set estado="Rechazada"   where id=?', [ id_inscripcion])
   const es = await pool.query('select * from personas where dni=?', [dni])
   if (observaciones != undefined){
-    await pool.query('insert into observaciones set detalle=?, id_ref=? ', [observaciones, es])
+    await pool.query('insert into observaciones set detalle=?, id_ref=? , fecha=?', [observaciones, es[0]['id'],(new Date(Date.now())).toLocaleDateString()])
 
 }
 res.json('Inscripcion rechazada ')
