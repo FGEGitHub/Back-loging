@@ -23,6 +23,17 @@ const fileUpload = multer({
 
 
 
+
+router.get('/traerobservaciones/:id', async (req, res) => {
+  const id = req.params.id
+
+
+  const etc = await pool.query('select * from observaciones where id_ref=?', [id])
+
+  res.json(etc);
+  //res.render('index')
+})
+
 router.get('/traerpersona/:id', async (req, res) => {
   const id = req.params.id
 
@@ -521,6 +532,20 @@ router.get('/datosusuarioporid/:dni', async (req, res) => {
 
 
 
+router.post("/agregarobservacion", async (req, res) => {
+  let { id, observaciones } = req.body
+
+
+  try {
+    await pool.query('insert into observaciones set detalle=?, id_ref=?, fecha=? ', [observaciones,id,(new Date(Date.now())).toLocaleDateString()])
+res.json(`Realizado`)
+  } catch (error) {
+    console.log(error)
+    res.json('No escribiste nadaaa')
+  }
+
+
+})
 
 router.post("/enviarinscripcion", async (req, res) => {
   let { nombre, apellido, dni, tel, tel2, fecha_nac,prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, motivacion } = req.body
