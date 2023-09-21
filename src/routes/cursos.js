@@ -730,7 +730,7 @@ res.json('Inscripcion rechazada ')
 
 router.post("/asignarcurso", async (req, res) => {
   let { dni, id_inscripcion, id_turno, observaciones} = req.body
-
+console.log(observaciones)
   try {
      
       const tu = await pool.query('select * from turnos where id=?', [id_turno])
@@ -748,7 +748,7 @@ router.post("/asignarcurso", async (req, res) => {
 
 
       if (observaciones != undefined){
-          await pool.query('insert into observaciones set detalle=?, id_ref=? ', [observaciones, es])
+          await pool.query('insert into observaciones set detalle=?, id_ref=?, fecha=? ', [observaciones, es[0]['id'],(new Date(Date.now())).toLocaleDateString()])
 
       }
       const mensaje = 'Listo! Alumna asignada a curso '+tu[0]['descripcion']+', en ese turno quedan '+cup+' Cupos disponibles'
