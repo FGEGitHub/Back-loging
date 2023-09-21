@@ -90,12 +90,11 @@ module.exports = {
     },
 
     isLoggedInn4(req,res, next){
-        console.log('entra1')
+       
         //
         const authorization = req.get('authorization')
         let token =null
-        console.log('authorization4')
-        console.log(authorization)
+  
         if (authorization && authorization.startsWith('Bearer')){
             console.log('entraa')
             token = authorization.substring(7) 
@@ -107,8 +106,7 @@ module.exports = {
              console.log(decodedToken)
            
         }catch{}
-        console.log('decodedToken.nivel')
-      console.log(decodedToken.nivel)
+    
         if (!token || !decodedToken.id || (decodedToken.nivel !=4 && decodedToken.nivel !=2 && decodedToken.nivel !=3 ) ){
             console.log('error token')
             return res.send('error login')

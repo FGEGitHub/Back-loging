@@ -375,7 +375,7 @@ if (asisprimera.length>0){
       notomados,
 
     }
-console.log(asistenciaa)
+
     res.json([clase, asistenciaa, estadisticas])
   } catch (error) {
     console.log(error)
@@ -936,11 +936,11 @@ router.post("/presente", async (req, res) => {
       if (asistencia === 'Sin determinar') {
         await pool.query('delete  from  asistencia where id = ?', [yatomada[0]['id']])
       } else {
-        await pool.query('update asistencia set asistencia=?, justificacion=? where id=?  ', [asistencia, observaciones, yatomada[0]['id']])
+        await pool.query('update asistencia set asistencia="Presente", justificacion="Ninguna" where id=?  ', [ yatomada[0]['id']])
       }
     } else {
 
-      await pool.query('insert into asistencia set id_persona=?,asistencia="Si",id_clase=?,justificacion="Ninguna"', [id_alumno,  id_clase])
+      await pool.query('insert into asistencia set id_persona=?,asistencia="Presente",id_clase=?,justificacion="Ninguna"', [id_alumno,  id_clase])
     }
     res.json('Realizado')
 
@@ -966,7 +966,7 @@ router.post("/ausente", async (req, res) => {
       if (asistencia === 'Sin determinar') {
         await pool.query('delete  from  asistencia where id = ?', [yatomada[0]['id']])
       } else {
-        await pool.query('update asistencia set asistencia=?, justificacion=? where id=?  ', [asistencia, observaciones, yatomada[0]['id']])
+        await pool.query('update asistencia set asistencia="Ausente", justificacion="Ninguna" where id=?  ', [ yatomada[0]['id']])
       }
     } else {
 
