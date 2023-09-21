@@ -424,49 +424,13 @@ router.get('/borrarturno/:id', async (req, res) => {
 router.get('/listadetodoslosturnos/', isLoggedInn2, async (req, res) => {
   try {
     console.log('listadetodos')
-    tur = await pool.query('select * from turnos   join  (select id as idcurso, nombre as nombrecurso from cursos) as selec1  on turnos.id_curso= selec1.idcurso ')
+    tur = await pool.query('select * from turnos   join  (select id as idcurso, nombre as nombrecurso from cursos) as selec1  on turnos.id_curso= selec1.idcurso left join (select id as idu, nombre as encargado from usuarios) as selec2 on turnos.id_encargado=selec2.idu where etapa=2')
 
 
-    todos = []
-    for (ii in tur) {
-
-      cat = await pool.query('select * from cursado where id_turno= ?', [tur[ii]['id']])
-      faltan = await pool.query('select * from cursado where id_turno= ? and (inscripcion <> "Confirmado" and inscripcion <> "Rechazado") ', [tur[ii]['id']])
-      en = await pool.query('select * from usuarios where id= ?', [tur[ii]['id_encargado']])
-      c1 = await pool.query('select * from usuarios where id= ?', [tur[ii]['id_coordinador']])
-      rechazados = await pool.query('select * from cursado where id_turno= ? and inscripcion = "Rechazado" ', [tur[ii]['id']])
-      enc = 'sin determinar'
-      if (en.length > 0) {
-        enc = en[0]['nombre']
-      }
-
-      coor = 'sin determinar'
-      if (c1.length > 0) {
-        coor = c1[0]['nombre']
-      }
+ 
 
 
-
-
-      nuev = {
-        id: tur[ii]['id'],
-        id_curso: tur[ii]['id_curso'],
-        numero: tur[ii]['numero'],
-        descripcion: tur[ii]['descripcion'],
-        enc,
-        coor,
-        idcurso: 123,
-        nombrecurso: tur[ii]['nombrecurso'],
-        id_turno: tur[ii]['id_turno'],
-        cant: cat.length,
-        faltanporresp: faltan.length,
-        rechazados: rechazados.length
-      }
-      todos.push(nuev)
-    }
-
-
-    res.json(todos)
+    res.json(tur)
   } catch (error) {
     console.log(error)
     res.json([])
