@@ -481,6 +481,19 @@ router.get('/traerturnos/:id',  async (req, res) => {
   const id = req.params.id
 
   const turnos = await pool.query('select * from turnos where id_curso=?',[id])
+  env =[]
+  for (ii in turnos){
+    cant_conf = await pool.query('select * from cursado join (select id as idi, edicion from inscripciones) as sel on cursado.id_inscripcion=sel.idi where edicion=2 ')
+
+nuevo={
+  id:turnos[ii]['id'],
+  descripcion:turnos[ii]['descripcion'],
+  cupo:turnos[ii]['cupo'],
+  disponibles:parseInt(turnos[ii]['cupo'])-cant_conf.length,
+
+}
+env.push(nuevo)
+  }
 
   res.json(turnos)
   

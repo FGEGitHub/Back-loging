@@ -909,14 +909,15 @@ if (inscriptos.length === 0) {
 cantidaddisp = await pool.query('select sum(disponibles) from turnos  where etapa=2 ')
 cantidaddis = await pool.query('select sum(cupo) from turnos  where etapa=2 ')
 cant_pre = await pool.query('select * from inscripciones where edicion=2 and estado in ("Preasignada","Asignada a curso","Rechazada")')
-cant_conf = await pool.query('select * from cursado join (select id as idi, edicion from inscripciones) as sel on cursado.id_inscripcion=sel.idi where edicion=2 ')
 
+cant_conf = await pool.query('select * from cursado join (select id as idi, edicion from inscripciones) as sel on cursado.id_inscripcion=sel.idi where edicion=2 ')
 console.log('sum(disponibles)')
+
 datos33={
   cantidadturnos:cantidaddis[0]['sum(cupo)'],
   cant_preasig:cant_pre.length,
   cant_conf:cant_conf.length,
-  cantidaddis:cantidaddisp[0]['sum(disponibles)']
+  cantidaddis:parseInt(cantidaddis[0]['sum(cupo)'])-cant_conf.length
 }
     
   res.json([inscriptos,deuda_exigible,datos33])
