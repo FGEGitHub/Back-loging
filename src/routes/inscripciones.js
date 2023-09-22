@@ -679,7 +679,7 @@ router.get('/preinscriptas/', async (req, res) => {
 
 try {
 
-  inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2 where edicion=2 and estado="Preasignada"')
+  inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2  left join (select id as idu, nombre as nombrecall from usuarios) as sel4 on inscripciones.id_call=sel4.idu where edicion=2 and estado="Preasignada"')
 
   curso1 = await pool.query('select * from inscripciones where uno =132')
   curso2 = await pool.query('select * from inscripciones where uno =133')
