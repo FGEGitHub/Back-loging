@@ -905,22 +905,18 @@ if (inscriptos.length === 0) {
 
 
 }
-const turnosss = await pool.query('select * from turnos where id_curso in (132,133,134,135,136)')
-console.log(turnosss)
-let cantidadturnos=0
-let cantidaddisp=0
-for (variable in turnosss){
-cantidadturnos+= parseInt(turnosss[variable]['cupo'])
-cantidaddisp+=parseInt(turnosss[variable]['disponibles'])
-}
 
-cant_pre = await pool.query('select * from inscripciones where edicion=2 and estado in ("Preasignada","Asignada a curso")')
-cant_conf = await pool.query('select * from inscripciones where edicion=2 and estado = "Asignada a curso"')
+cantidaddisp = await pool.query('select sum(disponibles) from turnos  where etapa=2 ')
+cantidaddis = await pool.query('select sum(cupo) from turnos  where etapa=2 ')
+cant_pre = await pool.query('select * from inscripciones where edicion=2 and estado in ("Preasignada","Asignada a curso","Rechazada")')
+cant_conf = await pool.query('select * from cursado join (select id as idi, edicion from inscripciones) as sel on cursado.id_inscripcion=sel.idi where edicion=2 ')
+
+console.log('sum(disponibles)')
 datos33={
-  cantidadturnos,
+  cantidadturnos:cantidaddis[0]['sum(cupo)'],
   cant_preasig:cant_pre.length,
   cant_conf:cant_conf.length,
-  cantidaddis:cantidaddisp
+  cantidaddis:cantidaddisp[0]['sum(disponibles)']
 }
     
   res.json([inscriptos,deuda_exigible,datos33])
