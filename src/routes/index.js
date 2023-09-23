@@ -38,6 +38,7 @@ try {
       let sinc = await pool.query('select * from inscripciones where id_call =? and estado="Preasignada" ', [encargados[encargado]['id']])
       let asig = await pool.query('select * from inscripciones where id_call =? and estado="Asignada a curso" ', [encargados[encargado]['id']])
       let rech = await pool.query('select * from inscripciones where id_call =? and estado="Rechazada" ', [encargados[encargado]['id']])
+       nocont = await pool.query('select * from inscripciones where id_call =? and estado="No contesta" ', [encargados[encargado]['id']])
 
       let objeto_nuevo = {
           id: encargados[encargado]['id'],
@@ -45,7 +46,8 @@ try {
           asignados: asignados.length,
           sinc: sinc.length,
           asig: asig.length,
-          rech: rech.length
+          rech: rech.length,
+          nocont:nocont.length
 
       }
       envio.push(objeto_nuevo)
