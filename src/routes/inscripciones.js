@@ -650,7 +650,7 @@ router.get('/traerinscripcionesenc/', async (req, res) => {
   const id = req.params.id
 
 
-  const etc = await pool.query('select * from inscripciones left join (select dni as dnip, nombre, apellido from personas) as selec on inscripciones.dni_persona=selec.dnip   where  (id_call is null or id_call= 0) and inscripciones.estado="Preasignada"  ')
+  const etc = await pool.query('select * from inscripciones left join (select dni as dnip, nombre, apellido from personas) as selec on inscripciones.dni_persona=selec.dnip   where  (id_call is null or id_call= 0) and edicion=2  ')
   console.log(etc)
 
   res.json(etc);
@@ -787,9 +787,9 @@ router.post("/asignarinscripciones", async (req, res) => {
 
   for (ins in inscrip) {
 
-      console.log(ins)
+     
 
-      await pool.query('update inscripciones set id_call =?  where  id = ?', [id, inscrip[ins]])
+      await pool.query('update inscripciones set id_call =?, estado="Preasignada"  where  id = ?', [id, inscrip[ins]])
   }
   res.json('realizado')
 
