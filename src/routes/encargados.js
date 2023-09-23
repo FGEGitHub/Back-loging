@@ -61,7 +61,7 @@ router.get('/curso/:id', async (req, res) => {
 router.get('/alumnasdelcurso/:id', async (req, res) => {
   const id = req.params.id
   /////id: turno
-  curso = await pool.query('select * from cursado join (select id as idp, nombre, apellido, dni from personas) as sel on cursado.id_persona=sel.idp where id_turno=?', [id])
+  curso = await pool.query('select * from cursado join (select id as idp, nombre, apellido, dni, tel, tel2 from personas) as sel on cursado.id_persona=sel.idp where id_turno=?', [id])
 ///curso es cursado  (lista de alumnas)
 console.log('curso')
 console.log(curso)
@@ -140,6 +140,9 @@ for (xxx  in clases) {
       justificadas: totalausentesjustificadas,
       observaciones:curso[ii]['observaciones'],
       idcursado: curso[ii]['idcursado'],
+      dni: curso[ii]['dni'],
+      tel: curso[ii]['tel'],
+      tel2: curso[ii]['tel2'],
       nombre: curso[ii]['nombre'],
       apellido: curso[ii]['apellido'],
       id: curso[ii]['id'],
