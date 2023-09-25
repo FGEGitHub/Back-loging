@@ -930,11 +930,11 @@ router.post("/presente", async (req, res) => {
       if (asistencia === 'Sin determinar') {
         await pool.query('delete  from  asistencia where id = ?', [yatomada[0]['id']])
       } else {
-        await pool.query('update asistencia set asistencia="Presente", justificacion="Ninguna" where id=?  ', [ yatomada[0]['id']])
+        await pool.query('update asistencia set asistencia="Presente", justificacion="Ninguna", fecha=? where id=?  ', [(new Date(Date.now())).toLocaleDateString(), yatomada[0]['id']])
       }
     } else {
 
-      await pool.query('insert into asistencia set id_persona=?,asistencia="Presente",id_clase=?,justificacion="Ninguna"', [id_alumno,  id_clase])
+      await pool.query('insert into asistencia set id_persona=?,asistencia="Presente",id_clase=?,justificacion="Ninguna", fecha=?', [id_alumno,  id_clase,(new Date(Date.now())).toLocaleDateString()])
     }
     res.json('Realizado')
 
@@ -958,11 +958,11 @@ router.post("/ausente", async (req, res) => {
       if (asistencia === 'Sin determinar') {
         await pool.query('delete  from  asistencia where id = ?', [yatomada[0]['id']])
       } else {
-        await pool.query('update asistencia set asistencia="Ausente", justificacion="Ninguna" where id=?  ', [ yatomada[0]['id']])
+        await pool.query('update asistencia set asistencia="Ausente", justificacion="Ninguna",fecha=? where id=?  ', [(new Date(Date.now())).toLocaleDateString(), yatomada[0]['id']])
       }
     } else {
 
-      await pool.query('insert into asistencia set id_persona=?,asistencia="No",id_clase=?,justificacion="Ninguna"', [id_alumno,  id_clase])
+      await pool.query('insert into asistencia set id_persona=?,asistencia="No",id_clase=?,justificacion="Ninguna", fecha=?', [id_alumno,  id_clase,(new Date(Date.now())).toLocaleDateString()])
     }
     res.json('Realizado')
 
