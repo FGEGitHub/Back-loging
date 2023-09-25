@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const passport = require('passport')
 const pool = require('../database')
+const { isLoggedInn } = require('../lib/auth')
 
 
 
@@ -70,6 +71,27 @@ router.get('/clases/:id', async (req, res) => {
     res.json([curso]);
     //res.render('index')
   })
+
+  
+
+
+  router.post("/justificar", isLoggedInn, async (req, res) => {
+    let { id, descripcion} = req.body
+    try {
+
+      await pool.query('update asistencia set justificacion = ? where id=?', [descripcion,id])
+
+
+      res.json('Realizado')
+    } catch (error) {
+      console.log(error)
+      res.json('Error algo sucedio')
+    }
+  
+  })
+  
+
+
 router.post("/confirmaciondellamado", async (req, res) => {
   let { confirmacion, id_turno, id_persona, id_cursado,observaciones } = req.body
   try {
