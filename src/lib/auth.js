@@ -106,7 +106,7 @@ module.exports = {
              console.log(decodedToken)
            
         }catch{}
-    
+    console.log(decodedToken)
         if (!token || !decodedToken.id || (decodedToken.nivel !=4 && decodedToken.nivel !=2 && decodedToken.nivel !=3 ) ){
             console.log('error token')
             return res.send('error login')

@@ -12,7 +12,7 @@ const pool = require('../database')
 router.get('/clases/:id', async (req, res) => {
   const id = req.params.id
 
-  turnos = await pool.query('select *  from turnos join (select  id as idcurso, nombre from cursos  )as cursoss on turnos.id_curso=cursoss.idcurso where turnos.id_encargado =?', [id])
+  turnos = await pool.query('select *  from turnos join (select  id as idcurso, nombre from cursos  )as cursoss on turnos.id_curso=cursoss.idcurso where etapa=2 and turnos.id_encargado =?', [id])
 console.log(turnos)
 
 
