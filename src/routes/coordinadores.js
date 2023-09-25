@@ -28,7 +28,7 @@ router.get('/clases/:id', async (req, res) => {
       idcurso: turnos[ii]['idcurso'],
       nombre:turnos[ii]['nombre'],
       turnoid: turnos[ii]['turnoid'],
-      cantsinresp:cat.length,
+      
       total:tot.length
    
   
