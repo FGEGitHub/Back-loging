@@ -124,13 +124,27 @@ await pool.query('delete  from  clases where id = ?',[id])
 
 
 
+router.get('/traerclase/:id', async (req, res) => {
+  const id = req.params.id
+
+try {
+  
+const turn = await pool.query('select * from clases  where id =? ',[id])
+console.log(turn)
+res.json([turn])
+} catch (error) {
+  console.log(error)
+  res.json(['error'])
+}
+
+})
 router.get('/detalledelcurso/:id', async (req, res) => {
   const id = req.params.id
 
 try {
   
 const turn = await pool.query('select * from turnos left join(select id as idc, nombre as coordinador from usuarios) as selec1 on turnos.id_coordinador=selec1.idc left join (select id as ide, nombre as encargado from usuarios) as selec2 on turnos.id_encargado=selec2.ide left join(select id as idcu, nombre as nombrecurso from cursos) as selec3 on turnos.id_curso=selec3.idcu where id =? ',[id])
-
+console.log(turn)
 res.json([turn])
 } catch (error) {
   console.log(error)
@@ -149,8 +163,8 @@ router.get('/clasesdelturno/:id', async (req, res) => {
     const clases = await pool.query('select * from clases where id_turno =?', [id])
     etc=[]
     for (ii in clases) {
-      const alumnos = await pool.query('select *, id as idcursado from cursado join   (select nombre,apellido, id as idpersona from personas) as  personaa on cursado.id_persona=personaa.idpersona  where cursado.id_turno = ?  and cursado.inscripcion= "Confirmado" ', [clases[ii]['id_turno']])
-
+      const alumnos = await pool.query('select *, id as idcursado from cursado join   (select nombre,apellido, id as idpersona from personas) as  personaa on cursado.id_persona=personaa.idpersona  where cursado.id_turno = ? ', [clases[ii]['id_turno']])
+console.log(alumnos.length)
       total = alumnos.length
       presentes=0
       ausentes=0
@@ -158,7 +172,7 @@ router.get('/clasesdelturno/:id', async (req, res) => {
      
     for (iiii in alumnos) {//////recorremos todas las asistencias de la clase
       asis = await pool.query('select * from asistencia where id_persona = ? and id_clase = ?',[alumnos[iiii]['id_persona'],clases[ii]['id']])
-      console.log(asis)
+     
 
       if (asis.length === 0) {
         notomados += 1
