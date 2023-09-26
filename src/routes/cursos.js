@@ -327,7 +327,10 @@ let asisprimera  = await pool.query('select * from asistencia join (select id as
      
 let primera="No"
 if (asisprimera.length>0){
-         primera="Si"
+    if (asisprimera[0]['asistencia']=="Presente"){
+      primera="Si"
+    }
+   
       }else{
          primera="No"
       }
