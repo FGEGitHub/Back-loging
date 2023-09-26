@@ -93,7 +93,7 @@ res.json('Clase agregada')
 
 
 
-router.post("/modificarclase",  async (req, res) => {
+router.post("/modificarunaclase",  async (req, res) => {
   const { id,observacion,numero_clase,fecha} = req.body
 try {
 
