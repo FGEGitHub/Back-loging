@@ -62,7 +62,7 @@ router.get('/clases/:id', async (req, res) => {
   router.get('/listadeausentes/:id', async (req, res) => {
     const id = req.params.id
   
-    curso = await pool.query('select *  from asistencia join (select id as idc, id_turno, fecha as fechaclase  from clases) as sel1 on  asistencia.id_clase=sel1.idc join (select id as idt, id_coordinador, etapa from turnos) as sel2 on sel1.id_turno=sel2.idt join (select id as idp, nombre, apellido, dni, tel, tel2 from personas) as sel3 on asistencia.id_persona=sel3.idp where asistencia ="Ausente" and id_coordinador=? and etapa=2', [id])
+    curso = await pool.query('select *  from asistencia join (select id as idc, id_turno, fecha as fechaclase  from clases) as sel1 on  asistencia.id_clase=sel1.idc join (select id as idt, id_coordinador, etapa from turnos) as sel2 on sel1.id_turno=sel2.idt join (select id as idp, nombre, apellido, dni, tel, tel2 from personas) as sel3 on asistencia.id_persona=sel3.idp where (asistencia in("Ausente","No")) and id_coordinador=? and etapa=2', [id])
   
   
   
