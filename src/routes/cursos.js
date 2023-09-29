@@ -343,6 +343,7 @@ if (asisprimera.length>0){
           apellido: alumnos[ii]['apellido'],
           dni: alumnos[ii]['dni'],
           asistencia: 'No Tomada',
+          justificacion: 'Ninguna',
           id_clase: id,
           primera
 
@@ -361,6 +362,7 @@ if (asisprimera.length>0){
           apellido: alumnos[ii]['apellido'],
           dni: alumnos[ii]['dni'],
           asistencia: asis[0]['asistencia'],
+          justificacion: asis[0]['justificacion'],
           id_clase: id,
           primera
 
