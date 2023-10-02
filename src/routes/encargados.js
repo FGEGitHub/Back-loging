@@ -49,6 +49,15 @@ router.get('/alumnasdelcurso/:id', async (req, res) => {
   const id = req.params.id
   try {
     curso = await pool.query('select * from cursado join (select id as idp, nombre, apellido, dni, tel, tel2 from personas) as sel on cursado.id_persona=sel.idp where id_turno=? ', [id])
+   // curso = await pool.query('select dni, COUNT(CASE  WHEN sel3.asistencia = "presente" THEN 1    WHEN sel3.asistencia = "No" THEN 2    WHEN sel3.asistencia is null THEN 3  ELSE NULL END) as cantidad_por_estado from cursado join (select id as idp, nombre, apellido, dni, tel, tel2 from personas) as sel on cursado.id_persona=sel.idp  left join (select id as idclase, id_turno as idtu  from clases) as sel2   on cursado.id_turno=sel2.idtu left join (select id as ida, asistencia, id_clase from asistencia) as sel3 on sel2.idclase=sel3.id_clase   where id_turno=?  group by dni', [id])
+
+/* 
+    SELECT alumnos.nombre, COUNT(asistencias.id) as cantidad_de_presentes
+    FROM alumnos
+    LEFT JOIN asistencias ON alumnos.id = asistencias.alumno_id
+    GROUP BY alumnos.id, alumnos.nombre
+ */
+
 
     res.json([curso])
   } catch (error) {
@@ -72,6 +81,23 @@ router.get('/curso/:id', async (req, res) => {
   res.json(curso);
   //res.render('index')
 })
+
+
+router.get('/listadeausentes/:id', async (req, res) => {
+  const id = req.params.id
+
+  curso = await pool.query('select *  from asistencia join (select id as idc, id_turno, fecha as fechaclase  from clases) as sel1 on  asistencia.id_clase=sel1.idc join (select id as idt, id_encargado, etapa from turnos) as sel2 on sel1.id_turno=sel2.idt join (select id as idp, nombre, apellido, dni, tel, tel2 from personas) as sel3 on asistencia.id_persona=sel3.idp where (asistencia in("Ausente","No")) and id_encargado=? and etapa=2', [id])
+
+
+
+  ////////id usuario encargado
+
+  res.json([curso]);
+  //res.render('index')
+})
+
+
+
 
 /* 
 
