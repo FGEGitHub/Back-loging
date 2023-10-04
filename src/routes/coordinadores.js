@@ -160,4 +160,45 @@ res.json([enviar,resumen])
 
 
 })
+
+
+
+
+router.get('/alertas/:id', async (req, res) => {
+  let id = req.params.id
+  
+ cursado = await pool.query('select * from cursado join (select id as idp, nombre, apellido, dni from personas) as sel on cursado.id_persona=sel.idp join (select id as idt, id_coordinador, descripcion from turnos )as sel2 on cursado.id_turno=sel2.idt    where id_coordinador=? ', [id])
+  //cursado = await pool.query('select dni,pres from cursado join (select id as idp, nombre, apellido, dni from personas) as sel on cursado.id_persona=sel.idp join (select id as idt, id_coordinador, descripcion from turnos )as sel2 on cursado.id_turno=sel2.idt left join (select id as idclase, id_turno as idtur,COUNT(*) as pres from clases left join (select id as idasis, id_clase, asistencia from asistencia) as sel5 on clases.idclase=sel5.id_clase where  asistencia ="Presente") as sel4 on sel2.idt= sel4.idtur where id_coordinador=? group by dni', [id])
+ //cursado = await pool.query('select * from cursado join (select id as idp, nombre, apellido, dni from personas) as sel on cursado.id_persona=sel.idp join (select id as idt, id_coordinador, descripcion from turnos )as sel2 on cursado.id_turno=sel2.idt    where id_coordinador=? ', [id])
+
+
+ console.log(cursado)
+  
+  let enviar =[]
+  let totalconfirmados=0
+  let totalrechazados=0
+   // clases = await pool.query('select * from clases join (select id as idt, id_coordinador from turnos) as sel3 on clases.id_turno=sel3.idt where id_coordinador=?',[id])
+ // asistencia= await pool.query('select * from asistencia join (select id as idc, id_turno from clases) as sel on asistencia.id_clase=sel.idc  where id_turno=?',[cursado[ii]['id_turno']])
+ 
+  /* for (ii in cursado) {
+
+nuevo={
+dni:cursado[ii]['dni'],
+nombre:cursado[ii]['nombre'],
+apellido:cursado[ii]['apellido'],
+descripcion:cursado[ii]['descripcion'],
+
+
+}
+enviar.push(nuevo)
+  } */
+  
+
+  res.json([cursado,{asasa:0}])
+  
+  
+  })
+
+
+
   module.exports = router
