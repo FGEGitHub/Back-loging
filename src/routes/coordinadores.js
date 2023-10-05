@@ -172,29 +172,35 @@ router.get('/alertas/:id', async (req, res) => {
  //cursado = await pool.query('select * from cursado join (select id as idp, nombre, apellido, dni from personas) as sel on cursado.id_persona=sel.idp join (select id as idt, id_coordinador, descripcion from turnos )as sel2 on cursado.id_turno=sel2.idt    where id_coordinador=? ', [id])
 
 
- console.log(cursado)
   
   let enviar =[]
   let totalconfirmados=0
   let totalrechazados=0
-   // clases = await pool.query('select * from clases join (select id as idt, id_coordinador from turnos) as sel3 on clases.id_turno=sel3.idt where id_coordinador=?',[id])
+clases = await pool.query('select * from clases join (select id as idt, id_coordinador, etapa from turnos) as sel3 on clases.id_turno=sel3.idt where id_coordinador=? and etapa=2',[id])
+
  // asistencia= await pool.query('select * from asistencia join (select id as idc, id_turno from clases) as sel on asistencia.id_clase=sel.idc  where id_turno=?',[cursado[ii]['id_turno']])
  
-  /* for (ii in cursado) {
+   for (ii in cursado) {
+
+    let pres = await pool.query('select * from asistencia join (select id as idc, id_turno from clases) as sel on asistencia.id_clase=sel.idc where asistencia="Presente" and id_persona=? and id_turno=?',[cursado[ii]['idp'],cursado[ii]['id_turno']])
+    let aus = await pool.query('select * from asistencia join (select id as idc, id_turno from clases) as sel on asistencia.id_clase=sel.idc where (asistencia="Ausente" or asistencia="No") and id_persona=? and id_turno=?',[cursado[ii]['idp'],cursado[ii]['id_turno']])
+
+
 
 nuevo={
 dni:cursado[ii]['dni'],
 nombre:cursado[ii]['nombre'],
 apellido:cursado[ii]['apellido'],
 descripcion:cursado[ii]['descripcion'],
-
+presentes:pres.length,
+ausentes:aus.length,
 
 }
 enviar.push(nuevo)
-  } */
+  } 
   
 
-  res.json([cursado,{asasa:0}])
+  res.json([enviar,{asasa:0}])
   
   
   })
