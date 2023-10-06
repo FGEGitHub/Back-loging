@@ -51,8 +51,7 @@ router.get('/alumnasdelcurso/:id', async (req, res) => {
     curso = await pool.query('select * from cursado join (select id as idp, nombre, apellido, dni, tel, tel2 from personas) as sel on cursado.id_persona=sel.idp where id_turno=? order by apellido', [id])
    // curso = await pool.query('select dni, COUNT(CASE  WHEN sel3.asistencia = "presente" THEN 1    WHEN sel3.asistencia = "No" THEN 2    WHEN sel3.asistencia is null THEN 3  ELSE NULL END) as cantidad_por_estado from cursado join (select id as idp, nombre, apellido, dni, tel, tel2 from personas) as sel on cursado.id_persona=sel.idp  left join (select id as idclase, id_turno as idtu  from clases) as sel2   on cursado.id_turno=sel2.idtu left join (select id as ida, asistencia, id_clase from asistencia) as sel3 on sel2.idclase=sel3.id_clase   where id_turno=?  group by dni', [id])
     clases = await pool.query('select * from clases where id_turno=?',[id])
-    console.log(clases)
-    console.log(clases.length)
+ 
 let enviar = []
    for (i in curso){
     let pres = await pool.query('select * from asistencia join (select id as idc, id_turno from clases) as sel on asistencia.id_clase=sel.idc where asistencia="Presente" and id_persona=? and id_turno=?',[curso[i]['idp'],id])
