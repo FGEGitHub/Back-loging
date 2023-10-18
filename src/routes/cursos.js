@@ -345,7 +345,8 @@ if (asisprimera.length>0){
           asistencia: 'No Tomada',
           justificacion: 'Ninguna',
           id_clase: id,
-          primera
+          primera,
+          id_asistencia:0
 
         }
         asistenciaa.push(aux)
@@ -364,7 +365,8 @@ if (asisprimera.length>0){
           asistencia: asis[0]['asistencia'],
           justificacion: asis[0]['justificacion'],
           id_clase: id,
-          primera
+          primera,
+          id_asistencia:asis[0]['id']
 
         }
         asistenciaa.push(aux)

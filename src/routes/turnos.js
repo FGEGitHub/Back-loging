@@ -244,7 +244,7 @@ router.get('/clasesdelturno/:id', async (req, res) => {
     etc.push(nuevo)
   }//fin todas las clases
 
-
+console.log(etc)
   res.json(etc);
   //res.render('index')
 })
@@ -258,8 +258,7 @@ router.get('/listadetodoslosturnos/', isLoggedInn2, async (req, res) => {
 
     todos = []
     for (ii in tur) {
-      console.log(ii)
-      console.log(tur)
+    
       console.log(tur[ii])
       console.log(tur[ii]['id'])
       cat = await pool.query('select * from cursado where id_turno= ?', [tur[ii]['id']])
@@ -296,7 +295,7 @@ router.get('/listadetodoslosturnos/', isLoggedInn2, async (req, res) => {
       }
       todos.push(nuev)
     }
-
+console.log(todos)
 
     res.json(todos)
   } catch (error) {
