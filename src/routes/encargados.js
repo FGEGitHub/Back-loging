@@ -13,7 +13,7 @@ router.get('/clases/:id', async (req, res) => {
   const id = req.params.id
 
   turnos = await pool.query('select *  from turnos join (select  id as idcurso, nombre from cursos  )as cursoss on turnos.id_curso=cursoss.idcurso where etapa=2 and turnos.id_encargado =?', [id])
-console.log(turnos)
+  console.log(turnos)
 
 
   todos = []
@@ -49,27 +49,29 @@ router.get('/alumnasdelcurso/:id', async (req, res) => {
   const id = req.params.id
   try {
     curso = await pool.query('select * from cursado join (select id as idp, nombre, apellido, dni, tel, tel2 from personas) as sel on cursado.id_persona=sel.idp where id_turno=? order by apellido', [id])
-   // curso = await pool.query('select dni, COUNT(CASE  WHEN sel3.asistencia = "presente" THEN 1    WHEN sel3.asistencia = "No" THEN 2    WHEN sel3.asistencia is null THEN 3  ELSE NULL END) as cantidad_por_estado from cursado join (select id as idp, nombre, apellido, dni, tel, tel2 from personas) as sel on cursado.id_persona=sel.idp  left join (select id as idclase, id_turno as idtu  from clases) as sel2   on cursado.id_turno=sel2.idtu left join (select id as ida, asistencia, id_clase from asistencia) as sel3 on sel2.idclase=sel3.id_clase   where id_turno=?  group by dni', [id])
-    clases = await pool.query('select * from clases where id_turno=?',[id])
- 
-let enviar = []
-   for (i in curso){
-    let pres = await pool.query('select * from asistencia join (select id as idc, id_turno from clases) as sel on asistencia.id_clase=sel.idc where asistencia="Presente" and id_persona=? and id_turno=?',[curso[i]['idp'],id])
-    let aus = await pool.query('select * from asistencia join (select id as idc, id_turno from clases) as sel on asistencia.id_clase=sel.idc where (asistencia="Ausente" or asistencia="No") and id_persona=? and id_turno=?',[curso[i]['idp'],id])
+    // curso = await pool.query('select dni, COUNT(CASE  WHEN sel3.asistencia = "presente" THEN 1    WHEN sel3.asistencia = "No" THEN 2    WHEN sel3.asistencia is null THEN 3  ELSE NULL END) as cantidad_por_estado from cursado join (select id as idp, nombre, apellido, dni, tel, tel2 from personas) as sel on cursado.id_persona=sel.idp  left join (select id as idclase, id_turno as idtu  from clases) as sel2   on cursado.id_turno=sel2.idtu left join (select id as ida, asistencia, id_clase from asistencia) as sel3 on sel2.idclase=sel3.id_clase   where id_turno=?  group by dni', [id])
+    clases = await pool.query('select * from clases where id_turno=?', [id])
 
-    nuevo={
-nombre:curso[i]['nombre'],
-apellido:curso[i]['apellido'],
-dni:curso[i]['dni'],
-tel:curso[i]['tel'],
-tel2:curso[i]['tel2'],
-presentes:pres.length,
-ausentes:aus.length,
-sintomar: (clases.length)-(aus.length)-(pres.length)
+    let enviar = []
+    for (i in curso) {
+      let pres = await pool.query('select * from asistencia join (select id as idc, id_turno from clases) as sel on asistencia.id_clase=sel.idc where asistencia="Presente" and id_persona=? and id_turno=?', [curso[i]['idp'], id])
+      let aus = await pool.query('select * from asistencia join (select id as idc, id_turno from clases) as sel on asistencia.id_clase=sel.idc where (asistencia="Ausente" or asistencia="No") and id_persona=? and id_turno=?', [curso[i]['idp'], id])
+
+      nuevo = {
+        id_cursado: curso[i]['id'],
+        observaciones: curso[i]['observaciones'],
+        nombre: curso[i]['nombre'],
+        apellido: curso[i]['apellido'],
+        dni: curso[i]['dni'],
+        tel: curso[i]['tel'],
+        tel2: curso[i]['tel2'],
+        presentes: pres.length,
+        ausentes: aus.length,
+        sintomar: (clases.length) - (aus.length) - (pres.length)
+      }
+      enviar.push(nuevo)
     }
-    enviar.push(nuevo)
-   }
-   
+
 
 
     res.json([enviar])
@@ -245,20 +247,20 @@ router.post("/cambiarestadocurado", async (req, res) => {
 
   console.log(id_cursado)
   console.log(observaciones)
-try {
- await pool.query('update cursado set observaciones = ? where id=?', [ observaciones, id_cursado])
-const nombre_curso = await pool.query('select * from cursado join (select id as idcurso, nombre as nombrecurso from cursos) as selec1 on cursado.id_curso=selec1.idcurso where id =? ',[id_cursado])
-console.log(nombre_curso)
-if (observaciones =='Finalizado'){
-  await pool.query('insert cursos_realizados  set nombre_curso=?, id_cursado=?, id_persona=?, fecha_carga=?', [nombre_curso[0]['nombrecurso'],id_cursado,nombre_curso[0]['id_persona'],(new Date(Date.now())).toLocaleDateString()])
+  try {
+    await pool.query('update cursado set observaciones = ? where id=?', [observaciones, id_cursado])
+    const nombre_curso = await pool.query('select * from cursado join (select id as idcurso, nombre as nombrecurso from cursos) as selec1 on cursado.id_curso=selec1.idcurso where id =? ', [id_cursado])
+    console.log(nombre_curso)
+    if (observaciones == 'Finalizado') {
+      await pool.query('insert cursos_realizados  set nombre_curso=?, id_cursado=?, id_persona=?, fecha_carga=?', [nombre_curso[0]['nombrecurso'], id_cursado, nombre_curso[0]['id_persona'], (new Date(Date.now())).toLocaleDateString()])
 
-}
+    }
 
-  res.json('Realizado')
-} catch (error) {
-  console.log(error)
-  res.json('No Realizado')
-}
+    res.json('Realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('No Realizado')
+  }
 
 
 })

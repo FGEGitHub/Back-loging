@@ -913,7 +913,7 @@ cant_nc = await pool.query('select * from inscripciones where edicion=2 and esta
 cant_nr = await pool.query('select * from inscripciones where edicion=2 and estado ="Rechazada"')
 cant_pend = await pool.query('select * from inscripciones where edicion=2 and estado ="Preasignada"')
 cant_conf = await pool.query('select * from cursado join (select id as idi, edicion from inscripciones) as sel on cursado.id_inscripcion=sel.idi where edicion=2 ')
-console.log('sum(disponibles)')
+
 
 datos33={
   cantidadturnos:cantidaddis[0]['sum(cupo)'],
