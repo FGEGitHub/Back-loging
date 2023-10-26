@@ -547,6 +547,72 @@ res.json(`Realizado`)
 
 })
 
+
+router.post("/enviarinscripcioncarnaval", async (req, res) => {
+  let {option1,option2,option3,option4,comparsa,comparsa_cual, nombre, apellido, dni, tel, tel2, fecha_nac,prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo } = req.body
+  if (comparsa_cual === undefined ) {
+    comparsa_cual = 'Sin determinar'
+  }
+
+  if (option1) {
+    maquillaje = 'Si'
+  }else{
+    maquillaje = 'No'
+  }
+  if (option2) {
+    peinado = 'Si'
+  }else{
+    peinado = 'No'
+  }
+  if (option3) {
+    confeccion = 'Si'
+  }else{
+    confeccion = 'No'
+  }
+  if (option4) {
+    baile = 'Si'
+  }else{
+    baile = 'No'
+  }
+ 
+  ///fecha
+  if (tipo_empleo === undefined) {
+    tipo_empleo = 'Sin determinar'
+  }
+  if (tipo_trabajo === undefined) {
+    tipo_trabajo = 'Sin determinar'
+  }
+  console.log(option1,option2,option3,option4,comparsa,comparsa_cual, nombre, apellido, dni, tel, tel2, fecha_nac, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo)
+
+  try {
+    let pers = await pool.query('select * from personas where dni =?', [dni])
+    if (pers.length > 0) {
+      await pool.query('update personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?where dni=? ', [fecha_nac,nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, dni])
+    } else {
+      await pool.query('insert into personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=? ', [fecha_nac,nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo ])
+
+    }
+     pers = await pool.query('select * from personas where dni =?', [dni])
+    const yainsc = await pool.query('select * from inscripciones_carnaval where id_persona =? ', [pers[0]['id']])
+   let mensaje = ''
+    if (yainsc.length > 0) {
+      mensaje = 'Ya estas inscripta!'
+    }
+    else {
+      fecha=(new Date(Date.now()))
+      await pool.query('insert into inscripciones_carnaval set fecha=?,dni_persona=?,id_persona=?,maquillaje=?,peinado=?,confeccion=?,baile=?', [fecha,dni, pers[0]['id'],maquillaje,peinado,confeccion,baile])
+      mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto'
+    }
+
+
+    res.json(mensaje)
+
+  } catch (error) {
+    console.log(error)
+    res.json('Error algo sucedio, verifica que hayas completado todos los campos')
+  }
+})
+
 router.post("/enviarinscripcion", async (req, res) => {
   let { nombre, apellido, dni, tel, tel2, fecha_nac,prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, motivacion } = req.body
   if (tipo_trabajo === undefined) {
