@@ -600,7 +600,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
     }
     else {
       fecha=(new Date(Date.now()))
-      await pool.query('insert into inscripciones_carnaval set fecha=?,dni_persona=?,id_persona=?,maquillaje=?,peinado=?,confeccion=?,baile=?', [fecha,dni, pers[0]['id'],maquillaje,peinado,confeccion,baile])
+      await pool.query('insert into inscripciones_carnaval set fecha=?,dni_persona=?,id_persona=?,maquillaje=?,peinado=?,confeccion=?,baile=?,comparsa=?,comparsa_cual=?', [fecha,dni, pers[0]['id'],maquillaje,peinado,confeccion,baile,comparsa,comparsa_cual])
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto'
     }
 
