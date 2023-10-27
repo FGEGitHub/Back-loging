@@ -596,7 +596,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
     const yainsc = await pool.query('select * from inscripciones_carnaval where id_persona =? ', [pers[0]['id']])
    let mensaje = ''
     if (yainsc.length > 0) {
-      mensaje = 'Ya estas inscripta!'
+      mensaje = 'Con estos datos ya tenemos una inscripción, no hace falta que te vuelvas a anotar. Por favor aguarda nuestro contacto.'
     }
     else {
       fecha=(new Date(Date.now()))
