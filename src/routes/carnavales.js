@@ -19,5 +19,15 @@ router.get('/traerinscripciones', async (req, res) => {
 })
 
 
+router.post("/desinscribir", async (req, res) => {
+    let { id} = req.body
+    try {
+            await pool.query('delete  from  inscripciones_carnaval where id = ?', [id])
+            res.json('Realizado')
+    } catch (error) {
+        console.log(error)
+        res.json('No Realizado')
+    }
 
+})
 module.exports = router
