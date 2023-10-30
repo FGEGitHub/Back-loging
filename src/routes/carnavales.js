@@ -37,7 +37,7 @@ router.get('/traerinscripcionesenc/', async (req, res) => {
     const id = req.params.id
   
   
-    const etc = await pool.query('select * from inscripciones_carnaval left join (select dni as dnip, nombre, apellido from personas) as selec on inscripciones_carnaval.dni_persona=selec.dnip   where  (id_call is null or id_call= 0)  ')
+    const etc = await pool.query('select * from inscripciones_carnaval left join (select dni as dnip, nombre, apellido from personas) as selec on inscripciones_carnaval.dni_persona=selec.dnip   where  (id_call is null or id_call= 0) order by id ')
     console.log(etc)
   
     res.json(etc);
