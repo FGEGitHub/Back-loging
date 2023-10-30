@@ -106,11 +106,56 @@ router.get('/traerinscripcionesenc/', async (req, res) => {
 ////conectado el usuario nivel6llamdos
 
   router.post("/asignarcurso", async (req, res) => {
-    let { dni, id_inscripcion,  option1,option2,option3,option4} = req.body
+    let { dni, id_inscripcion,  option1,option2,option3,option4,observaciones} = req.body
   console.log( dni, id_inscripcion,  option1,option2,option3,option4)
     try {
        
         const per = await pool.query('select * from personas where dni=?', [dni])
+
+        if (option1){
+             await pool.query('insert into cursado set id_inscripcion=?, id_turno=?, id_persona=?,motivo=?', [id_inscripcion,404,per[0]['id'],(new Date(Date.now())).toLocaleDateString()])
+             await pool.query('update inscripciones_carnaval set estado="Asignadx a curso"   where id=?', [ id_inscripcion])
+             const es = await pool.query('select * from personas where dni=?', [dni])
+  
+  
+             if (observaciones != undefined){
+                 await pool.query('insert into observaciones set detalle=?, id_ref=?, fecha=? ', [observaciones, es[0]['id'],(new Date(Date.now())).toLocaleDateString()])
+       
+             }
+        }
+        if (option2){
+          await pool.query('insert into cursado set id_inscripcion=?, id_turno=?, id_persona=?,motivo=?', [id_inscripcion,405,per[0]['id'],(new Date(Date.now())).toLocaleDateString()])
+          await pool.query('update inscripciones_carnaval set estado="Asignadx a curso"   where id=?', [ id_inscripcion])
+          const es = await pool.query('select * from personas where dni=?', [dni])
+
+
+          if (observaciones != undefined){
+              await pool.query('insert into observaciones set detalle=?, id_ref=?, fecha=? ', [observaciones, es[0]['id'],(new Date(Date.now())).toLocaleDateString()])
+    
+          }
+     }
+     if (option3){
+      await pool.query('insert into cursado set id_inscripcion=?, id_turno=?, id_persona=?,motivo=?', [id_inscripcion,406,per[0]['id'],(new Date(Date.now())).toLocaleDateString()])
+      await pool.query('update inscripciones_carnaval set estado="Asignadx a curso"   where id=?', [ id_inscripcion])
+      const es = await pool.query('select * from personas where dni=?', [dni])
+
+
+      if (observaciones != undefined){
+          await pool.query('insert into observaciones set detalle=?, id_ref=?, fecha=? ', [observaciones, es[0]['id'],(new Date(Date.now())).toLocaleDateString()])
+
+      }
+ }
+ if (option4){
+  await pool.query('insert into cursado set id_inscripcion=?, id_turno=?, id_persona=?,motivo=?', [id_inscripcion,407,per[0]['id'],(new Date(Date.now())).toLocaleDateString()])
+  await pool.query('update inscripciones_carnaval set estado="Asignadx a curso"   where id=?', [ id_inscripcion])
+  const es = await pool.query('select * from personas where dni=?', [dni])
+
+
+  if (observaciones != undefined){
+      await pool.query('insert into observaciones set detalle=?, id_ref=?, fecha=? ', [observaciones, es[0]['id'],(new Date(Date.now())).toLocaleDateString()])
+
+  }
+}
           
      /*        await pool.query('insert into cursado set id_inscripcion=?, id_turno=?, id_persona=?,motivo=?', [id_inscripcion,id_turno,per[0]['id'],(new Date(Date.now())).toLocaleDateString()])
            
@@ -126,7 +171,7 @@ router.get('/traerinscripcionesenc/', async (req, res) => {
             await pool.query('insert into observaciones set detalle=?, id_ref=?, fecha=? ', [observaciones, es[0]['id'],(new Date(Date.now())).toLocaleDateString()])
   
         } */
-        const mensaje = 'Listo! Alumna asignada a curso '+tu[0]['descripcion']+', en ese turno quedan '+cup+' Cupos disponibles'
+        const mensaje = 'Listo! asignadx a curso '
         console.log(mensaje)
         res.json(mensaje)
     } catch (error) {
