@@ -202,13 +202,33 @@ res.json('Mensaje enviado!')
   
   
   })
+  
+
+
+  router.get('/vercursosinscripta/:id', async (req, res) => {
+    const id = req.params.id
+    try {
+      
+      inscriptos = await pool.query('select * from cursado join (select id as idt, descripcion from turnos) as sel on cursado.id_turno=sel.idt where id_inscripcion=? ',[id])
+   
+      res.json([inscriptos])
+      
+    } catch (error) {
+  console.log(error)
+      res.json(["error"]) 
+     }
+
+  })
+
+
+
 
   router.get('/preinscriptascall/:id', async (req, res) => {
     const id = req.params.id
     
       try {
       
-        inscriptos = await pool.query('select * from inscripciones_carnaval join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones_carnaval.dni_persona=sel.dni  where id_call=? ',[id])
+        inscriptos = await pool.query('select * from inscripciones_carnaval join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones_carnaval.dni_persona=sel.dni   where id_call=? ',[id])
      
         res.json([inscriptos])
         
@@ -219,6 +239,29 @@ res.json('Mensaje enviado!')
       })
     
 
+
+      router.post("/desasignar", async (req, res) => {
+        const { id_inscripcion, observaciones, dni } = req.body
+        try {
+          const es = await pool.query('select * from personas where dni=?', [dni])
+          if (observaciones != undefined) {
+            await pool.query('insert into observaciones set detalle=?, id_ref=? fecha=? ', [observaciones, es[0]['id'], (new Date(Date.now())).toLocaleDateString()])
+      
+          }
+          const curs = await pool.query('select * from cursado where id_inscripcion=?', [id_inscripcion])
+      
+   
+
+          await pool.query('delete  from  cursado where id_inscripcion = ?', [id_inscripcion])
+          await pool.query('update inscripciones_carnaval set estado="Inscripto" where id =?', [id_inscripcion])
+      
+          res.json('Realizado')
+        } catch (error) {
+          console.log(error)
+          res.json('No realizado')
+        }
+      
+      })
 
 
 module.exports = router
