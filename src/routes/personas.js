@@ -44,7 +44,7 @@ router.get('/traerpersona/:id', async (req, res) => {
   //res.render('index')
 })
 
-router.get('/traerusuario/:id', isLoggedInn, async (req, res) => {
+router.get('/traerusuario/:id',  async (req, res) => {
   const id = req.params.id
 
 
