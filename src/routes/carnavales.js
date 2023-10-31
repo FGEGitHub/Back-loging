@@ -82,6 +82,27 @@ router.get('/traerinscripcionesenc/', async (req, res) => {
       res.json('No realizado, contacta al administrador')
   }
   })
+
+
+  
+///conectado el usuario nivel6llamdos
+router.post("/mensajeenviado", async (req, res) => {
+  let { dni, id_inscripcion, observaciones} = req.body
+
+  try {
+    
+  await pool.query('update inscripciones_carnaval set estado="Mensaje enviado"  where id=?', [ id_inscripcion])
+  const es = await pool.query('select * from personas where dni=?', [dni])
+  if (observaciones != undefined){
+    await pool.query('insert into observaciones set detalle=?, id_ref=? , fecha=?', [observaciones, es[0]['id'],(new Date(Date.now())).toLocaleDateString()])
+
+}
+res.json('Mensaje enviado!')
+} catch (error) {
+    console.log(error)
+    res.json('No realizado, contacta al administrador')
+}
+})
 ////conectado el usuario nivel6llamdos
 
   router.post("/rechazarinscrip", async (req, res) => {
