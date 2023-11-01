@@ -37,8 +37,8 @@ router.get('/tllamadoscarnaval', async (req, res) => {
         let asignados = await pool.query('select * from inscripciones_carnaval where id_call =? ', [encargados[encargado]['id']])
   
   
-        let sinc = await pool.query('select * from inscripciones_carnaval where id_call =? and estado="Preasignada" ', [encargados[encargado]['id']])
-        let asig = await pool.query('select * from inscripciones_carnaval where id_call =? and estado="Asignada a curso" ', [encargados[encargado]['id']])
+        let sinc = await pool.query('select * from inscripciones_carnaval where id_call =? and estado="Inscripto" ', [encargados[encargado]['id']])
+        let asig = await pool.query('select * from inscripciones_carnaval where id_call =? and estado="Asignadx a curso" ', [encargados[encargado]['id']])
         let rech = await pool.query('select * from inscripciones_carnaval where id_call =? and estado="Rechazada" ', [encargados[encargado]['id']])
          nocont = await pool.query('select * from inscripciones_carnaval where id_call =? and estado="No contesta" ', [encargados[encargado]['id']])
   
