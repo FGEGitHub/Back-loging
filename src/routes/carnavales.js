@@ -221,6 +221,22 @@ res.json('Mensaje enviado!')
   })
 
 
+  
+
+  router.get('/agregadoawasap/:id', async (req, res) => {
+    const id = req.params.id
+
+    await pool.query('update inscripciones_carnaval set agregadoagrupo="Si"   where id=?', [ id])
+res.json('realizado')
+
+  })
+  router.get('/noagregadoawasap/:id', async (req, res) => {
+    const id = req.params.id
+
+    await pool.query('update inscripciones_carnaval set agregadoagrupo="No"   where id=?', [ id])
+res.json('realizado')
+
+  })
 
 
   router.get('/preinscriptascall/:id', async (req, res) => {
