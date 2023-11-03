@@ -40,7 +40,9 @@ router.get('/tllamadoscarnaval', async (req, res) => {
         let sinc = await pool.query('select * from inscripciones_carnaval where id_call =? and estado="Inscripto" ', [encargados[encargado]['id']])
         let asig = await pool.query('select * from inscripciones_carnaval where id_call =? and estado="Asignadx a curso" ', [encargados[encargado]['id']])
         let rech = await pool.query('select * from inscripciones_carnaval where id_call =? and estado="Rechazada" ', [encargados[encargado]['id']])
-         nocont = await pool.query('select * from inscripciones_carnaval where id_call =? and estado="No contesta" ', [encargados[encargado]['id']])
+        let agregadoagrupo = await pool.query('select * from inscripciones_carnaval where id_call =? and agregadoagrupo="Si" ', [encargados[encargado]['id']])
+
+        nocont = await pool.query('select * from inscripciones_carnaval where id_call =? and estado="No contesta" ', [encargados[encargado]['id']])
   
         let objeto_nuevo = {
             id: encargados[encargado]['id'],
@@ -49,7 +51,8 @@ router.get('/tllamadoscarnaval', async (req, res) => {
             sinc: sinc.length,
             asig: asig.length,
             rech: rech.length,
-            nocont:nocont.length
+            nocont:nocont.length,
+            agregadoagrupo:agregadoagrupo.length
   
         }
         envio.push(objeto_nuevo)
