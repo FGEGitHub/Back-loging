@@ -340,6 +340,7 @@ if (asisprimera.length>0){
         aux = {
           id_alumno: alumnos[ii]['id_persona'],
           nombre: alumnos[ii]['nombre'],
+          tel: alumnos[ii]['tel'],
           apellido: alumnos[ii]['apellido'],
           dni: alumnos[ii]['dni'],
           asistencia: 'No Tomada',
@@ -361,6 +362,7 @@ if (asisprimera.length>0){
           id_alumno: alumnos[ii]['id_persona'],
           nombre: alumnos[ii]['nombre'],
           apellido: alumnos[ii]['apellido'],
+          tel: alumnos[ii]['tel'],
           dni: alumnos[ii]['dni'],
           asistencia: asis[0]['asistencia'],
           justificacion: asis[0]['justificacion'],
