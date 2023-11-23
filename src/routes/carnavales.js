@@ -243,10 +243,15 @@ res.json('realizado')
     const id = req.params.id
     
       try {
+        if(id==213){
+        inscriptoss = await pool.query('select * from inscripciones_carnaval left join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones_carnaval.dni_persona=sel.dni  ')
+
+        }else{
+          inscriptoss = await pool.query('select * from inscripciones_carnaval join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones_carnaval.dni_persona=sel.dni   where id_call=? ',[id])
+        }
       
-        inscriptos = await pool.query('select * from inscripciones_carnaval join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones_carnaval.dni_persona=sel.dni   where id_call=? ',[id])
      
-        res.json([inscriptos])
+        res.json([inscriptoss])
         
       } catch (error) {
     console.log(error)
