@@ -12,7 +12,7 @@ const { isLoggedInn } = require('../lib/auth')
 
 
 router.get('/traerinscripciones', async (req, res) => {
-    const todas = await pool.query('select * from inscripciones_carnaval join (select dni, nombre, apellido from personas) as sel on inscripciones_carnaval.dni_persona=sel.dni')
+    const todas = await pool.query('select * from inscripciones_carnaval join (select dni, nombre, apellido from personas) as sel on inscripciones_carnaval.dni_persona=sel.dni left join(select id as idca, nombre as nombrecall from usuarios) as sel3 on inscripciones_carnaval.id_call=sel3.idca ')
 
 
     res.json(todas)
