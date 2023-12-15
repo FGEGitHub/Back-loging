@@ -66,6 +66,7 @@ router.get('/listadetodosproductos', async (req, res) => {
       precio: productosdeunapersona[i]['precio'],
       descripcion: productosdeunapersona[i]['descripcion'],
       cantidad: productosdeunapersona[i]['stock'],
+      fecha: productosdeunapersona[i]['fecha'],
       imagenBase64: imagenBuffer.toString('base64')
     }
 enviar.push(nuevo)
