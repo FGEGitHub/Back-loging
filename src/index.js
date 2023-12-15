@@ -39,6 +39,8 @@ app.set('view engine', '.hbs')
     saveUninitialized: false,
     store: new MySQLStore(database)
 })) */
+app.use('/imagenesvendedoras', express.static('imagenesvendedoras'));
+
 
 const sessionStore = new MariaDBStore({
     host: 'localhost',
@@ -108,6 +110,7 @@ app.use(`/turnos`, require('./routes/turnos'))
 app.use(`/coordinadores`, require('./routes/coordinadores'))
 app.use(`/fiscalizacion`, require('./routes/fiscalizacion'))
 app.use(`/carnavales`, require('./routes/carnavales'))
+app.use(`/vendedoras`, require('./routes/vendedoras'))
 //app.use(`/links`, require('./routes/links'))
 
 
