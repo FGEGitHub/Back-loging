@@ -17,6 +17,17 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+
+
+
+
+
+router.post("/borrararticulo",  async (req, res) => {
+  const {id} = req.body
+  console.log(id)
+})
+
+
 router.post("/nuevoprpducto", upload.single('imagen'), async (req, res) => {
 
 
@@ -62,6 +73,8 @@ router.get('/listadetodosproductos', async (req, res) => {
     }
 
     nuevo = {
+      id: productosdeunapersona[i]['id'],
+      id_usuario: productosdeunapersona[i]['id_usuario'],
       nombre: productosdeunapersona[i]['nombre'],
       precio: productosdeunapersona[i]['precio'],
       descripcion: productosdeunapersona[i]['descripcion'],
@@ -100,6 +113,7 @@ router.get('/listadeproductos/:id', async (req, res) => {
     }
 
     nuevo = {
+      id: productosdeunapersona[i]['id'],
       nombre: productosdeunapersona[i]['nombre'],
       precio: productosdeunapersona[i]['precio'],
       descripcion: productosdeunapersona[i]['descripcion'],
