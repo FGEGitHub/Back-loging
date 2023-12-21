@@ -4,7 +4,8 @@ const { isLoggedIn, isLoggedInn, isLoggedInn2 } = require('../lib/auth') //prote
 const pool = require('../database')
 const multer = require('multer')
 const path = require('path')
-const fs = require('fs')
+const fse = require('fs').promises;
+const fs = require('fs');
 
 
 const storage = multer.diskStorage({
@@ -25,6 +26,30 @@ const upload = multer({ storage });
 router.post("/borrararticulo",  async (req, res) => {
   const {id} = req.body
   console.log(id)
+  try {
+    const  prod = await pool.query("select * from producto_venta where id=?",[id])
+    console.log(prod[0]['ubicacion'])
+    rutaImagen = path.join(__dirname, '../imagenesvendedoras', prod[0]['ubicacion']);
+    console.log('rutaImagen')
+    console.log(rutaImagen)
+    try {
+       await fse.unlink(rutaImagen);
+    } catch (error) {
+      console.log(error)
+    }
+  try {
+    await pool.query('delete  from  producto_venta where id = ?', [id])
+  
+  } catch (error) {
+    console.log(error)
+  }
+  
+    res.json('Borrado')
+  } catch (error) {
+    console.log(error)
+    res.json('No Borrado')
+  }
+
 })
 
 
@@ -80,7 +105,7 @@ router.get('/listadetodosproductos', async (req, res) => {
       descripcion: productosdeunapersona[i]['descripcion'],
       cantidad: productosdeunapersona[i]['stock'],
       fecha: productosdeunapersona[i]['fecha'],
-      imagenBase64: imagenBuffer.toString('base64')
+      imagenBase64
     }
 enviar.push(nuevo)
   }
@@ -106,10 +131,16 @@ router.get('/listadeproductos/:id', async (req, res) => {
     try {
       //const workbook = XLSX.readFile(path.join(__dirname, '../Excel/' + nombre))
       rutaImagen = path.join(__dirname, '../imagenesvendedoras', productosdeunapersona[i]['ubicacion']);
+      console.log(rutaImagen)
       imagenBuffer = fs.readFileSync(rutaImagen);
       imagenBase64 = imagenBuffer.toString('base64');
     } catch (error) {
+
       console.log(error)
+/*       rutaImagen = path.join(__dirname, '../../imagenes', "mantenimiento.jpeg");
+          console.log(rutaImagen)
+          imagenBuffer = fs.readFileSync(rutaImagen);
+          imagenBase64 = imagenBuffer.toString('base64'); */
     }
 
     nuevo = {
@@ -118,7 +149,8 @@ router.get('/listadeproductos/:id', async (req, res) => {
       precio: productosdeunapersona[i]['precio'],
       descripcion: productosdeunapersona[i]['descripcion'],
       cantidad: productosdeunapersona[i]['stock'],
-      imagenBase64: imagenBuffer.toString('base64')
+      imagenBase64
+      
     }
 enviar.push(nuevo)
   }
