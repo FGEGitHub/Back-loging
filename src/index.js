@@ -99,6 +99,7 @@ app.use(cors(corsOptions));
 //routes
 app.use(require('./routes/index'))
 app.use(require('./routes/authentication'))
+app.use(`/dtc`, require('./routes/dtc'))
 app.use(`/personas`, require('./routes/personas'))
 app.use(`/cursos`, require('./routes/cursos'))
 app.use(`/novedades`, require('./routes/novedades'))
