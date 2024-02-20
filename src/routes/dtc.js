@@ -17,7 +17,7 @@ router.get('/listachiques/',  async (req, res) => {
 
 
 router.post("/nuevochique", async (req, res) => {
-    let { nombre, apellido, observaciones, numero_clase, fecha_nacimiento } = req.body
+    let { nombre, apellido, fecha_nacimiento, observaciones,primer_contacto,primer_ingreso,admision,dni,domicilio,telefono,autorizacion_imagen,fotoc_dni,fotoc_responsable,tel_responsable,visita_social,egreso,aut_retirar,dato_escolar,hora_merienda} = req.body
   
   
     try {
@@ -29,8 +29,8 @@ router.post("/nuevochique", async (req, res) => {
   }
  
   
-      await pool.query('insert dtc_chicos  set nombre=?,apellido=?,fecha_nacimiento=?,observaciones=?', [nombre, apellido, fecha_nacimiento, observaciones])
-  
+      await pool.query('insert dtc_chicos  set nombre=?,apellido=?,fecha_nacimiento=?,observaciones=?,primer_contacto=?,primer_ingreso=?,admision=?,dni=?,domicilio=?,telefono=?,autorizacion_imagen=?,fotoc_dni=?,fotoc_responsable=?,tel_responsable=?,visita_social=?,egreso=?,aut_retirar=?,dato_escolar=?,hora_merienda=?', [nombre, apellido, fecha_nacimiento, observaciones,primer_contacto,primer_ingreso,admision,dni,domicilio,telefono,autorizacion_imagen,fotoc_dni,fotoc_responsable,tel_responsable,visita_social,egreso,aut_retirar,dato_escolar,hora_merienda])
+
       res.json('Agregado')
     } catch (error) {
       console.log(error)
