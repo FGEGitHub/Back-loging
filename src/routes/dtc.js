@@ -14,6 +14,11 @@ router.get('/listachiques/',  async (req, res) => {
     res.json([chiques])
 })
 
+router.get('/datosdechique/:id',  async (req, res) => {
+const id = req.params.id
+  const chiques = await pool.query('select * from dtc_chicos where id =?',[id])
+  res.json([chiques])
+})
 
 
 router.post("/nuevochique", async (req, res) => {
