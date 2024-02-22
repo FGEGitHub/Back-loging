@@ -14,7 +14,7 @@ router.get('/todos/', async (req, res) => {
 router.get('/todosdtc/', async (req, res) => {
    
   
-  const etc = await pool.query ('select * from usuarios where nivel =20' )
+  const etc = await pool.query ('select * from usuarios where nivel =20 OR nivel=21 or nivel =22' )
 res.json(etc);
 //res.render('index')
 })
@@ -77,7 +77,7 @@ res.json([enviar,resumen])
 
 //res.render('index')
 })
-  router.post('/signupp', isLoggedInn2, passport.authenticate('local.registroadmin', {
+  router.post('/signupp',passport.authenticate('local.registroadmin', {
     successRedirect: '/exitosignup',
     failureRedirect:'/noexito',
     failureFlash:true
