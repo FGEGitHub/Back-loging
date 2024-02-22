@@ -142,9 +142,16 @@ router.post("/nuevochique", async (req, res) => {
 
   router.post("/ponerpresente",  async (req, res) => {
     const {fecha, id} = req.body
-    await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?', [fecha, id])
+    const existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =?',[id,fecha])
+    if (existe.length>0){
+      await pool.query('delete  from  dtc_asistencia where id = ?', [existe[0]['id']])
 
-    res.json('prod,usuarios]')
+    }else{
+      await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?', [fecha, id])
+
+    }
+
+    res.json('Realizado')
   
   
   })
