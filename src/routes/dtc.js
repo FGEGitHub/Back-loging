@@ -91,6 +91,29 @@ router.post("/subirlegajo", upload.single('imagen'), async (req, res) => {
 
 })
 
+
+router.post("/modificarusuario", async (req, res) => {
+  let { id,nombre, apellido, fecha_nacimiento, observaciones,primer_contacto,primer_ingreso,admision,dni,domicilio,telefono,autorizacion_imagen,fotoc_dni,fotoc_responsable,tel_responsable,visita_social,egreso,aut_retirar,dato_escolar,hora_merienda} = req.body
+
+console.log( id,nombre, apellido, fecha_nacimiento, observaciones,primer_contacto,primer_ingreso,admision,dni,domicilio,telefono,autorizacion_imagen,fotoc_dni,fotoc_responsable,tel_responsable,visita_social,egreso,aut_retirar,dato_escolar,hora_merienda)
+  try {
+if (observaciones ==undefined){
+  observaciones="Sin observaciones"
+}
+if (fecha_nacimiento ==undefined){
+  fecha_nacimiento="Sin asignar"
+}
+
+    await pool.query('update dtc_chicos  set nombre=?,apellido=?,fecha_nacimiento=?,observaciones=?,primer_contacto=?,primer_ingreso=?,admision=?,dni=?,domicilio=?,telefono=?,autorizacion_imagen=?,fotoc_dni=?,fotoc_responsable=?,tel_responsable=?,visita_social=?,egreso=?,aut_retirar=?,dato_escolar=?,hora_merienda=? where id=?', [nombre, apellido, fecha_nacimiento, observaciones,primer_contacto,primer_ingreso,admision,dni,domicilio,telefono,autorizacion_imagen,fotoc_dni,fotoc_responsable,tel_responsable,visita_social,egreso,aut_retirar,dato_escolar,hora_merienda,id])
+
+    res.json('Modificado')
+  } catch (error) {
+    console.log(error)
+    res.json('No modificado')
+  }
+
+})
+
 router.post("/nuevochique", async (req, res) => {
     let { nombre, apellido, fecha_nacimiento, observaciones,primer_contacto,primer_ingreso,admision,dni,domicilio,telefono,autorizacion_imagen,fotoc_dni,fotoc_responsable,tel_responsable,visita_social,egreso,aut_retirar,dato_escolar,hora_merienda} = req.body
   
