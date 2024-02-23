@@ -139,7 +139,11 @@ router.post("/nuevochique", async (req, res) => {
   
   
   
-
+  
+  router.post("/traeractividades",  async (req, res) => {
+  const {fecha, id_usuario} = req.body
+  console.log(fecha, id_usuario)
+  })
   router.post("/ponerpresente",  async (req, res) => {
     const {fecha, id} = req.body
     const existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =?',[id,fecha])
