@@ -137,6 +137,7 @@ router.post("/nuevochique", async (req, res) => {
   
   })
     
+  
   router.post("/borraractividad",  async (req, res) => {
     const {id} = req.body
     
