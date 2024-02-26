@@ -136,14 +136,52 @@ router.post("/nuevochique", async (req, res) => {
     }
   
   })
-  
+    
+  router.post("/borraractividad",  async (req, res) => {
+    const {id} = req.body
+    
+    try {
+      await pool.query('delete  from  dtc_actividades where id = ?', [id])
+      res.json('Realizado')
+
+    } catch (error) {
+      console.log(error)
+      res.json('No realizado')
+    }
+
+
+  })
   
   
   
   router.post("/traeractividades",  async (req, res) => {
   const {fecha, id_usuario} = req.body
-  console.log(fecha, id_usuario)
+  try {
+    const existe = await pool.query('select * from dtc_actividades where acargo=? and fecha =?',[id_usuario,fecha])
+ res.json(existe)
+  } catch (error) {
+    console.log(error)
+    res.json([])
+  }
   })
+
+  
+
+
+  
+  router.post("/nuevaactividad",  async (req, res) => {
+    const {detalle, id_usuario, fecha,nombre} = req.body
+
+  console.log(detalle, id_usuario, fecha, nombre)
+   await pool.query('insert into dtc_actividades set fecha=?, acargo=?,titulo=?,detalle=?', [fecha, id_usuario,nombre,detalle])
+
+    res.json('Realizado')
+  
+  
+  })
+
+
+
   router.post("/ponerpresente",  async (req, res) => {
     const {fecha, id} = req.body
     const existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =?',[id,fecha])
