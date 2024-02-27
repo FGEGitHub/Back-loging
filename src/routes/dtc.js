@@ -137,7 +137,7 @@ router.post("/nuevochique", async (req, res) => {
   
   })
     
-  
+
   router.post("/borraractividad",  async (req, res) => {
     const {id} = req.body
     
@@ -154,6 +154,19 @@ router.post("/nuevochique", async (req, res) => {
   })
   
   
+  
+  router.post("/traertodaslasactividades",  async (req, res) => {
+    const {fecha} = req.body
+    try {
+      console.log(fecha)
+      const existe = await pool.query('select * from dtc_actividades join (select id as idu, nombre from usuarios) as sel on dtc_actividades.acargo=sel.idu where  fecha =?',[fecha])
+      console.log(existe)
+   res.json(existe)
+    } catch (error) {
+      console.log(error)
+      res.json([])
+    }
+    })
   
   router.post("/traeractividades",  async (req, res) => {
   const {fecha, id_usuario} = req.body
