@@ -215,7 +215,7 @@ router.post("/nuevochique", async (req, res) => {
     const {fecha} = req.body
     const  prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=?",[fecha])
     console.log(prod)
-    const usuarios =  await pool.query("select * from dtc_chicos ")
+    const usuarios =  await pool.query("select * from dtc_chicos left join (select fecha, id_usuario from dtc_asistencia  where fecha=?) as sel on dtc_chicos.id=sel.id_usuario",[fecha])
     res.json([prod,usuarios])
   
   
