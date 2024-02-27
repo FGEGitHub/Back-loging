@@ -26,7 +26,7 @@ const upload = multer({ storage });
 
 router.get('/listachiques/',  async (req, res) => {
 
-    const chiques = await pool.query('select * from dtc_chicos')
+    const chiques = await pool.query('select * from dtc_chicos order by apellido')
     res.json([chiques])
 })
 
