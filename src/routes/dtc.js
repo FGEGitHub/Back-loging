@@ -167,6 +167,22 @@ router.post("/nuevochique", async (req, res) => {
       res.json([])
     }
     })
+
+
+
+    
+
+ router.post("/traeractividadeschico",  async (req, res) => {
+  const {id_usuario} = req.body
+  try {
+    const existe = await pool.query('select * from dtc_actividades_chicos where id_usuario =?',[id_usuario])
+ res.json(existe)
+  } catch (error) {
+    console.log(error)
+    res.json([])
+  }
+  })
+
   
   router.post("/traeractividades",  async (req, res) => {
   const {fecha, id_usuario} = req.body
@@ -193,8 +209,17 @@ router.post("/nuevochique", async (req, res) => {
   
   
   })
+  router.post("/nuevaactividadchico",  async (req, res) => {
+    const {detalle, id_usuario, titulo,id_tallerista,fecha} = req.body
 
+  console.log(detalle, id_usuario, fecha, id_tallerista)
+ await pool.query('insert into dtc_actividades_chicos set id_usuario=?, id_tallerista=?,titulo=?,detalle=?', [id_usuario, id_tallerista,titulo,detalle,fecha])
 
+    res.json('Realizado')
+  
+  
+  })
+  
 
   router.post("/ponerpresente",  async (req, res) => {
     const {fecha, id} = req.body
