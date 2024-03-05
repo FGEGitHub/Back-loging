@@ -136,8 +136,23 @@ router.post("/nuevochique", async (req, res) => {
     }
   
   })
-    
+  
 
+  router.post("/borraractividadchico",  async (req, res) => {
+    const {id} = req.body
+    
+    try {
+      await pool.query('delete  from  dtc_actividades_chicos where id = ?', [id])
+      res.json('Realizado')
+
+    } catch (error) {
+      console.log(error)
+      res.json('No realizado')
+    }
+
+
+  })
+  
   router.post("/borraractividad",  async (req, res) => {
     const {id} = req.body
     
@@ -175,7 +190,7 @@ router.post("/nuevochique", async (req, res) => {
  router.post("/traeractividadeschico",  async (req, res) => {
   const {id_usuario} = req.body
   try {
-    const existe = await pool.query('select * from dtc_actividades_chicos where id_usuario =?',[id_usuario])
+    const existe = await pool.query('select * from dtc_actividades_chicos join (select id as idu, nombre from usuarios) as sel on dtc_actividades_chicos.id_tallerista=sel.idu where id_usuario =? order by id desc',[id_usuario])
  res.json(existe)
   } catch (error) {
     console.log(error)
@@ -213,7 +228,7 @@ router.post("/nuevochique", async (req, res) => {
     const {detalle, id_usuario, titulo,id_tallerista,fecha} = req.body
 
   console.log(detalle, id_usuario, fecha, id_tallerista)
- await pool.query('insert into dtc_actividades_chicos set id_usuario=?, id_tallerista=?,titulo=?,detalle=?', [id_usuario, id_tallerista,titulo,detalle,fecha])
+ await pool.query('insert into dtc_actividades_chicos set id_usuario=?, id_tallerista=?,titulo=?,detalle=?,fecha=?', [id_usuario, id_tallerista,titulo,detalle,fecha])
 
     res.json('Realizado')
   
