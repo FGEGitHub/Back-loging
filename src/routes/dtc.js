@@ -235,7 +235,15 @@ router.post("/nuevochique", async (req, res) => {
   
   })
   
-
+  router.get('/descargar/:id',async (req, res) => {
+    const id = req.params.id;
+    const nomb = await pool.query('select * from dtc_legajos where id=?',[id])
+    filePath = path.join(__dirname, '../imagenesvendedoras', nomb[0]['ubicacion']);
+console.log(filePath)
+   // const filePath = __dirname + '/uploads/' + nomb[0]['ubicacion'];
+  
+    res.download(filePath);
+  });
   router.post("/ponerpresente",  async (req, res) => {
     const {fecha, id} = req.body
     const existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =?',[id,fecha])
