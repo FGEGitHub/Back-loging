@@ -72,6 +72,28 @@ const id = req.params.id
     //  res.json(tareas)
   
   })
+
+  
+
+  router.post("/subirfotoperfil", upload.single('imagen'), async (req, res) => {
+
+    const id = req.body.id;
+
+  
+    const fileName = req.file.filename;
+  
+    try {
+      await pool.query('update dtc_chicos  set foto=? where id=?', [fileName,id])
+      res.json(`Realizado`)
+    } catch (error) {
+      console.log(error)
+      res.json('No escribiste nadaaa')
+    }
+  
+  
+  })
+
+
 router.post("/subirlegajo", upload.single('imagen'), async (req, res) => {
 
   const id = req.body.id;
