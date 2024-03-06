@@ -42,9 +42,22 @@ router.get('/traerfoto/:id', async (req, res) => {
   const id = req.params.id
   const productosdeunapersona =  await pool.query('select * from dtc_legajos where id =?',[id])
   rutaImagen = path.join(__dirname, '../imagenesvendedoras', productosdeunapersona[0]['ubicacion']);
+  imagenBase64=""
+  console.log(productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length-3] +productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length-2]+productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length-1])
+ if(productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length-3] +productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length-2]+productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length-1] ==="pdf"){
+  console.log('pdf')
+  imagenBase64=rutaImagen
+  res.sendFile(rutaImagen)
+
+
+ }else{
+  console.log('otro')
   imagenBuffer = fs.readFileSync(rutaImagen);
   imagenBase64 = imagenBuffer.toString('base64');
-res.json(imagenBase64)
+  res.json([imagenBase64,productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length-3] +productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length-2]+productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length-1]])
+
+ }
+ 
 
 })
   router.get('/listadelegajos/:id', async (req, res) => {
