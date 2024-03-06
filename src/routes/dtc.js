@@ -45,7 +45,7 @@ const id = req.params.id
     enviar=[]
     //  tareas = await pool.query('select * from producto_venta where id_usuario=? ',[id])
     let rutaImagen
-    for (i in productosdeunapersona) {
+   /*  for (i in productosdeunapersona) {
 
       imagenBase64 = 'undef'
       try {
@@ -66,9 +66,9 @@ const id = req.params.id
       }
       console.log(nuevo)
   enviar.push(nuevo)
-    }
+    } */
 console.log(enviar)
-    res.json(enviar);
+    res.json(productosdeunapersona);
   
   
     //  res.json(tareas)
