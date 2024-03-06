@@ -38,6 +38,15 @@ const id = req.params.id
 
 
 
+router.get('/traerfoto/:id', async (req, res) => {
+  const id = req.params.id
+  const productosdeunapersona =  await pool.query('select * from dtc_legajos where id =?',[id])
+  rutaImagen = path.join(__dirname, '../imagenesvendedoras', productosdeunapersona[0]['ubicacion']);
+  imagenBuffer = fs.readFileSync(rutaImagen);
+  imagenBase64 = imagenBuffer.toString('base64');
+res.json(imagenBase64)
+
+})
   router.get('/listadelegajos/:id', async (req, res) => {
     const id = req.params.id
 
