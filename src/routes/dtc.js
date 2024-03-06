@@ -202,7 +202,7 @@ router.post("/nuevochique", async (req, res) => {
   router.post("/traeractividades",  async (req, res) => {
   const {fecha, id_usuario} = req.body
   try {
-    const existe = await pool.query('select * from dtc_actividades where acargo=? and fecha =?',[id_usuario,fecha])
+    const existe = await pool.query('select * from dtc_actividades where acargo=? ',[id_usuario])
  res.json(existe)
   } catch (error) {
     console.log(error)
@@ -215,10 +215,10 @@ router.post("/nuevochique", async (req, res) => {
 
   
   router.post("/nuevaactividad",  async (req, res) => {
-    const {detalle, id_usuario, fecha,nombre} = req.body
+    const {detalle, id_tallerista, fecha,titulo} = req.body
 
-  console.log(detalle, id_usuario, fecha, nombre)
-   await pool.query('insert into dtc_actividades set fecha=?, acargo=?,titulo=?,detalle=?', [fecha, id_usuario,nombre,detalle])
+  console.log(detalle, id_tallerista, fecha, titulo)
+   await pool.query('insert into dtc_actividades set fecha=?, acargo=?,titulo=?,detalle=?', [fecha, id_tallerista,titulo,detalle])
 
     res.json('Realizado')
   
