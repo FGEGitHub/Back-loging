@@ -33,7 +33,17 @@ router.get('/listachiques/',  async (req, res) => {
 router.get('/datosdechique/:id',  async (req, res) => {
 const id = req.params.id
   const chiques = await pool.query('select * from dtc_chicos where id =?',[id])
-  res.json([chiques])
+  console.log(chiques[0]['foto'])
+  if( chiques[0]['foto']  === null){
+    imagenBase64=null
+   
+  }else{
+    rutaImagen = path.join(__dirname, '../imagenesvendedoras', chiques[0]['foto']);
+    imagenBuffer = fs.readFileSync(rutaImagen);
+    imagenBase64 = imagenBuffer.toString('base64');
+  }
+
+  res.json([chiques,imagenBase64])
 })
 
 
@@ -105,11 +115,30 @@ console.log(enviar)
 
   
     const fileName = req.file.filename;
+    //// borrar del storage
+
+    try {
+      const id = req.body.id;
+
   
+      const fileName = req.file.filename;
+      console.log(id)
+      const traerfoto= await pool.query('select * from dtc_chicos where id = ? ',[id])
+      console.log(traerfoto)
+      rutaImagen = path.join(__dirname, '../imagenesvendedoras', traerfoto[0]['foto']);
+      console.log('rutaImagen')
+      console.log(rutaImagen)
+       await fse.unlink(rutaImagen);
+    } catch (error) {
+      console.log('error1')
+      console.log(error)
+    }
+    /////
     try {
       await pool.query('update dtc_chicos  set foto=? where id=?', [fileName,id])
       res.json(`Realizado`)
     } catch (error) {
+      console.log('error2')
       console.log(error)
       res.json('No escribiste nadaaa')
     }
