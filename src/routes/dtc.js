@@ -46,6 +46,7 @@ const id = req.params.id
     //  tareas = await pool.query('select * from producto_venta where id_usuario=? ',[id])
     let rutaImagen
     for (i in productosdeunapersona) {
+
       imagenBase64 = 'undef'
       try {
         //const workbook = XLSX.readFile(path.join(__dirname, '../Excel/' + nombre))
@@ -63,9 +64,10 @@ const id = req.params.id
         descripcion: productosdeunapersona[i]['descripcion'],
         imagenBase64
       }
+      console.log(nuevo)
   enviar.push(nuevo)
     }
-
+console.log(enviar)
     res.json(enviar);
   
   
