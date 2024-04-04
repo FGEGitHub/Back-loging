@@ -320,13 +320,13 @@ console.log(filePath)
     res.download(filePath);
   });
   router.post("/ponerpresente",  async (req, res) => {
-    const {fecha, id} = req.body
+    const {fecha, id, id_tallerista} = req.body
     const existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =?',[id,fecha])
     if (existe.length>0){
       await pool.query('delete  from  dtc_asistencia where id = ?', [existe[0]['id']])
 
     }else{
-      await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?', [fecha, id])
+      await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?,id_tallerista=?', [fecha, id,id_tallerista])
 
     }
 
@@ -335,8 +335,18 @@ console.log(filePath)
   
   })
   router.post("/traerpresentes",  async (req, res) => {
-    const {fecha} = req.body
-    const  prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=?",[fecha])
+    const {fecha,id} = req.body
+
+    const usua = await pool.query('select * from usuarios where id=?',[id])
+    console.log(fecha)
+    let prod
+    if(usua.nivel=20 ){
+        prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? order by apellido",[fecha,238])
+
+    }else{
+        prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? order by apellido",[fecha,id])
+
+    }
     console.log(prod)
     const usuarios =  await pool.query("select * from dtc_chicos left join (select fecha, id_usuario from dtc_asistencia  where fecha=?) as sel on dtc_chicos.id=sel.id_usuario",[fecha])
     res.json([prod,usuarios])
