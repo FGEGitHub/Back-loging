@@ -23,6 +23,15 @@ const upload = multer({ storage });
 
 
 
+router.get('/clasesdetaller/:id',  async (req, res) => {
+  id= req.params.id
+  console.log(id)
+  const clases = await pool.query('select fecha,id_tallerista from dtc_asistencia where id_tallerista=? group by fecha,id_tallerista',[id])
+  console.log(clases)
+
+  res.json(clases)
+})
+
 
 router.get('/listachiques/',  async (req, res) => {
 
@@ -33,17 +42,22 @@ router.get('/listachiques/',  async (req, res) => {
 router.get('/datosdechique/:id',  async (req, res) => {
 const id = req.params.id
   const chiques = await pool.query('select * from dtc_chicos where id =?',[id])
-  console.log(chiques[0]['foto'])
-  if( chiques[0]['foto']  === null){
-    imagenBase64=null
-   
-  }else{
-    rutaImagen = path.join(__dirname, '../imagenesvendedoras', chiques[0]['foto']);
-    imagenBuffer = fs.readFileSync(rutaImagen);
-    imagenBase64 = imagenBuffer.toString('base64');
+  try {
+    console.log(chiques[0]['foto'])
+    if( chiques[0]['foto']  === null){
+      imagenBase64=null
+     
+    }else{
+      rutaImagen = path.join(__dirname, '../imagenesvendedoras', chiques[0]['foto']);
+      imagenBuffer = fs.readFileSync(rutaImagen);
+      imagenBase64 = imagenBuffer.toString('base64');
+    }
+  
+    res.json([chiques,imagenBase64])
+  } catch (error) {
+    res.json([])
   }
 
-  res.json([chiques,imagenBase64])
 })
 
 
@@ -310,6 +324,20 @@ router.post("/nuevochique", async (req, res) => {
   
   })
   
+
+
+  
+
+
+  router.get('/traertalleres/',async (req, res) => {
+
+    const existe = await pool.query('select * from usuarios where nivel=21 ')
+
+    res.json([existe])
+
+
+  })
+
   router.get('/descargar/:id',async (req, res) => {
     const id = req.params.id;
     const nomb = await pool.query('select * from dtc_legajos where id=?',[id])
@@ -339,8 +367,9 @@ console.log(filePath)
 
     const usua = await pool.query('select * from usuarios where id=?',[id])
     console.log(fecha)
+    console.log(id)
     let prod
-    if(usua.nivel=20 ){
+    if(usua.nivel==20 ){
         prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? order by apellido",[fecha,238])
 
     }else{
