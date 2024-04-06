@@ -26,10 +26,16 @@ const upload = multer({ storage });
 router.get('/clasesdetaller/:id',  async (req, res) => {
   id= req.params.id
   console.log(id)
-  const clases = await pool.query('select fecha,id_tallerista from dtc_asistencia where id_tallerista=? group by fecha,id_tallerista',[id])
-  console.log(clases)
+  const clases = await pool.query('select fecha,id_tallerista, count(fecha) from dtc_asistencia where id_tallerista=? group by fecha,id_tallerista',[id])
+ 
+  const resultadosConvertidos = clases.map(resultado => ({
+    fecha: resultado.fecha,
+    count: Number(resultado['count(fecha)']) // Convertir BigInt a Number
+  }));
+  
+  console.log(resultadosConvertidos)
 
-  res.json(clases)
+  res.json(resultadosConvertidos)
 })
 
 
@@ -366,8 +372,7 @@ console.log(filePath)
     const {fecha,id} = req.body
 
     const usua = await pool.query('select * from usuarios where id=?',[id])
-    console.log(fecha)
-    console.log(id)
+
     let prod
     if(usua.nivel==20 ){
         prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? order by apellido",[fecha,238])
@@ -376,7 +381,6 @@ console.log(filePath)
         prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? order by apellido",[fecha,id])
 
     }
-    console.log(prod)
     const usuarios =  await pool.query("select * from dtc_chicos left join (select fecha, id_usuario from dtc_asistencia  where fecha=?) as sel on dtc_chicos.id=sel.id_usuario",[fecha])
     res.json([prod,usuarios])
   
