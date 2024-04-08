@@ -68,6 +68,12 @@ const id = req.params.id
 
 
 
+router.get('/traerasistencia/:id', async (req, res) => {
+  const id = req.params.id
+  const asis =  await pool.query('select * from dtc_asistencia where id_usuario =?',[id])
+
+
+})
 router.get('/traerfoto/:id', async (req, res) => {
   const id = req.params.id
   const productosdeunapersona =  await pool.query('select * from dtc_legajos where id =?',[id])
@@ -355,7 +361,7 @@ console.log(filePath)
   });
   router.post("/ponerpresente",  async (req, res) => {
     const {fecha, id, id_tallerista} = req.body
-    const existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =?',[id,fecha])
+    const existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =? and id_tallerista=?',[id,fecha,id_tallerista])
     if (existe.length>0){
       await pool.query('delete  from  dtc_asistencia where id = ?', [existe[0]['id']])
 
@@ -374,14 +380,16 @@ console.log(filePath)
     const usua = await pool.query('select * from usuarios where id=?',[id])
 
     let prod
-    if(usua.nivel==20 ){
+let usuarios
+    if((usua[0].nivel==20) || (usua[0].nivel==22) ){
         prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? order by apellido",[fecha,238])
-
+         usuarios =  await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=?and id_tallerista=?) as sel on dtc_chicos.id=sel.id_usuario and ",[fecha,238])
     }else{
         prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? order by apellido",[fecha,id])
-
+         usuarios =  await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=? and id_tallerista=?) as sel on dtc_chicos.id=sel.id_usuario ",[fecha,id])
     }
-    const usuarios =  await pool.query("select * from dtc_chicos left join (select fecha, id_usuario from dtc_asistencia  where fecha=?) as sel on dtc_chicos.id=sel.id_usuario",[fecha])
+  
+   
     res.json([prod,usuarios])
   
   
