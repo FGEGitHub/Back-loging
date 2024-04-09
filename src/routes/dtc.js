@@ -401,7 +401,7 @@ console.log(filePath)
 let usuarios
     if((usua[0].nivel==20) || (usua[0].nivel==22) ){
         prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? order by apellido",[fecha,238])
-         usuarios =  await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=?and id_tallerista=?) as sel on dtc_chicos.id=sel.id_usuario and ",[fecha,238])
+         usuarios =  await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=?and id_tallerista=?) as sel on dtc_chicos.id=sel.id_usuario ",[fecha,238])
     }else{
         prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? order by apellido",[fecha,id])
          usuarios =  await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=? and id_tallerista=?) as sel on dtc_chicos.id=sel.id_usuario ",[fecha,id])
