@@ -70,8 +70,18 @@ const id = req.params.id
 
 router.get('/traerasistencia/:id', async (req, res) => {
   const id = req.params.id
-  const asis =  await pool.query('select * from dtc_asistencia where id_usuario =?',[id])
+  const asis =  await pool.query('select count(usuario),usuario,idu from dtc_asistencia join(select id as idu, usuario from usuarios) as sel on dtc_asistencia.id_tallerista=sel.idu where id_usuario =? group by usuario,idu',[id])
 
+  const resultadosConvertidos = asis.map(resultado => ({
+    
+    count: Number(resultado['count(usuario)']),
+    taller: resultado.usuario,// Convertir BigInt a Number
+    id_tallerista:resultado.idu
+  }));
+  
+  console.log(resultadosConvertidos)
+
+  res.json([resultadosConvertidos])
 
 })
 router.get('/traerfoto/:id', async (req, res) => {
@@ -213,6 +223,14 @@ if (fecha_nacimiento ==undefined){
     res.json('No modificado')
   }
 
+})
+
+
+
+router.post("/traerasistenciasdetaller", async (req, res) => {
+  let {id_tallerista,id_usuario} = req.body
+const resp = await pool.query('select * from dtc_asistencia where id_tallerista=? and id_usuario=?',[id_tallerista,id_usuario])
+res.json([resp])
 })
 
 router.post("/nuevochique", async (req, res) => {
