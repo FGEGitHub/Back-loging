@@ -377,6 +377,29 @@ console.log(filePath)
   
     res.download(filePath);
   });
+
+  
+
+  router.post("/traerestadisticas",  async (req, res) => {
+    const {fecha} = req.body
+    ///presentes mensuales 
+    // Divide la fecha usando el guión ('-') como separador
+const [dia, mes, año] = fecha.split('-');
+
+// Imprime los valores separados
+console.log('Día:', dia);
+console.log('Mes:', mes);
+console.log('Año:', año);
+const presentes_totales = await pool.query('SELECT * FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = 4 AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = 2024 and id_tallerista=238')
+    console.log("presentes totales:",presentes_totales.length)
+    const presentes_totales_reales = await pool.query('SELECT distinct(id_usuario) FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = 4 AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = 2024 and id_tallerista=238')
+
+    console.log("presentes reales totales:",presentes_totales_reales.length)
+
+    res.json([presentes_totales,presentes_totales_reales])
+  })
+
+
   router.post("/ponerpresente",  async (req, res) => {
     const {fecha, id, id_tallerista} = req.body
     const existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =? and id_tallerista=?',[id,fecha,id_tallerista])
