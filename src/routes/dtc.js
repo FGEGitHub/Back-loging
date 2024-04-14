@@ -540,7 +540,7 @@ console.log("cumple",cumple)
 router.post("/traercumples", async (req, res) => {
   let { fecha } = req.body
   ///presentes mensuales 
-  fecha = fecha.fecha
+  fecha = fecha
   console.log(fecha)
   // Divide la fecha usando el guión ('-') como separador
   let [dia, mes, año] = fecha.split('-');
@@ -552,8 +552,9 @@ if (mes.length==1){
 }else{mescumple=mes}
 console.log("'_%"+mescumple+"-"+diacumple+"'")
 const cumple = await pool.query('select * from dtc_chicos where fecha_nacimiento like ?',["%"+mescumple+"-"+diacumple])
+const estemes = await pool.query('select * from dtc_chicos where fecha_nacimiento like ?',["%"+"-"+mescumple+"-"+"%"])
 
-res.json(cumple)
+res.json([cumple,estemes])
 })
 
 
