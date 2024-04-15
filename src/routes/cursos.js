@@ -434,7 +434,7 @@ router.get('/listadetodoslosturnos/', isLoggedInn2, async (req, res) => {
   try {
     console.log('listadetodos')
   //  tur = await pool.query('select * from turnos   join  (select id as idcurso, nombre as nombrecurso from cursos) as selec1  on turnos.id_curso= selec1.idcurso left join (select id as idu, nombre as encargado from usuarios) as selec2 on turnos.id_encargado=selec2.idu  left join (select id as idu2, nombre as coordinador from usuarios) as selec3 on turnos.id_coordinador=selec3.idu2 where etapa=2')
-    tur = await pool.query('select * from turnos   join  (select id as idcurso, nombre as nombrecurso from cursos) as selec1  on turnos.id_curso= selec1.idcurso left join (select id as idu, nombre as encargado from usuarios) as selec2 on turnos.id_encargado=selec2.idu  left join (select id as idu2, nombre as coordinador from usuarios) as selec3 on turnos.id_coordinador=selec3.idu2 where etapa=2')
+    tur = await pool.query('select * from turnos   join  (select id as idcurso, nombre as nombrecurso from cursos) as selec1  on turnos.id_curso= selec1.idcurso left join (select id as idu, nombre as encargado from usuarios) as selec2 on turnos.id_encargado=selec2.idu  left join (select id as idu2, nombre as coordinador from usuarios) as selec3 on turnos.id_coordinador=selec3.idu2 where etapa=3')
 let enviar=[]
 for (i in tur ){
 

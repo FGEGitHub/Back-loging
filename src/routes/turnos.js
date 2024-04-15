@@ -307,5 +307,12 @@ console.log(todos)
 })
 
 
+router.get('/traerturnosparainscri/',  async (req, res) => {
+  
+const tu = await pool.query('select * from turnos where etapa=3')
+res.json([tu])
+
+})
+
 
 module.exports = router
