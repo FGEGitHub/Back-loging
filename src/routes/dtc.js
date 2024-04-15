@@ -431,15 +431,16 @@ const pres_Semanal_real = await pool.query('SELECT distinct(id_usuario) FROM dtc
   router.post("/ponerpresente",  async (req, res) => {
     const {fecha, id, id_tallerista} = req.body
     const existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =? and id_tallerista=?',[id,fecha,id_tallerista])
+   let era
     if (existe.length>0){
       await pool.query('delete  from  dtc_asistencia where id = ?', [existe[0]['id']])
-
+      era="puesto Ausente"
     }else{
       await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?,id_tallerista=?', [fecha, id,id_tallerista])
-
+      era="puesto Presente"
     }
 
-    res.json('Realizado')
+    res.json(era)
   
   
   })
