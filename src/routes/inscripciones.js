@@ -1365,7 +1365,7 @@ router.get('/listacriterios/', async (req, res) => {
 
   criterios = await pool.query('select * from criterios')
 
-  res.json(criterios)
+  res.json([criterios[criterios.length-1]])
 })
 
 
