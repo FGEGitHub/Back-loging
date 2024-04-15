@@ -409,12 +409,21 @@ const presentes_totales = await pool.query('SELECT * FROM dtc_asistencia WHERE M
 //console.log("lunes:", startOfWeek(date, { weekStartsOn: 1 }) )
 const fechaFormateada = format(startOfWeek(date, { weekStartsOn: 1 }), 'd-M-yyyy', { locale: es });
  console.log("lunesformato",fechaFormateada)
-
+ const [dias, mess, años] = fecha.split('-');
+// const presentes_totales_semana = await pool.query('SELECT * FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? and id_tallerista=238',[mess,años])
+ //const presentes_totales_reales_semana = await pool.query('SELECT distinct(id_usuario) FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? and id_tallerista=238',[mess,años])
+ console.log(format(parse(fecha, 'd-M-yyyy', new Date()), 'yyyy-MM-dd'),format(parse(fechaFormateada, 'd-M-yyyy', new Date()), 'yyyy-MM-dd'))
+const pres_Semanal = await pool.query('SELECT * FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") >= STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(fecha, "%d-%m-%Y") <= STR_TO_DATE(?, "%d-%m-%Y") and id_tallerista=238 ',[fechaFormateada,fecha]);
+const pres_Semanal_real = await pool.query('SELECT distinct(id_usuario) FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") >= STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(fecha, "%d-%m-%Y") <= STR_TO_DATE(?, "%d-%m-%Y") and id_tallerista=238 ',[fechaFormateada,fecha]);
  const estad ={
-  presentes_totales:1,
-  presentes_totales_reales:5,
-  presentes_totales_reales_mespasado:2
+  presentes_totales:presentes_totales.length,
+  presentes_totales_reales:presentes_totales_reales.length,
+  presentes_totales_reales_mespasado:presentes_totales_reales_mespasado.length,
+  presentes_totales_semana:pres_Semanal.length,
+  presentes_totales_reales_semana:pres_Semanal_real.length,
+  
  }
+ console.log(estad)
     res.json([estad])
   })
 
