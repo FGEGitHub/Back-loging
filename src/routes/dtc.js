@@ -2,7 +2,8 @@ const express = require('express')
 const router = express.Router()
 const { isLoggedIn, isLoggedInn, isLoggedInn2, isLoggedInn4 } = require('../lib/auth') //proteger profile
 const pool = require('../database')
-
+const { parse, startOfWeek, format } = require('date-fns');
+const { es } = require('date-fns/locale');
 const multer = require('multer')
 const path = require('path')
 const fse = require('fs').promises;
@@ -390,13 +391,31 @@ const [dia, mes, año] = fecha.split('-');
 console.log('Día:', dia);
 console.log('Mes:', mes);
 console.log('Año:', año);
-const presentes_totales = await pool.query('SELECT * FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = 4 AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = 2024 and id_tallerista=238')
-    console.log("presentes totales:",presentes_totales.length)
-    const presentes_totales_reales = await pool.query('SELECT distinct(id_usuario) FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = 4 AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = 2024 and id_tallerista=238')
+console.log('Mes pasado:', mes-1);
+if (mes==1){
+  mesanterior=12
+  anioanterior=año-1
+}else{mesanterior=mes-1
+anioanterior=año}
 
-    console.log("presentes reales totales:",presentes_totales_reales.length)
+const presentes_totales = await pool.query('SELECT * FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? and id_tallerista=238',[mes,año])
+    const presentes_totales_reales = await pool.query('SELECT distinct(id_usuario) FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? and id_tallerista=238',[mes,año])
+    presentes_totales_reales_mespasado= await pool.query('SELECT distinct(id_usuario) FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? and id_tallerista=238',[mesanterior,anioanterior])
+   
+    const date = parse(fecha, 'dd-MM-yyyy', new Date());
+    console.log("date:",date)
+   // const fecha2=  parse(date, 'dd-MM-yyyy', new Date());
 
-    res.json([presentes_totales,presentes_totales_reales])
+//console.log("lunes:", startOfWeek(date, { weekStartsOn: 1 }) )
+const fechaFormateada = format(startOfWeek(date, { weekStartsOn: 1 }), 'd-M-yyyy', { locale: es });
+ console.log("lunesformato",fechaFormateada)
+
+ const estad ={
+  presentes_totales:1,
+  presentes_totales_reales:5,
+  presentes_totales_reales_mespasado:2
+ }
+    res.json([estad])
   })
 
 
