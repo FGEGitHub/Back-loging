@@ -620,7 +620,10 @@ router.post("/enviarinscripcion", async (req, res) => {
   if (tipo_trabajo === undefined) {
     tipo_trabajo = 'Sin determinar'
   }
-
+  if (participante_feria === undefined) {
+    participante_feria = 'Sin determinar'
+  }
+  
   if (tipo_empleo === undefined) {
     tipo_empleo = 'Sin determinar'
   }
@@ -629,17 +632,17 @@ router.post("/enviarinscripcion", async (req, res) => {
     cantidad_hijos = 'Sin determinar'
   }
 
-  console.log(nombre, fecha_nac, apellido, dni, tel, tel2, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, motivacion)
+  console.log(nombre, fecha_nac, participante_feria,apellido, dni, tel, tel2, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, motivacion)
 
   try {
     let pers = await pool.query('select * from personas where dni =?', [dni])
     if (pers.length > 0) {
       cat = await caregorizar.asignarcategoria(pers)
 
-      await pool.query('update personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?, categoria=? where dni=? ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, cat, dni])
+      await pool.query('update personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?, categoria=?,participante_feria=? where dni=? ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, cat,participante_feria, dni])
     } else {
 
-      await pool.query('insert into personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?  ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior,])
+      await pool.query('insert into personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?,participante_feria  ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior,participante_feria])
       pers = await pool.query('select * from personas where dni =?', [dni])
       cat = await caregorizar.asignarcategoria(pers)
 
