@@ -44,7 +44,7 @@ router.get('/traerpersona/:id', async (req, res) => {
   //res.render('index')
 })
 
-router.get('/traerusuario/:id',  async (req, res) => {
+router.get('/traerusuario/:id', async (req, res) => {
   const id = req.params.id
 
 
@@ -59,7 +59,7 @@ router.get('/traerusuario/:id',  async (req, res) => {
 router.get('/traerencargados/', async (req, res) => {
 
   profesores = await pool.query('select * from usuarios where nivel=4')
- 
+
   res.json(profesores)
 })
 router.get('/traercoordiandores/', async (req, res) => {
@@ -103,20 +103,20 @@ router.get('/datospersona/:id', async (req, res) => {
 
 
 router.get('/categorizarpersonas', async (req, res) => {
- 
-criterios =  await pool.query('select * from criterios ')
-console.log(criterios[criterios.length-1])
-console.log(criterios[criterios.length])
+
+  criterios = await pool.query('select * from criterios ')
+  console.log(criterios[criterios.length - 1])
+  console.log(criterios[criterios.length])
   const etc2 = await pool.query('select * from inscripciones where edicion=2  ')
   for (ii in etc2) {
-     etc = await pool.query('select * from personas where dni=? ',[etc2[ii]['dni_persona']])
+    etc = await pool.query('select * from personas where dni=? ', [etc2[ii]['dni_persona']])
     cat = await caregorizar.asignarcategoria([etc[0]])
-   await pool.query('update personas set categoria=? where dni =?',[cat,etc2[ii]['dni_persona']])
+    await pool.query('update personas set categoria=? where dni =?', [cat, etc2[ii]['dni_persona']])
 
 
-    
+
   }
-res.json ('listo')
+  res.json('listo')
 
 })
 /* 
@@ -135,7 +135,7 @@ res.json('listo')
 
 
 ///funcion preasignar 
- 
+
 /* router.get('/preasignar', async (req, res) => {
  
 
@@ -257,35 +257,35 @@ res.json('listo')
 
 
 router.get('/categorizarpersonastodas', async (req, res) => {
- 
-  criterios =  await pool.query('select * from criterios ')
-  
-   
-    etc = await pool.query('select * from personas')
-    for (ii in etc) {
-  
-      cat = await caregorizar.asignarcategoria([etc[ii]])
-     await pool.query('update personas set categoria=? where dni =?',[cat,etc[ii]['dni']])
-  
-  
-  ///////
-  
-  
-  ///
-  
-  
-      
-    }
-  res.json ('listo')
-  
-  })
+
+  criterios = await pool.query('select * from criterios ')
+
+
+  etc = await pool.query('select * from personas')
+  for (ii in etc) {
+
+    cat = await caregorizar.asignarcategoria([etc[ii]])
+    await pool.query('update personas set categoria=? where dni =?', [cat, etc[ii]['dni']])
+
+
+    ///////
+
+
+    ///
+
+
+
+  }
+  res.json('listo')
+
+})
 
 ///// lista
 router.get('/lista', async (req, res) => {
   const usuario = req.params.usuario
 
   const etc = await pool.query('select * from personas  ')
-  
+
 
   res.json(etc);
   //res.render('index')
@@ -345,7 +345,8 @@ router.get('/datosusuarioporid/:dni', async (req, res) => {
   }
   try {
     tipo_trabajo = etc[0]['tipo_trabajo']
-  } catch (error) {5
+  } catch (error) {
+    5
     tipo_trabajo = 'no determinado'
   }
   try {
@@ -537,8 +538,8 @@ router.post("/agregarobservacion", async (req, res) => {
 
 
   try {
-    await pool.query('insert into observaciones set detalle=?, id_ref=?, fecha=? ', [observaciones,id,(new Date(Date.now())).toLocaleDateString()])
-res.json(`Realizado`)
+    await pool.query('insert into observaciones set detalle=?, id_ref=?, fecha=? ', [observaciones, id, (new Date(Date.now())).toLocaleDateString()])
+    res.json(`Realizado`)
   } catch (error) {
     console.log(error)
     res.json('No escribiste nadaaa')
@@ -549,32 +550,32 @@ res.json(`Realizado`)
 
 
 router.post("/enviarinscripcioncarnaval", async (req, res) => {
-  let {option1,option2,option3,option4,comparsa,comparsa_cual, nombre, apellido, dni, tel, tel2, fecha_nac,prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo } = req.body
-  if (comparsa_cual === undefined ) {
+  let { option1, option2, option3, option4, comparsa, comparsa_cual, nombre, apellido, dni, tel, tel2, fecha_nac, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo } = req.body
+  if (comparsa_cual === undefined) {
     comparsa_cual = 'Sin determinar'
   }
 
   if (option1) {
     maquillaje = 'Si'
-  }else{
+  } else {
     maquillaje = 'No'
   }
   if (option2) {
     peinado = 'Si'
-  }else{
+  } else {
     peinado = 'No'
   }
   if (option3) {
     confeccion = 'Si'
-  }else{
+  } else {
     confeccion = 'No'
   }
   if (option4) {
     baile = 'Si'
-  }else{
+  } else {
     baile = 'No'
   }
- 
+
   ///fecha
   if (tipo_empleo === undefined) {
     tipo_empleo = 'Sin determinar'
@@ -582,25 +583,25 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
   if (tipo_trabajo === undefined) {
     tipo_trabajo = 'Sin determinar'
   }
-  console.log(option1,option2,option3,option4,comparsa,comparsa_cual, nombre, apellido, dni, tel, tel2, fecha_nac, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo)
+  console.log(option1, option2, option3, option4, comparsa, comparsa_cual, nombre, apellido, dni, tel, tel2, fecha_nac, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo)
 
   try {
     let pers = await pool.query('select * from personas where dni =?', [dni])
     if (pers.length > 0) {
-      await pool.query('update personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?where dni=? ', [fecha_nac,nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, dni])
+      await pool.query('update personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?where dni=? ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, dni])
     } else {
-      await pool.query('insert into personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=? ', [fecha_nac,nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo ])
+      await pool.query('insert into personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=? ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo])
 
     }
-     pers = await pool.query('select * from personas where dni =?', [dni])
+    pers = await pool.query('select * from personas where dni =?', [dni])
     const yainsc = await pool.query('select * from inscripciones_carnaval where id_persona =? ', [pers[0]['id']])
-   let mensaje = ''
+    let mensaje = ''
     if (yainsc.length > 0) {
       mensaje = 'Con estos datos ya tenemos una inscripción, no hace falta que te vuelvas a anotar. Por favor aguarda nuestro contacto.'
     }
     else {
-      fecha=(new Date(Date.now()))
-      await pool.query('insert into inscripciones_carnaval set fecha=?,dni_persona=?,id_persona=?,maquillaje=?,peinado=?,confeccion=?,baile=?,comparsa=?,comparsa_cual=?', [fecha,dni, pers[0]['id'],maquillaje,peinado,confeccion,baile,comparsa,comparsa_cual])
+      fecha = (new Date(Date.now()))
+      await pool.query('insert into inscripciones_carnaval set fecha=?,dni_persona=?,id_persona=?,maquillaje=?,peinado=?,confeccion=?,baile=?,comparsa=?,comparsa_cual=?', [fecha, dni, pers[0]['id'], maquillaje, peinado, confeccion, baile, comparsa, comparsa_cual])
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto'
     }
 
@@ -614,7 +615,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
 })
 
 router.post("/enviarinscripcion", async (req, res) => {
-  let { nombre, apellido, dni, tel, tel2, fecha_nac,prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior,participante_feria, motivacion } = req.body
+  let { nombre, apellido, dni, tel, tel2, fecha_nac, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, participante_feria, motivacion } = req.body
   ///participante_feria
   if (tipo_trabajo === undefined) {
     tipo_trabajo = 'Sin determinar'
@@ -627,27 +628,34 @@ router.post("/enviarinscripcion", async (req, res) => {
   if (cantidad_hijos === undefined) {
     cantidad_hijos = 'Sin determinar'
   }
-  
-  console.log(nombre,fecha_nac, apellido, dni, tel, tel2, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, motivacion)
+
+  console.log(nombre, fecha_nac, apellido, dni, tel, tel2, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, motivacion)
 
   try {
     let pers = await pool.query('select * from personas where dni =?', [dni])
     if (pers.length > 0) {
-      await pool.query('update personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=? where dni=? ', [fecha_nac,nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior,  dni])
+      cat = await caregorizar.asignarcategoria(pers)
+
+      await pool.query('update personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?, categoria=? where dni=? ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, cat, dni])
     } else {
-      await pool.query('insert into personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?  ', [fecha_nac,nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, ])
+
+      await pool.query('insert into personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?  ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior,])
+      pers = await pool.query('select * from personas where dni =?', [dni])
+      cat = await caregorizar.asignarcategoria(pers)
+
+      await pool.query('update personas set categoria=? where id=? ', [cat, pers[0]['id']])
 
     }
-     pers = await pool.query('select * from personas where dni =?', [dni])
+    pers = await pool.query('select * from personas where dni =?', [dni])
     const yainsc = await pool.query('select * from inscripciones where id_persona =? and edicion=2', [pers[0]['id']])
-   let mensaje = ''
+    let mensaje = ''
     if (yainsc.length > 0) {
       mensaje = 'Ya estas inscripta!'
     }
     else {
-      fecha=(new Date(Date.now()))
+      fecha = (new Date(Date.now()))
       cat = await caregorizar.asignarcategoria(pers)
-      await pool.query('insert into inscripciones set fecha=?,dni_persona=?, uno=?,dos=?,motivacion=?,id_persona=?,edicion=?', [fecha,dni, prioridad1, prioridad2, motivacion, pers[0]['id'], 3])
+      await pool.query('insert into inscripciones set fecha=?,dni_persona=?, uno=?,dos=?,motivacion=?,id_persona=?,edicion=?', [fecha, dni, prioridad1, prioridad2, motivacion, pers[0]['id'], 3])
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto'
     }
 
@@ -1054,8 +1062,11 @@ router.get('/cargarcursos111', async (req, res) => {
 
 
 ///////////
-router.get('/prueba', async (req, res) => {
-  res.send('hola mundo')
+router.get('/prueba/:dni', async (req, res) => {
+  const dni = req.params.dni
+  etc = await pool.query('select * from personas where dni=? ', [dni])
+  cat = await caregorizar.asignarcategoria([etc[0]])
+  res.send(cat)
 })
 
 
