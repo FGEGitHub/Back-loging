@@ -427,7 +427,20 @@ const pres_Semanal_real = await pool.query('SELECT distinct(id_usuario) FROM dtc
     res.json([estad])
   })
 
+  
+  
+  router.post("/borrarusuariodtc",  async (req, res) => {
+    const {id} = req.body
 
+    try {
+      await pool.query('delete  from  dtc_chicos where id = ?', [id])
+res.json('Usuario borrado')
+    } catch (error) {
+      console.log(error)
+      res.json('UsuarNooio borrado, algo sucedio')
+    }
+ 
+  })
   router.post("/ponerpresente",  async (req, res) => {
     const {fecha, id, id_tallerista} = req.body
     const existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =? and id_tallerista=?',[id,fecha,id_tallerista])
