@@ -322,8 +322,12 @@ router.post("/traeractividadeschico", async (req, res) => {
 router.post("/traeractividades", async (req, res) => {
   const { fecha, id_usuario } = req.body
   try {
-    const existe = await pool.query('select * from dtc_actividades where acargo=? ', [id_usuario])
-    res.json(existe)
+    console.log('id_usuaro',id_usuario)
+    const existeee = await pool.query('select * from dtc_actividades where acargo=? ', [id_usuario])
+    console.log('existe')
+    console.log(existeee)
+   
+    res.json(existeee)
   } catch (error) {
     console.log(error)
     res.json([])
@@ -516,6 +520,27 @@ router.post("/borrarusuariodtc", async (req, res) => {
   }
 
 })
+
+
+
+
+router.post("/ponerpresenteactividad", async (req, res) => {
+  const { fecha, id, id_tallerista } = req.body
+  console.log(id)
+  const existe = await pool.query('select * from dtc_asistencia where id_actividad=?', [id])
+  let era
+  if (existe.length > 0) {
+    await pool.query('delete  from  dtc_asistencia where id = ?', [existe[0]['id']])
+    era = "puesto Ausente"
+  } else {
+    await pool.query('insert into dtc_asistencia set id_actividad=?', [fecha, id, id_tallerista])
+    era = "puesto Presente"
+  }
+
+  res.json(era)
+
+
+})
 router.post("/ponerpresente", async (req, res) => {
   const { fecha, id, id_tallerista } = req.body
   const existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =? and id_tallerista=?', [id, fecha, id_tallerista])
@@ -532,6 +557,27 @@ router.post("/ponerpresente", async (req, res) => {
 
 
 })
+
+
+
+router.post("/traerpresentesdeactividad", async (req, res) => {
+  const { fecha, id } = req.body
+console.log(id)
+  let prod
+  let usuarios
+
+    prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where id_actividad=? order by apellido", [id])
+    usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where id_actividad=?) as sel on dtc_chicos.id=sel.id_usuario ", [id])
+  
+
+
+  res.json([prod, usuarios])
+
+
+})
+
+
+
 router.post("/traerpresentes", async (req, res) => {
   const { fecha, id } = req.body
 
