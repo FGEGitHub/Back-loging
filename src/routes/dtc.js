@@ -542,7 +542,14 @@ router.post("/ponerpresenteactividad", async (req, res) => {
 
 })
 router.post("/ponerpresente", async (req, res) => {
-  const { fecha, id, id_tallerista } = req.body
+  let { fecha, id, id_tallerista } = req.body
+
+const prueba  = await pool.query('select * from usuarios where id=?',[id_tallerista])
+console.log(prueba)
+if(prueba[0].nivel=="20"){
+  id_tallerista=238
+}
+
   const existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =? and id_tallerista=?', [id, fecha, id_tallerista])
   let era
   if (existe.length > 0) {
@@ -569,7 +576,7 @@ console.log(id)
     prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where id_actividad=? order by apellido", [id])
     usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where id_actividad=?) as sel on dtc_chicos.id=sel.id_usuario ", [id])
   
-
+console.log(usuarios)
 
   res.json([prod, usuarios])
 
