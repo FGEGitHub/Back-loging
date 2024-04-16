@@ -488,6 +488,22 @@ console.log(fechaaux)
 
 
 
+
+router.post("/modificarkid", async (req, res) => {
+  const { id,kid } = req.body
+
+try {
+  await pool.query('update dtc_chicos  set kid=? where id=?', [kid, id])
+  res.json('realizado')
+} catch (error) {
+  console.log(error)
+  res.json('No realizado')
+}
+
+
+})
+
+
 router.post("/borrarusuariodtc", async (req, res) => {
   const { id } = req.body
 
