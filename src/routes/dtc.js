@@ -617,7 +617,7 @@ router.post("/traerpresentesdeactividad", async (req, res) => {
 
 
 
-router.post("/traerpresentes", async (req, res) => {
+router.post("/traercumpleanios", async (req, res) => {
   const { traercumpleanios } = req.body
 })
 
