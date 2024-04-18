@@ -322,11 +322,11 @@ router.post("/traeractividadeschico", async (req, res) => {
 router.post("/traeractividades", async (req, res) => {
   const { fecha, id_usuario } = req.body
   try {
-    console.log('id_usuaro',id_usuario)
+    console.log('id_usuaro', id_usuario)
     const existeee = await pool.query('select * from dtc_actividades where acargo=? ', [id_usuario])
     console.log('existe')
     console.log(existeee)
-   
+
     res.json(existeee)
   } catch (error) {
     console.log(error)
@@ -386,10 +386,11 @@ router.get('/descargar/:id', async (req, res) => {
 
 
 router.post("/traerestadisticas", async (req, res) => {
-  const { fecha } = req.body
+  let { fecha } = req.body
   ///presentes mensuales 
+  fecha = fecha.fecha
   // Divide la fecha usando el guión ('-') como separador
-  const [dia, mes, año] = fecha.split('-');
+  let [dia, mes, año] = fecha.split('-');
 
 
   if (mes == 1) {
@@ -411,45 +412,46 @@ router.post("/traerestadisticas", async (req, res) => {
   //console.log("lunes:", startOfWeek(date, { weekStartsOn: 1 }) )
   const fechaFormateada = format(startOfWeek(date, { weekStartsOn: 1 }), 'd-M-yyyy', { locale: es });
   console.log('fechalnes', fechaFormateada)
+  ///cantidad de presentes al lunes
   let cantp = await pool.query('select * from dtc_asistencia where fecha =?', fechaFormateada)
   let estasemana = [cantp.length]
   let fechaaux = fechaFormateada
- /*  console.log(fechaaux)
-  while (fechaaux !== fecha) {
   
-    let [diaStr, mesStr, anioStr] = fechaaux.split('-');
-    let dia = parseInt(diaStr);
-    let mes = parseInt(mesStr) - 1; // Los meses en JavaScript son de 0 a 11
-    let anio = parseInt(anioStr);
+  while (fechaaux !== fecha) {
+
+    [diaStr, mesStr, anioStr] = fechaaux.split('-');
+    dia = parseInt(diaStr);
+    mes = parseInt(mesStr) - 1; // Los meses en JavaScript son de 0 a 11
+    anio = parseInt(anioStr);
 
     // Crear un objeto Date con la fecha parseada
-    let  fechaw = new Date(anio, mes, dia);
+    fechaw = new Date(anio, mes, dia);
 
     // Sumar un día
     fechaw.setDate(fechaw.getDate() + 1);
 
     // Obtener los valores de la nueva fecha
-    const nuevoDia = fechaw.getDate();
-    const nuevoMes = fechaw.getMonth() + 1; // Los meses en JavaScript son de 0 a 11, por lo que sumamos 1
-    const nuevoAnio = fechaw.getFullYear();
-
+    nuevoDia = fechaw.getDate();
+    nuevoMes = fechaw.getMonth() + 1; // Los meses en JavaScript son de 0 a 11, por lo que sumamos 1
+    nuevoAnio = fechaw.getFullYear();
     // Formatear la nueva fecha a d-m-yyyy
-    const fechaaux = `${nuevoDia}-${nuevoMes}-${nuevoAnio}`;
-console.log(fechaaux)
+    fechaaux = `${nuevoDia}-${nuevoMes}-${nuevoAnio}`;
+
+    let cantp = await pool.query('select * from dtc_asistencia where fecha =?', fechaaux)
+    estasemana.push(cantp.length)
     // Código a ejecutar repetidamente mientras la condición sea verdadera
   }
- */
+
   ///////// ARRANCA TRANSFORMACION FECHA PSADA
-  console.log('arrancatransformado')
   const fechaconvertidora = new Date(date);
 
   fechaconvertidora.setDate(fechaconvertidora.getDate() - 7);
-  console.log(fechaconvertidora) //bien
+  //console.log(fechaconvertidora) //bien
   let fechaHaceUnaSemana = fechaconvertidora.toISOString().split('T')[0];
 
   // Convertir la fecha a formato deseado: YYYY-M-D
   const fechaconvertidoraaux = new Date(fechaHaceUnaSemana);
-  console.log('fechaconvertidoraaux', fechaconvertidoraaux)
+ 
 
 
   const lunespasado = format(startOfWeek(fechaHaceUnaSemana, { weekStartsOn: 1 }), 'd-M-yyyy', { locale: es });
@@ -475,7 +477,34 @@ console.log(fechaaux)
   const pres_Semanapasada = await pool.query('SELECT * FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") >= STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(fecha, "%d-%m-%Y") <= STR_TO_DATE(?, "%d-%m-%Y") and id_tallerista=238 ', [lunespasado, fechaHaceUnaSemana]);
   const pres_Semanal_real_semanapasada = await pool.query('SELECT distinct(id_usuario) FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") >= STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(fecha, "%d-%m-%Y") <= STR_TO_DATE(?, "%d-%m-%Y") and id_tallerista=238 ', [lunespasado, fechaHaceUnaSemana]);
 
+   cantp = await pool.query('select * from dtc_asistencia where fecha =?', lunespasado)
+   semanapasada = [cantp.length]
+   fechaaux = lunespasado
+console.log("comapracionsemanapasada",fechaaux,fechaHaceUnaSemana)
+  while (fechaaux !== fechaHaceUnaSemana) {
 
+    [diaStr, mesStr, anioStr] = fechaaux.split('-');
+    dia = parseInt(diaStr);
+    mes = parseInt(mesStr) - 1; // Los meses en JavaScript son de 0 a 11
+    anio = parseInt(anioStr);
+
+    // Crear un objeto Date con la fecha parseada
+    fechaw = new Date(anio, mes, dia);
+
+    // Sumar un día
+    fechaw.setDate(fechaw.getDate() + 1);
+
+    // Obtener los valores de la nueva fecha
+    nuevoDia = fechaw.getDate();
+    nuevoMes = fechaw.getMonth() + 1; // Los meses en JavaScript son de 0 a 11, por lo que sumamos 1
+    nuevoAnio = fechaw.getFullYear();
+    // Formatear la nueva fecha a d-m-yyyy
+    fechaaux = `${nuevoDia}-${nuevoMes}-${nuevoAnio}`;
+    console.log(fechaaux)
+    let cantp = await pool.query('select * from dtc_asistencia where fecha =?', fechaaux)
+    semanapasada.push(cantp.length)
+    // Código a ejecutar repetidamente mientras la condición sea verdadera
+  }
   const estad = {
     presentes_totales: presentes_totales.length,
     presentes_totales_reales: presentes_totales_reales.length,
@@ -483,7 +512,9 @@ console.log(fechaaux)
     presentes_totales_semana: pres_Semanal.length,
     presentes_totales_reales_semana: pres_Semanal_real.length,
     pres_Semanapasada: pres_Semanapasada.length,
-    pres_Semanal_real_semanapasada: pres_Semanal_real_semanapasada.length
+    pres_Semanal_real_semanapasada: pres_Semanal_real_semanapasada.length,
+    semana: estasemana,
+    semanapasada:semanapasada
 
   }
   console.log(estad)
@@ -494,15 +525,15 @@ console.log(fechaaux)
 
 
 router.post("/modificarkid", async (req, res) => {
-  const { id,kid } = req.body
+  const { id, kid } = req.body
 
-try {
-  await pool.query('update dtc_chicos  set kid=? where id=?', [kid, id])
-  res.json('realizado')
-} catch (error) {
-  console.log(error)
-  res.json('No realizado')
-}
+  try {
+    await pool.query('update dtc_chicos  set kid=? where id=?', [kid, id])
+    res.json('realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('No realizado')
+  }
 
 
 })
@@ -544,11 +575,11 @@ router.post("/ponerpresenteactividad", async (req, res) => {
 router.post("/ponerpresente", async (req, res) => {
   let { fecha, id, id_tallerista } = req.body
 
-const prueba  = await pool.query('select * from usuarios where id=?',[id_tallerista])
-console.log(prueba)
-if(prueba[0].nivel=="20"){
-  id_tallerista=238
-}
+  const prueba = await pool.query('select * from usuarios where id=?', [id_tallerista])
+  console.log(prueba)
+  if (prueba[0].nivel == "20") {
+    id_tallerista = 238
+  }
 
   const existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =? and id_tallerista=?', [id, fecha, id_tallerista])
   let era
@@ -569,20 +600,26 @@ if(prueba[0].nivel=="20"){
 
 router.post("/traerpresentesdeactividad", async (req, res) => {
   const { fecha, id } = req.body
-console.log(id)
+  console.log(id)
   let prod
   let usuarios
 
-    prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where id_actividad=? order by apellido", [id])
-    usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where id_actividad=?) as sel on dtc_chicos.id=sel.id_usuario ", [id])
-  
-console.log(usuarios)
+  prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where id_actividad=? order by apellido", [id])
+  usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where id_actividad=?) as sel on dtc_chicos.id=sel.id_usuario ", [id])
+
+  console.log(usuarios)
 
   res.json([prod, usuarios])
 
 
 })
 
+
+
+
+router.post("/traerpresentes", async (req, res) => {
+  const { traercumpleanios } = req.body
+})
 
 
 router.post("/traerpresentes", async (req, res) => {
