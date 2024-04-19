@@ -265,3 +265,70 @@ passport.deserializeUser(async (id, done) => {
     const rows = await pool.query('SELECT * FROM usuarios Where id = ?', [id])
     done(null, rows[0])
 })
+
+
+
+passport.use('local.signupde', new LocalStrategy({
+    usernameField: 'usuario',
+    passwordField: 'password',
+    passReqToCallback: 'true'
+}, async (req, usuario, password, done) => {
+    
+    const { nombre, mail, tel,nivel,dni } = req.body
+    //  const razon = await pool.query('Select razon from clientes where cuil_cuit like  ?', [cuil_cuit]) seleccionar razon
+
+
+  if (nivel == undefined){
+    nivel= 100
+  }
+ 
+    const newUser = {
+        password,
+        usuario,
+        nombre,
+      
+        nivel
+
+
+    }
+
+
+    //fin transformar 
+    try {  
+      
+        const verif  = await pool.query('select * from usuarios where usuario = ?',[usuario])
+        if (verif.length>0){
+            req.flash('message', 'error, usuario existente')
+        }else{
+        newUser.password = await helpers.encryptPassword(password)
+        try {
+            const result = await pool.query('INSERT INTO usuarios  set password=?, usuario=?,nivel=?', [newUser.password, usuario,nivel])
+            
+            newUser.id = result.insertId// porque newuser no tiene el id
+           
+
+            return done(null, newUser)// para continuar, y devuelve el newUser para que almacene en una sesion
+
+        } catch (error) {
+            console.log(error)
+        }}
+
+
+   
+
+
+
+    } catch (error) {
+        console.log(error)
+        req.flash('message', 'error,algo sucedio ')
+
+    }
+
+
+
+
+
+}
+
+
+))
