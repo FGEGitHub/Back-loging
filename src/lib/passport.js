@@ -332,3 +332,38 @@ passport.use('local.signupde', new LocalStrategy({
 
 
 ))
+
+
+passport.use('local.signinde', new LocalStrategy({
+    usernameField: 'usuario', // usuario es el nombre que recibe del hbs
+    passwordField: 'password',
+    passReqToCallback: 'true' // para recibir mas datos 
+
+}, async (req, usuario, password, done) => {  // que es lo que va a hacer 
+    console.log('entra')
+    const rows = await pool.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario])
+    console.log(rows)
+    if (rows.length > 0) {
+        const usuario = rows[0]
+       
+        const validPassword = await helpers.matchPassword(password, usuario.password)
+       
+        if (validPassword) {
+           
+  /*      const userFoRToken = {
+                id: usuario.id,
+                usuario: usuario.cuil_cuit,
+                nivel: usuario.nivel
+            }
+            const token = jwt.sign(userFoRToken, 'fideicomisocs121', { expiresIn: 60 * 60 * 24 * 7 })
+            res.send({ id: req.usuario.id,cuil_cuit: req.usuario.cuil_cuit,token, nivel: req.usuario.nivel})  */
+            done(null, usuario, req.flash('success', 'Welcome' )) // done termina, null el error, user lo pasa para serializar
+          
+        } else {
+            done(null, false, req.flash('message', 'Pass incorrecta')) // false para no avanzar
+        }
+    } else {
+        return done(null, false, req.flash('message', 'EL nombre de cuil/cuit no existe'))
+    }
+}))
+
