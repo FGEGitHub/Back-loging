@@ -8,7 +8,7 @@ const multer = require('multer')
 const path = require('path')
 const fse = require('fs').promises;
 const fs = require('fs');
-
+const moment = require('moment-timezone');
 
 const storage = multer.diskStorage({
   destination: path.join(__dirname, '../imagenesvendedoras'),
@@ -575,16 +575,9 @@ router.post("/ponerpresenteactividad", async (req, res) => {
 })
 router.post("/ponerpresente", async (req, res) => {
   let { fecha, id, id_tallerista } = req.body
-  const fechaHoraActual = new Date();
+  const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
 
-  // Obtener la hora, minutos y segundos
-  const hora = fechaHoraActual.getHours();
-  const minutos = fechaHoraActual.getMinutes();
-  const segundos = fechaHoraActual.getSeconds();
-  
-  // Formatear la hora como cadena
-  const horaActual = `${hora}:${minutos}:${segundos}`;
-  console.log('hora',horaActual)
+  console.log("La hora actual en Buenos Aires es:", horaBuenosAires);
   const prueba = await pool.query('select * from usuarios where id=?', [id_tallerista])
   console.log(prueba)
   if (prueba[0].nivel == "20") {
@@ -597,7 +590,7 @@ router.post("/ponerpresente", async (req, res) => {
     await pool.query('delete  from  dtc_asistencia where id = ?', [existe[0]['id']])
     era = "puesto Ausente"
   } else {
-    await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?,id_tallerista=?,hora=?', [fecha, id, id_tallerista,horaActual])
+    await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?,id_tallerista=?,hora=?', [fecha, id, id_tallerista,horaBuenosAires])
     era = "puesto Presente"
   }
 
