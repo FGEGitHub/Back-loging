@@ -389,6 +389,7 @@ router.post("/traerestadisticas", async (req, res) => {
   let { fecha } = req.body
   ///presentes mensuales 
   fecha = fecha.fecha
+  console.log(fecha)
   // Divide la fecha usando el guión ('-') como separador
   let [dia, mes, año] = fecha.split('-');
 
@@ -574,7 +575,16 @@ router.post("/ponerpresenteactividad", async (req, res) => {
 })
 router.post("/ponerpresente", async (req, res) => {
   let { fecha, id, id_tallerista } = req.body
+  const fechaHoraActual = new Date();
 
+  // Obtener la hora, minutos y segundos
+  const hora = fechaHoraActual.getHours();
+  const minutos = fechaHoraActual.getMinutes();
+  const segundos = fechaHoraActual.getSeconds();
+  
+  // Formatear la hora como cadena
+  const horaActual = `${hora}:${minutos}:${segundos}`;
+  console.log('hora',horaActual)
   const prueba = await pool.query('select * from usuarios where id=?', [id_tallerista])
   console.log(prueba)
   if (prueba[0].nivel == "20") {
@@ -587,7 +597,7 @@ router.post("/ponerpresente", async (req, res) => {
     await pool.query('delete  from  dtc_asistencia where id = ?', [existe[0]['id']])
     era = "puesto Ausente"
   } else {
-    await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?,id_tallerista=?', [fecha, id, id_tallerista])
+    await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?,id_tallerista=?,hora=?', [fecha, id, id_tallerista,horaActual])
     era = "puesto Presente"
   }
 
