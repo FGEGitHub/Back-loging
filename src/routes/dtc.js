@@ -392,8 +392,15 @@ router.post("/traerestadisticas", async (req, res) => {
   console.log(fecha)
   // Divide la fecha usando el guión ('-') como separador
   let [dia, mes, año] = fecha.split('-');
-
-
+if (dia.length==1){
+  diacumple="0"+dia
+}else{diacumple=dia}
+if (mes.length==1){
+  mescumple="0"+mes
+}else{mescumple=mes}
+console.log("'_%"+mescumple+"-"+diacumple+"'")
+const cumple = await pool.query('select * from dtc_chicos where fecha_nacimiento like ?',["%"+mescumple+"-"+diacumple])
+console.log("cumple",cumple)
   if (mes == 1) {
     mesanterior = 12
     anioanterior = año - 1
@@ -459,7 +466,6 @@ router.post("/traerestadisticas", async (req, res) => {
 
   const [añoo, messs, diaa] = fechaHaceUnaSemana.split('-');
   let diaaa = diaa
-  console.log(diaa[0])
   let messss = messs
   if (diaa[0] == 0) {
     diaaa = diaa[1]
@@ -471,7 +477,6 @@ router.post("/traerestadisticas", async (req, res) => {
 
   // const presentes_totales_semana = await pool.query('SELECT * FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? and id_tallerista=238',[mess,años])
   //const presentes_totales_reales_semana = await pool.query('SELECT distinct(id_usuario) FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? and id_tallerista=238',[mess,años])
-  console.log(format(parse(fecha, 'd-M-yyyy', new Date()), 'yyyy-MM-dd'), format(parse(fechaFormateada, 'd-M-yyyy', new Date()), 'yyyy-MM-dd'))
   const pres_Semanal = await pool.query('SELECT * FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") >= STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(fecha, "%d-%m-%Y") <= STR_TO_DATE(?, "%d-%m-%Y") and id_tallerista=238 ', [fechaFormateada, fecha]);
   const pres_Semanal_real = await pool.query('SELECT distinct(id_usuario) FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") >= STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(fecha, "%d-%m-%Y") <= STR_TO_DATE(?, "%d-%m-%Y") and id_tallerista=238 ', [fechaFormateada, fecha]);
 
@@ -481,7 +486,6 @@ router.post("/traerestadisticas", async (req, res) => {
    cantp = await pool.query('select * from dtc_asistencia where fecha =?', lunespasado)
    semanapasada = [cantp.length]
    fechaaux = lunespasado
-console.log("comapracionsemanapasada",fechaaux,fechaHaceUnaSemana)
   while (fechaaux !== fechaHaceUnaSemana) {
 
     [diaStr, mesStr, anioStr] = fechaaux.split('-');
@@ -501,7 +505,6 @@ console.log("comapracionsemanapasada",fechaaux,fechaHaceUnaSemana)
     nuevoAnio = fechaw.getFullYear();
     // Formatear la nueva fecha a d-m-yyyy
     fechaaux = `${nuevoDia}-${nuevoMes}-${nuevoAnio}`;
-    console.log(fechaaux)
     let cantp = await pool.query('select * from dtc_asistencia where fecha =?', fechaaux)
     semanapasada.push(cantp.length)
     // Código a ejecutar repetidamente mientras la condición sea verdadera
@@ -515,7 +518,8 @@ console.log("comapracionsemanapasada",fechaaux,fechaHaceUnaSemana)
     pres_Semanapasada: pres_Semanapasada.length,
     pres_Semanal_real_semanapasada: pres_Semanal_real_semanapasada.length,
     semana: estasemana,
-    semanapasada:semanapasada
+    semanapasada:semanapasada,
+    cumple:cumple
 
   }
   console.log(estad)
@@ -600,6 +604,21 @@ router.post("/ponerpresente", async (req, res) => {
 })
 
 
+
+router.post("/traercumples", async (req, res) => {
+  const { fecha, id } = req.body
+  console.log(id)
+  let prod
+  let usuarios
+
+  usuarios = await pool.query("select * from dtc_chicos where ", [id])
+
+  console.log(usuarios)
+
+  res.json([prod, usuarios])
+
+
+})
 
 router.post("/traerpresentesdeactividad", async (req, res) => {
   const { fecha, id } = req.body
