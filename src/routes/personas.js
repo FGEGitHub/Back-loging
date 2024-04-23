@@ -22,6 +22,558 @@ const fileUpload = multer({
 }).single('image')
 
 
+const upload = multer({ dest: 'uploads/' });
+
+
+router.post('/subirexcel', upload.single('excel'), async (req, res) => {
+  try {
+    // Leer el archivo Excel
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0]; // Suponiendo que hay solo una hoja en el archivo
+
+    // Obtener los datos de la hoja
+    const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    // Procesar los datos
+  /*   const sheetData = sheetData.map(row => ({
+      nombre: row.Nombre,
+      apellido: row.Apellido
+
+     ));    // Agrega más campos según las columnas que necesites procesar
+    } */
+
+
+ 
+
+    console.log(sheetData)
+
+
+
+    ///////////////////////////////////////////////////////////////////
+    for (property in sheetData) {
+      // a += 1
+      cat="cero"
+      console.log(sheetData[property]['D.N.I.'])
+      aux = sheetData[property]['D.N.I.']
+      existe = await pool.query('select * from personas where dni = ?', [aux])
+      try {
+        ///////
+        yainscripto = await pool.query('select * from inscripciones where dni_persona = ? and edicion=3', [aux])
+        if (yainscripto.length == 0) {
+
+
+
+        if (existe.length > 0) {
+
+         
+
+          ///actualizar
+
+          if (sheetData[property]['Nombre'] === undefined) {
+            nombre = 'No'
+          } else {
+            nombre = sheetData[property]['Nombre']
+
+          }
+          if (sheetData[property]['Apellido'] === undefined) {
+            apellido = 'No'
+          } else {
+            apellido = sheetData[property]['Apellido']
+          }
+          if (sheetData[property]['D.N.I.'] === undefined) {
+            dni = 'No'
+          } else {
+            dni = sheetData[property]['D.N.I.']
+          }
+          if (sheetData[property]['Correo electrónico'] === undefined) {
+            mail = 'No'
+          } else {
+            mail = sheetData[property]['Correo electrónico']
+
+          }
+          if (sheetData[property]['Domicilio'] === undefined) {
+            direccion = 'No'
+          } else {
+            direccion = sheetData[property]['Domicilio']
+          }
+          if (sheetData[property]['recibir_novedades'] === undefined) {
+            recibir_novedades = 'No'
+          } else {
+            recibir_novedades = sheetData[property]['recibir_novedades']
+          }
+          if (sheetData[property]['Barrio'] === undefined) {
+            barrio = 'No'
+          } else {
+            barrio = sheetData[property]['Barrio']
+          }
+          if (sheetData[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'] === undefined) {
+            fecha_nac = 'No'
+          } else {
+            fecha_nac = sheetData[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)']
+          }
+          if (sheetData[property]['Número de teléfono de contacto'] === undefined) {
+            tel = 'No'
+          } else {
+            tel = sheetData[property]['Número de teléfono de contacto']
+          }
+          if (sheetData[property]['Número de teléfono alternativo'] === undefined) {
+            tel2 = 'No'
+          } else {
+            tel2 = sheetData[property]['Número de teléfono alternativo']
+          }
+          if (sheetData[property]['¿Participaste o participas de nuestra Feria de Mujeres Emprendedoras?'] === undefined) {
+            participante_feria = 'No'
+          } else {
+            participante_feria = sheetData[property]['¿Participaste o participas de nuestra Feria de Mujeres Emprendedoras?']
+          }
+          
+
+          if (sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente?'] === undefined) {
+            participante_anterior = 'No'
+          } else {
+            participante_anterior = sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente?']
+          }
+          if (sheetData[property]['Nivel educativo alcanzado'] === undefined) {
+            nivel_secundario = 'No'
+          } else {
+            nivel_secundario = sheetData[property]['Nivel educativo alcanzado']
+          }
+          if (sheetData[property]['¿Actualmente estas trabajando?'] === undefined) {
+            trabajo = 'No'
+          } else {
+            trabajo = sheetData[property]['¿Actualmente estas trabajando?']
+          }
+          if (sheetData[property]['Si tu respuesta fue sí, contamos como es tu empleo:'] === undefined) {
+            tipo_trabajo = 'No'
+          } else {
+            tipo_trabajo = sheetData[property]['Si tu respuesta fue sí, contamos como es tu empleo:']
+          }
+          if (sheetData[property]['¿Qué tipo de trabajo posees?'] === undefined) {
+            tipo_empleo = 'No'
+          } else {
+            tipo_empleo = sheetData[property]['¿Qué tipo de trabajo posees?']
+          }
+          if (sheetData[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'] === undefined) {
+            hijos = 'No'
+          } else {
+            hijos = sheetData[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?']
+          }
+          if (sheetData[property]['¿Te gustaría recibir novedades de nuevos cursos y/o actividades que llevemos adelante desde nuestro espacio?'] === undefined) {
+            novedades = 'No'
+          } else {
+            novedades = sheetData[property]['¿Te gustaría recibir novedades de nuevos cursos y/o actividades que llevemos adelante desde nuestro espacio?']
+          }
+          
+          await pool.query('update personas set tipo_empleo=?, mail=?, participante_feria=?, recibir_novedades=?,direccion =?,barrio=?,fecha_nac=?, tel=?, tel2=?,participante_anterior=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,hijos=? where dni = ?', [tipo_empleo, mail, participante_feria, recibir_novedades,direccion, barrio, fecha_nac, tel, tel2, participante_anterior, nivel_secundario, trabajo, tipo_trabajo, hijos, aux])
+
+
+        } else {
+          ///crear nueva persona 
+
+          if (sheetData[property]['Nombre'] === undefined) {
+            nombre = 'No'
+          } else {
+            nombre = sheetData[property]['Nombre']
+
+          }
+          if (sheetData[property]['Apellido'] === undefined) {
+            apellido = 'No'
+          } else {
+            apellido = sheetData[property]['Apellido']
+          }
+          if (sheetData[property]['D.N.I.'] === undefined) {
+            dni = 'No'
+          } else {
+            dni = sheetData[property]['D.N.I.']
+          }
+          if (sheetData[property]['Domicilio'] === undefined) {
+            direccion = 'No'
+          } else {
+            direccion = sheetData[property]['Domicilio']
+          }
+          if (sheetData[property]['Correo electrónico'] === undefined) {
+            mail = 'No'
+          } else {
+            mail = sheetData[property]['Correo electrónico']
+
+          }
+          if (sheetData[property]['¿Qué tipo de trabajo posees?'] === undefined) {
+            tipo_empleo = 'No'
+          } else {
+            tipo_empleo = sheetData[property]['¿Qué tipo de trabajo posees?']
+          }
+          if (sheetData[property]['recibir_novedades'] === undefined) {
+            recibir_novedades = 'No'
+          } else {
+            recibir_novedades = sheetData[property]['recibir_novedades']
+          }
+          if (sheetData[property]['¿Participaste o participas de nuestra Feria de Mujeres Emprendedoras?'] === undefined) {
+            participante_feria = 'No'
+          } else {
+            participante_feria = sheetData[property]['¿Participaste o participas de nuestra Feria de Mujeres Emprendedoras?']
+          }
+          
+          if (sheetData[property]['Barrio'] === undefined) {
+            barrio = 'No'
+          } else {
+            barrio = sheetData[property]['Barrio']
+          }
+          if (sheetData[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'] === undefined) {
+            fecha_nac = 'No'
+          } else {
+            fecha_nac = sheetData[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)']
+          }
+          if (sheetData[property]['Número de teléfono de contacto'] === undefined) {
+            tel = 'No'
+          } else {
+            tel = sheetData[property]['Número de teléfono de contacto']
+          }
+          if (sheetData[property]['Número de teléfono alternativo'] === undefined) {
+            tel2 = 'No'
+          } else {
+            tel2 = sheetData[property]['Número de teléfono alternativo']
+          }
+          if (sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente?'] === undefined) {
+            participante_anterior = 'No'
+          } else {
+            participante_anterior = sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente?']
+          }
+          if (sheetData[property]['Nivel educativo alcanzado'] === undefined) {
+            nivel_secundario = 'No'
+          } else {
+            nivel_secundario = sheetData[property]['Nivel educativo alcanzado']
+          }
+          if (sheetData[property]['¿Actualmente estas trabajando?'] === undefined) {
+            trabajo = 'No'
+          } else {
+            trabajo = sheetData[property]['¿Actualmente estas trabajando?']
+          }
+          if (sheetData[property]['Si tu respuesta fue sí, contamos como es tu empleo:'] === undefined) {
+            tipo_trabajo = 'No'
+          } else {
+            tipo_trabajo = sheetData[property]['Si tu respuesta fue sí, contamos como es tu empleo:']
+          }
+          if (sheetData[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'] === undefined) {
+            hijos = 'No'
+          } else {
+            hijos = sheetData[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?']
+          }
+          if (sheetData[property]['¿Te gustaría recibir novedades de nuevos cursos y/o actividades que llevemos adelante desde nuestro espacio?'] === undefined) {
+            novedades = 'No'
+          } else {
+            novedades = sheetData[property]['¿Te gustaría recibir novedades de nuevos cursos y/o actividades que llevemos adelante desde nuestro espacio?']
+          }
+          
+
+          await pool.query('INSERT INTO personas set tipo_empleo=?, mail=?, participante_feria=?, recibir_novedades=?, nombre=?,apellido=?,dni=?,direccion=?,barrio=?,fecha_nac=?,tel=?, tel2=?,participante_anterior=?, nivel_secundario=?, trabajo=?,tipo_trabajo=?,hijos=?', [tipo_empleo, mail, participante_feria, recibir_novedades,nombre, apellido, dni, direccion , barrio, fecha_nac, tel, tel2, participante_anterior, nivel_secundario, trabajo, tipo_trabajo, hijos]);
+        }
+        /////////¿Actualmente  se encuentra estudiando? actividad adicional
+        /////////////Tipo de empleo
+      }else{
+        console.log('yainscptito')
+      }
+
+      }
+      //////
+      catch (error) {
+        console.log(error)
+      }
+
+      switch (sheetData[property]['Selecciona el primer curso de mayor preferencia']) {
+        case "Martes de 08 a 10hs - COSTURA CREATIVA":
+          id_curso = 408
+          break;
+        case "Martes de 10 a 12hs - COSTURA CREATIVA":
+          id_curso = 409
+          break;
+
+        case "Martes de 14 a 16hs - COSTURA CREATIVA":
+          id_curso = 410
+          break;
+        case "Martes de 16 a 18hs - COSTURA CREATIVA":
+          id_curso = 411
+          break;
+        case "Martes de 18 a 20hs - COSTURA CREATIVA":
+          id_curso = 412
+            break;
+        case "Lunes de 14 a 16hs - BARBERÍA":
+          id_curso = 413
+              break;
+
+        case "Lunes de 16 a 18hs - BARBERÍA":
+          id_curso = 414
+                break;
+
+        case "Lunes de 18 a 20hs - BARBERÍA":
+          id_curso = 415
+                  break;
+
+        case "Jueves de 08 a 10hs - BARBERÍA":
+          id_curso = 416
+                    break;
+
+        case "Jueves de 10 a 12hs - BARBERÍA":
+          id_curso = 417
+                      break;
+
+        case "Lunes de 08 a 10hs - CROCHET DESDE CERO":
+          id_curso = 418
+                        break;
+
+        case "Lunes de 10 a 12hs - CROCHER DESDE CERO":
+          id_curso = 419
+                          break;
+        case "Miércoles 08 a 10hs - CROCHET DESDE CERO":
+          id_curso = 420
+                            break;
+
+        case "Miércoles de 10 a 12hs - CROCHET DESDE CERO":
+          id_curso = 421
+                              break;
+
+        case "Miércoles de 14 a 16hs - COCINA EXPRESS":
+          id_curso = 422
+                                break;
+
+        case "Miércoles de 16 a 18hs - COCINA EXPRESS":
+          id_curso = 423
+                                  break;
+
+        case "Miércoles de 18 a 20hs - COCINA EXPRESS":
+          id_curso = 424
+                                    break;
+
+        case "Viernes de 08 a 10hs - COCINA EXPRESS":
+          id_curso = 425
+                                      break;
+
+        case "Viernes de 10 a 12hs - COCINA EXPRESS":
+          id_curso = 426
+                                        break;
+
+        case "Jueves de 14 a 16hs - DECORACIÓN DE TORTAS":
+          id_curso = 427
+                                          break;
+
+        case "Jueves de 16 a 18hs - DECORACIÓN DE TORTAS":
+          id_curso = 428
+                                            break;
+                                            
+        case "Jueves de 18 a 20hs - DECORACIÓN DE TORTAS":
+          id_curso = 429
+                                            break;
+                                            
+        case "Viernes de 14 a 16hs - COCTELERÍA":
+          id_curso = 430
+                                            break;
+                                            
+        case "Viernes de 16 a 18hs - COCTELERÍA":
+          id_curso = 431
+                                            break;
+                                            
+        case "Viernes de 18 a 20hs - COCTELERÍA":
+          id_curso = 432
+                                            break;
+                                            
+
+
+
+
+        default:
+          id_curso = 1
+          break;
+      }
+      uno = id_curso
+
+
+      switch (sheetData[property]['Selecciona el segundo curso de mayor preferencia']) {
+        case "Martes de 08 a 10hs - COSTURA CREATIVA":
+          id_curso = 408
+          break;
+        case "Martes de 10 a 12hs - COSTURA CREATIVA":
+          id_curso = 409
+          break;
+
+        case "Martes de 14 a 16hs - COSTURA CREATIVA":
+          id_curso = 410
+          break;
+        case "Martes de 16 a 18hs - COSTURA CREATIVA":
+          id_curso = 411
+          break;
+        case "Martes de 18 a 20hs - COSTURA CREATIVA":
+          id_curso = 412
+            break;
+        case "Lunes de 14 a 16hs - BARBERÍA":
+          id_curso = 413
+              break;
+
+        case "Lunes de 16 a 18hs - BARBERÍA":
+          id_curso = 414
+                break;
+
+        case "Lunes de 18 a 20hs - BARBERÍA":
+          id_curso = 415
+                  break;
+
+        case "Jueves de 08 a 10hs - BARBERÍA":
+          id_curso = 416
+                    break;
+
+        case "Jueves de 10 a 12hs - BARBERÍA":
+          id_curso = 417
+                      break;
+
+        case "Lunes de 08 a 10hs - CROCHET DESDE CERO":
+          id_curso = 418
+                        break;
+
+        case "Lunes de 10 a 12hs - CROCHER DESDE CERO":
+          id_curso = 419
+                          break;
+        case "Miércoles 08 a 10hs - CROCHET DESDE CERO":
+          id_curso = 420
+                            break;
+
+        case "Miércoles de 10 a 12hs - CROCHET DESDE CERO":
+          id_curso = 421
+                              break;
+
+        case "Miércoles de 14 a 16hs - COCINA EXPRESS":
+          id_curso = 422
+                                break;
+
+        case "Miércoles de 16 a 18hs - COCINA EXPRESS":
+          id_curso = 423
+                                  break;
+
+        case "Miércoles de 18 a 20hs - COCINA EXPRESS":
+          id_curso = 424
+                                    break;
+
+        case "Viernes de 08 a 10hs - COCINA EXPRESS":
+          id_curso = 425
+                                      break;
+
+        case "Viernes de 10 a 12hs - COCINA EXPRESS":
+          id_curso = 426
+                                        break;
+
+        case "Jueves de 14 a 16hs - DECORACIÓN DE TORTAS":
+          id_curso = 427
+                                          break;
+
+        case "Jueves de 16 a 18hs - DECORACIÓN DE TORTAS":
+          id_curso = 428
+                                            break;
+                                            
+        case "Jueves de 18 a 20hs - DECORACIÓN DE TORTAS":
+          id_curso = 429
+                                            break;
+                                            
+        case "Viernes de 14 a 16hs - COCTELERÍA":
+          id_curso = 430
+                                            break;
+                                            
+        case "Viernes de 16 a 18hs - COCTELERÍA":
+          id_curso = 431
+                                            break;
+                                            
+        case "Viernes de 18 a 20hs - COCTELERÍA":
+          id_curso = 432
+                                            break;
+                                            
+
+
+
+
+        default:
+          id_curso = 1
+          break;
+      }
+      dos = id_curso
+
+
+      try {
+
+       
+        if (sheetData[property]['D.N.I.'] === undefined) {
+          dni = '34825125'
+        } else {
+          dni = sheetData[property]['D.N.I.']
+        }
+        let idp = await pool.query('select * from personas where dni =?',[dni])
+        cat = await caregorizar.asignarcategoria(idp)
+        console.log(cat)
+        await pool.query('update personas set categoria=? where dni =?', [cat, dni])
+
+        if (sheetData[property]['¿Por que querés tomar alguno de estos cursos?'] === undefined) {
+          motivacion = 'Sin completar'
+        } else {
+          motivacion = sheetData[property]['¿Por que querés tomar alguno de estos cursos?']
+        }
+        if (sheetData[property]['Posee alguno de los  siguientes dispositivos con conexión a internet:'] === undefined) {
+          conexion_int = 'Sin completar'
+        } else {
+          conexion_int = sheetData[property]['Posee alguno de los  siguientes dispositivos con conexión a internet:']
+        }
+        if (sheetData[property]['D.N.I.'] === undefined) {
+          dni_persona = 'Sin completar'
+        } else {
+          dni_persona = sheetData[property]['D.N.I.']
+        }
+        if (sheetData[property]['¿Qué te gustaría hacer con las habilidades aprendidas?'] === undefined) {
+          objetivo = 'Sin completar'
+        } else {
+          objetivo = sheetData[property]['¿Qué te gustaría hacer con las habilidades aprendidas?']
+        }
+        if (sheetData[property]['Disponibilidad Horaria para cursar '] === undefined) {
+          horario = 'Sin completar'
+        } else {
+          horario = sheetData[property]['Disponibilidad Horaria para cursar ']
+        }
+        if (sheetData[property]['¿Cómo te enteraste de los cursos?'] === undefined) {
+          como_se_entero = 'Sin completar'
+        } else {
+          como_se_entero = sheetData[property]['¿Cómo te enteraste de los cursos?']
+        }
+
+        if (sheetData[property]['¿Qué curso te gustaría que agreguemos en las próximas ofertas?'] === undefined) {
+          recomendacion = 'Sin completar'
+        } else {
+          recomendacion = sheetData[property]['¿Qué curso te gustaría que agreguemos en las próximas ofertas?']
+        }
+        
+
+
+        await pool.query('INSERT INTO inscripciones set id_persona=?,motivacion=?,conexion_int=?,dni_persona=?,objetivo=?,horario=?, estado="pendiente",uno=?,dos=?,como_se_entero=?,recomendacion=?,edicion=3', [idp[0]['id'],motivacion, conexion_int, dni_persona, objetivo, horario, uno, dos,como_se_entero,recomendacion]);
+
+
+        console.log('cargado')
+
+
+
+      } catch (e) {
+        console.log(e)
+      }
+  
+    }
+
+
+    // Devolver los datos procesados como respuesta
+    res.json('realizado');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al procesar el archivo Excel.');
+  }
+});
+
+
+
+
+
+
+
+
 
 
 router.get('/traerobservaciones/:id', async (req, res) => {
@@ -623,7 +1175,7 @@ router.post("/enviarinscripcion", async (req, res) => {
   if (participante_feria === undefined) {
     participante_feria = 'Sin determinar'
   }
-  
+
   if (tipo_empleo === undefined) {
     tipo_empleo = 'Sin determinar'
   }
@@ -632,17 +1184,17 @@ router.post("/enviarinscripcion", async (req, res) => {
     cantidad_hijos = 'Sin determinar'
   }
 
-  console.log(nombre, fecha_nac, participante_feria,apellido, dni, tel, tel2, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, motivacion)
+  console.log(nombre, fecha_nac, participante_feria, apellido, dni, tel, tel2, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, motivacion)
 
   try {
     let pers = await pool.query('select * from personas where dni =?', [dni])
     if (pers.length > 0) {
       cat = await caregorizar.asignarcategoria(pers)
 
-      await pool.query('update personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?, categoria=?,participante_feria=? where dni=? ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, cat,participante_feria, dni])
+      await pool.query('update personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?, categoria=?,participante_feria=? where dni=? ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, cat, participante_feria, dni])
     } else {
 
-      await pool.query('insert into personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?,participante_feria  ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior,participante_feria])
+      await pool.query('insert into personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?,participante_feria  ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, participante_feria])
       pers = await pool.query('select * from personas where dni =?', [dni])
       cat = await caregorizar.asignarcategoria(pers)
 
@@ -933,14 +1485,14 @@ router.get('/cargarpersonas111', async (req, res) => {
   const workbooksheets = workbook.SheetNames
   const sheet = workbooksheets[0]
 
-  const dataExcel = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
-  //console.log(dataExcel)
+  const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
+  //console.log(sheetData)
 
 
   let a = 1
-  for (const property in dataExcel) {
+  for (const property in sheetData) {
     a += 1
-    aux = dataExcel[property]['Número']
+    aux = sheetData[property]['Número']
     existe = await pool.query('select * from personas where dni = ?', [aux])
 
 
@@ -948,34 +1500,15 @@ router.get('/cargarpersonas111', async (req, res) => {
       console.log('Dni ya existe')
     } else {
       hijos = 0
-      if (dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'] === '') {
+      if (sheetData[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'] === '') {
         hijos = 0
       } else {
-        hijos = dataExcel[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?']
+        hijos = sheetData[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?']
       }
 
       try {
-        const newLink = {
-          apellido: dataExcel[property]['Apellido'],
-          nombre: dataExcel[property]['Nombre'],
-          dni: dataExcel[property]['D.N.I.'],
-
-          usuario: 'No',
-          direccion: dataExcel[property]['Dirección calle'] + '-' + dataExcel[property][' Altura'] + '-' + dataExcel[property]['Piso y departamento (en caso que corresponda)'],
-          barrio: dataExcel[property]['Barrio'],
-          residencia: dataExcel[property]['Donde vivís'],
-          tel: dataExcel[property]['Número de teléfono de contacto'],
-
-          tel2: dataExcel[property]['Número de teléfono alternativo'],
-
-          participante_anterior: dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres? '],
-          nivel_secundario: dataExcel[property]['Nivel educativo alcanzado'],
-
-          hijos: hijos,
-          como_se_entero: dataExcel[property]['¿Cómo te enteraste de los cursos?'],
-        }
-
-        await pool.query('INSERT INTO personas set apellido=?,nombre=?,dni=?,usuario=?,direccion=?,barrio=?,residencia=?,tel=?,tel2=?,participante_anterior=?,nivel_secundario=?,hijos=?,como_se_entero=?', [dataExcel[property]['Apellido'], dataExcel[property]['Nombre'], dataExcel[property]['D.N.I.'], 'No', dataExcel[property]['Dirección calle'] + '-' + dataExcel[property][' Altura'] + '-' + dataExcel[property]['Piso y departamento (en caso que corresponda)'], dataExcel[property]['Barrio'], dataExcel[property]['Donde vivís'], dataExcel[property]['Número de teléfono de contacto'], dataExcel[property]['Número de teléfono alternativo'], dataExcel[property]['¿Participaste de algún curso de la escuela de Mujeres? '], dataExcel[property]['Nivel educativo alcanzado'], dataExcel[property]['¿Cómo te enteraste de los cursos?']]);
+      
+        await pool.query('INSERT INTO personas set apellido=?,nombre=?,dni=?,usuario=?,direccion=?,barrio=?,residencia=?,tel=?,tel2=?,participante_anterior=?,nivel_secundario=?,hijos=?,como_se_entero=?', [sheetData[property]['Apellido'], sheetData[property]['Nombre'], sheetData[property]['D.N.I.'], 'No', sheetData[property]['Dirección calle'] + '-' + sheetData[property][' Altura'] + '-' + sheetData[property]['Piso y departamento (en caso que corresponda)'], sheetData[property]['Barrio'], sheetData[property]['Donde vivís'], sheetData[property]['Número de teléfono de contacto'], sheetData[property]['Número de teléfono alternativo'], sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente? '], sheetData[property]['Nivel educativo alcanzado'], sheetData[property]['¿Cómo te enteraste de los cursos?']]);
 
 
         console.log('cargado')
@@ -986,7 +1519,7 @@ router.get('/cargarpersonas111', async (req, res) => {
         console.log(e)
       }
 
-      /* if ((dataExcel[property]['Sucursal']).includes(cuil_cuit)) {
+      /* if ((sheetData[property]['Sucursal']).includes(cuil_cuit)) {
           estado = 'A'
       }*/
 
@@ -1004,14 +1537,14 @@ router.get('/cargarcursos111', async (req, res) => {
   const workbooksheets = workbook.SheetNames
   const sheet = workbooksheets[0]
 
-  const dataExcel = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
-  //console.log(dataExcel)
+  const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
+  //console.log(sheetData)
 
 
   let a = 1
-  for (const property in dataExcel) {
+  for (const property in sheetData) {
     a += 1
-    aux = dataExcel[property]['Selecciona el primer curso de mayor preferencia (1)']
+    aux = sheetData[property]['Selecciona el primer curso de mayor preferencia (1)']
     existe = await pool.query('select * from cursos where nombre = ?', [aux])
 
 
@@ -1019,20 +1552,20 @@ router.get('/cargarcursos111', async (req, res) => {
       console.log('Dni ya existe')
     } else {
 
-      aux = dataExcel[property]['Selecciona el primer curso de mayor preferencia (1)']
+      aux = sheetData[property]['Selecciona el primer curso de mayor preferencia (1)']
       existe = await pool.query('select * from cursos where nombre = ?', [aux])
       if (existe.length > 0) {
         console.log('Curso ya existe')
       } else {
 
-        aux = dataExcel[property]['Selecciona el primer curso de mayor preferencia (2)']
+        aux = sheetData[property]['Selecciona el primer curso de mayor preferencia (2)']
         existe = await pool.query('select * from cursos where nombre = ?', [aux])
 
         if (existe.length > 0) {
           console.log('Curso ya existe')
         } else {
 
-          aux = dataExcel[property]['Selecciona el primer curso de mayor preferencia (3)']
+          aux = sheetData[property]['Selecciona el primer curso de mayor preferencia (3)']
           existe = await pool.query('select * from cursos where nombre = ?', [aux])
 
           if (existe.length > 0) {
@@ -1118,18 +1651,18 @@ router.get('/cargarinscripciones', async (req, res) => {
   const workbooksheets = workbook.SheetNames
   const sheet = workbooksheets[0]
 
-  const dataExcel = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
-  //console.log(dataExcel)
+  const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
+  //console.log(sheetData)
 
 
   let a = 1
-  for (const property in dataExcel) {
+  for (const property in sheetData) {
     a += 1
-    aux = dataExcel[property]['Número']
+    aux = sheetData[property]['Número']
     existe = await pool.query('select * from personas where dni = ?', [aux])
 
 
-    expresion = dataExcel[property]['Selecciona el primer curso de mayor preferencia (1)']
+    expresion = sheetData[property]['Selecciona el primer curso de mayor preferencia (1)']
     switch (expresion) {
       case 'Bordado Mexicano':
         id_curso = 122
@@ -1158,7 +1691,7 @@ router.get('/cargarinscripciones', async (req, res) => {
     uno = id_curso
 
 
-    expresion = dataExcel[property]['Selecciona el primer curso de mayor preferencia (2)']
+    expresion = sheetData[property]['Selecciona el primer curso de mayor preferencia (2)']
     switch (expresion) {
       case 'Bordado Mexicano':
         id_curso = 122
@@ -1188,7 +1721,7 @@ router.get('/cargarinscripciones', async (req, res) => {
 
 
 
-    expresion = dataExcel[property]['Selecciona el primer curso de mayor preferencia (3)']
+    expresion = sheetData[property]['Selecciona el primer curso de mayor preferencia (3)']
     switch (expresion) {
       case 'Bordado Mexicano':
         id_curso = 122
@@ -1219,12 +1752,12 @@ router.get('/cargarinscripciones', async (req, res) => {
 
     try {
       const newLink = {
-        motivacion: dataExcel[property]['¿Por que elegiste tomar este curso?'],
-        conexion_int: dataExcel[property]['Posee alguno de los  siguientes dispositivos con conexión a internet:'],
-        dni_persona: dataExcel[property]['D.N.I.'],
-        objetivo: dataExcel[property]['¿Qué te gustaría  hacer con las habilidades aprendidas?'],
-        horario: dataExcel[property]['Disponibilidad Horaria para cursar'],
-        horario2: dataExcel[property]['Disponibilidad Horaria para cursar2'],
+        motivacion: sheetData[property]['¿Por que elegiste tomar este curso?'],
+        conexion_int: sheetData[property]['Posee alguno de los  siguientes dispositivos con conexión a internet:'],
+        dni_persona: sheetData[property]['D.N.I.'],
+        objetivo: sheetData[property]['¿Qué te gustaría  hacer con las habilidades aprendidas?'],
+        horario: sheetData[property]['Disponibilidad Horaria para cursar'],
+        horario2: sheetData[property]['Disponibilidad Horaria para cursar2'],
         estado: 'pendiente',
 
         uno,
@@ -1247,7 +1780,7 @@ router.get('/cargarinscripciones', async (req, res) => {
       console.log(e)
     }
 
-    /* if ((dataExcel[property]['Sucursal']).includes(cuil_cuit)) {
+    /* if ((sheetData[property]['Sucursal']).includes(cuil_cuit)) {
         estado = 'A'
     }*/
 
@@ -1273,14 +1806,14 @@ router.get('/cargaremprendimientos1111', async (req, res) => {
   const workbooksheets = workbook.SheetNames
   const sheet = workbooksheets[0]
 
-  const dataExcel = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
-  //console.log(dataExcel)
+  const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
+  //console.log(sheetData)
 
 
   let a = 1
-  for (const property in dataExcel) {
+  for (const property in sheetData) {
     a += 1
-    aux = dataExcel[property]['¿Tenes un emprendimiento?']
+    aux = sheetData[property]['¿Tenes un emprendimiento?']
 
 
     if (aux === 'Sí') {
@@ -1288,11 +1821,11 @@ router.get('/cargaremprendimientos1111', async (req, res) => {
       try {
         const newLink = {
 
-          dni_persona: dataExcel[property]['D.N.I.'],
-          rubro: dataExcel[property]['Rubro'],
-          descripcion: dataExcel[property]['Contamos brevemente de que se trata'],
-          red_social: dataExcel[property]['Dejannos las redes sociales de tu emprendimiento (si lo tiene)'],
-          quiere_partic_esme: dataExcel[property]['¿Te interesaría participar de una feria?'],
+          dni_persona: sheetData[property]['D.N.I.'],
+          rubro: sheetData[property]['Rubro'],
+          descripcion: sheetData[property]['Contamos brevemente de que se trata'],
+          red_social: sheetData[property]['Dejannos las redes sociales de tu emprendimiento (si lo tiene)'],
+          quiere_partic_esme: sheetData[property]['¿Te interesaría participar de una feria?'],
 
 
         }
@@ -1332,16 +1865,16 @@ router.get('/cargartrabajos', async (req, res) => {
   const workbooksheets = workbook.SheetNames
   const sheet = workbooksheets[0]
 
-  const dataExcel = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
-  //console.log(dataExcel)
+  const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheet])
+  //console.log(sheetData)
 
 
   let a = 1
-  for (const property in dataExcel) {
+  for (const property in sheetData) {
     a += 1
-    dni = dataExcel[property]['D.N.I.']
+    dni = sheetData[property]['D.N.I.']
 
-    trabaja = dataExcel[property]['Actualmente, ¿se encuentra trabajando?']
+    trabaja = sheetData[property]['¿Actualmente estas trabajando?']
     console.log(trabaja)
     if (trabaja === 'Si') {
 
@@ -1349,7 +1882,7 @@ router.get('/cargartrabajos', async (req, res) => {
       const newLink = {
 
         trabajo: 'Si',
-        tipo_trabajo: dataExcel[property]['¿Qué tipo de empleo posee?'],
+        tipo_trabajo: sheetData[property]['Si tu respuesta fue sí, contamos como es tu empleo:'],
 
 
 
@@ -1370,7 +1903,7 @@ router.get('/cargartrabajos', async (req, res) => {
       const newLink = {
 
         trabajo: 'No',
-        tipo_trabajo: dataExcel[property]['¿Qué tipo de empleo posee?'],
+        tipo_trabajo: sheetData[property]['Si tu respuesta fue sí, contamos como es tu empleo:'],
 
 
 
