@@ -603,6 +603,18 @@ router.post("/ponerpresente", async (req, res) => {
 
 })
 
+router.get("/nivelar", async (req, res) => {
+ 
+
+  const hoy = await pool.query('select * from dtc_asistencia where fecha="15-4-2024"')
+  for (is in hoy ){
+    await pool.query('insert into dtc_asistencia set  fecha="24-4-2024",id_tallerista=238, id_usuario=?', [hoy[is]['id_usuario']])
+  }
+  res.json(era)
+
+
+})
+
 
 
 router.post("/traercumples", async (req, res) => {
