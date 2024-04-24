@@ -10,17 +10,17 @@ async function asignarcategoria(persona) {
   let categoria = 'cero'
   try {
 
-    if (((persona[0]['hijos'] === "Si") || (persona[0]['hijos'] === "No")) && ((persona[0]['trabajo'] === "Si") || (persona[0]['trabajo'] === "No"))) {
-      if ((persona[0]['participante_anterior'] === "Sí") || (persona[0]['participante_anterior'] === "Si")) {
+    
+      if ((persona[0]['participante_anterior'] == "Sí") || (persona[0]['participante_anterior'] == "Si")) {
 
         /// 
-        if ((persona[0]['hijos'] == "0") || (persona[0]['hijos'] == null) || (persona[0]['hijos'] == "No")) {
+        if ((persona[0]['hijos'] == "0") || (persona[0]['hijos'] == null) || (persona[0]['hijos'] == "No")|| (persona[0]['hijos'] == "nn")) {
 
           ///tiene hijos
           //  porcentaje_real=35.1
           if (persona[0]['trabajo'] === "Si" || persona[0]['trabajo'] === "Si") {
 
-            if (persona[0]['tipo_trabajo'] === "Formal") {
+            if ((persona[0]['tipo_trabajo'] === "Formal") || (persona[0]['tipo_trabajo'] === "FORMAL")  ) {
 
               categoria = "doce"
 
@@ -44,7 +44,7 @@ async function asignarcategoria(persona) {
 
           if (persona[0]['trabajo'] === "Si" || persona[0]['trabajo'] === "Si") {
 
-            if (persona[0]['tipo_trabajo'] === "Formal") {
+            if((persona[0]['tipo_trabajo'] === "Formal") || (persona[0]['tipo_trabajo'] === "FORMAL")  )  {
 
               categoria = "nueve"
 
@@ -82,7 +82,7 @@ async function asignarcategoria(persona) {
           //  porcentaje_real=35.1
           if (persona[0]['trabajo'] === "Si" || persona[0]['trabajo'] === "Si") {
 
-            if (persona[0]['tipo_trabajo'] === "Formal") {
+            if ((persona[0]['tipo_trabajo'] === "Formal") || (persona[0]['tipo_trabajo'] === "FORMAL")  ) {
 
               categoria = "seis"
 
@@ -106,7 +106,7 @@ async function asignarcategoria(persona) {
 
           if (persona[0]['trabajo'] === "Si" || persona[0]['trabajo'] === "Si") {
 
-            if (persona[0]['tipo_trabajo'] === "Formal") {
+            if ((persona[0]['tipo_trabajo'] === "Formal") || (persona[0]['tipo_trabajo'] === "FORMAL")  ) {
 
               categoria = "tres"
 
@@ -130,7 +130,7 @@ async function asignarcategoria(persona) {
         }
 
       }
-    }
+    
 
   } catch (error) {
 

@@ -45,7 +45,7 @@ router.post('/subirexcel', upload.single('excel'), async (req, res) => {
 
  
 
-    console.log(sheetData)
+ 
 
 
 
@@ -128,10 +128,10 @@ router.post('/subirexcel', upload.single('excel'), async (req, res) => {
           }
           
 
-          if (sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente?'] === undefined) {
+          if (sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente? '] === undefined) {
             participante_anterior = 'No'
           } else {
-            participante_anterior = sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente?']
+            participante_anterior = sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente? ']
           }
           if (sheetData[property]['Nivel educativo alcanzado'] === undefined) {
             nivel_secundario = 'No'
@@ -163,8 +163,10 @@ router.post('/subirexcel', upload.single('excel'), async (req, res) => {
           } else {
             novedades = sheetData[property]['¿Te gustaría recibir novedades de nuevos cursos y/o actividades que llevemos adelante desde nuestro espacio?']
           }
-          
-          await pool.query('update personas set tipo_empleo=?, mail=?, participante_feria=?, recibir_novedades=?,direccion =?,barrio=?,fecha_nac=?, tel=?, tel2=?,participante_anterior=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,hijos=? where dni = ?', [tipo_empleo, mail, participante_feria, recibir_novedades,direccion, barrio, fecha_nac, tel, tel2, participante_anterior, nivel_secundario, trabajo, tipo_trabajo, hijos, aux])
+         idp = await pool.query('select * from personas where dni =?',[dni])
+          cat = await caregorizar.asignarcategoria(idp)
+
+          await pool.query('update personas set categoria=?, tipo_empleo=?, mail=?, participante_feria=?, recibir_novedades=?,direccion =?,barrio=?,fecha_nac=?, tel=?, tel2=?,participante_anterior=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,hijos=? where dni = ?', [cat,tipo_empleo, mail, participante_feria, recibir_novedades,direccion, barrio, fecha_nac, tel, tel2, participante_anterior, nivel_secundario, trabajo, tipo_trabajo, hijos, aux])
 
 
         } else {
@@ -233,10 +235,10 @@ router.post('/subirexcel', upload.single('excel'), async (req, res) => {
           } else {
             tel2 = sheetData[property]['Número de teléfono alternativo']
           }
-          if (sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente?'] === undefined) {
+          if (sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente? '] === undefined) {
             participante_anterior = 'No'
           } else {
-            participante_anterior = sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente?']
+            participante_anterior = sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente? ']
           }
           if (sheetData[property]['Nivel educativo alcanzado'] === undefined) {
             nivel_secundario = 'No'
@@ -263,14 +265,15 @@ router.post('/subirexcel', upload.single('excel'), async (req, res) => {
           } else {
             novedades = sheetData[property]['¿Te gustaría recibir novedades de nuevos cursos y/o actividades que llevemos adelante desde nuestro espacio?']
           }
-          
+          let idp = await pool.query('select * from personas where dni =?',[dni])
+          cat = await caregorizar.asignarcategoria(idp)
 
-          await pool.query('INSERT INTO personas set tipo_empleo=?, mail=?, participante_feria=?, recibir_novedades=?, nombre=?,apellido=?,dni=?,direccion=?,barrio=?,fecha_nac=?,tel=?, tel2=?,participante_anterior=?, nivel_secundario=?, trabajo=?,tipo_trabajo=?,hijos=?', [tipo_empleo, mail, participante_feria, recibir_novedades,nombre, apellido, dni, direccion , barrio, fecha_nac, tel, tel2, participante_anterior, nivel_secundario, trabajo, tipo_trabajo, hijos]);
+          await pool.query('INSERT INTO personas set categoria=?,tipo_empleo=?, mail=?, participante_feria=?, recibir_novedades=?, nombre=?,apellido=?,dni=?,direccion=?,barrio=?,fecha_nac=?,tel=?, tel2=?,participante_anterior=?, nivel_secundario=?, trabajo=?,tipo_trabajo=?,hijos=?', [cat,tipo_empleo, mail, participante_feria, recibir_novedades,nombre, apellido, dni, direccion , barrio, fecha_nac, tel, tel2, participante_anterior, nivel_secundario, trabajo, tipo_trabajo, hijos]);
         }
         /////////¿Actualmente  se encuentra estudiando? actividad adicional
         /////////////Tipo de empleo
       }else{
-        console.log('yainscptito')
+        
       }
 
       }
@@ -492,7 +495,7 @@ router.post('/subirexcel', upload.single('excel'), async (req, res) => {
       }
       dos = id_curso
 
-
+        if (yainscripto.length == 0) {
       try {
 
        
@@ -548,13 +551,13 @@ router.post('/subirexcel', upload.single('excel'), async (req, res) => {
         await pool.query('INSERT INTO inscripciones set id_persona=?,motivacion=?,conexion_int=?,dni_persona=?,objetivo=?,horario=?, estado="pendiente",uno=?,dos=?,como_se_entero=?,recomendacion=?,edicion=3', [idp[0]['id'],motivacion, conexion_int, dni_persona, objetivo, horario, uno, dos,como_se_entero,recomendacion]);
 
 
-        console.log('cargado')
+      
 
 
 
       } catch (e) {
         console.log(e)
-      }
+      }}
   
     }
 
@@ -1508,7 +1511,7 @@ router.get('/cargarpersonas111', async (req, res) => {
 
       try {
       
-        await pool.query('INSERT INTO personas set apellido=?,nombre=?,dni=?,usuario=?,direccion=?,barrio=?,residencia=?,tel=?,tel2=?,participante_anterior=?,nivel_secundario=?,hijos=?,como_se_entero=?', [sheetData[property]['Apellido'], sheetData[property]['Nombre'], sheetData[property]['D.N.I.'], 'No', sheetData[property]['Dirección calle'] + '-' + sheetData[property][' Altura'] + '-' + sheetData[property]['Piso y departamento (en caso que corresponda)'], sheetData[property]['Barrio'], sheetData[property]['Donde vivís'], sheetData[property]['Número de teléfono de contacto'], sheetData[property]['Número de teléfono alternativo'], sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente? '], sheetData[property]['Nivel educativo alcanzado'], sheetData[property]['¿Cómo te enteraste de los cursos?']]);
+        await pool.query('INSERT INTO personas set apellido=?,nombre=?,dni=?,usuario=?,direccion=?,barrio=?,residencia=?,tel=?,tel2=?,participante_anterior=?,nivel_secundario=?,hijos=?,como_se_entero=?', [sheetData[property]['Apellido'], sheetData[property]['Nombre'], sheetData[property]['D.N.I.'], 'No', sheetData[property]['Dirección calle'] + '-' + sheetData[property][' Altura'] + '-' + sheetData[property]['Piso y departamento (en caso que corresponda)'], sheetData[property]['Barrio'], sheetData[property]['Donde vivís'], sheetData[property]['Número de teléfono de contacto'], sheetData[property]['Número de teléfono alternativo'], sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente?  '], sheetData[property]['Nivel educativo alcanzado'], sheetData[property]['¿Cómo te enteraste de los cursos?']]);
 
 
         console.log('cargado')
