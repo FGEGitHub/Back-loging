@@ -34,7 +34,7 @@ router.post('/incripcionesid', async (req, res) => {
 
   const estract = await pool.query('select * from excelinscripciones where id = ? ', [id])
   const nombree = estract[0]['ruta']
- 
+
 
   let mandar = []
   // const workbook = XLSX.readFile(`./src/Excel/${nombree}`)
@@ -501,14 +501,14 @@ router.post('/cargarinscripciones', async (req, res) => {
 })
 
 router.post('/modificarestadodeinscrip', async (req, res) => {
-  const { id , estado} = req.body
-try {
-  await pool.query('update inscripciones set  estado=? where  id = ?', [   estado, id])
-  res.json('Realizado')
-} catch (error) {
-  console.log(error)
-  res.json('No Realizado')
-}
+  const { id, estado } = req.body
+  try {
+    await pool.query('update inscripciones set  estado=? where  id = ?', [estado, id])
+    res.json('Realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('No Realizado')
+  }
 
 })
 
@@ -516,9 +516,9 @@ router.post('/cargarexcelpersonas', async (req, res) => {
   const { id } = req.body
   console.log(id)
   const estract = await pool.query('select * from excelinscripciones where id = ? ', [id])
-  
+
   const nombree = estract[0]['ruta']
- 
+
 
   let mandar = []
   // const workbook = XLSX.readFile(`./src/Excel/${nombree}`)
@@ -538,7 +538,7 @@ router.post('/cargarexcelpersonas', async (req, res) => {
 
 
 
- 
+
     let a = 1
     for (const property in dataExcel) {
       a += 1
@@ -557,19 +557,19 @@ router.post('/cargarexcelpersonas', async (req, res) => {
         } else {
           apellido = dataExcel[property]['Apellido']
         }
-       
+
         if (dataExcel[property]['barrio_id'] === undefined) {
           barrio = 'No'
         } else {
           barrio = dataExcel[property]['barrio_id']
         }
-     
+
         if (dataExcel[property]['telefono'] === undefined) {
           tel = 'No'
         } else {
           tel = dataExcel[property]['telefono']
         }
-     
+
         if (dataExcel[property]['nivelestudio_id'] === undefined) {
           nivel_secundario = 'Sin determinar'
         } else {
@@ -598,17 +598,17 @@ router.post('/cargarexcelpersonas', async (req, res) => {
         if (existe.length > 0) {
 
           console.log('viejo')
-        
-          await pool.query('update personas set  tel=?,mail=? where dni = ?', [   tel, mail, aux])
+
+          await pool.query('update personas set  tel=?,mail=? where dni = ?', [tel, mail, aux])
           console.log('viejo guardado')
 
         } else {
           ///crear nueva persona 
-        console.log('nuevo')
-      
+          console.log('nuevo')
 
-          await pool.query('INSERT INTO personas set direccion=?, nombre=?,apellido=?,dni=?,barrio=?,tel=?, nivel_secundario=?, trabajo=?,tipo_trabajo=?,mail=?', [direccion,nombre, apellido, aux,  barrio, tel, nivel_secundario, trabajo, tipo_trabajo, mail]);
-         console.log('nuevo guardado')
+
+          await pool.query('INSERT INTO personas set direccion=?, nombre=?,apellido=?,dni=?,barrio=?,tel=?, nivel_secundario=?, trabajo=?,tipo_trabajo=?,mail=?', [direccion, nombre, apellido, aux, barrio, tel, nivel_secundario, trabajo, tipo_trabajo, mail]);
+          console.log('nuevo guardado')
         }
 
         /////////¿Actualmente  se encuentra estudiando? actividad adicional
@@ -622,7 +622,7 @@ router.post('/cargarexcelpersonas', async (req, res) => {
         console.log(error)
       }
 
-    
+
 
 
     }
@@ -661,124 +661,124 @@ router.get('/traerinscripcionesenc/', async (req, res) => {
 })
 
 router.get('/preinscriptascall/:id', async (req, res) => {
-const id = req.params.id
+  const id = req.params.id
 
   try {
-  
-    inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2 left join (select id_inscripcion , id_turno  from cursado) as sel8 on inscripciones.id=sel8.id_inscripcion left join (select id as idt, descripcion, id_curso from turnos) as sel9 on sel8.id_turno=sel9.idt left join(select id as idc, nombre as nombrecurso from cursos) as sel10 on sel9.id_curso=sel10.idc where id_call=? ',[id])
- 
+
+    inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2 left join (select id_inscripcion , id_turno  from cursado) as sel8 on inscripciones.id=sel8.id_inscripcion left join (select id as idt, descripcion, id_curso from turnos) as sel9 on sel8.id_turno=sel9.idt left join(select id as idc, nombre as nombrecurso from cursos) as sel10 on sel9.id_curso=sel10.idc where id_call=? ', [id])
+
     res.json([inscriptos])
-    
+
   } catch (error) {
 
-    res.json(["error"]) 
-   }
-  })
+    res.json(["error"])
+  }
+})
 
 router.get('/preinscriptas/', async (req, res) => {
 
-try {
+  try {
 
-  inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2  left join (select id as idu, nombre as nombrecall from usuarios) as sel4 on inscripciones.id_call=sel4.idu where edicion=2 and estado="Preasignada"')
+    inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2  left join (select id as idu, nombre as nombrecall from usuarios) as sel4 on inscripciones.id_call=sel4.idu where edicion=2 and estado="Preasignada"')
 
-  curso1 = await pool.query('select * from inscripciones where uno =132')
-  curso2 = await pool.query('select * from inscripciones where uno =133')
-  curso3 = await pool.query('select * from inscripciones where uno =134')
-  curso4 = await pool.query('select * from inscripciones where uno =135')
-  curso5 = await pool.query('select * from inscripciones where uno =136')
+    curso1 = await pool.query('select * from inscripciones where uno =132')
+    curso2 = await pool.query('select * from inscripciones where uno =133')
+    curso3 = await pool.query('select * from inscripciones where uno =134')
+    curso4 = await pool.query('select * from inscripciones where uno =135')
+    curso5 = await pool.query('select * from inscripciones where uno =136')
 
-  let deuda_exigible=[]
+    let deuda_exigible = []
 
 
-if (inscriptos.length === 0) {
+    if (inscriptos.length === 0) {
 
-    const dato1 = {
+      const dato1 = {
         'datoa': 'Cantidad de inscriptas',
         'datob': "No hay cuotas Calculadas"
-    }
-    const dato2 = {
+      }
+      const dato2 = {
         'datoa': 'Monto devengado hasta la cuota',
         'datob': "No hay cuotas Calculadas"
-    }
-    const dato3 = {
+      }
+      const dato3 = {
         'datoa': 'Monto abonado hasta la cuota',
         'datob': "No hay cuotas Calculadas"
-    }
-    const dato4 = {
+      }
+      const dato4 = {
         'datoa': 'Deuda Exigible',
         'datob': "No hay cuotas Calculadas"
-    }
-    const deuda_exigible = [dato1, dato2, dato3, dato4]
-    const dato5 = {
+      }
+      const deuda_exigible = [dato1, dato2, dato3, dato4]
+      const dato5 = {
         'datoa': 'Cantidad de cuotas sin pago',
         'datob': 'no calculado'
-    }
-    const dato6 = {
+      }
+      const dato6 = {
         'datoa': 'Monto cuota pura',
         'datob': 'no calculado'
-    }
-    const dato7 = {
+      }
+      const dato7 = {
         'datoa': 'Saldo de capital a vencer',
         'datob': 'no calculado'
-    }
+      }
 
-    const cuotas_pendientes = [dato5, dato6, dato7]
-    const respuesta = [inscriptos,cuotas_pendientes]
-
-
-    res.json(respuesta)
-} else {
+      const cuotas_pendientes = [dato5, dato6, dato7]
+      const respuesta = [inscriptos, cuotas_pendientes]
 
 
+      res.json(respuesta)
+    } else {
 
-    const dato1 = {
+
+
+      const dato1 = {
         'datoa': 'Cantidad de inscriptas',
         'datob': inscriptos.length,
-        'datoc': inscriptos.length*100/inscriptos.length,
-        'datod': (25*(inscriptos.length/inscriptos.length)).toFixed(2)
-        
-    }
-    const dato2 = {
+        'datoc': inscriptos.length * 100 / inscriptos.length,
+        'datod': (25 * (inscriptos.length / inscriptos.length)).toFixed(2)
+
+      }
+      const dato2 = {
         'datoa': 'Elaboracion de mesa de dulces para eventos',
         'datob': curso1.length,
-        'datoc': (curso1.length*100/inscriptos.length).toFixed(2),
-        'datod': (25*(curso1.length/inscriptos.length)).toFixed(2)
-    }
-    const dato3 = {
-      'datoa': 'Maquillaje y peinado para eventos',
-      'datob': curso2.length,
-      'datoc': (curso2.length*100/inscriptos.length).toFixed(2),
-      'datod': (25*(curso2.length/inscriptos.length)).toFixed(2)
-  }
-    const dato4 = {
+        'datoc': (curso1.length * 100 / inscriptos.length).toFixed(2),
+        'datod': (25 * (curso1.length / inscriptos.length)).toFixed(2)
+      }
+      const dato3 = {
+        'datoa': 'Maquillaje y peinado para eventos',
+        'datob': curso2.length,
+        'datoc': (curso2.length * 100 / inscriptos.length).toFixed(2),
+        'datod': (25 * (curso2.length / inscriptos.length)).toFixed(2)
+      }
+      const dato4 = {
         'datoa': 'Diseño de lenceria femenina',
         'datob': curso3.length,
-        'datoc': (curso3.length*100/inscriptos.length).toFixed(2),
-        'datod': (25*(curso3.length/inscriptos.length)).toFixed(2)
+        'datoc': (curso3.length * 100 / inscriptos.length).toFixed(2),
+        'datod': (25 * (curso3.length / inscriptos.length)).toFixed(2)
+      }
+      const dato5 = {
+        'datoa': 'Textiles y accesorios para el verano',
+        'datob': curso4.length,
+        'datoc': (curso4.length * 100 / inscriptos.length).toFixed(2),
+        'datod': (25 * (curso4.length / inscriptos.length)).toFixed(2)
+      }
+      const dato6 = {
+        'datoa': 'Refaccion integral para el hogar',
+        'datob': curso5.length,
+        'datoc': (curso5.length * 100 / inscriptos.length).toFixed(2),
+        'datod': (25 * (curso5.length / inscriptos.length)).toFixed(2)
+      }
+      deuda_exigible = [dato1, dato2, dato3, dato4, dato5, dato6]
+
+
     }
-    const dato5 = {
-      'datoa': 'Textiles y accesorios para el verano',
-      'datob': curso4.length,
-      'datoc': (curso4.length*100/inscriptos.length).toFixed(2),
-      'datod': (25*(curso4.length/inscriptos.length)).toFixed(2)
+
+    res.json([inscriptos, deuda_exigible])
+
+  } catch (error) {
+    console.log(error)
+
   }
-  const dato6 = {
-    'datoa': 'Refaccion integral para el hogar',
-    'datob': curso5.length,
-    'datoc': (curso5.length*100/inscriptos.length).toFixed(2),
-    'datod': (25*(curso5.length/inscriptos.length)).toFixed(2)
-}
-     deuda_exigible = [dato1, dato2, dato3, dato4, dato5, dato6]
-
-
-}
-
-  res.json([inscriptos,deuda_exigible])
-    
-} catch (error) {
-console.log(error)
- 
-}
 })
 
 router.post("/asignarinscripciones", async (req, res) => {
@@ -787,9 +787,9 @@ router.post("/asignarinscripciones", async (req, res) => {
 
   for (ins in inscrip) {
 
-     
 
-      await pool.query('update inscripciones set id_call =?, estado="Preasignada"  where  id = ?', [id, inscrip[ins]])
+
+    await pool.query('update inscripciones set id_call =?, estado="Preasignada"  where  id = ?', [id, inscrip[ins]])
   }
   res.json('realizado')
 
@@ -800,11 +800,11 @@ router.post('/asignarencargado', async (req, res) => {
   const { id_inscripcion, id_encargado } = req.body
 
   try {
-      await pool.query('update inscripciones set encargado=? where  id = ?', [id_encargado, id_inscripcion])
-      res.json('asignado')
+    await pool.query('update inscripciones set encargado=? where  id = ?', [id_encargado, id_inscripcion])
+    res.json('asignado')
 
   } catch (error) {
-      res.json('error')
+    res.json('error')
   }
 })
 
@@ -812,7 +812,7 @@ router.get('/incriptas2da/', async (req, res) => {
 
   inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria,id as idp from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, descripcion as nombrecurso1 from turnos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, descripcion as nombrecurso2 from turnos) as sel3 on inscripciones.dos=sel3.id2 left join (select id_inscripcion , id_turno  from cursado) as sel8 on inscripciones.id=sel8.id_inscripcion left join (select id as idt, descripcion, id_curso from turnos) as sel9 on sel8.id_turno=sel9.idt left join(select id as idc, nombre as nombrecurso from cursos) as sel10 on sel9.id_curso=sel10.idc where edicion=3')
 
-  
+
   //inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2 left join (select id as idc, id_turno from cursado) as sel8 on inscripciones.id=sel8.idt where edicion=2')
   curso1 = await pool.query('select * from inscripciones where uno =132')
   curso2 = await pool.query('select * from inscripciones where uno =133')
@@ -820,38 +820,38 @@ router.get('/incriptas2da/', async (req, res) => {
   curso4 = await pool.query('select * from inscripciones where uno =135')
   curso5 = await pool.query('select * from inscripciones where uno =136')
 
-  let deuda_exigible=[]
+  let deuda_exigible = []
 
-if (inscriptos.length === 0) {
+  if (inscriptos.length === 0) {
 
     const dato1 = {
-        'datoa': 'Cantidad de inscriptas',
-        'datob': "No hay cuotas Calculadas"
+      'datoa': 'Cantidad de inscriptas',
+      'datob': "No hay cuotas Calculadas"
     }
     const dato2 = {
-        'datoa': 'Monto devengado hasta la cuota',
-        'datob': "No hay cuotas Calculadas"
+      'datoa': 'Monto devengado hasta la cuota',
+      'datob': "No hay cuotas Calculadas"
     }
     const dato3 = {
-        'datoa': 'Monto abonado hasta la cuota',
-        'datob': "No hay cuotas Calculadas"
+      'datoa': 'Monto abonado hasta la cuota',
+      'datob': "No hay cuotas Calculadas"
     }
     const dato4 = {
-        'datoa': 'Deuda Exigible',
-        'datob': "No hay cuotas Calculadas"
+      'datoa': 'Deuda Exigible',
+      'datob': "No hay cuotas Calculadas"
     }
     const deuda_exigible = [dato1, dato2, dato3, dato4]
     const dato5 = {
-        'datoa': 'Cantidad de cuotas sin pago',
-        'datob': 'no calculado'
+      'datoa': 'Cantidad de cuotas sin pago',
+      'datob': 'no calculado'
     }
     const dato6 = {
-        'datoa': 'Monto cuota pura',
-        'datob': 'no calculado'
+      'datoa': 'Monto cuota pura',
+      'datob': 'no calculado'
     }
     const dato7 = {
-        'datoa': 'Saldo de capital a vencer',
-        'datob': 'no calculado'
+      'datoa': 'Saldo de capital a vencer',
+      'datob': 'no calculado'
     }
 
     const cuotas_pendientes = [dato5, dato6, dato7]
@@ -860,73 +860,73 @@ if (inscriptos.length === 0) {
 
 
     res.json(respuesta)
-} else {
+  } else {
 
 
 
     const dato1 = {
-        'datoa': 'Cantidad de inscriptas',
-        'datob': inscriptos.length,
-        'datoc': inscriptos.length*100/inscriptos.length,
-        'datod': (25*(inscriptos.length/inscriptos.length)).toFixed(2)
-        
+      'datoa': 'Cantidad de inscriptas',
+      'datob': inscriptos.length,
+      'datoc': inscriptos.length * 100 / inscriptos.length,
+      'datod': (25 * (inscriptos.length / inscriptos.length)).toFixed(2)
+
     }
     const dato2 = {
-        'datoa': 'Elaboracion de mesa de dulces para eventos',
-        'datob': curso1.length,
-        'datoc': (curso1.length*100/inscriptos.length).toFixed(2),
-        'datod': (25*(curso1.length/inscriptos.length)).toFixed(2)
+      'datoa': 'Elaboracion de mesa de dulces para eventos',
+      'datob': curso1.length,
+      'datoc': (curso1.length * 100 / inscriptos.length).toFixed(2),
+      'datod': (25 * (curso1.length / inscriptos.length)).toFixed(2)
     }
     const dato3 = {
       'datoa': 'Maquillaje y peinado para eventos',
       'datob': curso2.length,
-      'datoc': (curso2.length*100/inscriptos.length).toFixed(2),
-      'datod': (25*(curso2.length/inscriptos.length)).toFixed(2)
-  }
+      'datoc': (curso2.length * 100 / inscriptos.length).toFixed(2),
+      'datod': (25 * (curso2.length / inscriptos.length)).toFixed(2)
+    }
     const dato4 = {
-        'datoa': 'Diseño de lenceria femenina',
-        'datob': curso3.length,
-        'datoc': (curso3.length*100/inscriptos.length).toFixed(2),
-        'datod': (25*(curso3.length/inscriptos.length)).toFixed(2)
+      'datoa': 'Diseño de lenceria femenina',
+      'datob': curso3.length,
+      'datoc': (curso3.length * 100 / inscriptos.length).toFixed(2),
+      'datod': (25 * (curso3.length / inscriptos.length)).toFixed(2)
     }
     const dato5 = {
       'datoa': 'Textiles y accesorios para el verano',
       'datob': curso4.length,
-      'datoc': (curso4.length*100/inscriptos.length).toFixed(2),
-      'datod': (25*(curso4.length/inscriptos.length)).toFixed(2)
+      'datoc': (curso4.length * 100 / inscriptos.length).toFixed(2),
+      'datod': (25 * (curso4.length / inscriptos.length)).toFixed(2)
+    }
+    const dato6 = {
+      'datoa': 'Refaccion integral para el hogar',
+      'datob': curso5.length,
+      'datoc': (curso5.length * 100 / inscriptos.length).toFixed(2),
+      'datod': (25 * (curso5.length / inscriptos.length)).toFixed(2)
+    }
+    deuda_exigible = [dato1, dato2, dato3, dato4, dato5, dato6]
+
+
   }
-  const dato6 = {
-    'datoa': 'Refaccion integral para el hogar',
-    'datob': curso5.length,
-    'datoc': (curso5.length*100/inscriptos.length).toFixed(2),
-    'datod': (25*(curso5.length/inscriptos.length)).toFixed(2)
-}
-     deuda_exigible = [dato1, dato2, dato3, dato4, dato5, dato6]
+
+  cantidaddisp = await pool.query('select sum(disponibles) from turnos  where etapa=2 ')
+  cantidaddis = await pool.query('select sum(cupo) from turnos  where etapa=2 ')
+  cant_pre = await pool.query('select * from inscripciones where edicion=2 and estado in ("Preasignada","Asignada a curso","Rechazada","No Contesta")')
+  cant_nc = await pool.query('select * from inscripciones where edicion=2 and estado ="No contesta"')
+  cant_nr = await pool.query('select * from inscripciones where edicion=2 and estado ="Rechazada"')
+  cant_pend = await pool.query('select * from inscripciones where edicion=2 and estado ="Preasignada"')
+  cant_conf = await pool.query('select * from cursado join (select id as idi, edicion from inscripciones) as sel on cursado.id_inscripcion=sel.idi where edicion=2 ')
 
 
-}
+  datos33 = {
+    cantidadturnos: cantidaddis[0]['sum(cupo)'],
+    cant_preasig: cant_pre.length,
+    cant_conf: cant_conf.length,
+    cant_nc: cant_nc.length,
+    cant_pend: cant_pend.length,
+    cant_rech: cant_nr.length,
+    cantidaddis: parseInt(cantidaddis[0]['sum(cupo)']) - cant_conf.length
+  }
 
-cantidaddisp = await pool.query('select sum(disponibles) from turnos  where etapa=2 ')
-cantidaddis = await pool.query('select sum(cupo) from turnos  where etapa=2 ')
-cant_pre = await pool.query('select * from inscripciones where edicion=2 and estado in ("Preasignada","Asignada a curso","Rechazada","No Contesta")')
-cant_nc = await pool.query('select * from inscripciones where edicion=2 and estado ="No contesta"')
-cant_nr = await pool.query('select * from inscripciones where edicion=2 and estado ="Rechazada"')
-cant_pend = await pool.query('select * from inscripciones where edicion=2 and estado ="Preasignada"')
-cant_conf = await pool.query('select * from cursado join (select id as idi, edicion from inscripciones) as sel on cursado.id_inscripcion=sel.idi where edicion=2 ')
+  res.json([inscriptos, deuda_exigible, datos33])
 
-
-datos33={
-  cantidadturnos:cantidaddis[0]['sum(cupo)'],
-  cant_preasig:cant_pre.length,
-  cant_conf:cant_conf.length,
-  cant_nc:cant_nc.length,
-  cant_pend:cant_pend.length,
-  cant_rech:cant_nr.length,
-  cantidaddis:parseInt(cantidaddis[0]['sum(cupo)'])-cant_conf.length
-}
-    
-  res.json([inscriptos,deuda_exigible,datos33])
-  
 })
 
 ////////  FUNCION PARA CREAR CURSOS
@@ -997,16 +997,16 @@ router.post("/buscarestadopornombre", async (req, res) => {
   try {
 
 
-      const asi = await pool.query('select * from inscripciones join (select nombre, apellido, dni from personas) as sel on inscripciones.dni_persona=sel.dni  where nombre like ? or apellido like ? and edicion=2', ['%' + nombre + '%', '%' + nombre + '%'])
+    const asi = await pool.query('select * from inscripciones join (select nombre, apellido, dni from personas) as sel on inscripciones.dni_persona=sel.dni  where nombre like ? or apellido like ? and edicion=2', ['%' + nombre + '%', '%' + nombre + '%'])
 
-  
-      res.json(asi)
-    
+
+    res.json(asi)
+
 
 
   } catch (error) {
-      console.log(error)
-      res.json([{ nombre: 'error' }])
+    console.log(error)
+    res.json([{ nombre: 'error' }])
   }
 })
 
@@ -1015,16 +1015,16 @@ router.post("/buscarestadopordni", async (req, res) => {
   try {
 
 
-      const asi = await pool.query('select * from inscripciones join (select nombre, apellido, dni from personas) as sel on inscripciones.dni_persona=sel.dni  where dni like ?  and edicion=2', ['%' + dni + '%'])
+    const asi = await pool.query('select * from inscripciones join (select nombre, apellido, dni from personas) as sel on inscripciones.dni_persona=sel.dni  where dni like ?  and edicion=2', ['%' + dni + '%'])
 
-  
-      res.json(asi)
-    
+
+    res.json(asi)
+
 
 
   } catch (error) {
-      console.log(error)
-      res.json([{ nombre: 'error' }])
+    console.log(error)
+    res.json([{ nombre: 'error' }])
   }
 })
 
@@ -1134,13 +1134,125 @@ router.get('/designarturnos/', async (req, res) => {
   }
 
 })
+router.get('/inscribirautomaticamente/', async (req, res) => {
+
+  for (let variable = 0; variable < 14; variable++) {
+    unos = await pool.query('select * from inscripciones join (select id as idp,categoria from personas) as sel on inscripciones.id_persona=sel.idp where  categoria="uno" and edicion=3 and  (estado="Inscripta" or estado="pendiente" )')
+   console.log(unos)
+    if (unos.length > 0) {
+      recorrer = 0
+      necesario = 0
+      while ((recorrer < unos.length) && (necesario <= 30)) {
+
+        /////// buscamso prioridad uno 
+        try {
+
+          disponibilidad = await pool.query('select * from cursado where id_turno=?', [unos[recorrer]['uno']])
+          console.log('disponibilidad',disponibilidad)
+          if (disponibilidad.length < 60) {
+            necesario += 1
+            console.log('agregando cat 1')
+            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,etapa=3', [unos[recorrer]['id_persona'], unos[recorrer]['categoria'], unos[recorrer]['uno'], unos[recorrer]['id']])
+
+            await pool.query('update inscripciones set estado="Preasignada" where id=? ', [unos[recorrer]['id']])
+
+          }
+          console.log(necesario)
+
+        } catch (error) {
+          console.log(error)
+        }
+        recorrer += 1
+      }
+      if ((necesario <= 30) && (disponibilidad.length < 60)) {
+        console.log('buscando disponibilidad2')
+        recorrer = 0
+        while ((recorrer < unos.length) && (necesario <= 30)) {
+
+
+          disponibilidad = await pool.query('select * from cursado where id_turno=?', [unos[recorrer]['dos']])
+          if (disponibilidad.length < 60) {
+            necesario += 1
+
+            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,observaciones="Se toma 2da opcion",etapa=3', [unos[recorrer]['id_persona'], unos[recorrer]['categoria'], unos[recorrer]['uno'], unos[recorrer]['id']])
+
+            await pool.query('update inscripciones set estado="Preasignada" where id=? ', [unos[recorrer]['id']])
+          }
+        }
+        recorrer += 1
+      }/// fin buscar uuna opcion por 2da 
+    }/// fin de la busqueda de categoria 
 
 
 
 
-router.get('/inscribirauto/', async (req, res) => {
 
-  let inscripciones = await pool.query('select * from inscripciones where estado="pendiente"')
+    //////////categoria2
+    doses = await pool.query('select * from inscripciones join (select id as idp,categoria from personas) as sel on inscripciones.id_persona=sel.idp where  and categoria="dos" and edicion=3 and  (estado="Inscripta" or estado="pendiente"')
+    if (doses.length > 0) {
+      recorrer = 0
+      necesario = 0
+      while ((recorrer < doses.length) && (necesario <= 10)) {
+
+        /////// buscamso prioridad uno 
+        try {
+
+          disponibilidad = await pool.query('select * from cursado where id_turno=?', [doses[recorrer]['uno']])
+          if (disponibilidad.length < 60) {
+            necesario += 1
+
+            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,etapa=3', [doses[recorrer]['id_persona'], doses[recorrer]['categoria'], doses[recorrer]['uno'], doses[recorrer]['id']])
+
+            await pool.query('update inscripciones set estado="Preasignada" where id=? ', [doses[recorrer]['id']])
+            console.log('agregando cat 2')
+          }
+          console.log(necesario)
+
+        } catch (error) {
+          console.log(error)
+        }
+        recorrer += 1
+      }
+      if ((necesario <= 30) && (disponibilidad.length < 60)) {
+        console.log('buscando disponibilidad2')
+        recorrer = 0
+        while ((recorrer < doses.length) && (necesario <= 10)) {
+
+
+          disponibilidad = await pool.query('select * from cursado where id_turno=?', [doses[recorrer]['dos']])
+          if (disponibilidad.length < 60) {
+            necesario += 1
+
+            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,observaciones="Se toma 2da opcion",etapa=3', [unos[recorrer]['id_persona'], unos[recorrer]['categoria'], unos[recorrer]['uno'], unos[recorrer]['id']])
+
+            await pool.query('update inscripciones set estado="Preasignada" where id=? ', [doses[recorrer]['id']])
+          }
+        }
+        recorrer += 1
+      }/// fin buscar uuna opcion por 2da 
+    }/// fin de la busqueda de categoria 
+
+
+
+
+
+
+
+
+
+
+
+
+    console.log("Vuelta")
+  } /// fin for
+
+})
+
+
+
+router.get('/inscribirauddddto/', async (req, res) => {
+
+  let inscripciones = await pool.query('select * from inscripciones where estado="Inscripta"')
   const criterios = await pool.query('select * from criterios')
   listadef = []
 
@@ -1163,7 +1275,7 @@ router.get('/inscribirauto/', async (req, res) => {
       }
       ////////ENTRA EN BUCLE REVISANDO CUPO EN HORARIOS
       turnoactual = '99'
-     
+
 
 
       turno = await pool.query('select * from turnos where id_curso=? and numero = ?', [inscripciones[ii]['uno'], turnoaux])
@@ -1181,7 +1293,7 @@ router.get('/inscribirauto/', async (req, res) => {
         for (iiii in turno) {
           if (!bandera) {
             haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, inscripciones[ii]['uno'], criterios[criterios.length - 1][cat], turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
-            
+
             if (haycupo) {
 
 
@@ -1240,34 +1352,34 @@ router.get('/inscribirauto/', async (req, res) => {
     yaseinscribio = await pool.query('select * from cursado where id_persona =?', pers[0]['id'])
     if (yaseinscribio.length === 0) {
 
-    turno = await pool.query('select * from turnos where id_curso=? and numero = ?', [listadef[ii]['dos'], turnoaux])
-    if (turno.length > 0) {
-      for (iiii in turno) {
-        if (!bandera) {
-          haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, listadef[ii]['dos'], criterios[criterios.length - 1][cat], turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
+      turno = await pool.query('select * from turnos where id_curso=? and numero = ?', [listadef[ii]['dos'], turnoaux])
+      if (turno.length > 0) {
+        for (iiii in turno) {
+          if (!bandera) {
+            haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, listadef[ii]['dos'], criterios[criterios.length - 1][cat], turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
 
 
-          if (haycupo) {
-
-
-
+            if (haycupo) {
 
 
 
-            await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=? ', ["Asignado a curso", persona[0]['id'], listadef[ii]['dos'], cat, listadef[ii]['id'], turno[iiii]['id']])
 
 
 
-            await pool.query('update inscripciones set estado= "Asignado a curso" where id=? ', [listadef[ii]['id'],])
-            bandera = true
+              await pool.query('insert into cursado set inscripcion=?,id_persona=?,id_curso=?,categoria=?,id_inscripcion=?,id_turno=? ', ["Asignado a curso", persona[0]['id'], listadef[ii]['dos'], cat, listadef[ii]['id'], turno[iiii]['id']])
+
+
+
+              await pool.query('update inscripciones set estado= "Asignado a curso" where id=? ', [listadef[ii]['id'],])
+              bandera = true
+            }
           }
+
         }
-
       }
+
+
     }
-
-
-  }
 
   }
   res.send('Realizado')
@@ -1365,7 +1477,7 @@ router.get('/listacriterios/', async (req, res) => {
 
   criterios = await pool.query('select * from criterios')
 
-  res.json([criterios[criterios.length-1]])
+  res.json([criterios[criterios.length - 1]])
 })
 
 
@@ -1550,32 +1662,32 @@ router.post("/actualizarprioridades", isLoggedInn2, async (req, res) => {
 
 
 router.get('/actualizarcursado/', async (req, res) => {
-correjidos=0
-cursado = await pool.query('select * from cursado')
-personas=''
+  correjidos = 0
+  cursado = await pool.query('select * from cursado')
+  personas = ''
 
-for (ii in cursado) {
-cantidad = await pool.query('select * from cursado where id_persona = ?',[cursado[ii]['id_persona']])
-if(cantidad.length>1){
-  pers= await pool.query('select * from personas where id = ?',[cursado[ii]['id_persona']])
-  personas=personas + 'persona '+pers[0]['nombre']+' inscripta mas de una vez en curso '+cursado[ii]['id_curso']
-}
+  for (ii in cursado) {
+    cantidad = await pool.query('select * from cursado where id_persona = ?', [cursado[ii]['id_persona']])
+    if (cantidad.length > 1) {
+      pers = await pool.query('select * from personas where id = ?', [cursado[ii]['id_persona']])
+      personas = personas + 'persona ' + pers[0]['nombre'] + ' inscripta mas de una vez en curso ' + cursado[ii]['id_curso']
+    }
 
-inscripcion = await pool.query('select * from inscripciones where id = ?',[cursado[ii]['id_inscripcion']])
-if (inscripcion[0]['estado'] === 'pendiente'){
+    inscripcion = await pool.query('select * from inscripciones where id = ?', [cursado[ii]['id_inscripcion']])
+    if (inscripcion[0]['estado'] === 'pendiente') {
 
-  await pool.query('update inscripciones set estado=? where id=? ', [cursado[ii]['inscripcion'],cursado[ii]['id_inscripcion']])
-  correjidos+=1
+      await pool.query('update inscripciones set estado=? where id=? ', [cursado[ii]['inscripcion'], cursado[ii]['id_inscripcion']])
+      correjidos += 1
 
-}
+    }
 
-}
-rta= ' SE CORRIJIERON '+correjidos+'estados en inscripciones'
-if (personas===''){
-  personas='no hay personas inscriptas mas de una vez'
-}
+  }
+  rta = ' SE CORRIJIERON ' + correjidos + 'estados en inscripciones'
+  if (personas === '') {
+    personas = 'no hay personas inscriptas mas de una vez'
+  }
 
-res.json ([rta,personas ])
+  res.json([rta, personas])
 })
 
 
