@@ -660,12 +660,12 @@ router.get('/datospersona/:id', async (req, res) => {
 router.get('/categorizarpersonas', async (req, res) => {
 
   criterios = await pool.query('select * from criterios ')
-  console.log(criterios[criterios.length - 1])
-  console.log(criterios[criterios.length])
-  const etc2 = await pool.query('select * from inscripciones where edicion=2  ')
+
+  const etc2 = await pool.query('select * from inscripciones where edicion=3  and estado="Inscripta"')
   for (ii in etc2) {
     etc = await pool.query('select * from personas where dni=? ', [etc2[ii]['dni_persona']])
-    cat = await caregorizar.asignarcategoria([etc[0]])
+    cat = await caregorizar.asignarcategoria(etc)
+
     await pool.query('update personas set categoria=? where dni =?', [cat, etc2[ii]['dni_persona']])
 
 
