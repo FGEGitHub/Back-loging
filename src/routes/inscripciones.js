@@ -1138,11 +1138,11 @@ router.get('/inscribirautomaticamente/', async (req, res) => {
 
   for (let variable = 0; variable < 14; variable++) {
     unos = await pool.query('select * from inscripciones join (select id as idp,categoria from personas) as sel on inscripciones.id_persona=sel.idp where  categoria="uno" and edicion=3 and  (estado="Inscripta" or estado="pendiente" )')
-   console.log(unos)
+
     if (unos.length > 0) {
       recorrer = 0
       necesario = 0
-      while ((recorrer < unos.length) && (necesario <= 30)) {
+      while ((recorrer < unos.length) && (necesario < 30)) {
 
         /////// buscamso prioridad uno 
         try {
@@ -1157,29 +1157,29 @@ router.get('/inscribirautomaticamente/', async (req, res) => {
             await pool.query('update inscripciones set estado="Preasignada" where id=? ', [unos[recorrer]['id']])
 
           }
-          console.log(necesario)
 
         } catch (error) {
           console.log(error)
         }
         recorrer += 1
       }
-      if ((necesario <= 30) && (disponibilidad.length < 60)) {
+      if ((necesario < 30) && (disponibilidad.length < 60)) {
         console.log('buscando disponibilidad2')
         recorrer = 0
-        while ((recorrer < unos.length) && (necesario <= 30)) {
+        while ((recorrer < unos.length) && (necesario < 30)) {
 
 
           disponibilidad = await pool.query('select * from cursado where id_turno=?', [unos[recorrer]['dos']])
           if (disponibilidad.length < 60) {
             necesario += 1
 
-            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,observaciones="Se toma 2da opcion",etapa=3', [unos[recorrer]['id_persona'], unos[recorrer]['categoria'], unos[recorrer]['uno'], unos[recorrer]['id']])
+            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,observaciones="Se toma 2da opcion",etapa=3', [unos[recorrer]['id_persona'], unos[recorrer]['categoria'], unos[recorrer]['dos'], unos[recorrer]['id']])
 
             await pool.query('update inscripciones set estado="Preasignada" where id=? ', [unos[recorrer]['id']])
           }
+          recorrer += 1
         }
-        recorrer += 1
+     
       }/// fin buscar uuna opcion por 2da 
     }/// fin de la busqueda de categoria 
 
@@ -1188,11 +1188,11 @@ router.get('/inscribirautomaticamente/', async (req, res) => {
 
 
     //////////categoria2
-    doses = await pool.query('select * from inscripciones join (select id as idp,categoria from personas) as sel on inscripciones.id_persona=sel.idp where  and categoria="dos" and edicion=3 and  (estado="Inscripta" or estado="pendiente"')
+    doses = await pool.query('select * from inscripciones join (select id as idp,categoria from personas) as sel on inscripciones.id_persona=sel.idp where  categoria="dos" and edicion=3 and  (estado="Inscripta" or estado="pendiente")')
     if (doses.length > 0) {
       recorrer = 0
       necesario = 0
-      while ((recorrer < doses.length) && (necesario <= 10)) {
+      while ((recorrer < doses.length) && (necesario < 10)) {
 
         /////// buscamso prioridad uno 
         try {
@@ -1206,29 +1206,30 @@ router.get('/inscribirautomaticamente/', async (req, res) => {
             await pool.query('update inscripciones set estado="Preasignada" where id=? ', [doses[recorrer]['id']])
             console.log('agregando cat 2')
           }
-          console.log(necesario)
+        
 
         } catch (error) {
           console.log(error)
         }
         recorrer += 1
       }
-      if ((necesario <= 30) && (disponibilidad.length < 60)) {
+      if ((necesario < 10) && (disponibilidad.length < 60)) {
         console.log('buscando disponibilidad2')
         recorrer = 0
-        while ((recorrer < doses.length) && (necesario <= 10)) {
+        while ((recorrer < doses.length) && (necesario < 10)) {
 
 
           disponibilidad = await pool.query('select * from cursado where id_turno=?', [doses[recorrer]['dos']])
           if (disponibilidad.length < 60) {
             necesario += 1
 
-            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,observaciones="Se toma 2da opcion",etapa=3', [unos[recorrer]['id_persona'], unos[recorrer]['categoria'], unos[recorrer]['uno'], unos[recorrer]['id']])
+            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,observaciones="Se toma 2da opcion",etapa=3', [doses[recorrer]['id_persona'], doses[recorrer]['categoria'], doses[recorrer]['dos'], doses[recorrer]['id']])
 
             await pool.query('update inscripciones set estado="Preasignada" where id=? ', [doses[recorrer]['id']])
           }
+          recorrer += 1
         }
-        recorrer += 1
+       
       }/// fin buscar uuna opcion por 2da 
     }/// fin de la busqueda de categoria 
 
@@ -1243,7 +1244,547 @@ router.get('/inscribirautomaticamente/', async (req, res) => {
 
 
 
+    
+    //////////categoria3
+    treses = await pool.query('select * from inscripciones join (select id as idp,categoria from personas) as sel on inscripciones.id_persona=sel.idp where  categoria="tres" and edicion=3 and  (estado="Inscripta" or estado="pendiente")')
+    if (treses.length > 0) {
+      recorrer = 0
+      necesario = 0
+      while ((recorrer < treses.length) && (necesario < 5)) {
+
+        /////// buscamso prioridad uno 
+        try {
+
+          disponibilidad = await pool.query('select * from cursado where id_turno=?', [treses[recorrer]['uno']])
+          if (disponibilidad.length < 60) {
+            necesario += 1
+
+            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,etapa=3', [treses[recorrer]['id_persona'], treses[recorrer]['categoria'], treses[recorrer]['uno'], treses[recorrer]['id']])
+
+            await pool.query('update inscripciones set estado="Preasignada" where id=? ', [treses[recorrer]['id']])
+            console.log('agregando cat 2')
+          }
+       
+
+        } catch (error) {
+          console.log(error)
+        }
+        recorrer += 1
+      }
+      if ((necesario < 5) && (disponibilidad.length < 60)) {
+        console.log('buscando disponibilidad2')
+        recorrer = 0
+        while ((recorrer < treses.length) && (necesario < 5)) {
+
+
+          disponibilidad = await pool.query('select * from cursado where id_turno=?', [treses[recorrer]['dos']])
+          if (disponibilidad.length < 60) {
+            necesario += 1
+
+            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,observaciones="Se toma 2da opcion",etapa=3', [treses[recorrer]['id_persona'], treses[recorrer]['categoria'], treses[recorrer]['dos'], treses[recorrer]['id']])
+
+            await pool.query('update inscripciones set estado="Preasignada" where id=? ', [treses[recorrer]['id']])
+          }
+          recorrer += 1
+        }
+      
+      }/// fin buscar uuna opcion por 2da 
+    }/// fin de la busqueda de categoria 
+
+
+
+
+
+
+
+    
+    //////////categoria4
+    cuatroses = await pool.query('select * from inscripciones join (select id as idp,categoria from personas) as sel on inscripciones.id_persona=sel.idp where  categoria="cuatro" and edicion=3 and  (estado="Inscripta" or estado="pendiente")')
+    if (cuatroses.length > 0) {
+      recorrer = 0
+      necesario = 0
+      
+      while ((recorrer < cuatroses.length) && (necesario < 15)) {
+
+        /////// buscamso prioridad uno 
+        try {
+
+          disponibilidad = await pool.query('select * from cursado where id_turno=?', [cuatroses[recorrer]['uno']])
+          if (disponibilidad.length < 60) {
+            necesario += 1
+
+            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,etapa=3', [cuatroses[recorrer]['id_persona'], cuatroses[recorrer]['categoria'], cuatroses[recorrer]['uno'], cuatroses[recorrer]['id']])
+
+            await pool.query('update inscripciones set estado="Preasignada" where id=? ', [cuatroses[recorrer]['id']])
+            console.log('agregando cat 2')
+          }
+       
+
+        } catch (error) {
+          console.log(error)
+        }
+        recorrer += 1
+      }
+      if ((necesario < 15) && (disponibilidad.length < 60)) {
+        console.log('buscando disponibilidad2')
+        recorrer = 0
+        while ((recorrer < cuatroses.length) && (necesario < 5)) {
+
+
+          disponibilidad = await pool.query('select * from cursado where id_turno=?', [cuatroses[recorrer]['dos']])
+          if (disponibilidad.length < 60) {
+            necesario += 1
+
+            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,observaciones="Se toma 2da opcion",etapa=3', [cuatroses[recorrer]['id_persona'], cuatroses[recorrer]['categoria'], cuatroses[recorrer]['dos'], cuatroses[recorrer]['id']])
+
+            await pool.query('update inscripciones set estado="Preasignada" where id=? ', [cuatroses[recorrer]['id']])
+          }
+          recorrer += 1
+        }
+        
+      }/// fin buscar uuna opcion por 2da 
+    }/// fin de la busqueda de categoria 
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+    //////////categoria5
+    cincoses = await pool.query('select * from inscripciones join (select id as idp,categoria from personas) as sel on inscripciones.id_persona=sel.idp where  categoria="cinco" and edicion=3 and  (estado="Inscripta" or estado="pendiente")')
+    if (cincoses.length > 0) {
+      recorrer = 0
+      necesario = 0
+      
+      while ((recorrer < cincoses.length) && (necesario < 5)) {
+
+        /////// buscamso prioridad uno 
+        try {
+
+          disponibilidad = await pool.query('select * from cursado where id_turno=?', [cincoses[recorrer]['uno']])
+          if (disponibilidad.length < 60) {
+            necesario += 1
+
+            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,etapa=3', [cincoses[recorrer]['id_persona'], cincoses[recorrer]['categoria'], cincoses[recorrer]['uno'], cincoses[recorrer]['id']])
+
+            await pool.query('update inscripciones set estado="Preasignada" where id=? ', [cincoses[recorrer]['id']])
+            console.log('agregando cat 5')
+          }
+       
+
+        } catch (error) {
+          console.log(error)
+        }
+        recorrer += 1
+      }
+      if ((necesario < 5) && (disponibilidad.length < 60)) {
+        console.log('buscando disponibilidad25')
+        recorrer = 0
+        while ((recorrer < cincoses.length) && (necesario < 5)) {
+
+
+          disponibilidad = await pool.query('select * from cursado where id_turno=?', [cincoses[recorrer]['dos']])
+          if (disponibilidad.length < 60) {
+            necesario += 1
+
+            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,observaciones="Se toma 2da opcion",etapa=3', [cincoses[recorrer]['id_persona'], cincoses[recorrer]['categoria'], cincoses[recorrer]['dos'], cincoses[recorrer]['id']])
+
+            await pool.query('update inscripciones set estado="Preasignada" where id=? ', [cincoses[recorrer]['id']])
+          }
+          recorrer += 1
+        }
+        
+      }/// fin buscar uuna opcion por 2da 
+    }/// fin de la busqueda de categoria 
+
+
+
+
+
+
+
+
+
+    
+    //////////categoria6
+    seises = await pool.query('select * from inscripciones join (select id as idp,categoria from personas) as sel on inscripciones.id_persona=sel.idp where  categoria="seis" and edicion=3 and  (estado="Inscripta" or estado="pendiente")')
+    if (seises.length > 0) {
+      recorrer = 0
+      necesario = 0
+      
+      while ((recorrer < seises.length) && (necesario < 5)) {
+
+        /////// buscamso prioridad uno 
+        try {
+
+          disponibilidad = await pool.query('select * from cursado where id_turno=?', [seises[recorrer]['uno']])
+          if (disponibilidad.length < 60) {
+            necesario += 1
+
+            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,etapa=3', [seises[recorrer]['id_persona'], seises[recorrer]['categoria'], seises[recorrer]['uno'], seises[recorrer]['id']])
+
+            await pool.query('update inscripciones set estado="Preasignada" where id=? ', [seises[recorrer]['id']])
+            console.log('agregando cat 2')
+          }
+       
+
+        } catch (error) {
+          console.log(error)
+        }
+        recorrer += 1
+      }
+      if ((necesario < 5) && (disponibilidad.length < 60)) {
+        console.log('buscando disponibilidad2')
+        recorrer = 0
+        while ((recorrer < seises.length) && (necesario < 5)) {
+
+
+          disponibilidad = await pool.query('select * from cursado where id_turno=?', [seises[recorrer]['dos']])
+          if (disponibilidad.length < 60) {
+            necesario += 1
+
+            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,observaciones="Se toma 2da opcion",etapa=3', [seises[recorrer]['id_persona'], seises[recorrer]['categoria'], seises[recorrer]['dos'], seises[recorrer]['id']])
+
+            await pool.query('update inscripciones set estado="Preasignada" where id=? ', [seises[recorrer]['id']])
+          }
+          recorrer += 1
+        }
+      
+      }/// fin buscar uuna opcion por 2da 
+    }/// fin de la busqueda de categoria 
+
+
+
+
+
+    //////////categoria7
+    sietes = await pool.query('select * from inscripciones join (select id as idp,categoria from personas) as sel on inscripciones.id_persona=sel.idp where  categoria="siete" and edicion=3 and  (estado="Inscripta" or estado="pendiente")')
+    if (sietes.length > 0) {
+      recorrer = 0
+      necesario = 0
+      
+      while ((recorrer < sietes.length) && (necesario < 5)) {
+
+        /////// buscamso prioridad uno 
+        try {
+
+          disponibilidad = await pool.query('select * from cursado where id_turno=?', [sietes[recorrer]['uno']])
+          if (disponibilidad.length < 60) {
+            necesario += 1
+
+            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,etapa=3', [sietes[recorrer]['id_persona'], sietes[recorrer]['categoria'], sietes[recorrer]['uno'], sietes[recorrer]['id']])
+
+            await pool.query('update inscripciones set estado="Preasignada" where id=? ', [sietes[recorrer]['id']])
+            console.log('agregando cat 2')
+          }
+       
+
+        } catch (error) {
+          console.log(error)
+        }
+        recorrer += 1
+      }
+      if ((necesario < 5) && (disponibilidad.length < 60)) {
+        console.log('buscando disponibilidad2')
+        recorrer = 0
+        while ((recorrer < sietes.length) && (necesario < 5)) {
+
+
+          disponibilidad = await pool.query('select * from cursado where id_turno=?', [sietes[recorrer]['dos']])
+          if (disponibilidad.length < 60) {
+            necesario += 1
+
+            await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,observaciones="Se toma 2da opcion",etapa=3', [sietes[recorrer]['id_persona'], sietes[recorrer]['categoria'], sietes[recorrer]['dos'], sietes[recorrer]['id']])
+
+            await pool.query('update inscripciones set estado="Preasignada" where id=? ', [sietes[recorrer]['id']])
+          }
+          recorrer += 1
+        }
+      
+      }/// fin buscar uuna opcion por 2da 
+    }/// fin de la busqueda de categoria 
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //////////categoria8
+        ochoss = await pool.query('select * from inscripciones join (select id as idp,categoria from personas) as sel on inscripciones.id_persona=sel.idp where  categoria="ocho" and edicion=3 and  (estado="Inscripta" or estado="pendiente")')
+        if (ochoss.length > 0) {
+          recorrer = 0
+          necesario = 0
+          
+          while ((recorrer < ochoss.length) && (necesario < 2)) {
+    
+            /////// buscamso prioridad uno 
+            try {
+    
+              disponibilidad = await pool.query('select * from cursado where id_turno=?', [ochoss[recorrer]['uno']])
+              if (disponibilidad.length < 60) {
+                necesario += 1
+    
+                await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,etapa=3', [ochoss[recorrer]['id_persona'], ochoss[recorrer]['categoria'], ochoss[recorrer]['uno'], ochoss[recorrer]['id']])
+    
+                await pool.query('update inscripciones set estado="Preasignada" where id=? ', [ochoss[recorrer]['id']])
+                console.log('agregando cat 2')
+              }
+           
+    
+            } catch (error) {
+              console.log(error)
+            }
+            recorrer += 1
+          }
+          if ((necesario < 2) && (disponibilidad.length < 60)) {
+            console.log('buscando disponibilidad2')
+            recorrer = 0
+            while ((recorrer < ochoss.length) && (necesario < 2)) {
+    
+    
+              disponibilidad = await pool.query('select * from cursado where id_turno=?', [ochoss[recorrer]['dos']])
+              if (disponibilidad.length < 60) {
+                necesario += 1
+    
+                await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,observaciones="Se toma 2da opcion",etapa=3', [ochoss[recorrer]['id_persona'], ochoss[recorrer]['categoria'], ochoss[recorrer]['dos'], ochoss[recorrer]['id']])
+    
+                await pool.query('update inscripciones set estado="Preasignada" where id=? ', [ochoss[recorrer]['id']])
+              }
+              recorrer += 1
+            }
+          
+          }/// fin buscar uuna opcion por 2da 
+        }/// fin de la busqueda de categoria 
+    
+
+
+
+
+
+          //////////categoria9
+          nuevess = await pool.query('select * from inscripciones join (select id as idp,categoria from personas) as sel on inscripciones.id_persona=sel.idp where  categoria="nueve" and edicion=3 and  (estado="Inscripta" or estado="pendiente")')
+          if (nuevess.length > 0) {
+            recorrer = 0
+            necesario = 0
+            
+            while ((recorrer < nuevess.length) && (necesario < 3)) {
+      
+              /////// buscamso prioridad uno 
+              try {
+      
+                disponibilidad = await pool.query('select * from cursado where id_turno=?', [nuevess[recorrer]['uno']])
+                if (disponibilidad.length < 60) {
+                  necesario += 1
+      
+                  await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,etapa=3', [nuevess[recorrer]['id_persona'], nuevess[recorrer]['categoria'], nuevess[recorrer]['uno'], nuevess[recorrer]['id']])
+      
+                  await pool.query('update inscripciones set estado="Preasignada" where id=? ', [nuevess[recorrer]['id']])
+                  console.log('agregando cat 2')
+                }
+             
+      
+              } catch (error) {
+                console.log(error)
+              }
+              recorrer += 1
+            }
+            if ((necesario < 3) && (disponibilidad.length < 60)) {
+              console.log('buscando disponibilidad2')
+              recorrer = 0
+              while ((recorrer < nuevess.length) && (necesario < 3)) {
+      
+      
+                disponibilidad = await pool.query('select * from cursado where id_turno=?', [nuevess[recorrer]['dos']])
+                if (disponibilidad.length < 60) {
+                  necesario += 1
+      
+                  await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,observaciones="Se toma 2da opcion",etapa=3', [nuevess[recorrer]['id_persona'], nuevess[recorrer]['categoria'], nuevess[recorrer]['dos'], nuevess[recorrer]['id']])
+      
+                  await pool.query('update inscripciones set estado="Preasignada" where id=? ', [nuevess[recorrer]['id']])
+                }
+                recorrer += 1
+              }
+            
+            }/// fin buscar uuna opcion por 2da 
+          }/// fin de la busqueda de categoria 
+
+
+
+
+
+
+
+
+                //////////categoria10
+                dieses = await pool.query('select * from inscripciones join (select id as idp,categoria from personas) as sel on inscripciones.id_persona=sel.idp where  categoria="diez" and edicion=3 and  (estado="Inscripta" or estado="pendiente")')
+                if (dieses.length > 0) {
+                  recorrer = 0
+                  necesario = 0
+                  
+                  while ((recorrer < dieses.length) && (necesario < 10)) {
+            
+                    /////// buscamso prioridad uno 
+                    try {
+            
+                      disponibilidad = await pool.query('select * from cursado where id_turno=?', [dieses[recorrer]['uno']])
+                      if (disponibilidad.length < 60) {
+                        necesario += 1
+            
+                        await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,etapa=3', [dieses[recorrer]['id_persona'], dieses[recorrer]['categoria'], dieses[recorrer]['uno'], dieses[recorrer]['id']])
+            
+                        await pool.query('update inscripciones set estado="Preasignada" where id=? ', [dieses[recorrer]['id']])
+                        console.log('agregando cat 2')
+                      }
+                   
+            
+                    } catch (error) {
+                      console.log(error)
+                    }
+                    recorrer += 1
+                  }
+                  if ((necesario < 10) && (disponibilidad.length < 60)) {
+                    console.log('buscando disponibilidad2')
+                    recorrer = 0
+                    while ((recorrer < dieses.length) && (necesario < 10)) {
+            
+            
+                      disponibilidad = await pool.query('select * from cursado where id_turno=?', [dieses[recorrer]['dos']])
+                      if (disponibilidad.length < 60) {
+                        necesario += 1
+            
+                        await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,observaciones="Se toma 2da opcion",etapa=3', [dieses[recorrer]['id_persona'], dieses[recorrer]['categoria'], dieses[recorrer]['dos'], dieses[recorrer]['id']])
+            
+                        await pool.query('update inscripciones set estado="Preasignada" where id=? ', [dieses[recorrer]['id']])
+                      }
+                      recorrer += 1
+                    }
+                  
+                  }/// fin buscar uuna opcion por 2da 
+                }/// fin de la busqueda de categoria 
+
+
+
+
+
+
+
+
+
+                
+                //////////categoria11
+                oncess = await pool.query('select * from inscripciones join (select id as idp,categoria from personas) as sel on inscripciones.id_persona=sel.idp where  categoria="once" and edicion=3 and  (estado="Inscripta" or estado="pendiente")')
+                if (oncess.length > 0) {
+                  recorrer = 0
+                  necesario = 0
+                  
+                  while ((recorrer < oncess.length) && (necesario < 2)) {
+            
+                    /////// buscamso prioridad uno 
+                    try {
+            
+                      disponibilidad = await pool.query('select * from cursado where id_turno=?', [oncess[recorrer]['uno']])
+                      if (disponibilidad.length < 60) {
+                        necesario += 1
+            
+                        await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,etapa=3', [oncess[recorrer]['id_persona'], oncess[recorrer]['categoria'], oncess[recorrer]['uno'], oncess[recorrer]['id']])
+            
+                        await pool.query('update inscripciones set estado="Preasignada" where id=? ', [oncess[recorrer]['id']])
+                        console.log('agregando cat 2')
+                      }
+                   
+            
+                    } catch (error) {
+                      console.log(error)
+                    }
+                    recorrer += 1
+                  }
+                  if ((necesario < 2) && (disponibilidad.length < 60)) {
+                    console.log('buscando disponibilidad2')
+                    recorrer = 0
+                    while ((recorrer < oncess.length) && (necesario < 2)) {
+            
+            
+                      disponibilidad = await pool.query('select * from cursado where id_turno=?', [oncess[recorrer]['dos']])
+                      if (disponibilidad.length < 60) {
+                        necesario += 1
+            
+                        await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,observaciones="Se toma 2da opcion",etapa=3', [oncess[recorrer]['id_persona'], oncess[recorrer]['categoria'], oncess[recorrer]['dos'], oncess[recorrer]['id']])
+            
+                        await pool.query('update inscripciones set estado="Preasignada" where id=? ', [oncess[recorrer]['id']])
+                      }
+                      recorrer += 1
+                    }
+                  
+                  }/// fin buscar uuna opcion por 2da 
+                }/// fin de la busqueda de categoria 
+
+
+
+                  
+                //////////categoria12
+                docess = await pool.query('select * from inscripciones join (select id as idp,categoria from personas) as sel on inscripciones.id_persona=sel.idp where  categoria="doce" and edicion=3 and  (estado="Inscripta" or estado="pendiente")')
+                if (docess.length > 0) {
+                  recorrer = 0
+                  necesario = 0
+                  
+                  while ((recorrer < docess.length) && (necesario < 3)) {
+            
+                    /////// buscamso prioridad uno 
+                    try {
+            
+                      disponibilidad = await pool.query('select * from cursado where id_turno=?', [docess[recorrer]['uno']])
+                      if (disponibilidad.length < 60) {
+                        necesario += 1
+            
+                        await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,etapa=3', [docess[recorrer]['id_persona'], docess[recorrer]['categoria'], docess[recorrer]['uno'], docess[recorrer]['id']])
+            
+                        await pool.query('update inscripciones set estado="Preasignada" where id=? ', [docess[recorrer]['id']])
+                        console.log('agregando cat 2')
+                      }
+                   
+            
+                    } catch (error) {
+                      console.log(error)
+                    }
+                    recorrer += 1
+                  }
+                  if ((necesario < 3) && (disponibilidad.length < 60)) {
+                    console.log('buscando disponibilidad2')
+                    recorrer = 0
+                    while ((recorrer < docess.length) && (necesario < 3)) {
+            
+            
+                      disponibilidad = await pool.query('select * from cursado where id_turno=?', [docess[recorrer]['dos']])
+                      if (disponibilidad.length < 60) {
+                        necesario += 1
+            
+                        await pool.query('insert into cursado set id_persona=?,categoria=?,id_turno=?,id_inscripcion=?,observaciones="Se toma 2da opcion",etapa=3', [docess[recorrer]['id_persona'], docess[recorrer]['categoria'], docess[recorrer]['dos'], docess[recorrer]['id']])
+            
+                        await pool.query('update inscripciones set estado="Preasignada" where id=? ', [docess[recorrer]['id']])
+                      }
+                      recorrer += 1
+                    }
+                  
+                  }/// fin buscar uuna opcion por 2da 
+                }/// fin de la busqueda de categoria 
+
     console.log("Vuelta")
+    console.log("variable")
+    
   } /// fin for
 
 })
