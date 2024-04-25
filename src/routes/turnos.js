@@ -316,5 +316,30 @@ res.json([tu[10],tu[11],tu[5],tu[6],tu[7],tu[0],tu[1],tu[2],tu[3],tu[4],tu[12],t
 
 })
 
+router.get('/traerinscripcionesenc/:id',  async (req, res) => {
+
+  const tu = await pool.query('select * from inscripciones join (select id as idp, nombre, apellido,categoria from personas) as sel on  inscripciones.id_persona=sel.idp join (select id as idt, descripcion as elec1 from turnos) as sel2 on inscripciones.uno= sel2.idt join (select id as idtu, descripcion as elec2 from turnos) as sel3 on inscripciones.uno= sel3.idtu where edicion=3 and estado="pendiente"')
+  
+  
+  res.json(tu)
+  
+  })
+
+  router.post("/asignarinscripciones", async (req, res) => {
+    let { id, inscrip } = req.body
+  ///id es decurso 
+  console.log(inscrip)
+    for (ins in inscrip) {
+  
+       console.log(inscrip[ins])
+  
+        await pool.query('update inscripciones set estado="Preasignada" where  id = ?', [ inscrip[ins]])
+        inscri = await pool.query('select * from inscripciones join (select id as idp, categoria from personas) as sel on inscripciones.id_persona=sel.idp where id=?',inscrip[ins])
+        await pool.query('insert cursado  set id_turno=?, id_persona=?,categoria=?, id_inscripcion=?', [id, inscri[0]['id_persona'],inscri[0]['categoria'],inscrip[ins]])
+
+    }
+    res.json('realizado')
+  
+  })
 
 module.exports = router
