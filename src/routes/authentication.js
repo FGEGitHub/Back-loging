@@ -46,7 +46,7 @@ router.get('/exitosignup',(req,res)=>{
 })
 
 router.get('/noexito',(req,res)=>{
-    console.log(req.algo)
+    console.log("req.algo")
     console.log(req.rtaa)
     res.send('Sin Exito')
 })

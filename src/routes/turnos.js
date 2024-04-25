@@ -112,12 +112,12 @@ router.post("/ponerausentes", async (req, res) => {
       for (ii in cursado) {
         let esta = await pool.query('select * from asistencia where id_persona=? and id_clase=?', [cursado[ii]['id_persona'], clases[i]['id']])
         if (esta.length === 0) {
-          await pool.query('insert into asistencia set  id_clase=? ,id_persona=?, fecha=? ', [clases[i]['id'],cursado[ii]['id_persona'],(new Date(Date.now())).toLocaleDateString()])
+          await pool.query('insert into asistencia set  id_clase=? ,id_persona=?, fecha=? ', [clases[i]['id'], cursado[ii]['id_persona'], (new Date(Date.now())).toLocaleDateString()])
 
         }
 
       }
-        console.log(sintomar)
+      console.log(sintomar)
     }
 
 
@@ -244,7 +244,7 @@ router.get('/clasesdelturno/:id', async (req, res) => {
     etc.push(nuevo)
   }//fin todas las clases
 
-console.log(etc)
+  console.log(etc)
   res.json(etc);
   //res.render('index')
 })
@@ -258,7 +258,7 @@ router.get('/listadetodoslosturnos/', isLoggedInn2, async (req, res) => {
 
     todos = []
     for (ii in tur) {
-    
+
       console.log(tur[ii])
       console.log(tur[ii]['id'])
       cat = await pool.query('select * from cursado where id_turno= ?', [tur[ii]['id']])
@@ -295,7 +295,7 @@ router.get('/listadetodoslosturnos/', isLoggedInn2, async (req, res) => {
       }
       todos.push(nuev)
     }
-console.log(todos)
+    console.log(todos)
 
     res.json(todos)
   } catch (error) {
@@ -307,39 +307,132 @@ console.log(todos)
 })
 
 
-router.get('/traerturnosparainscri/',  async (req, res) => {
-  
-const tu = await pool.query('select * from turnos where etapa=3')
+router.get('/traerturnosparainscri/', async (req, res) => {
+
+  const tu = await pool.query('select * from turnos where etapa=3')
 
 
-res.json([tu[10],tu[11],tu[5],tu[6],tu[7],tu[0],tu[1],tu[2],tu[3],tu[4],tu[12],tu[13],tu[14],tu[15],tu[16],tu[8],tu[9],tu[19],tu[20],tu[21],tu[17],tu[18],tu[22],tu[23],tu[24]])
+  res.json([tu[10], tu[11], tu[5], tu[6], tu[7], tu[0], tu[1], tu[2], tu[3], tu[4], tu[12], tu[13], tu[14], tu[15], tu[16], tu[8], tu[9], tu[19], tu[20], tu[21], tu[17], tu[18], tu[22], tu[23], tu[24]])
 
 })
 
-router.get('/traerinscripcionesenc/:id',  async (req, res) => {
+router.get('/traerinscripcionesenc/:id', async (req, res) => {
 
-  const tu = await pool.query('select * from inscripciones join (select id as idp, nombre, apellido,categoria from personas) as sel on  inscripciones.id_persona=sel.idp join (select id as idt, descripcion as elec1 from turnos) as sel2 on inscripciones.uno= sel2.idt join (select id as idtu, descripcion as elec2 from turnos) as sel3 on inscripciones.uno= sel3.idtu where edicion=3 and estado="pendiente"')
-  
-  
+  const tu = await pool.query('select * from inscripciones join (select id as idp, nombre, apellido,categoria from personas) as sel on  inscripciones.id_persona=sel.idp join (select id as idt, descripcion as elec1 from turnos) as sel2 on inscripciones.uno= sel2.idt join (select id as idtu, descripcion as elec2 from turnos) as sel3 on inscripciones.dos= sel3.idtu where edicion=3 and estado="pendiente"')
+
+
   res.json(tu)
-  
-  })
 
-  router.post("/asignarinscripciones", async (req, res) => {
-    let { id, inscrip } = req.body
+})
+
+router.post("/asignarinscripciones", async (req, res) => {
+  let { id, inscrip } = req.body
   ///id es decurso 
   console.log(inscrip)
-    for (ins in inscrip) {
-  
-       console.log(inscrip[ins])
-  
-        await pool.query('update inscripciones set estado="Preasignada" where  id = ?', [ inscrip[ins]])
-        inscri = await pool.query('select * from inscripciones join (select id as idp, categoria from personas) as sel on inscripciones.id_persona=sel.idp where id=?',inscrip[ins])
-        await pool.query('insert cursado  set id_turno=?, id_persona=?,categoria=?, id_inscripcion=?', [id, inscri[0]['id_persona'],inscri[0]['categoria'],inscrip[ins]])
+  for (ins in inscrip) {
+
+    console.log(inscrip[ins])
+
+    await pool.query('update inscripciones set estado="Preasignada" where  id = ?', [inscrip[ins]])
+    inscri = await pool.query('select * from inscripciones join (select id as idp, categoria from personas) as sel on inscripciones.id_persona=sel.idp where id=?', inscrip[ins])
+    await pool.query('insert cursado  set id_turno=?, id_persona=?,categoria=?, id_inscripcion=?', [id, inscri[0]['id_persona'], inscri[0]['categoria'], inscrip[ins]])
+
+  }
+  res.json('realizado')
+
+})
+
+
+
+
+
+
+
+
+
+router.post("/cambiarhorario", async (req, res) => {
+  let { dni, id_inscripcion, observaciones } = req.body
+console.log( dni, id_inscripcion, observaciones )
+  try {
+
+    await pool.query('update inscripciones set estado="Solicita cambio"   where id=?', [id_inscripcion])
+    const es = await pool.query('select * from personas where dni=?', [dni])
+    if (observaciones != undefined) {
+      await pool.query('insert into observaciones set detalle=?, id_ref=? , fecha=?', [observaciones, es[0]['id'], (new Date(Date.now())).toLocaleDateString()])
+
+
+
 
     }
-    res.json('realizado')
-  
-  })
+   
+    const essss = await pool.query('select * from inscripciones where dni_persona=?', [dni])
+
+    await pool.query('delete  from  cursado where id_inscripcion = ?', [essss[0]['id']])
+    res.json('Se retira del curso con observacion de que solicita cambio ')
+  } catch (error) {
+    console.log(error)
+    res.json('No realizado, contacta al administrador')
+  }
+})
+
+router.post("/rechazarinscrip", async (req, res) => {
+  let { dni, id_inscripcion, observaciones } = req.body
+
+  try {
+
+    await pool.query('update inscripciones set estado="Rechazada"   where id=?', [id_inscripcion])
+    const es = await pool.query('select * from personas where dni=?', [dni])
+    if (observaciones != undefined) {
+      await pool.query('insert into observaciones set detalle=?, id_ref=? , fecha=?', [observaciones, es[0]['id'], (new Date(Date.now())).toLocaleDateString()])
+
+
+
+
+    }
+    console.log('essss[0]')
+    const essss = await pool.query('select * from inscripciones where dni_persona=?', [dni])
+
+    await pool.query('delete  from  cursado where id_inscripcion = ?', [essss[0]['id']])
+    res.json('Inscripcion rechazada ')
+  } catch (error) {
+    console.log(error)
+    res.json('No realizado, contacta al administrador')
+  }
+})
+
+
+
+
+router.post("/asignarcurso", async (req, res) => {
+  let { id } = req.body
+  try {
+    await pool.query('update inscripciones set estado="Asignada a curso"   where id=?', [id])
+
+
+    /*        await pool.query('insert into cursado set id_inscripcion=?, id_turno=?, id_persona=?,motivo=?', [id_inscripcion,id_turno,per[0]['id'],(new Date(Date.now())).toLocaleDateString()])
+          
+ 
+           await pool.query('update inscripciones set estado="Asignada a curso"   where id=?', [ id_inscripcion])
+ 
+           await pool.query('update turnos set disponibles=?  where id=?', [cup, id_turno])
+ 
+            const es = await pool.query('select * from personas where dni=?', [dni])
+ 
+ 
+       if (observaciones != undefined){
+           await pool.query('insert into observaciones set detalle=?, id_ref=?, fecha=? ', [observaciones, es[0]['id'],(new Date(Date.now())).toLocaleDateString()])
+ 
+       } */
+    const mensaje = 'Listo! asignadx a curso '
+    console.log(mensaje)
+    res.json(mensaje)
+  } catch (error) {
+    console.log(error)
+    res.json('error')
+  }
+
+
+})
+
 
 module.exports = router

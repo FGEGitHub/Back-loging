@@ -650,7 +650,7 @@ router.get('/traerinscripcionesenc/', async (req, res) => {
   const id = req.params.id
 
 
-  const etc = await pool.query('select * from inscripciones left join (select dni as dnip, nombre, apellido from personas) as selec on inscripciones.dni_persona=selec.dnip   where  (id_call is null or id_call= 0) and edicion=2  ')
+  const etc = await pool.query('select * from turnos where  (id_call is null or id_call= 0) and etapa=3  ')
   console.log(etc)
 
   res.json(etc);
@@ -679,105 +679,15 @@ router.get('/preinscriptas/', async (req, res) => {
 
   try {
 
-    inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2  left join (select id as idu, nombre as nombrecall from usuarios) as sel4 on inscripciones.id_call=sel4.idu where edicion=2 and estado="Preasignada"')
-
-    curso1 = await pool.query('select * from inscripciones where uno =132')
-    curso2 = await pool.query('select * from inscripciones where uno =133')
-    curso3 = await pool.query('select * from inscripciones where uno =134')
-    curso4 = await pool.query('select * from inscripciones where uno =135')
-    curso5 = await pool.query('select * from inscripciones where uno =136')
-
-    let deuda_exigible = []
+    inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join (select id_inscripcion, id_turno from cursado) as sel2 on inscripciones.id=sel2.id_inscripcion  join (select id as idc, descripcion from turnos) as sel5 on sel2.id_turno=sel5.idc left join (select id as idu, nombre as nombrecall from usuarios) as sel4 on inscripciones.id_call=sel4.idu where edicion=3 and estado="Preasignada"')
+console.log(inscriptos.length)
 
 
-    if (inscriptos.length === 0) {
-
-      const dato1 = {
-        'datoa': 'Cantidad de inscriptas',
-        'datob': "No hay cuotas Calculadas"
-      }
-      const dato2 = {
-        'datoa': 'Monto devengado hasta la cuota',
-        'datob': "No hay cuotas Calculadas"
-      }
-      const dato3 = {
-        'datoa': 'Monto abonado hasta la cuota',
-        'datob': "No hay cuotas Calculadas"
-      }
-      const dato4 = {
-        'datoa': 'Deuda Exigible',
-        'datob': "No hay cuotas Calculadas"
-      }
-      const deuda_exigible = [dato1, dato2, dato3, dato4]
-      const dato5 = {
-        'datoa': 'Cantidad de cuotas sin pago',
-        'datob': 'no calculado'
-      }
-      const dato6 = {
-        'datoa': 'Monto cuota pura',
-        'datob': 'no calculado'
-      }
-      const dato7 = {
-        'datoa': 'Saldo de capital a vencer',
-        'datob': 'no calculado'
-      }
-
-      const cuotas_pendientes = [dato5, dato6, dato7]
-      const respuesta = [inscriptos, cuotas_pendientes]
-
-
-      res.json(respuesta)
-    } else {
-
-
-
-      const dato1 = {
-        'datoa': 'Cantidad de inscriptas',
-        'datob': inscriptos.length,
-        'datoc': inscriptos.length * 100 / inscriptos.length,
-        'datod': (25 * (inscriptos.length / inscriptos.length)).toFixed(2)
-
-      }
-      const dato2 = {
-        'datoa': 'Elaboracion de mesa de dulces para eventos',
-        'datob': curso1.length,
-        'datoc': (curso1.length * 100 / inscriptos.length).toFixed(2),
-        'datod': (25 * (curso1.length / inscriptos.length)).toFixed(2)
-      }
-      const dato3 = {
-        'datoa': 'Maquillaje y peinado para eventos',
-        'datob': curso2.length,
-        'datoc': (curso2.length * 100 / inscriptos.length).toFixed(2),
-        'datod': (25 * (curso2.length / inscriptos.length)).toFixed(2)
-      }
-      const dato4 = {
-        'datoa': 'Diseño de lenceria femenina',
-        'datob': curso3.length,
-        'datoc': (curso3.length * 100 / inscriptos.length).toFixed(2),
-        'datod': (25 * (curso3.length / inscriptos.length)).toFixed(2)
-      }
-      const dato5 = {
-        'datoa': 'Textiles y accesorios para el verano',
-        'datob': curso4.length,
-        'datoc': (curso4.length * 100 / inscriptos.length).toFixed(2),
-        'datod': (25 * (curso4.length / inscriptos.length)).toFixed(2)
-      }
-      const dato6 = {
-        'datoa': 'Refaccion integral para el hogar',
-        'datob': curso5.length,
-        'datoc': (curso5.length * 100 / inscriptos.length).toFixed(2),
-        'datod': (25 * (curso5.length / inscriptos.length)).toFixed(2)
-      }
-      deuda_exigible = [dato1, dato2, dato3, dato4, dato5, dato6]
-
-
-    }
-
-    res.json([inscriptos, deuda_exigible])
+    res.json([inscriptos])
 
   } catch (error) {
     console.log(error)
-
+    res.json([[11]])
   }
 })
 
@@ -789,7 +699,7 @@ router.post("/asignarinscripciones", async (req, res) => {
 
 
 
-    await pool.query('update inscripciones set id_call =?, estado="Preasignada"  where  id = ?', [id, inscrip[ins]])
+    await pool.query('update turnos set id_call =?  where  id = ?', [id, inscrip[ins]])
   }
   res.json('realizado')
 
@@ -1134,7 +1044,7 @@ router.get('/designarturnos/', async (req, res) => {
   }
 
 })
-router.get('/inscribirautomaticamente/', async (req, res) => {
+router.get('/inscribirautomaticamente333/', async (req, res) => {
 
   for (let variable = 0; variable < 14; variable++) {
     unos = await pool.query('select * from inscripciones join (select id as idp,categoria from personas) as sel on inscripciones.id_persona=sel.idp where  categoria="uno" and edicion=3 and  (estado="Inscripta" or estado="pendiente" )')

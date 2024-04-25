@@ -83,29 +83,47 @@ try {
   let envio = []
   asignados = 0
   for (encargado in encargados) {
-      let asignados = await pool.query('select * from inscripciones where id_call =? ', [encargados[encargado]['id']])
+      let turnos = await pool.query('select * from turnos where id_call =? ', [encargados[encargado]['id']])
+     
 
+      sinc= 0
+      asig= 0
+      rech= 0
+      nocont=0
 
-      let sinc = await pool.query('select * from inscripciones where id_call =? and estado="Preasignada" ', [encargados[encargado]['id']])
-      let asig = await pool.query('select * from inscripciones where id_call =? and estado="Asignada a curso" ', [encargados[encargado]['id']])
-      let rech = await pool.query('select * from inscripciones where id_call =? and estado="Rechazada" ', [encargados[encargado]['id']])
-       nocont = await pool.query('select * from inscripciones where id_call =? and estado="No contesta" ', [encargados[encargado]['id']])
+      for (tur in turnos) {
+      
+        let sinco = await pool.query('select * from inscripciones join(select id as idc, id_turno,id_inscripcion from cursado) as sel on inscripciones.id=sel.id_inscripcion  where id_turno =? and estado="Preasignada" ', [turnos[tur]['id']])
+    
+        let asigo = await pool.query('select * from inscripciones join(select id as idc, id_turno,id_inscripcion from cursado) as sel on inscripciones.id=sel.id_inscripcion  where id_turno =? ', [turnos[tur]['id']])
+        let recho = await pool.query('select * from inscripciones join(select id as idc, id_turno,id_inscripcion from cursado) as sel on inscripciones.id=sel.id_inscripcion  where id_turno =? and estado="Rechazada" ', [turnos[tur]['id']])
+         noconto = await pool.query('select * from inscripciones join(select id as idc, id_turno,id_inscripcion from cursado) as sel on inscripciones.id=sel.id_inscripcion  where id_turno =? and estado="No contesta" ', [turnos[tur]['id']])
+
+      
+   
+            sinc=sinc+ sinco.length,
+            asig= asig+asigo.length,
+            rech=rech+ recho.length,
+            nocont=nocont+noconto.length
+  
+  
+      
+      }
+
 
       let objeto_nuevo = {
           id: encargados[encargado]['id'],
           nombre: encargados[encargado]['nombre'],
-          asignados: asignados.length,
-          sinc: sinc.length,
-          asig: asig.length,
-          rech: rech.length,
-          nocont:nocont.length
-
+          turnos:turnos.length,
+          sinc,
+          asig,
+          rech,
+          nocont
       }
       envio.push(objeto_nuevo)
   }
 
 
-  console.log(envio)
   res.json([envio])
 } catch (error) {
   console.log(error)
