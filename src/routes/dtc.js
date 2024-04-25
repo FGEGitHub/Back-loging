@@ -613,6 +613,13 @@ router.post("/ponerpresente", async (req, res) => {
   } else {
     await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?,id_tallerista=?,hora=?', [fecha, id, id_tallerista,horaBuenosAires])
     era = "puesto Presente"
+    yaesta =await pool.query('select * from dtc_asistencia where fecha=? and id_tallerista=238 and id_usuario=? ', [fecha,id])
+    if(yaesta.length>0){
+     console.log('esta')
+    }else{
+     await pool.query('insert into dtc_asistencia set  fecha=?,id_tallerista=238, id_usuario=?', [fecha,id])
+ 
+    }
   }
 
   res.json(era)
