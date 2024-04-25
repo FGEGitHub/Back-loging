@@ -471,7 +471,35 @@ enviar.push(nuevo)
  
 
 
-    res.json(enviar)
+const unoq = await pool.query('select * from cursado where categoria ="uno" and etapa=3')
+const dosq = await pool.query('select * from cursado where categoria ="dos" and etapa=3')
+const tresq = await pool.query('select * from cursado where categoria ="tres" and etapa=3')
+const cuatroq = await pool.query('select * from cursado where categoria ="cuatro" and etapa=3')
+const cincoq = await pool.query('select * from cursado where categoria ="cinco" and etapa=3')
+const seisq = await pool.query('select * from cursado where categoria ="seis" and etapa=3')
+const sieteq = await pool.query('select * from cursado where categoria ="siete" and etapa=3')
+const ochoq = await pool.query('select * from cursado where categoria ="ocho" and etapa=3')
+const nueveq = await pool.query('select * from cursado where categoria ="nueve" and etapa=3')
+const diezq = await pool.query('select * from cursado where categoria ="diez" and etapa=3')
+const onceq = await pool.query('select * from cursado where categoria ="once" and etapa=3')
+const doceq = await pool.query('select * from cursado where categoria ="doce" and etapa=3')
+
+resultado={
+  uno:unoq.length,
+  dos:dosq.length,
+  tres:tresq.length,
+  cuatro:cuatroq.length,
+  cinco:cincoq.length,
+  seis:seisq.length,
+  siete:sieteq.length,
+  ocho:ochoq.length,
+  nueve:nueveq.length,
+  diez:diezq.length,
+  once:onceq.length,
+  doce:doceq.length,
+  
+}
+res.json([enviar,resultado])
   } catch (error) {
     console.log(error)
     res.json([])
@@ -480,6 +508,39 @@ enviar.push(nuevo)
 
 })
 
+
+
+router.get('/estadisticasporcent/',  async (req, res) => {
+  try {
+    console.log('listadetodos')
+  //  tur = await pool.query('select * from turnos   join  (select id as idcurso, nombre as nombrecurso from cursos) as selec1  on turnos.id_curso= selec1.idcurso left join (select id as idu, nombre as encargado from usuarios) as selec2 on turnos.id_encargado=selec2.idu  left join (select id as idu2, nombre as coordinador from usuarios) as selec3 on turnos.id_coordinador=selec3.idu2 where etapa=2')
+    tur = await pool.query('select * from turnos   join  (select id as idcurso, nombre as nombrecurso from cursos) as selec1  on turnos.id_curso= selec1.idcurso left join (select id as idu, nombre as encargado from usuarios) as selec2 on turnos.id_encargado=selec2.idu  left join (select id as idu2, nombre as coordinador from usuarios) as selec3 on turnos.id_coordinador=selec3.idu2 where etapa=3')
+let enviar=[]
+for (i in tur ){
+
+  cur = await pool.query('select * from cursado where id_turno=?',[tur[i]['id']])
+  nuevo={
+    id:tur[i]['id'],
+    nombrecurso:tur[i]['nombrecurso'],
+    descripcion:tur[i]['descripcion'],
+    coordinador:tur[i]['coordinador'],
+    encargado:tur[i]['encargado'],
+    cantidad:cur.length,
+    cupo:50,
+  }
+enviar.push(nuevo)
+}
+ 
+
+
+    res.json(enviar)
+  } catch (error) {
+    console.log(error)
+    res.json([])
+  }
+
+
+})
 
 
 router.get('/listadeturnos/:id', isLoggedInn2, async (req, res) => {
