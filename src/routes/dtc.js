@@ -526,7 +526,24 @@ console.log("cumple",cumple)
   res.json([estad])
 })
 
+router.post("/traercumples", async (req, res) => {
+  let { fecha } = req.body
+  ///presentes mensuales 
+  fecha = fecha.fecha
+  console.log(fecha)
+  // Divide la fecha usando el guión ('-') como separador
+  let [dia, mes, año] = fecha.split('-');
+if (dia.length==1){
+  diacumple="0"+dia
+}else{diacumple=dia}
+if (mes.length==1){
+  mescumple="0"+mes
+}else{mescumple=mes}
+console.log("'_%"+mescumple+"-"+diacumple+"'")
+const cumple = await pool.query('select * from dtc_chicos where fecha_nacimiento like ?',["%"+mescumple+"-"+diacumple])
 
+res.json(cumple)
+})
 
 
 router.post("/modificarkid", async (req, res) => {
@@ -606,11 +623,17 @@ router.post("/ponerpresente", async (req, res) => {
 router.get("/nivelar", async (req, res) => {
  
 
-  const hoy = await pool.query('select * from dtc_asistencia where fecha="15-4-2024"')
+  const hoy = await pool.query('select * from dtc_asistencia where fecha="25-4-2024"')
   for (is in hoy ){
-    await pool.query('insert into dtc_asistencia set  fecha="24-4-2024",id_tallerista=238, id_usuario=?', [hoy[is]['id_usuario']])
+    yaesta =await pool.query('select * from dtc_asistencia where fecha="25-4-2024" and id_tallerista=238 and id_usuario=? ', [hoy[is]['id_usuario']])
+   if(yaesta.length>0){
+    console.log('esta')
+   }else{
+    await pool.query('insert into dtc_asistencia set  fecha="25-4-2024",id_tallerista=238, id_usuario=?', [hoy[is]['id_usuario']])
+
+   }
   }
-  res.json(era)
+  res.json('era')
 
 
 })
