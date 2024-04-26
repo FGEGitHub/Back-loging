@@ -112,6 +112,7 @@ app.use(`/coordinadores`, require('./routes/coordinadores'))
 app.use(`/fiscalizacion`, require('./routes/fiscalizacion'))
 app.use(`/carnavales`, require('./routes/carnavales'))
 app.use(`/vendedoras`, require('./routes/vendedoras'))
+app.use(`/doneu`, require('./routes/doneu'))
 //app.use(`/links`, require('./routes/links'))
 
 
