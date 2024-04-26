@@ -27,6 +27,60 @@ const upload = multer({ dest: 'uploads/' });
 
 
 
+
+
+router.post('/subirexcelclientes', upload.single('excel'), async (req, res) => {
+  try {
+    // Leer el archivo Excel
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0]; // Suponiendo que hay solo una hoja en el archivo
+
+    // Obtener los datos de la hoja
+    const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    // Procesar los datos
+  /*   const sheetData = sheetData.map(row => ({
+      nombre: row.Nombre,
+      apellido: row.Apellido
+
+     ));    // Agrega más campos según las columnas que necesites procesar
+    } */
+
+
+
+    ///////////////////////////////////////////////////////////////////
+    for (property in sheetData) {
+      // a += 1
+        ///////
+
+  
+          ///actualizar
+
+          if (sheetData[property]['adrema'] === undefined) {
+            adrema = 'sin definir'
+          } else {
+            adrema = sheetData[property]['Nombre']
+
+          }
+          exis = await pool2.query('select * from clientes where nombre=? and telefono=? and correo=? and fecha_nac=? and estado_civil=? and sexo=? and provincia=?', [sheetData[property]['nombre'],sheetData[property]['tel'],sheetData[property]['email'],sheetData[property]['fecha_nac'],sheetData[property]['estadoc'],sheetData[property]['sexo'],sheetData[property]['provincia']])
+          if (exis==0){
+            await pool2.query('insert into clientes set nombre=?,telefono=?,correo=?,fecha_nac=?,estado_civil=?,sexo=?,provincia=?', [sheetData[property]['nombre'],sheetData[property]['tel'],sheetData[property]['email'],sheetData[property]['fecha_nac'],sheetData[property]['estadoc'],sheetData[property]['sexo'],sheetData[property]['provincia']])
+
+          }
+  
+
+    }
+
+
+    // Devolver los datos procesados como respuesta
+    res.json('realizado');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al procesar el archivo Excel.');
+  }
+})
+
+
 router.post('/subirexcellotes', upload.single('excel'), async (req, res) => {
   try {
     // Leer el archivo Excel
