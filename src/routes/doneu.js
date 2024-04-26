@@ -13,7 +13,13 @@ res.json(lot)
 })
  
 
-
+router.get("/traerclientes", async (req, res) => {
+    const lot = await pool.query('select * from clientes')
+    console.log(lot.length)
+    res.json(lot)
+    
+    })
+     
 
 module.exports = router
 
