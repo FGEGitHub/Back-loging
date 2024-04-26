@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const { isLoggedIn, isLoggedInn, isLoggedInn2, isLoggedInn4 } = require('../lib/auth') //proteger profile
 const pool = require('../database')
+const pool2 = require('../database2')
 const XLSX = require('xlsx')
 const caregorizar = require('./funciones/caregorizar')
 const multer = require('multer')
@@ -23,6 +24,59 @@ const fileUpload = multer({
 
 
 const upload = multer({ dest: 'uploads/' });
+
+
+
+router.post('/subirexcellotes', upload.single('excel'), async (req, res) => {
+  try {
+    // Leer el archivo Excel
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0]; // Suponiendo que hay solo una hoja en el archivo
+
+    // Obtener los datos de la hoja
+    const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    // Procesar los datos
+  /*   const sheetData = sheetData.map(row => ({
+      nombre: row.Nombre,
+      apellido: row.Apellido
+
+     ));    // Agrega más campos según las columnas que necesites procesar
+    } */
+
+
+
+    ///////////////////////////////////////////////////////////////////
+    for (property in sheetData) {
+      // a += 1
+        ///////
+
+  
+          ///actualizar
+
+          if (sheetData[property]['adrema'] === undefined) {
+            adrema = 'sin definir'
+          } else {
+            adrema = sheetData[property]['Nombre']
+
+          }
+          exis = await pool2.query('select * from lotes where manzana=? and sector=? and superficie=? and estado=? and adrema=?', [sheetData[property]['manzana'],sheetData[property]['sector'],sheetData[property]['superficie'],sheetData[property]['estado'],adrema])
+          if (exis==0){
+            await pool2.query('insert into lotes set manzana=?,sector=?,superficie=?,estado=?,adrema=?', [sheetData[property]['manzana'],sheetData[property]['sector'],sheetData[property]['superficie'],sheetData[property]['estado'],adrema])
+
+          }
+  
+
+    }
+
+
+    // Devolver los datos procesados como respuesta
+    res.json('realizado');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al procesar el archivo Excel.');
+  }
+})
 
 
 router.post('/subirexcel', upload.single('excel'), async (req, res) => {
