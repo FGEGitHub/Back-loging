@@ -18,7 +18,7 @@ const diskstorage = multer.diskStorage({
   }
 }) //para que almacene temporalmente la imagen
 const fileUpload = multer({
-  storage: diskstorage,
+  storage: diskstorage,f
 
 }).single('image')
 
@@ -2035,6 +2035,53 @@ router.get('/cargartrabajos', async (req, res) => {
 })
 
 
+
+
+router.post('/subirexceltelefonos', upload.single('excel'), async (req, res) => {
+  try {
+    // Leer el archivo Excel
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0]; // Suponiendo que hay solo una hoja en el archivo
+
+    // Obtener los datos de la hoja
+    const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    // Procesar los datos
+  /*   const sheetData = sheetData.map(row => ({
+      nombre: row.Nombre,
+      apellido: row.Apellido
+
+     ));    // Agrega más campos según las columnas que necesites procesar
+    } */
+
+
+
+    ///////////////////////////////////////////////////////////////////
+    for (property in sheetData) {
+      // a += 1
+        ///////
+
+  
+          ///actualizar
+try {
+  await pool.query('UPDATE personas set tel=? where dni = ?  ', [sheetData[property]['Número de teléfono de contacto '], sheetData[property]['D.N.I.']])
+  console.log("sa")
+} catch (error) {
+  console.log(error)
+}
+
+ 
+
+    }
+
+
+    // Devolver los datos procesados como respuesta
+    res.json('realizado');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al procesar el archivo Excel.');
+  }
+})
 
 
 module.exports = router
