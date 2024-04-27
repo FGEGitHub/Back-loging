@@ -437,9 +437,9 @@ router.post("/asignarcurso", async (req, res) => {
 
 
 router.post("/mensajeenviado", async (req, res) => {
-  let { id } = req.body
+  let { id_inscripcion } = req.body
   try {
-    await pool.query('update inscripciones set estado="Mensaje enviado"   where id=?', [id])
+    await pool.query('update inscripciones set estado="Mensaje enviado"   where id=?', [id_inscripcion])
 
 
     /*        await pool.query('insert into cursado set id_inscripcion=?, id_turno=?, id_persona=?,motivo=?', [id_inscripcion,id_turno,per[0]['id'],(new Date(Date.now())).toLocaleDateString()])
