@@ -666,7 +666,7 @@ router.get('/preinscriptascall/:id', async (req, res) => {
   try {
 
    // inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, nombre as nombrecurso1 from cursos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, nombre as nombrecurso2 from cursos) as sel3 on inscripciones.dos=sel3.id2 left join (select id_inscripcion , id_turno  from cursado) as sel8 on inscripciones.id=sel8.id_inscripcion left join (select id as idt, descripcion, id_curso from turnos) as sel9 on sel8.id_turno=sel9.idt left join(select id as idc, nombre as nombrecurso from cursos) as sel10 on sel9.id_curso=sel10.idc where id_call=? ', [id])
-    inscriptos = await pool.query("select * from turnos join (select id_turno, id_inscripcion from cursado) as sel on turnos.id=sel.id_turnos join (select id as idi, id_persona as idp from inscripciones) as sel2 on sel.id_inscripcion=sel2.idi join(select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo,tel,tel2 from personas) as sel3 on sel2.idp=sel3.idpp  where id_call =?",[id])
+    inscriptos = await pool.query("select * from turnos join (select id_turno, id_inscripcion from cursado) as sel on turnos.id=sel.id_turno join (select id as idi, id_persona as idp from inscripciones) as sel2 on sel.id_inscripcion=sel2.idi join(select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo,tel,tel2 from personas) as sel3 on sel2.idp=sel3.idpp  where id_call =?",[id])
     res.json([inscriptos])
 
   } catch (error) {
