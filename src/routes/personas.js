@@ -18,7 +18,7 @@ const diskstorage = multer.diskStorage({
   }
 }) //para que almacene temporalmente la imagen
 const fileUpload = multer({
-  storage: diskstorage,f
+  storage: diskstorage,
 
 }).single('image')
 
