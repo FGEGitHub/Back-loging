@@ -90,11 +90,15 @@ try {
       asig= 0
       rech= 0
       nocont=0
-
+      mensaje=0
+asignada=0
       for (tur in turnos) {
       
-        let sinco = await pool.query('select * from inscripciones join(select id as idc, id_turno,id_inscripcion from cursado) as sel on inscripciones.id=sel.id_inscripcion  where id_turno =? and estado="Preasignada" ', [turnos[tur]['id']])
-    
+        let sinco = await pool.query('select * from inscripciones join(select id as idc, id_turno,id_inscripcion from cursado) as sel on inscripciones.id=sel.id_inscripcion  where id_turno =? and (estado="Preasignada" or estado="pendiente") ', [turnos[tur]['id']])
+        let mensajeo = await pool.query('select * from inscripciones join(select id as idc, id_turno,id_inscripcion from cursado) as sel on inscripciones.id=sel.id_inscripcion  where id_turno =? and estado="Mensaje enviado" ', [turnos[tur]['id']])
+        let asignadao = await pool.query('select * from inscripciones join(select id as idc, id_turno,id_inscripcion from cursado) as sel on inscripciones.id=sel.id_inscripcion  where id_turno =? and estado="Asignada a curso" ', [turnos[tur]['id']])
+
+
         let asigo = await pool.query('select * from inscripciones join(select id as idc, id_turno,id_inscripcion from cursado) as sel on inscripciones.id=sel.id_inscripcion  where id_turno =? ', [turnos[tur]['id']])
         let recho = await pool.query('select * from inscripciones join(select id as idc, id_turno,id_inscripcion from cursado) as sel on inscripciones.id=sel.id_inscripcion  where id_turno =? and estado="Rechazada" ', [turnos[tur]['id']])
          noconto = await pool.query('select * from inscripciones join(select id as idc, id_turno,id_inscripcion from cursado) as sel on inscripciones.id=sel.id_inscripcion  where id_turno =? and estado="No contesta" ', [turnos[tur]['id']])
@@ -104,8 +108,9 @@ try {
             sinc=sinc+ sinco.length,
             asig= asig+asigo.length,
             rech=rech+ recho.length,
+            mensaje=mensaje+mensajeo.length
             nocont=nocont+noconto.length
-  
+            asignada=asignada+asignadao.length
   
       
       }
@@ -118,7 +123,9 @@ try {
           sinc,
           asig,
           rech,
-          nocont
+          mensaje,
+          nocont,
+          asignada
       }
       envio.push(objeto_nuevo)
   }
