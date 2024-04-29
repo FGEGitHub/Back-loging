@@ -622,6 +622,17 @@ router.post("/ponerpresente", async (req, res) => {
   if (existe.length > 0) {
     await pool.query('delete  from  dtc_asistencia where id = ?', [existe[0]['id']])
     era = "puesto Ausente"
+
+    const existee = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =? and id_tallerista=238', [id, fecha])
+   
+    if (existee.length > 0) {
+      await pool.query('delete  from  dtc_asistencia where id = ?', [existee[0]['id']])
+    }
+    
+
+
+
+
   } else {
     await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?,id_tallerista=?,hora=?', [fecha, id, id_tallerista,horaBuenosAires])
     era = "puesto Presente"
