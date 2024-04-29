@@ -43,7 +43,18 @@ router.get('/clasesdetaller/:id', async (req, res) => {
 router.get('/listachiques/', async (req, res) => {
 
   const chiques = await pool.query('select * from dtc_chicos order by apellido')
-  res.json([chiques])
+  const kid1 = await pool.query('select * from dtc_chicos where kid="kid1" ')
+  const kid2 = await pool.query('select * from dtc_chicos where kid="kid2"')
+  const kid3 = await pool.query('select * from dtc_chicos where kid="kid3"')
+  const sind = await pool.query('select * from dtc_chicos where kid not in("kid1","kid2","kid3")')
+  env={
+    total:chiques.length,
+    kid1:kid1.length,
+    kid2:kid2.length,
+    kid3:kid3.length,
+    sind:sind.length
+  }
+  res.json([chiques,env])
 })
 
 router.get('/datosdechique/:id', async (req, res) => {
