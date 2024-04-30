@@ -114,9 +114,9 @@ router.post('/subirexcellotes', upload.single('excel'), async (req, res) => {
             adrema = sheetData[property]['Nombre']
 
           }
-          exis = await pool2.query('select * from lotes where manzana=? and sector=? and superficie=? and estado=? and adrema=?', [sheetData[property]['manzana'],sheetData[property]['sector'],sheetData[property]['superficie'],sheetData[property]['estado'],adrema])
+          exis = await pool2.query('select * from lotes where manzana=? and sector=? and lote=?', [sheetData[property]['manzana'],sheetData[property]['sector'],sheetData[property]['lote']])
           if (exis==0){
-            await pool2.query('insert into lotes set manzana=?,sector=?,superficie=?,estado=?,adrema=?', [sheetData[property]['manzana'],sheetData[property]['sector'],sheetData[property]['superficie'],sheetData[property]['estado'],adrema])
+            await pool2.query('insert into lotes set manzana=?,lote=?,sector=?,superficie=?,estado=?,adrema=?', [sheetData[property]['manzana'],sheetData[property]['lote'],sheetData[property]['sector'],sheetData[property]['superficie'],sheetData[property]['estado'],adrema])
 
           }
   
