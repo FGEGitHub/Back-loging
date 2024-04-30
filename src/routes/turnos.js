@@ -318,7 +318,7 @@ router.get('/traerturnosparainscri/', async (req, res) => {
 
 router.get('/traerinscripcionesenc/:id', async (req, res) => {
 
-  const tu = await pool.query('select * from inscripciones join (select id as idp, nombre, apellido,categoria from personas) as sel on  inscripciones.id_persona=sel.idp join (select id as idt, descripcion as elec1 from turnos) as sel2 on inscripciones.uno= sel2.idt join (select id as idtu, descripcion as elec2 from turnos) as sel3 on inscripciones.dos= sel3.idtu where edicion=3 and estado="pendiente" order by elec1')
+  const tu = await pool.query('select * from inscripciones join (select id as idp, nombre, apellido,categoria from personas) as sel on  inscripciones.id_persona=sel.idp join (select id as idt, descripcion as elec1 from turnos) as sel2 on inscripciones.uno= sel2.idt join (select id as idtu, descripcion as elec2 from turnos) as sel3 on inscripciones.dos= sel3.idtu where edicion=3 and estado="pendiente" order by elec2')
 
 
   res.json(tu)
