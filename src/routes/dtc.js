@@ -40,6 +40,23 @@ router.get('/clasesdetaller/:id', async (req, res) => {
 })
 
 
+
+
+router.get('/listadepersonaspsiq/', async (req, res) => {
+
+  const chiques = await pool.query('select * from dtc_personas_psicologa order by apellido')
+
+  env={
+    total:chiques.length,
+    kid1:5,
+    kid2:5,
+    kid3:5,
+    sind:5
+  }
+  res.json([chiques,env])
+})
+
+
 router.get('/listachiques/', async (req, res) => {
 
   const chiques = await pool.query('select * from dtc_chicos order by apellido')
@@ -268,6 +285,30 @@ router.post("/nuevochique", async (req, res) => {
 
 })
 
+
+
+router.post("/nuevapersonapsiq", async (req, res) => {
+  let { nombre, apellido, fecha_nacimiento, observaciones,  primer_ingreso,  dni, domicilio, telefono } = req.body
+console.log(nombre, apellido, fecha_nacimiento, observaciones,  primer_ingreso,  dni, domicilio, telefono)
+
+  try {
+    if (observaciones == undefined) {
+      observaciones = "Sin observaciones"
+    }
+    if (fecha_nacimiento == undefined) {
+      fecha_nacimiento = "Sin asignar"
+    }
+
+
+    await pool.query('insert dtc_personas_psicologa  set nombre=?,apellido=?,fecha_nacimiento=?,observaciones=?,primer_ingreso=?,dni=?,domicilio=?,telefono=?', [nombre, apellido, fecha_nacimiento, observaciones, primer_ingreso, dni, domicilio, telefono])
+
+    res.json('Agregado')
+  } catch (error) {
+    console.log(error)
+    res.json('No agregado')
+  }
+
+})
 
 router.post("/borraractividadchico", async (req, res) => {
   const { id } = req.body
