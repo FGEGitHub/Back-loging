@@ -98,7 +98,7 @@ router.get('/datosdechique/:id', async (req, res) => {
 
 router.get('/datosdepersonapsi/:id', async (req, res) => {
   const id = req.params.id
-  const chiques = await pool.query('select * from dtc_chicos where id =?', [id])
+  const chiques = await pool.query('select * from dtc_personas_psicologa where id =?', [id])
   
 
   try{
@@ -242,6 +242,28 @@ router.post("/subirlegajo", upload.single('imagen'), async (req, res) => {
 
 })
 
+
+router.post("/modificarusuariopsiq", async (req, res) => {
+  let { id, nombre, apellido, kid,fecha_nacimiento, observaciones, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, hora_merienda } = req.body
+
+  console.log(id, nombre, apellido, fecha_nacimiento, observaciones, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, hora_merienda)
+  try {
+    if (observaciones == undefined) {
+      observaciones = "Sin observaciones"
+    }
+    if (fecha_nacimiento == undefined) {
+      fecha_nacimiento = "Sin asignar"
+    }
+
+    await pool.query('update dtc_personas_psicologa  set nombre=?,apellido=?,fecha_nacimiento=?,observaciones=?,primer_ingreso=?,admision=?,dni=?,domicilio=?,telefono=? where id=?', [nombre, apellido, fecha_nacimiento, observaciones,  primer_ingreso, admision, dni, domicilio, telefono, id])
+
+    res.json('Modificado')
+  } catch (error) {
+    console.log(error)
+    res.json('No modificado')
+  }
+
+})
 
 router.post("/modificarusuario", async (req, res) => {
   let { id, nombre, apellido, kid,fecha_nacimiento, observaciones, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, hora_merienda } = req.body
@@ -639,7 +661,18 @@ router.post("/borrarusuariodtc", async (req, res) => {
 })
 
 
+router.post("/borrarusuariodtcpsiq", async (req, res) => {
+  const { id } = req.body
 
+  try {
+    await pool.query('delete  from  dtc_personas_psicologa where id = ?', [id])
+    res.json('Usuario borrado')
+  } catch (error) {
+    console.log(error)
+    res.json('UsuarNooio borrado, algo sucedio')
+  }
+
+})
 
 router.post("/ponerpresenteactividad", async (req, res) => {
   const { fecha, id, id_tallerista } = req.body
@@ -658,6 +691,7 @@ router.post("/ponerpresenteactividad", async (req, res) => {
 
 
 })
+
 router.post("/ponerpresente", async (req, res) => {
   let { fecha, id, id_tallerista } = req.body
   const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
