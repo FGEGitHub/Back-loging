@@ -26,7 +26,24 @@ const fileUpload = multer({
 const upload = multer({ dest: 'uploads/' });
 
 
+router.get('/sacarcero', async (req, res) => {
 
+  const personas = await pool.query('select * from personas')
+  for(x in personas){
+    cadena=personas[x]['tel']
+    if (cadena.charAt(0) === "0") {
+      console.log('actualizado',personas[x]['tel'],'a ')
+      // Si es "0", devolver el resto de la cadena después del primer carácter
+      ac= cadena.slice(1);
+       console.log(ac)
+       await pool.query('update personas set tel=? where id=?',[ac,personas[x]['id']])
+
+  } 
+ 
+
+  }
+  res.send('Listo')
+})
 
 
 router.post('/subirexcelclientes', upload.single('excel'), async (req, res) => {
