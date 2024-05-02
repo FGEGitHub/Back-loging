@@ -692,6 +692,47 @@ router.post("/ponerpresenteactividad", async (req, res) => {
 
 })
 
+router.post("/agendarturno", async (req, res) => {
+  let { fecha, id, id_tallerista } = req.body
+  const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
+  console.log(fecha, id, id_tallerista)
+  console.log("La hora actual en Buenos Aires es:", horaBuenosAires);
+
+  const existe = await pool.query('select * from dtc_turnos where id_persona=? and fecha =? ', [id, fecha])
+  let era
+  if (existe.length > 0) {
+   // await pool.query('delete  from  dtc_asistencia where id = ?', [existe[0]['id']])
+    era = "Turno quitado"
+
+    const existee = await pool.query('select * from dtc_turnos where id_usuario=? and fecha =? and id_tallerista=238', [id, fecha])
+   
+    if (existee.length > 0) {
+     await pool.query('delete  from  dtc_turnos where id = ?', [existee[0]['id']])
+    }
+    
+
+  } else {
+ await pool.query('insert into dtc_turnos set fecha=?, id_persona=?,hora=?', [fecha, id,horaBuenosAires])
+   
+  }
+
+  res.json(era)
+
+
+})
+
+router.post("/sacarturno", async (req, res) => {
+  let {  id } = req.body
+  try {
+    await pool.query('delete  from  dtc_turnos where id = ?', [id])
+    res.json('quitado')
+  } catch (error) {
+    console.log(error)
+    res.json('Error')
+  }
+
+
+})
 router.post("/ponerpresente", async (req, res) => {
   let { fecha, id, id_tallerista } = req.body
   const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
@@ -734,6 +775,19 @@ router.post("/ponerpresente", async (req, res) => {
   res.json(era)
 
 
+})
+
+
+router.get("/traertodoslosturnosaprobac", async (req, res) => {
+ 
+
+  try {
+    const tunr = await pool.query('select * from dtc_turnos')
+    res.json([tunr])
+  } catch (error) {
+    console.log(error)
+    res.json(['Error'])
+  }
 })
 
 router.get("/nivelar", async (req, res) => {
@@ -792,6 +846,20 @@ router.post("/traerpresentesdeactividad", async (req, res) => {
 
 router.post("/traercumpleanios", async (req, res) => {
   const { traercumpleanios } = req.body
+})
+
+
+
+router.post("/traerparaturnos", async (req, res) => {
+  const { fecha, id } = req.body
+console.log(fecha)
+
+  prod = await pool.query("select * from dtc_turnos join (select id as idc, nombre, apellido,dni from dtc_personas_psicologa ) as sel on dtc_turnos.id_persona=sel.idc where fecha=?  order by apellido", [fecha])
+  usuarios = await pool.query("select * from dtc_personas_psicologa left join (select fecha, id_persona  from dtc_turnos  where fecha=?) as sel on dtc_personas_psicologa.id=sel.id_persona ", [fecha])
+
+  res.json([prod, usuarios,{}])
+
+
 })
 
 
