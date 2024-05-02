@@ -423,7 +423,7 @@ router.post("/asignarcurso", async (req, res) => {
            await pool.query('insert into observaciones set detalle=?, id_ref=?, fecha=? ', [observaciones, es[0]['id'],(new Date(Date.now())).toLocaleDateString()])
  
        } */
-    const mensaje = 'Listo! estado mensaje enviado'
+    const mensaje = 'Listo! estado confirmado'
     console.log(mensaje)
     res.json(mensaje)
   } catch (error) {
