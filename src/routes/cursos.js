@@ -9,7 +9,7 @@ router.get('/preinscriptascall/:id', async (req, res) => {
   
     try {
       if(id==213){
-      inscriptoss = await pool.query('select * from inscripciones left join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni  ')
+        inscriptoss = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as idc, id_turno,id_inscripcion from cursado) as sel2 on inscripciones.id=sel2.id_inscripcion join (select id as idt, id_call as callcenter, descripcion from turnos) as sel3 on sel2.id_turno=sel3.idt where edicion=3  ')
 
       }else{
         inscriptoss = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as idc, id_turno,id_inscripcion from cursado) as sel2 on inscripciones.id=sel2.id_inscripcion join (select id as idt, id_call as callcenter, descripcion from turnos) as sel3 on sel2.id_turno=sel3.idt   where callcenter=? ',[id])
