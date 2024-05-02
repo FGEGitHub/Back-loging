@@ -223,6 +223,8 @@ router.post("/subirfotoperfil", upload.single('imagen'), async (req, res) => {
 })
 
 
+
+
 router.post("/subirlegajo", upload.single('imagen'), async (req, res) => {
 
   const id = req.body.id;
@@ -287,7 +289,21 @@ router.post("/modificarusuario", async (req, res) => {
 
 })
 
+router.post("/clasificarturno", async (req, res) => {
+  let { id,estado} = req.body
 
+  try {
+ 
+
+    await pool.query('update dtc_turnos set estado=? where id=?', [estado, id])
+
+    res.json('Modificado')
+  } catch (error) {
+    console.log(error)
+    res.json('No modificado')
+  }
+
+})
 
 router.post("/traerasistenciasdetaller", async (req, res) => {
   let { id_tallerista, id_usuario } = req.body
@@ -782,11 +798,13 @@ router.get("/traertodoslosturnosaprobac", async (req, res) => {
  
 
   try {
-    const tunr = await pool.query('select * from dtc_turnos')
-    res.json([tunr])
+    const tunr = await pool.query('select * from dtc_turnos join(select id as idp, nombre, apellido, dni from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.idp')
+    const pendientes =await pool.query('select * from dtc_turnos  where estado="pendiente"')
+    console.log(tunr)
+    res.json([tunr,pendientes.length])
   } catch (error) {
     console.log(error)
-    res.json(['Error'])
+    res.json(['Error','error'])
   }
 })
 
