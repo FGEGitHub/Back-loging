@@ -22,8 +22,33 @@ const upload = multer({ storage });
 
 
 
+router.get('/sumar1/:id', async (req, res) => {
+  id = req.params.id
+try {
+  await pool.query(' UPDATE dtc_asistencia SET racion = racion + 1 where id=?', [ id])
+ 
+
+} catch (error) {
+  console.log(error)
+
+}
+
+res.json('')
+})
+
+router.get('/restar1/:id', async (req, res) => {
+  id = req.params.id
+try {
+  await pool.query(' UPDATE dtc_asistencia SET racion = racion - 1 where id=?', [ id])
+ 
 
 
+} catch (error) {
+  console.log(error)
+}
+res.json('')
+
+})
 router.get('/clasesdetaller/:id', async (req, res) => {
   id = req.params.id
   console.log(id)
