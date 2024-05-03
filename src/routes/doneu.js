@@ -20,7 +20,18 @@ router.get("/traerclientes", async (req, res) => {
 
 })
 
+router.post("/asignarventa", async (req, res) => {
+    const { id, id_lote} = req.body
+    try {
+        console.log( id, id_lote)
+        await pool.query('insert into ventas set id_cliente=?, id_lote=?', [id, id_lote])
 
+        res.json('Realizado')
+    } catch (error) {
+        console.log(error)
+        res.json('No Realizado')
+    }
+})
 
 router.post("/determinarmapa1bosques", async (req, res) => {
     const { mapa1, manzana, lote } = req.body
