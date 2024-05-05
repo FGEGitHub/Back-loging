@@ -6,8 +6,14 @@ const pool = require('../database2')
 
 
 router.get("/traerlotes", async (req, res) => {
-    const lot = await pool.query('select * from lotes')
-    console.log(lot.length)
+
+    try {
+        const lot = await pool.query('select * from lotes left join (select id_lote,id_cliente from ventas) as sel on lotes.id=sel.id_lote  join (select id as idp, nombre, apellido from clientes) as sel2 on sel.id_cliente=sel2.idp')
+        console.log(lot.length)
+    } catch (error) {
+        console.log(error)
+    }
+   
     res.json(lot)
 
 })
