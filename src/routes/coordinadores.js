@@ -18,7 +18,7 @@ router.get('/clases/:id', async (req, res) => {
     todos = []
     for (ii in turnos) {
     
-      tot = await pool.query('select * from cursado where id_turno= ? ',[turnos[ii]['id']])
+      tot = await pool.query('select * from cursado  join (select id as idi, estado from inscripciones) as sel on cursado.id_inscripcion=sel.idi where id_turno= ? and estado="Asignada a curso"',[turnos[ii]['id']])
      nuev = {
       id: turnos[ii]['id'],
       id_curso: turnos[ii]['id_curso'],
