@@ -941,13 +941,13 @@ console.log(id)
   
   
   }
-
-
+  raciones = await pool.query("select sum(racion) from dtc_asistencia  where fecha=? and id_tallerista=238", [fecha])
+console.log(raciones)
   prod1 = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? and sel.kid='kid1' order by apellido", [fecha, 238])
   prod2 = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? and sel.kid='kid2'order by apellido", [fecha, 238])
   prod3 = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? and sel.kid='kid3'order by apellido", [fecha, 238])
-console.log("usuarios",usuarios.length)
-  res.json([prod, usuarios,{kid1:prod1.length,kid2:prod2.length,kid3:prod3.length}])
+
+  res.json([prod, usuarios,{kid1:prod1.length,kid2:prod2.length,kid3:prod3.length},raciones[0]['sum(racion)']])
 
 
 })
