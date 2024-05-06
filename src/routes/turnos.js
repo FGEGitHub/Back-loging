@@ -203,7 +203,7 @@ router.get('/clasesdelturno/:id', async (req, res) => {
   const clases = await pool.query('select * from clases where id_turno =?', [id])
   etc = []
   for (ii in clases) {
-    const alumnos = await pool.query('select *, id as idcursado from cursado join   (select nombre,apellido, id as idpersona from personas) as  personaa on cursado.id_persona=personaa.idpersona  where cursado.id_turno = ? ', [clases[ii]['id_turno']])
+    const alumnos = await pool.query('select *, id as idcursado from cursado join   (select nombre,apellido, id as idpersona from personas) as  personaa on cursado.id_persona=personaa.idpersona join (select id as idi, estado from inscripciones) as sel2 on cursado.id_inscripcion=sel2.idi  where cursado.id_turno = ? and estado="Asignada a curso"', [clases[ii]['id_turno']])
     console.log(alumnos.length)
     total = alumnos.length
     presentes = 0
