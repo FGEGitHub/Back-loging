@@ -738,6 +738,7 @@ router.post("/agendarturno", async (req, res) => {
   const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
   console.log(fecha, id, id_tallerista)
   console.log("La hora actual en Buenos Aires es:", horaBuenosAires);
+try {
 
   const existe = await pool.query('select * from dtc_turnos where id_persona=? and fecha =? ', [id, fecha])
   let era
@@ -758,7 +759,11 @@ router.post("/agendarturno", async (req, res) => {
   }
 
   res.json(era)
-
+  
+} catch (error) {
+  console.log(error)
+  res.json("error")
+}
 
 })
 

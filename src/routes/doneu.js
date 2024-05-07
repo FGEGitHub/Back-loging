@@ -8,7 +8,7 @@ const pool = require('../database2')
 router.get("/traerlotes", async (req, res) => {
 
     try {
-        const lot = await pool.query('select * from lotes left join (select id_lote,id_cliente from ventas) as sel on lotes.id=sel.id_lote  left join (select id as idp, nombre from clientes) as sel2 on sel.id_cliente=sel2.idp')
+        const lot = await pool.query('select * from lotes left join (select id as idventa, id_lote,id_cliente from ventas) as sel on lotes.id=sel.id_lote  left join (select id as idp, nombre from clientes) as sel2 on sel.id_cliente=sel2.idp')
         console.log(lot.length)
         res.json(lot)
     } catch (error) {
@@ -20,7 +20,18 @@ router.get("/traerlotes", async (req, res) => {
 
 })
 
-
+router.get("/traerventa/:id", async (req, res) => {
+ 
+id= req.params.id
+    try {
+      const venta = await pool.query('select * from ventas where id=?',[id])
+   
+      res.json([venta])
+    } catch (error) {
+      console.log(error)
+      res.json(['Error','error'])
+    }
+  })
 router.get("/traerclientes", async (req, res) => {
     const lot = await pool.query('select * from clientes')
     console.log(lot.length)
