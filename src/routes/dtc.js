@@ -673,6 +673,31 @@ res.json([cumple,estemes])
 })
 
 
+
+router.post("/traerracionesmes", async (req, res) => {
+  let { fecha } = req.body
+  ///presentes mensuales 
+  fecha = fecha
+
+  // Divide la fecha usando el guión ('-') como separador
+  let [dia, mes, año] = fecha.split('-');
+cantidadmes=0
+enviar=[]
+for (let inde = 1; inde <32; inde++) {
+  console.log(inde)
+  estemes = await pool.query('select sum(racion) from dtc_asistencia where fecha like ?',[inde+"-"+mes+"-2024"+"%"])
+
+  if(estemes[0]['sum(racion)'] != null){
+
+   await enviar.push({fecha:inde+"-"+mes+"-"+"2024",cantidad:estemes[0]['sum(racion)']})
+    cantidadmes+=estemes[0]['sum(racion)']
+  }
+   
+  }
+console.log(enviar)
+
+res.json([enviar,{kid1:1,kid2:2,kid3:3,cantidadmes:cantidadmes}])
+})
 router.post("/modificarkid", async (req, res) => {
   const { id, kid } = req.body
 
@@ -858,6 +883,9 @@ router.get("/nivelar", async (req, res) => {
 
 
 
+
+
+
 router.post("/traercumples", async (req, res) => {
   const { fecha, id } = req.body
   console.log(id)
@@ -891,10 +919,6 @@ router.post("/traerpresentesdeactividad", async (req, res) => {
 
 
 
-
-router.post("/traercumpleanios", async (req, res) => {
-  const { traercumpleanios } = req.body
-})
 
 
 
