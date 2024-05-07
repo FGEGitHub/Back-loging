@@ -36,10 +36,39 @@ try {
 res.json('')
 })
 
+router.get('/sumar1p/:id', async (req, res) => {
+  id = req.params.id
+try {
+  await pool.query(' UPDATE dtc_asistencia SET premerienda = premerienda + 1 where id=?', [ id])
+ 
+
+} catch (error) {
+  console.log(error)
+
+}
+
+res.json('')
+})
+
+
+
 router.get('/restar1/:id', async (req, res) => {
   id = req.params.id
 try {
   await pool.query(' UPDATE dtc_asistencia SET racion = racion - 1 where id=?', [ id])
+ 
+
+
+} catch (error) {
+  console.log(error)
+}
+res.json('')
+
+})
+router.get('/restar1p/:id', async (req, res) => {
+  id = req.params.id
+try {
+  await pool.query(' UPDATE dtc_asistencia SET premerienda = premerienda - 1 where id=?', [ id])
  
 
 
