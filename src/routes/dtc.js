@@ -673,31 +673,31 @@ res.json([cumple,estemes])
 })
 
 
-
 router.post("/traerracionesmes", async (req, res) => {
-  let { fecha } = req.body
-  ///presentes mensuales 
-  fecha = fecha
+  let { fecha } = req.body;
+  fecha = fecha;
 
-  // Divide la fecha usando el guión ('-') como separador
   let [dia, mes, año] = fecha.split('-');
-cantidadmes=0
-enviar=[]
-for (let inde = 1; inde <32; inde++) {
-  console.log(inde)
-  estemes = await pool.query('select sum(racion) from dtc_asistencia where fecha like ?',[inde+"-"+mes+"-2024"+"%"])
+  cantidadmes = 0;
+  enviar = [];
 
-  if(estemes[0]['sum(racion)'] != null){
+  for (let inde = 1; inde < 32; inde++) {
+      console.log(inde);
+      try {
+          let estemes = await pool.query('select sum(racion) from dtc_asistencia where fecha like ?', [inde + "-" + mes + "-2024" + "%"]);
 
-   await enviar.push({fecha:inde+"-"+mes+"-"+"2024",cantidad:estemes[0]['sum(racion)']})
-    cantidadmes+=estemes[0]['sum(racion)']
+          if (estemes[0]['sum(racion)'] != null) {
+              enviar.push({ fecha: inde + "-" + mes + "-" + "2024", cantidad: estemes[0]['sum(racion)'] });
+              cantidadmes += estemes[0]['sum(racion)'];
+          }
+      } catch (error) {
+          console.error("Error al ejecutar la consulta:", error);
+      }
   }
-   
-  }
-console.log(enviar)
+  console.log(enviar);
+  res.json([enviar, { kid1: 1, kid2: 2, kid3: 3, cantidadmes: cantidadmes }]);
+});
 
-res.json([enviar,{kid1:1,kid2:2,kid3:3,cantidadmes:cantidadmes}])
-})
 router.post("/modificarkid", async (req, res) => {
   const { id, kid } = req.body
 
