@@ -851,11 +851,8 @@ router.post("/ponerpresente", async (req, res) => {
   const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
 
   console.log("La hora actual en Buenos Aires es:", horaBuenosAires);
-  const prueba = await pool.query('select * from usuarios where id=?', [id_tallerista])
-  console.log(prueba)
-  if (prueba[0].nivel == "20") {
-    id_tallerista = 238
-  }
+
+  id_tallerista = 238
 
   const existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =? and id_tallerista=?', [id, fecha, id_tallerista])
   let era
@@ -863,26 +860,11 @@ router.post("/ponerpresente", async (req, res) => {
     await pool.query('delete  from  dtc_asistencia where id = ?', [existe[0]['id']])
     era = "puesto Ausente"
 
-    const existee = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =? and id_tallerista=238', [id, fecha])
-   
-    if (existee.length > 0) {
-      await pool.query('delete  from  dtc_asistencia where id = ?', [existee[0]['id']])
-    }
-    
-
-
-
 
   } else {
     await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?,id_tallerista=?,hora=?', [fecha, id, id_tallerista,horaBuenosAires])
     era = "puesto Presente"
-    yaesta =await pool.query('select * from dtc_asistencia where fecha=? and id_tallerista=238 and id_usuario=? ', [fecha,id])
-    if(yaesta.length>0){
-     console.log('esta')
-    }else{
-     await pool.query('insert into dtc_asistencia set  fecha=?,id_tallerista=238, id_usuario=?', [fecha,id])
- 
-    }
+   
   }
 
   res.json(era)
@@ -952,7 +934,7 @@ router.post("/traerpresentesdeactividad", async (req, res) => {
   prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where id_actividad=? order by apellido", [id])
   usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where id_actividad=?) as sel on dtc_chicos.id=sel.id_usuario ", [id])
 
-  console.log(usuarios)
+  
 
   res.json([prod, usuarios])
 
@@ -985,24 +967,24 @@ console.log(id)
   let prod=[]
   let usuarios=[]
   if ((usua[0].nivel == 20) || (usua[0].nivel == 22)) {
-    prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? order by apellido", [fecha, 238])
-    usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=?and id_tallerista=?) as sel on dtc_chicos.id=sel.id_usuario ", [fecha, 238])
+    prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=?  order by apellido", [fecha])
+    usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=?) as sel on dtc_chicos.id=sel.id_usuario ", [fecha])
   } else {
 
     if(id==246){
-      prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? and kid='kid1' order by apellido", [fecha, id])
-      usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=? and id_tallerista=?) as sel on dtc_chicos.id=sel.id_usuario where kid='kid1' ", [fecha, id])
+      prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=?  and kid='kid1' order by apellido", [fecha])
+      usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=? ) as sel on dtc_chicos.id=sel.id_usuario where kid='kid1' ", [fecha])
     
     }else{
       if(id==244){
-        prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? and kid='kid2' order by apellido", [fecha, id])
-        usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=? and id_tallerista=?) as sel on dtc_chicos.id=sel.id_usuario where kid='kid2' ", [fecha, id])
+        prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=?  and kid='kid2' order by apellido", [fecha])
+        usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=? ) as sel on dtc_chicos.id=sel.id_usuario where kid='kid2' ", [fecha])
       
       }else{
       
         if(id==245){
-          prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? and kid='kid3' order by apellido", [fecha, id])
-          usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=? and id_tallerista=?) as sel on dtc_chicos.id=sel.id_usuario where kid='kid3' ", [fecha, id])
+          prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and kid='kid3' order by apellido", [fecha])
+          usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=? ) as sel on dtc_chicos.id=sel.id_usuario where kid='kid3' ", [fecha])
         
       
       }
@@ -1025,6 +1007,30 @@ ext = await pool.query('select * from dtc_chicos where dato_escolar="Horario ext
 
 })
 
+
+
+router.post("/establecerretiro", async (req, res) => {
+  const { id, retiro} = req.body
+try {
+  await pool.query('update dtc_asistencia set retiro=? where id=?', [retiro, id])
+res.json("Retiro establecido")
+} catch (error) {
+  console.log(error)
+  res.json('error')
+}
+
+})
+router.post("/establecerregreso", async (req, res) => {
+  const { id, retorno} = req.body
+try {
+  await pool.query('update dtc_asistencia set retorno=? where id=?', [retorno, id])
+res.json("Regreso establecido")
+} catch (error) {
+  console.log(error)
+  res.json('error')
+}
+
+})
 
 router.post("/borrarlegajo", async (req, res) => {
   const { id } = req.body
