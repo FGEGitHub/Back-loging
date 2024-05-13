@@ -402,6 +402,39 @@ router.post("/rechazarinscrip", async (req, res) => {
 
 
 
+router.post("/asignarcursonuevo", async (req, res) => {
+  let { id, id_turno} = req.body
+  try {
+    console.log(id, id_turno)
+await pool.query('update inscripciones set estado="Asignada a curso"   where id=?', [id])
+const personasa= await pool.query('select * from inscripciones where id=?',[id])
+console.log(personasa)
+
+       await pool.query('insert into cursado set id_inscripcion=?, id_turno=?, id_persona=?', [id,id_turno,personasa[0]['id_persona']])
+          
+   /*   
+           await pool.query('update inscripciones set estado="Asignada a curso"   where id=?', [ id_inscripcion])
+ 
+           await pool.query('update turnos set disponibles=?  where id=?', [cup, id_turno])
+ 
+            const es = await pool.query('select * from personas where dni=?', [dni])
+ 
+ 
+       if (observaciones != undefined){
+           await pool.query('insert into observaciones set detalle=?, id_ref=?, fecha=? ', [observaciones, es[0]['id'],(new Date(Date.now())).toLocaleDateString()])
+ 
+       } */
+    const mensaje = 'Listo! estado confirmado'
+    console.log(mensaje)
+    res.json(mensaje)
+  } catch (error) {
+    console.log(error)
+    res.json('error')
+  }
+
+
+})
+
 
 router.post("/asignarcurso", async (req, res) => {
   let { id } = req.body
