@@ -812,6 +812,24 @@ router.post("/ponerpresenteactividad", async (req, res) => {
 
 })
 
+
+
+
+router.post("/agregarturno", async (req, res) => {
+  const { fecha, horario} = req.body
+  console.log(fecha, horario )
+  try {
+    await pool.query('insert into dtc_turnos set fecha=?, detalle=?, estado="Disponible"', [fecha, horario])
+res.json('Realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('No Realizado')
+  }
+
+})
+
+
+
 router.post("/agendarturno", async (req, res) => {
   let { fecha, id, id_tallerista } = req.body
   const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
@@ -885,6 +903,18 @@ router.post("/ponerpresente", async (req, res) => {
 })
 
 
+router.post("/traertodoslosturnosfecha", async (req, res) => {
+  const { fecha, } = req.body
+  try {
+    const tunr = await pool.query('select * from dtc_turnos left join(select id as idp, nombre, apellido, dni from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.idp where fecha=?',[fecha])
+    const pendientes =await pool.query('select * from dtc_turnos  where estado="pendiente"')
+    console.log(tunr)
+    res.json([tunr,pendientes.length])
+  } catch (error) {
+    console.log(error)
+    res.json(['Error','error'])
+  }
+})
 router.get("/traertodoslosturnosaprobac", async (req, res) => {
  
 
