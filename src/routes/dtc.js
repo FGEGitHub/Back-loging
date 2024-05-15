@@ -831,36 +831,11 @@ res.json('Realizado')
 
 
 router.post("/agendarturno", async (req, res) => {
-  let { fecha, id, id_tallerista } = req.body
+  let {  id, id_persona } = req.body
+
   const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
-  console.log(fecha, id, id_tallerista)
+  console.log(fecha, id, id_persona)
   console.log("La hora actual en Buenos Aires es:", horaBuenosAires);
-try {
-
-  const existe = await pool.query('select * from dtc_turnos where id_persona=? and fecha =? ', [id, fecha])
-  let era
-  if (existe.length > 0) {
-   // await pool.query('delete  from  dtc_asistencia where id = ?', [existe[0]['id']])
-    era = "Turno quitado"
-
-    const existee = await pool.query('select * from dtc_turnos where id_usuario=? and fecha =? and id_tallerista=238', [id, fecha])
-   
-    if (existee.length > 0) {
-     await pool.query('delete  from  dtc_turnos where id = ?', [existee[0]['id']])
-    }
-    
-
-  } else {
- await pool.query('insert into dtc_turnos set fecha=?, id_persona=?,hora=?', [fecha, id,horaBuenosAires])
-   
-  }
-
-  res.json(era)
-  
-} catch (error) {
-  console.log(error)
-  res.json("error")
-}
 
 })
 
@@ -908,8 +883,10 @@ router.post("/traertodoslosturnosfecha", async (req, res) => {
   try {
     const tunr = await pool.query('select * from dtc_turnos left join(select id as idp, nombre, apellido, dni from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.idp where fecha=?',[fecha])
     const pendientes =await pool.query('select * from dtc_turnos  where estado="pendiente"')
+    usuarios = await pool.query("select * from dtc_personas_psicologa left join (select fecha, id_persona  from dtc_turnos  where fecha=?) as sel on dtc_personas_psicologa.id=sel.id_persona ", [fecha])
+
     console.log(tunr)
-    res.json([tunr,pendientes.length])
+    res.json([tunr,usuarios])
   } catch (error) {
     console.log(error)
     res.json(['Error','error'])
