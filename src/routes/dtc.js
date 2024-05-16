@@ -985,7 +985,7 @@ console.log(id)
   console.log('uaua',usua)
   let prod=[]
   let usuarios=[]
-  if ((usua[0].nivel == 20) || (usua[0].nivel == 22)) {
+  if ((usua[0].nivel == 20) || (usua[0].nivel == 22)|| (usua[0].id == 263)) {
     prod = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=?  order by apellido", [fecha])
     usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=?) as sel on dtc_chicos.id=sel.id_usuario ", [fecha])
   } else {
