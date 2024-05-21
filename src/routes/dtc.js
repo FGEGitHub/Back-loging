@@ -344,18 +344,18 @@ router.post("/modificarusuario", async (req, res) => {
 
 })
 
-router.post("/clasificarturno", async (req, res) => {
-  let { id,estado} = req.body
+router.post("/borrarturno", async (req, res) => {
+  let { id} = req.body
 
   try {
  
 
-    await pool.query('update dtc_turnos set estado=? where id=?', [estado, id])
+    await pool.query('delete from dtc_turnos  where id=?', [id])
 
-    res.json('Modificado')
+    res.json('Borrado')
   } catch (error) {
     console.log(error)
-    res.json('No modificado')
+    res.json('No Borrado')
   }
 
 })
@@ -816,10 +816,10 @@ router.post("/ponerpresenteactividad", async (req, res) => {
 
 
 router.post("/agregarturno", async (req, res) => {
-  const { fecha, horario} = req.body
-  console.log(fecha, horario )
+  const { fecha, horario,id_psic} = req.body
+  console.log(fecha, horario,id_psic )
   try {
-    await pool.query('insert into dtc_turnos set fecha=?, detalle=?, estado="Disponible"', [fecha, horario])
+    await pool.query('insert into dtc_turnos set fecha=?, detalle=?,id_psico=?, estado="Disponible"', [fecha, horario,id_psic])
 res.json('Realizado')
   } catch (error) {
     console.log(error)
@@ -833,9 +833,16 @@ res.json('Realizado')
 router.post("/agendarturno", async (req, res) => {
   let {  id, id_persona } = req.body
 
-  const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
-  console.log(fecha, id, id_persona)
-  console.log("La hora actual en Buenos Aires es:", horaBuenosAires);
+  try {
+    const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
+    console.log( id, id_persona)
+    await pool.query('update dtc_turnos set id_persona=?,estado="Agendado",hora=? where id=?', [id_persona,horaBuenosAires+'-'+(new Date(Date.now())).toLocaleDateString(), id])
+res.json('agendado')  
+  } catch (error) {
+   console.log(error)
+   res.json('no agendado')   
+  }
+
 
 })
 
@@ -881,7 +888,7 @@ router.post("/ponerpresente", async (req, res) => {
 router.post("/traertodoslosturnosfecha", async (req, res) => {
   const { fecha, } = req.body
   try {
-    const tunr = await pool.query('select * from dtc_turnos left join(select id as idp, nombre, apellido, dni from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.idp where fecha=?',[fecha])
+    const tunr = await pool.query('select * from dtc_turnos left join(select id as idp, nombre, apellido, dni from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where fecha=?',[fecha])
     const pendientes =await pool.query('select * from dtc_turnos  where estado="pendiente"')
     usuarios = await pool.query("select * from dtc_personas_psicologa left join (select fecha, id_persona  from dtc_turnos  where fecha=?) as sel on dtc_personas_psicologa.id=sel.id_persona ", [fecha])
 
