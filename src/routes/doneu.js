@@ -20,6 +20,24 @@ router.get("/traerlotes", async (req, res) => {
 
 })
 
+
+router.get("/traerloteslogin", async (req, res) => {
+
+    try {
+        const lot = await pool.query('select * from lotes left join (select id as idventa, id_lote,id_cliente from ventas) as sel on lotes.id=sel.id_lote  left join (select id as idp, nombre from clientes) as sel2 on sel.id_cliente=sel2.idp')
+        const sum = await pool.query('select sum(clicks) from lotes')
+
+     
+        res.json([lot,sum[0]['sum(clicks)']])
+    } catch (error) {
+        console.log("error",error)
+        res.json(["lot"])
+    }
+   
+  
+
+})
+
 router.get("/traerventa/:id", async (req, res) => {
  
 id= req.params.id
@@ -51,6 +69,27 @@ router.post("/asignarventa", async (req, res) => {
         res.json('No Realizado')
     }
 })
+
+router.post("/clickgenerallote", async (req, res) => {
+    const { id, id_usuario} = req.body
+    try {
+        console.log(id)
+        console.log(id_usuario)
+        const lotes= await pool.query('select * from lotes where mapa1 =?',[id])
+        console.log(lotes)
+        if(lotes.length>0){
+            await pool.query('update lotes set clicks = clicks + 1 where mapa1=?', [id])
+        }
+       
+console.log(lotes)
+        res.json(lotes)
+    } catch (error) {
+        console.log(error)
+        res.json('No Realizado')
+    }
+})
+
+
 
 router.post("/determinarmapa1bosques", async (req, res) => {
     const { mapa1, manzana, lote } = req.body
