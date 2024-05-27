@@ -719,7 +719,7 @@ router.post('/asignarencargado', async (req, res) => {
 })
 
 router.get('/incriptas2da/', async (req, res) => {
-
+/* 
   inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria,id as idp from personas) as sel on inscripciones.dni_persona=sel.dni join (select id as id1, descripcion as nombrecurso1 from turnos) as sel2 on inscripciones.uno=sel2.id1 join (select id as id2, descripcion as nombrecurso2 from turnos) as sel3 on inscripciones.dos=sel3.id2 left join (select id_inscripcion , id_turno  from cursado) as sel8 on inscripciones.id=sel8.id_inscripcion left join (select id as idt, descripcion, id_curso from turnos) as sel9 on sel8.id_turno=sel9.idt left join(select id as idc, nombre as nombrecurso from cursos) as sel10 on sel9.id_curso=sel10.idc where edicion=3')
 
 
@@ -835,7 +835,12 @@ router.get('/incriptas2da/', async (req, res) => {
     cantidaddis: parseInt(cantidaddis[0]['sum(cupo)']) - cant_conf.length
   }
 
-  res.json([inscriptos, deuda_exigible, datos33])
+  res.json([inscriptos, deuda_exigible, datos33]) */
+  inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria,id as idp from personas) as sel on inscripciones.dni_persona=sel.dni  where edicion=4')
+  
+  deuda_exigible = []
+  datos33={}
+    res.json([inscriptos, deuda_exigible, datos33])
 
 })
 
