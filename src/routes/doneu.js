@@ -69,7 +69,20 @@ router.post("/asignarventa", async (req, res) => {
         res.json('No Realizado')
     }
 })
+router.post("/modificarcliente", async (req, res) => {
+    const { nombre, dni, sexo, estado_civil, provincia, fecha_nac,telefono, correo,id} = req.body
 
+console.log( id)
+try {
+    await pool.query('update clientes set nombre=?, dni=?, sexo=?, estado_civil=?, provincia=?, fecha_nac=?,telefono=?, correo=? where id=?', [nombre, dni, sexo, estado_civil, provincia, fecha_nac,telefono, correo,id])
+
+res.json('realizado')
+} catch (error) {
+    console.log(error)
+    res.json('No realizado')
+}
+
+})
 router.post("/nuevocliente", async (req, res) => {
     let { nombre, dni, sexo, estado_civil, provincia, fecha_nac,telefono, correo} = req.body
     try {
