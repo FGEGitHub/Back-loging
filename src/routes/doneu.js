@@ -9,7 +9,7 @@ router.get("/traerlotes", async (req, res) => {
 
     try {
         const lot = await pool.query('select * from lotes left join (select id as idventa, id_lote,id_cliente from ventas) as sel on lotes.id=sel.id_lote  left join (select id as idp, nombre from clientes) as sel2 on sel.id_cliente=sel2.idp')
-        console.log(lot.length)
+        console.log(lot)
         res.json(lot)
     } catch (error) {
         console.log("error",error)
@@ -62,6 +62,40 @@ router.post("/asignarventa", async (req, res) => {
     try {
         console.log( id, id_lote)
         await pool.query('insert into ventas set id_cliente=?, id_lote=?', [id, id_lote])
+
+        res.json('Realizado')
+    } catch (error) {
+        console.log(error)
+        res.json('No Realizado')
+    }
+})
+
+router.post("/nuevocliente", async (req, res) => {
+    let { nombre, dni, sexo, estado_civil, provincia, fecha_nac,telefono, correo} = req.body
+    try {
+        if(dni==undefined){
+            dni="Sin determinar"  
+        }
+        if(sexo==undefined){
+            sexo="Sin determinar"  
+        }
+        if(estado_civil==undefined){
+            estado_civil="Sin determinar"  
+        }
+        if(provincia==undefined){
+            provincia="Sin determinar"  
+        }
+        if(fecha_nac==undefined){
+            fecha_nac="Sin determinar"  
+        }
+        if(telefono==undefined){
+            telefono="Sin determinar"  
+        }
+        if(correo==undefined){
+            correo="Sin determinar"  
+        }
+       // console.log( nombre, dni, sexo, estado_civil, provincia, fecha_nac,telefono, correo)
+    await pool.query('insert into clientes set  nombre=?, dni=?, sexo=?, estado_civil=?, provincia=?, fecha_nac=?,telefono=?, correo=?', [ nombre, dni, sexo, estado_civil, provincia, fecha_nac,telefono, correo])
 
         res.json('Realizado')
     } catch (error) {
