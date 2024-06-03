@@ -318,7 +318,7 @@ router.get('/traerturnosparainscri/', async (req, res) => {
 
 router.get('/traerinscripcionesenc/:id', async (req, res) => {
 
-  const tu = await pool.query('select * from inscripciones join (select id as idp, nombre, apellido,categoria from personas) as sel on  inscripciones.id_persona=sel.idp join (select id as idt, descripcion as elec1 from turnos) as sel2 on inscripciones.uno= sel2.idt join (select id as idtu, descripcion as elec2 from turnos) as sel3 on inscripciones.dos= sel3.idtu where edicion=3 and (estado="pendiente" or estado="Rechazada") order by elec2')
+  const tu = await pool.query('select * from inscripciones join (select id as idp, nombre, apellido,categoria, participante_feria from personas) as sel on  inscripciones.id_persona=sel.idp  where edicion=4 and (estado="Inscripta" or estado="Rechazada") order by modalidad')
 
 
   res.json(tu)
@@ -333,7 +333,7 @@ router.post("/asignarinscripciones", async (req, res) => {
 
     console.log(inscrip[ins])
 
-    await pool.query('update inscripciones set estado="Preasignada" where  id = ?', [inscrip[ins]])
+    await pool.query('update inscripciones set estado="Asignada a curso" where  id = ?', [inscrip[ins]])
     inscri = await pool.query('select * from inscripciones join (select id as idp, categoria from personas) as sel on inscripciones.id_persona=sel.idp where id=?', inscrip[ins])
     await pool.query('insert cursado  set id_turno=?, id_persona=?,categoria=?, id_inscripcion=?', [id, inscri[0]['id_persona'], inscri[0]['categoria'], inscrip[ins]])
 
