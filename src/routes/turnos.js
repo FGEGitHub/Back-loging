@@ -406,11 +406,11 @@ router.post("/asignarcursonuevo", async (req, res) => {
   let { id, id_turno} = req.body
   try {
     console.log(id, id_turno)
-await pool.query('update inscripciones set estado="Asignada a curso"   where id=?', [id])
+await pool.query('update inscripciones set estado="Confirmada"   where id=?', [id])
 const personasa= await pool.query('select * from inscripciones where id=?',[id])
 console.log(personasa)
 
-       await pool.query('insert into cursado set id_inscripcion=?, id_turno=?, id_persona=?', [id,id_turno,personasa[0]['id_persona']])
+    //   await pool.query('insert into cursado set id_inscripcion=?, id_turno=?, id_persona=?', [id,id_turno,personasa[0]['id_persona']])
           
    /*   
            await pool.query('update inscripciones set estado="Asignada a curso"   where id=?', [ id_inscripcion])
