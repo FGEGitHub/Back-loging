@@ -563,9 +563,10 @@ router.post("/nuevaactividadchico", async (req, res) => {
 
 router.get('/traerpresentesdeclase/:id', async (req, res) => {
   const id = req.params.id
-    const existe = await pool.query('select * from dtc_clases_taller where id=?',[id])
-    usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=?) as sel on dtc_chicos.id=sel.id_usuario ", [fecha])
-
+    const existe = await pool.query('select * from dtc_asistencia_clase join (select id as idc,nombre from dtc_chicos) as sel on dtc_asistencia_clase.id_usuario=sel.idc  where id_clase=?',[id])//presentes
+   console.log(existe)
+    usuarios = await pool.query("select * from dtc_chicos left join (select id as ida  from dtc_asistencia_clase where id=? ) as sel on dtc_chicos.id=sel.ida ", [id])
+//todos
     res.json([existe,usuarios])
   
   
@@ -962,7 +963,45 @@ router.post("/ponerpresente", async (req, res) => {
 
 })
 
+router.post("/ponerpresenteclase", async (req, res) => {
+  let { id_clase, id_usuario } = req.body
+  const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
 
+  console.log("La hora actual en Buenos Aires es:", horaBuenosAires);
+
+
+
+  const existe = await pool.query('select * from dtc_asistencia_clase where id_clase=? and id_usuario =? ', [id_clase, id_usuario])
+  let era
+  if (existe.length > 0) {
+    await pool.query('delete  from  dtc_asistencia_clase where id = ?', [existe[0]['id']])
+    era = "puesto Ausente"
+
+
+  } else {
+    await pool.query('insert into dtc_asistencia_clase set id_clase=?, id_usuario=?,fecha=?', [id_clase, id_usuario,horaBuenosAires])
+    era = "puesto Presente"
+   
+  }
+
+  res.json(era)
+
+
+})
+
+
+router.post("/ponerausenteclase", async (req, res) => {
+  const { id} = req.body
+  try {
+    await pool.query('delete  from  dtc_asistencia_clase where id = ?', [id])
+    res.json('Puesto ausente')
+
+
+  } catch (error) {
+    console.log(error)
+    res.json('Error')
+  }
+})
 router.post("/traertodoslosturnosfecha", async (req, res) => {
   const { fecha, } = req.body
   try {
