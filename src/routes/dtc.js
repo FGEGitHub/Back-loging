@@ -534,6 +534,15 @@ router.post("/nuevaactividadchico", async (req, res) => {
 
 
 
+router.get('/traeretapacocina/:id', async (req, res) => {
+const id = req.params.id
+  const existe = await pool.query('select * from dtc_etapa where id_usuario=?',[id])
+
+  res.json([existe])
+
+
+})
+
 
 
 router.get('/traertalleres/', async (req, res) => {
@@ -696,6 +705,33 @@ console.log("cumple",cumple)
   }
   console.log(estad)
   res.json([estad])
+})
+
+
+router.post("/nuevaetapa", async (req, res) => {
+  let { fecha, descripcion, expediente,id_usuario,titulo} = req.body
+  console.log(fecha, descripcion, expediente,id_usuario,titulo)
+  if (titulo == undefined){
+    titulo="Sin completar"
+  }
+
+if (descripcion == undefined){
+  descripcion="Sin completar"
+}
+
+if (expediente == undefined){
+  expediente="Sin completar"
+}
+
+try {
+ await pool.query('insert into dtc_etapa set  fecha=?,descripcion=?,expediente=?, id_usuario=?,titulo=?', [fecha, descripcion, expediente,id_usuario,titulo])
+res.json("Realizado")
+} catch (error) {
+  console.log(error)
+  res.json("No realizado")
+}
+
+
 })
 
 router.post("/traercumples", async (req, res) => {
