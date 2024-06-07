@@ -11,7 +11,7 @@ const { isLoggedInn } = require('../lib/auth')
 router.get('/clases/:id', async (req, res) => {
     const id = req.params.id
   
-    turnos = await pool.query('select *, id as turnoid  from turnos join (select  id as idcurso, nombre from cursos  )as cursoss on turnos.id_curso=cursoss.idcurso where etapa=3 and turnos.id_coordinador =? ', [id])
+    turnos = await pool.query('select *, id as turnoid  from turnos join (select  id as idcurso, nombre from cursos  )as cursoss on turnos.id_curso=cursoss.idcurso where (etapa=3 or etapa=4) and turnos.id_coordinador =? ', [id])
   
   
   
