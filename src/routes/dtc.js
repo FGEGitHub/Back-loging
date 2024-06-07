@@ -561,6 +561,16 @@ router.post("/nuevaactividadchico", async (req, res) => {
 
 
 
+router.get('/traerpresentesdeclase/:id', async (req, res) => {
+  const id = req.params.id
+    const existe = await pool.query('select * from dtc_clases_taller where id=?',[id])
+    usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=?) as sel on dtc_chicos.id=sel.id_usuario ", [fecha])
+
+    res.json([existe,usuarios])
+  
+  
+  })
+  
 
 router.get('/traeretapacocina/:id', async (req, res) => {
 const id = req.params.id

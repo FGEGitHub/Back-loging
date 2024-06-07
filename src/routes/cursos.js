@@ -455,7 +455,7 @@ let enviar=[]
 for (i in tur ){
 
   cur = await pool.query('select * from cursado where id_turno=?',[tur[i]['id']])
-  conf = await pool.query('select * from cursado  join (select id as idi, estado from inscripciones) as sel on cursado.id_inscripcion=sel.idi where id_turno=? and estado="Asignada a curso"',[tur[i]['id']])
+  conf = await pool.query('select * from cursado  join (select id as idi, estado from inscripciones) as sel on cursado.id_inscripcion=sel.idi where id_turno=? and estado="Confirmada"',[tur[i]['id']])
   nuevo={
     id:tur[i]['id'],
     nombrecurso:tur[i]['nombrecurso'],
