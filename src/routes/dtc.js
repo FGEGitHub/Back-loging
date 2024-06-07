@@ -22,6 +22,21 @@ const upload = multer({ storage });
 
 
 
+router.get('/traerclasestaller/:id', async (req, res) => {
+  id = req.params.id
+try {
+ const clas= await pool.query(' select * from  dtc_clases_taller  where id_tallerista=?', [ id])
+ console.log(clas)
+res.json(clas)
+} catch (error) {
+  console.log(error)
+  res.json('Error')
+}
+
+
+})
+
+
 router.get('/sumar1/:id', async (req, res) => {
   id = req.params.id
 try {
@@ -407,6 +422,19 @@ router.post("/nuevochique", async (req, res) => {
 
 
 
+router.post("/nuevaclasetaller", async (req, res) => {
+  let { id_tallerista,fecha,titulo} = req.body
+console.log( id_tallerista,fecha,titulo)
+try {
+  await pool.query('insert dtc_clases_taller  set id_tallerista=?, fecha=?,titulo=?', [id_tallerista,fecha,titulo])
+
+  res.json("realizado")
+} catch (error) {
+  console.log(error)
+  res.json('no realizado')
+}
+
+})
 router.post("/nuevapersonapsiq", async (req, res) => {
   let { nombre, apellido, fecha_nacimiento, observaciones,  primer_ingreso,  dni, domicilio, telefono } = req.body
 console.log(nombre, apellido, fecha_nacimiento, observaciones,  primer_ingreso,  dni, domicilio, telefono)
