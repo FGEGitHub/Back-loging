@@ -605,6 +605,24 @@ router.get('/descargar/:id', async (req, res) => {
 
 
 
+router.post("/consultarasitencias", async (req, res) => {
+  let { fecha_inicio, fecha_fin } = req.body
+  ///presentes mensuales 
+  console.log(fecha_inicio, fecha_fin )
+
+  const query = `
+    SELECT *
+    FROM dtc_asistencia
+    WHERE STR_TO_DATE(fecha, '%d-%m-%Y') BETWEEN ? AND ?
+  `;
+   console.log(query)
+  pool.query(query, [fecha_inicio, fecha_fin], (error, results) => {
+    if (error) console.log(error);
+    console.log(results);
+  });
+
+})
+
 router.post("/traerestadisticas", async (req, res) => {
   let { fecha } = req.body
   ///presentes mensuales 
