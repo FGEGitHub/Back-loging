@@ -14,7 +14,7 @@ router.get('/todos/', async (req, res) => {
 router.get('/todosdtc/', async (req, res) => {
    
   
-  const etc = await pool.query ('select * from usuarios where nivel =20 OR nivel=21 or nivel =22 or nivel =23 or nivel =24 or nivel =25' )
+  const etc = await pool.query ('select * from usuarios where nivel =20 OR nivel=21 or nivel =22 or nivel =23 or nivel =24 or nivel =25 or nivel =25 ' )
 res.json(etc);
 //res.render('index')
 })
