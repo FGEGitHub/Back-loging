@@ -3,7 +3,7 @@ const router = express.Router()
 const { isLoggedIn, isLoggedInn, isLoggedInn2, isLoggedInn4 } = require('../lib/auth') //proteger profile
 const pool = require('../database')
 const { parse, startOfWeek, format } = require('date-fns');
-const { es, id } = require('date-fns/locale');
+
 const multer = require('multer')
 const path = require('path')
 const fse = require('fs').promises;
@@ -23,7 +23,7 @@ const upload = multer({ storage });
 
 
 router.get('/traerclasestaller/:id', async (req, res) => {
-  id = req.params.id
+  let id = req.params.id
   try {
     const clas = await pool.query(' select * from  dtc_clases_taller  where id_tallerista=?', [id])
     console.log(clas)
@@ -38,7 +38,7 @@ router.get('/traerclasestaller/:id', async (req, res) => {
 
 
 router.get('/sumar1/:id', async (req, res) => {
-  id = req.params.id
+ let id = req.params.id
   try {
     await pool.query(' UPDATE dtc_asistencia SET racion = racion + 1 where id=?', [id])
 
