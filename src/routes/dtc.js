@@ -609,18 +609,36 @@ router.post("/consultarasitencias", async (req, res) => {
   let { fecha_inicio, fecha_fin } = req.body
   ///presentes mensuales 
   console.log(fecha_inicio, fecha_fin )
-
-  const query = `
-    SELECT *
-    FROM dtc_asistencia
-    WHERE STR_TO_DATE(fecha, '%d-%m-%Y') BETWEEN ? AND ?
-  `;
-   console.log(query)
-  pool.query(query, [fecha_inicio, fecha_fin], (error, results) => {
-    if (error) console.log(error);
-    console.log(results);
-  });
-
+  try {
+    
+ 
+  function transformarFecha(fecha) {
+    // Dividir la fecha en partes [YYYY, MM, DD]
+    const [year, month, day] = fecha.split('-');
+    
+    // Convertir a números y eliminar ceros a la izquierda si existen
+    const dayNum = parseInt(day, 10);
+    const monthNum = parseInt(month, 10);
+    
+    // Formatear la fecha como D-M-YYYY
+    const fechaTransformada = `${dayNum}-${monthNum}-${year}`;
+    
+    return fechaTransformada;
+  }
+   fecha_inicio = transformarFecha(fecha_inicio);
+   fecha_fin = transformarFecha(fecha_fin);
+   console.log(fecha_inicio, fecha_fin )
+const resultados = await pool.query('SELECT fecha, count(fecha) as cantidad FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") BETWEEN STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(?, "%d-%m-%Y") group by fecha',[fecha_inicio, fecha_fin]);
+const resultadosConvertidos = resultados.map(row => ({
+  fecha: row.fecha,
+  cantidad: Number(row.cantidad)
+}));
+console.log(resultadosConvertidos)
+res.json(resultadosConvertidos)
+} catch (error) {
+    console.log(error)
+    res.json([{fecha:"Error",cantidad:"Error"}])
+}
 })
 
 router.post("/traerestadisticas", async (req, res) => {
