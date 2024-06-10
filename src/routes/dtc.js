@@ -3,7 +3,7 @@ const router = express.Router()
 const { isLoggedIn, isLoggedInn, isLoggedInn2, isLoggedInn4 } = require('../lib/auth') //proteger profile
 const pool = require('../database')
 const { parse, startOfWeek, format } = require('date-fns');
-
+const { es } = require('date-fns/locale');
 const multer = require('multer')
 const path = require('path')
 const fse = require('fs').promises;
