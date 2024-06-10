@@ -623,6 +623,24 @@ router.get('/descargar/:id', async (req, res) => {
 
 
 
+
+
+router.post("/borrarclasee", async (req, res) => {
+  let { id } = req.body
+  ///presentes mensuales 
+  try {
+    await pool.query('delete  from  dtc_clases_taller where id = ?', [id])
+
+    res.json('realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('No realizado')
+
+
+  }
+
+
+})
 router.post("/consultarasitencias", async (req, res) => {
   let { fecha_inicio, fecha_fin } = req.body
   ///presentes mensuales 
