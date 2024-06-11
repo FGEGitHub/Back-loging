@@ -25,7 +25,7 @@ const upload = multer({ storage });
 router.get('/traerclasestaller/:id', async (req, res) => {
   let id = req.params.id
   try {
-    const clas = await pool.query(' select * from  dtc_clases_taller  where id_tallerista=?', [id])
+    const clas = await pool.query(' select * from  dtc_clases_taller  where id_tallerista=? ORDER BY id DESC', [id])
     console.log(clas)
     res.json(clas)
   } catch (error) {
@@ -377,6 +377,38 @@ router.post("/borrarturno", async (req, res) => {
 
 })
 
+
+router.post("/modificarclase", async (req, res) => {
+  let { id, titulo, descripcion, fecha } = req.body
+
+  try {
+
+
+    await pool.query('update dtc_clases_taller  set  titulo=?, descripcion=?, fecha=? where id=?', [titulo, descripcion, fecha , id])
+
+    res.json('modificado')
+  } catch (error) {
+    console.log(error)
+    res.json('No modificado')
+  }
+
+})
+
+router.post("/borraretapa", async (req, res) => {
+  let { id } = req.body
+
+  try {
+
+
+    await pool.query('delete from dtc_etapa  where id=?', [id])
+
+    res.json('Borrado')
+  } catch (error) {
+    console.log(error)
+    res.json('No Borrado')
+  }
+
+})
 router.post("/traerasistenciasdetaller", async (req, res) => {
   let { id_tallerista, id_usuario } = req.body
   const resp = await pool.query('select * from dtc_asistencia where id_tallerista=? and id_usuario=?', [id_tallerista, id_usuario])
@@ -593,7 +625,8 @@ router.get('/traerpresentesdeclase/:id', async (req, res) => {
 
 router.get('/traeretapacocina/:id', async (req, res) => {
   const id = req.params.id
-  const existe = await pool.query('select * from dtc_etapa where id_usuario=?', [id])
+  const existe = await pool.query('SELECT * FROM dtc_etapa WHERE id_usuario=? ORDER BY id DESC', [id]);
+
 
   res.json([existe])
 
@@ -820,7 +853,7 @@ router.post("/traerestadisticas", async (req, res) => {
 
 
 router.post("/nuevaetapa", async (req, res) => {
-  let { fecha, descripcion, expediente, id_usuario, titulo } = req.body
+  let { fecha, descripcion, expediente, id_usuario, titulo, etapa, proyecto } = req.body
   console.log(fecha, descripcion, expediente, id_usuario, titulo)
   if (titulo == undefined) {
     titulo = "Sin completar"
@@ -835,7 +868,7 @@ router.post("/nuevaetapa", async (req, res) => {
   }
 
   try {
-    await pool.query('insert into dtc_etapa set  fecha=?,descripcion=?,expediente=?, id_usuario=?,titulo=?', [fecha, descripcion, expediente, id_usuario, titulo])
+    await pool.query('insert into dtc_etapa set  fecha=?,descripcion=?,expediente=?, id_usuario=?,titulo=?, etapa=?, proyecto=?', [fecha, descripcion, expediente, id_usuario, titulo,etapa, proyecto ])
     res.json("Realizado")
   } catch (error) {
     console.log(error)
