@@ -599,10 +599,10 @@ router.post("/nuevaactividad", async (req, res) => {
 
 })
 router.post("/nuevaactividadchico", async (req, res) => {
-  const { detalle, id_usuario, titulo, id_tallerista, fecha } = req.body
+  const { detalle, id_usuario, titulo, id_tallerista, fecha, fecha_act } = req.body
 
   console.log(detalle, id_usuario, fecha, id_tallerista)
-  await pool.query('insert into dtc_actividades_chicos set id_usuario=?, id_tallerista=?,titulo=?,detalle=?,fecha=?', [id_usuario, id_tallerista, titulo, detalle, fecha])
+  await pool.query('insert into dtc_actividades_chicos set id_usuario=?, id_tallerista=?,titulo=?,detalle=?,fecha=?,fecha_act=?', [id_usuario, id_tallerista, titulo, detalle, fecha,fecha_act])
 
   res.json('Realizado')
 
