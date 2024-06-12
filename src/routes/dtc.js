@@ -1076,7 +1076,7 @@ router.post("/ponerpresenteclase", async (req, res) => {
 
 
 
-  const existe = await pool.query('select * from dtc_asistencia_clase where id_clase=? and id_usuario =? ', [id_clase, id_usuario])
+  let existe = await pool.query('select * from dtc_asistencia_clase where id_clase=? and id_usuario =? ', [id_clase, id_usuario])
   let era
   if (existe.length > 0) {
     await pool.query('delete  from  dtc_asistencia_clase where id = ?', [existe[0]['id']])
@@ -1088,7 +1088,22 @@ router.post("/ponerpresenteclase", async (req, res) => {
     era = "puesto Presente"
 
   }
+ const clase = await pool.query('select * from dtc_clases_taller where id=?',[id_clase])
+ const [year, month, day] = clase[0]['fecha'].split('-');
 
+ // Convertir a números y eliminar ceros a la izquierda si existen
+ const dayNum = parseInt(day, 10);
+ const monthNum = parseInt(month, 10);
+
+ // Formatear la fecha como D-M-YYYY
+ const fechaTransformada = `${dayNum}-${monthNum}-${year}`;
+ console.log(fechaTransformada)
+ existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =? and id_tallerista=238', [id_usuario, fechaTransformada])
+console.log(existe)
+  if (existe.length == 0) {
+    await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?,id_tallerista=238,hora=?', [fechaTransformada, id_usuario, horaBuenosAires])
+
+  }
   res.json(era)
 
 
