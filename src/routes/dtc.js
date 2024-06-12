@@ -623,6 +623,15 @@ router.get('/traerpresentesdeclase/:id', async (req, res) => {
 })
 
 
+router.get('/traeretapacocinacadia/', async (req, res) => {
+  const existe = await pool.query('SELECT * FROM dtc_etapa_cadia WHERE ORDER BY id DESC');
+
+
+  res.json([existe])
+
+
+})
+
 router.get('/traeretapacocina/:id', async (req, res) => {
   const id = req.params.id
   const existe = await pool.query('SELECT * FROM dtc_etapa WHERE id_usuario=? ORDER BY id DESC', [id]);
@@ -852,6 +861,31 @@ router.post("/traerestadisticas", async (req, res) => {
 })
 
 
+router.post("/nuevaetapacadia", async (req, res) => {
+  let { fecha, descripcion, expediente, id_usuario, titulo, etapa, proyecto } = req.body
+  console.log(fecha, descripcion, expediente, id_usuario, titulo)
+  if (titulo == undefined) {
+    titulo = "Sin completar"
+  }
+
+  if (descripcion == undefined) {
+    descripcion = "Sin completar"
+  }
+
+  if (expediente == undefined) {
+    expediente = "Sin completar"
+  }
+
+  try {
+    await pool.query('insert into dtc_etapa_cadia set  fecha=?,descripcion=?,expediente=?, titulo=?, etapa=?, proyecto=?', [fecha, descripcion, expediente,  titulo,etapa, proyecto ])
+    res.json("Realizado")
+  } catch (error) {
+    console.log(error)
+    res.json("No realizado")
+  }
+
+
+})
 router.post("/nuevaetapa", async (req, res) => {
   let { fecha, descripcion, expediente, id_usuario, titulo, etapa, proyecto } = req.body
   console.log(fecha, descripcion, expediente, id_usuario, titulo)
