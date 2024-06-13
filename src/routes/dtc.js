@@ -661,8 +661,21 @@ router.get('/traeretapacocina/:id', async (req, res) => {
 router.get('/traertalleres/', async (req, res) => {
 
   const existe = await pool.query('select * from usuarios where nivel=26 ')
+enviar = []
+  for (ie in existe){
+    let can = await pool.query('select * from dtc_clases_taller where id_tallerista=?',[existe[ie]['id']])
+    nue={
+      id:existe[ie]['id'],
+      nombre:existe[ie]['nombre'],
+      cantidad:can.length,
+      usuario:existe[ie]['usuario'],
+     
 
-  res.json([existe])
+    }
+    enviar.push(nue)
+  }
+
+  res.json([enviar])
 
 
 })
