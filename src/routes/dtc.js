@@ -26,8 +26,22 @@ router.get('/traerclasestaller/:id', async (req, res) => {
   let id = req.params.id
   try {
     const clas = await pool.query(' select * from  dtc_clases_taller  where id_tallerista=? ORDER BY id DESC', [id])
-    console.log(clas)
-    res.json(clas)
+    env = []
+    for (iii in clas){
+      can = await pool.query('select * from dtc_asistencia_clase where id_clase=?',[clas[iii]['id']])
+      nuev={
+        id:clas[iii]['id'],
+        fecha:clas[iii]['fecha'],
+        titulo:clas[iii]['titulo'],
+        descripcion:clas[iii]['descripcion'],
+        id_tallerista:clas[iii]['id_tallerista'],
+        cantidad:can.length
+      }
+      env.push(nuev)
+    }
+
+    console.log(env)
+    res.json(env)
   } catch (error) {
     console.log(error)
     res.json('Error')
@@ -646,7 +660,7 @@ router.get('/traeretapacocina/:id', async (req, res) => {
 
 router.get('/traertalleres/', async (req, res) => {
 
-  const existe = await pool.query('select * from usuarios where nivel=21 ')
+  const existe = await pool.query('select * from usuarios where nivel=26 ')
 
   res.json([existe])
 
