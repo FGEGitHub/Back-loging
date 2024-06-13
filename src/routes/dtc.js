@@ -658,6 +658,13 @@ router.get('/traeretapacocina/:id', async (req, res) => {
 
 
 
+router.get('/traerintervenciones/', async (req, res) => {
+  let can = await pool.query('select * from dtc_actividades_chicos join (select id as idu, nombre as nombretallerista from usuarios) as sel on  dtc_actividades_chicos.id_tallerista=sel-idu')
+  res.json([can])
+
+})
+
+
 router.get('/traertalleres/', async (req, res) => {
 
   const existe = await pool.query('select * from usuarios where nivel=26 ')
