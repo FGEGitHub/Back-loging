@@ -665,6 +665,15 @@ router.get('/traerintervenciones/', async (req, res) => {
 })
 
 
+
+router.get('/obtenerdetalle/:id', async (req, res) => {
+  const id = req.params.id
+  let can = await pool.query('select * from dtc_actividades_chicos where id=?',[id])
+  res.json(can)
+
+})
+
+
 router.get('/traertalleres/', async (req, res) => {
 
   const existe = await pool.query('select * from usuarios where nivel=26 ')
