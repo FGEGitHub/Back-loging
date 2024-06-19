@@ -662,8 +662,22 @@ router.get('/traeretapacocina/:id', async (req, res) => {
 
 
 router.get('/traerintervenciones/', async (req, res) => {
-  let can = await pool.query('select * from dtc_actividades_chicos join (select id as idu, nombre as nombretallerista from usuarios) as sel on  dtc_actividades_chicos.id_tallerista=sel.idu')
-  res.json([can])
+  let can = await pool.query(`
+    SELECT 
+      dtc_actividades_chicos.*, 
+      sel.nombretallerista, 
+      SUBSTRING(dtc_actividades_chicos.fecha_act, 6, 2) AS mes, 
+      SUBSTRING(dtc_actividades_chicos.fecha_act, 1, 4) AS año
+    FROM 
+      dtc_actividades_chicos 
+    JOIN 
+      (SELECT id AS idu, nombre AS nombretallerista FROM usuarios) AS sel 
+    ON 
+      dtc_actividades_chicos.id_tallerista = sel.idu 
+    ORDER BY 
+      dtc_actividades_chicos.id DESC
+  `);
+  ;  res.json([can])
 
 })
 
