@@ -168,6 +168,22 @@ router.get('/listachiques/', async (req, res) => {
   res.json([chiques, env])
 })
 
+
+
+
+router.get('/datosdechiquecadia/:id', async (req, res) => {
+  const id = req.params.id
+  const chiques = await pool.query('select * from cadia_chicos where id =?', [id])
+  try {
+    
+    res.json([chiques, "imagenBase64", ["vincuos"]])
+  } catch (error) {
+    console.log(error)
+    res.json([])
+  }
+
+})
+
 router.get('/datosdechique/:id', async (req, res) => {
   const id = req.params.id
   const chiques = await pool.query('select * from dtc_chicos where id =?', [id])
@@ -340,6 +356,29 @@ router.post("/subirlegajo", upload.single('imagen'), async (req, res) => {
 })
 
 
+router.post("/modificarusuariocadia", async (req, res) => {
+  let { id, nombre, apellido, fecha_ingreso, fecha_nacimiento, observaciones, fecha_fin,  dni, direccion} = req.body
+
+  try {
+    if (observaciones == undefined) {
+      observaciones = "Sin observaciones"
+    }
+    if (fecha_nacimiento == undefined) {
+      fecha_nacimiento = "Sin asignar"
+    }
+
+    await pool.query('update cadia_chicos  set nombre=?,apellido=?,fecha_nacimiento=?,dni=?,fecha_ingreso=?,fecha_fin=?,direccion=? where id=?', [nombre, apellido, fecha_nacimiento, dni,fecha_ingreso,fecha_fin,direccion, id])
+
+    res.json('Modificado')
+  } catch (error) {
+    console.log(error)
+    res.json('No modificado')
+  }
+
+})
+
+
+
 router.post("/modificarusuariopsiq", async (req, res) => {
   let { id, nombre, apellido, kid, fecha_nacimiento, observaciones, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, hora_merienda } = req.body
 
@@ -439,6 +478,44 @@ router.post("/traerasistenciasdetaller", async (req, res) => {
   const resp = await pool.query('select * from dtc_asistencia where id_tallerista=? and id_usuario=?', [id_tallerista, id_usuario])
   res.json([resp])
 })
+
+
+router.post("/nuevochiquecadia", async (req, res) => {
+  let { nombre, apellido, fecha_nacimiento, kid, observaciones, fecha_fin, primer_contacto, primer_ingreso, fecha_ingreso, dni, direccion, telefono, autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, hora_merienda, escuela, grado, fines } = req.body
+
+  try {
+    if (observaciones == undefined) {
+      observaciones = "Sin observaciones"
+    }
+    if (fecha_nacimiento == undefined) {
+      fecha_nacimiento = "Sin asignar"
+    }
+
+    if (dni == "Sin determinar") {
+      await pool.query('insert cadia_chicos  set nombre=?,apellido=?,fecha_nacimiento=?,dni=?,fecha_ingreso=?,fecha_fin=?,direccion=?', [nombre, apellido,fecha_nacimiento, dni,fecha_ingreso,fecha_fin,direccion])
+
+      res.json('Agregado')
+    } else {
+      const yahay = await pool.query('select * from dtc_chicos where dni=?', [dni])
+      if (yahay.length > 0) {
+        res.json('Error, dni ya tegistrado')
+      } else {
+        await pool.query('insert cadia_chicos  set nombre=?,apellido=?,fecha_nacimiento=?,dni=?,fecha_ingreso=?,fecha_fin=?,direccion=?', [nombre, apellido, fecha_nacimiento, dni,fecha_ingreso,fecha_fin,direccion])
+
+        res.json('Agregado')
+      }
+
+    }
+
+
+  } catch (error) {
+    console.log(error)
+    res.json('No agregado')
+  }
+
+})
+
+
 
 router.post("/nuevochique", async (req, res) => {
   let { nombre, apellido, fecha_nacimiento, kid, observaciones, talle, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, hora_merienda, escuela, grado, fines } = req.body
@@ -1087,6 +1164,23 @@ router.post("/determinarvinculo", async (req, res) => {
   }
 
 })
+
+
+
+router.post("/borrarusuariocadia", async (req, res) => {
+  const { id } = req.body
+
+  try {
+    await pool.query('delete  from  cadia_chicos where id = ?', [id])
+    res.json('Usuario borrado')
+  } catch (error) {
+    console.log(error)
+    res.json('UsuarNooio borrado, algo sucedio')
+  }
+
+})
+
+
 
 router.post("/borrarusuariodtc", async (req, res) => {
   const { id } = req.body
