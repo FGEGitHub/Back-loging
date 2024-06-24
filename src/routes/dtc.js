@@ -140,6 +140,17 @@ router.get('/listadepersonaspsiq/', async (req, res) => {
 })
 
 
+router.get('/listachicoscadia/', async (req, res) => {
+
+  const chiques = await pool.query('select * from cadia_chicos order by apellido')
+
+  env = {
+    total: chiques.length,
+  
+  }
+  res.json([chiques, env])
+})
+
 router.get('/listachiques/', async (req, res) => {
 
   const chiques = await pool.query('select * from dtc_chicos order by apellido')
