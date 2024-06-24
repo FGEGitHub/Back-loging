@@ -701,28 +701,60 @@ router.get('/obtenerdetalle/:id', async (req, res) => {
 
 })
 
-
 router.get('/traertalleres/', async (req, res) => {
+  try {
+    // Obtiene todos los usuarios con nivel 26
+    const existe = await pool.query('SELECT * FROM usuarios WHERE nivel = 26');
+    enviar = [];
 
-  const existe = await pool.query('select * from usuarios where nivel=26 ')
-enviar = []
-  for (ie in existe){
-    let can = await pool.query('select * from dtc_clases_taller where id_tallerista=?',[existe[ie]['id']])
-    nue={
-      id:existe[ie]['id'],
-      nombre:existe[ie]['nombre'],
-      cantidad:can.length,
-      usuario:existe[ie]['usuario'],
-     
+    // Obtiene la fecha actual
+    const fechaActual = new Date();
+    const mesActual = fechaActual.getMonth() + 1; // Los meses en JavaScript son de 0 a 11
+    const añoActual = fechaActual.getFullYear();
+    const diaActual = fechaActual.getDate();
 
+    // Formatea el primer y último día del mes actual
+    const primerDiaMes = `${añoActual}-${mesActual.toString().padStart(2, '0')}-01`;
+    const ultimoDiaMes = `${añoActual}-${mesActual.toString().padStart(2, '0')}-31`;
+
+    // Formatea el día actual
+    const fechaHoy = `${añoActual}-${mesActual.toString().padStart(2, '0')}-${diaActual.toString().padStart(2, '0')}`;
+
+    for (const usuario of existe) {
+      // Cuenta todas las clases del tallerista
+      const totalClases = await pool.query('SELECT * FROM dtc_clases_taller WHERE id_tallerista = ?', [usuario.id]);
+
+      // Cuenta las clases del tallerista en el mes actual
+      const clasesMesActual = await pool.query(
+        'SELECT * FROM dtc_clases_taller WHERE id_tallerista = ? AND fecha BETWEEN ? AND ?',
+        [usuario.id, primerDiaMes, ultimoDiaMes]
+      );
+
+      // Cuenta las clases del tallerista hoy
+      const clasesHoy = await pool.query(
+        'SELECT * FROM dtc_clases_taller WHERE id_tallerista = ? AND fecha = ?',
+        [usuario.id, fechaHoy]
+      );
+
+      const nue = {
+        id: usuario.id,
+        nombre: usuario.nombre,
+        cantidad: totalClases.length,
+        cantidadMes: clasesMesActual.length,
+        cantidadHoy: clasesHoy.length,
+        usuario: usuario.usuario,
+      };
+
+      enviar.push(nue);
     }
-    enviar.push(nue)
+
+    res.json([enviar]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Ocurrió un error al obtener los talleres' });
   }
+});
 
-  res.json([enviar])
-
-
-})
 
 router.get('/descargar/:id', async (req, res) => {
   const id = req.params.id;
