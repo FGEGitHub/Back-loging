@@ -125,6 +125,14 @@ router.get('/clasesdetaller/:id', async (req, res) => {
 
 
 
+router.get('/listaexpedientes/', async (req, res) => {
+
+  const chiques = await pool.query('select * from dtc_expedientes ')
+
+  res.json([chiques, 0])
+})
+
+
 router.get('/listadepersonaspsiq/', async (req, res) => {
 
   const chiques = await pool.query('select * from dtc_personas_psicologa order by apellido')
@@ -479,6 +487,24 @@ router.post("/traerasistenciasdetaller", async (req, res) => {
   res.json([resp])
 })
 
+
+
+router.post("/nuevoexpediente", async (req, res) => {
+  let { titulo, inicio, cierre, detalle } = req.body
+  try {
+    if( cierre == undefined){
+      cierre="No"
+    }
+    await pool.query('insert dtc_expedientes  set titulo=?, inicio=?, cierre=?, detalle=? ', [titulo, inicio, cierre, detalle ])
+
+    res.json("Realizado")
+  } catch (error) {
+    console.log(error)
+    res.json("No realizado")
+  }
+
+  
+})
 
 router.post("/nuevochiquecadia", async (req, res) => {
   let { nombre, apellido, fecha_nacimiento, kid, observaciones, fecha_fin, primer_contacto, primer_ingreso, fecha_ingreso, dni, direccion, telefono, autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, hora_merienda, escuela, grado, fines } = req.body
