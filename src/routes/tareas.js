@@ -4,7 +4,25 @@ const { isLoggedIn,isLoggedInn, isLoggedInn2  } = require('../lib/auth') //prote
 const pool = require('../database')
 
 
+router.get('/rk/', async (req, res) => {
+    const id = req.params.id
+    console.log(id)
 
+    tareas = await pool.query('select * from rk order by punt desc')
+
+    res.json(tareas)
+
+})
+
+router.post('/guardar', async (req, res) => {
+    const {name, punt} = req.body
+    console.log(id)
+
+    await pool.query('insert into rk set name=?, punt=?', [name, punt])
+
+    res.json("guardado")
+
+})
 
 
 router.get('/lista/:id', isLoggedInn2, async (req, res) => {
