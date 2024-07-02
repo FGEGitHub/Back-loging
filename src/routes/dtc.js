@@ -147,7 +147,19 @@ router.get('/listadepersonaspsiq/', async (req, res) => {
   res.json([chiques, env])
 })
 
+router.get('/listadepersonasgim/', async (req, res) => {
 
+  const chiques = await pool.query('select * from dtc_usuario_gimnasio order by apellido')
+
+  env = {
+    total: chiques.length,
+    kid1: 5,
+    kid2: 5,
+    kid3: 5,
+    sind: 5
+  }
+  res.json([chiques, env])
+})
 router.get('/listachicoscadia/', async (req, res) => {
 
   const chiques = await pool.query('select * from cadia_chicos order by apellido')
@@ -488,6 +500,26 @@ router.post("/traerasistenciasdetaller", async (req, res) => {
 })
 
 
+
+router.post("/nuevapersonagim", async (req, res) => {
+  let { nombre, apellido, dni, tel, direccion } = req.body
+  try {
+    if( direccion == undefined){
+      direccion="No"
+    }
+    if( tel == undefined){
+      tel="No"
+    }
+    await pool.query('insert dtc_usuario_gimnasio  set nombre=?, apellido=?, dni=?,tel=?, direccion=? ', [nombre, apellido, dni, tel, direccion  ])
+
+    res.json("Realizado")
+  } catch (error) {
+    console.log(error)
+    res.json("No realizado")
+  }
+
+  
+})
 
 router.post("/nuevoexpediente", async (req, res) => {
   let { titulo, inicio, cierre, detalle } = req.body
