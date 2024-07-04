@@ -510,6 +510,9 @@ router.post("/nuevapersonagim", async (req, res) => {
     if( tel == undefined){
       tel="No"
     }
+    if( tel == undefined){
+      tel="No"
+    }
     await pool.query('insert dtc_usuario_gimnasio  set nombre=?, apellido=?, dni=?,tel=?, direccion=? ', [nombre, apellido, dni, tel, direccion  ])
 
     res.json("Realizado")
@@ -762,8 +765,10 @@ router.post("/nuevaactividad", async (req, res) => {
 
 })
 router.post("/nuevaactividadchico", async (req, res) => {
-  const { detalle, id_usuario, titulo, id_tallerista, fecha, fecha_act } = req.body
-
+  let { detalle, id_usuario, titulo, id_tallerista, fecha, fecha_act } = req.body
+if(fecha_act==undefined){
+  fecha_act="04/07/2024"
+}
   console.log(detalle, id_usuario, fecha, id_tallerista)
   await pool.query('insert into dtc_actividades_chicos set id_usuario=?, id_tallerista=?,titulo=?,detalle=?,fecha=?,fecha_act=?', [id_usuario, id_tallerista, titulo, detalle, fecha,fecha_act])
 
