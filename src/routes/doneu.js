@@ -57,6 +57,21 @@ router.get("/traerclientes", async (req, res) => {
 
 })
 
+router.post("/actualizarventa", async (req, res) => {
+    const { id, escritura,posecion, consctruccion} = req.body
+    try {
+        console.log(  id, escritura,posecion, consctruccion)
+        await pool.query('update ventas set escritura=?,posecion=?, construccion=? where id=?', [  escritura,posecion, consctruccion,id])
+
+        res.json('Realizado')
+    } catch (error) {
+        console.log(error)
+        res.json('No Realizado')
+    }
+})
+
+
+
 router.post("/asignarventa", async (req, res) => {
     const { id, id_lote} = req.body
     try {
