@@ -59,6 +59,7 @@ router.get("/traerclientes", async (req, res) => {
 
 router.post("/modificarlotee", async (req, res) => {
     const { id, precio} = req.body
+    console.log(id, precio)
     try {
         await pool.query('update lotes set precio=? where id=?', [ precio,id])
 

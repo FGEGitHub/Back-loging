@@ -779,6 +779,31 @@ if(fecha_act==undefined){
 
 
 
+router.get('/traercitas/:id', async (req, res) => {
+  const id = req.params.id
+
+const pendientes = await pool.query('select * from dtc_turnos where id_psico=? and estado="Disponible"',[id])
+const confirm = await pool.query('select * from dtc_turnos where id_psico=?and estado="Agendado"',[id])
+
+
+
+  res.json([pendientes, confirm])
+
+
+})
+
+router.get('/traercitastodos/', async (req, res) => {
+  const id = req.params.id
+
+const pendientes = await pool.query('select * from dtc_turnos where estado="Disponible"')
+const confirm = await pool.query('select * from dtc_turnos where estado="Agendado"')
+
+
+
+  res.json([pendientes, confirm])
+
+
+})
 router.get('/traerpresentesdeclase/:id', async (req, res) => {
   const id = req.params.id
   const existe = await pool.query('select * from dtc_asistencia_clase join (select id as idc,nombre from dtc_chicos) as sel on dtc_asistencia_clase.id_usuario=sel.idc  where id_clase=?', [id])//presentes
