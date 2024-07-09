@@ -11,10 +11,22 @@ router.get('/todos/', async (req, res) => {
   res.json(etc);
 //res.render('index')
 })
+
+
+
+router.get('/todoscadia/', async (req, res) => {
+   
+  
+  const etc = await pool.query ('select * from usuarios where nivel =40 OR nivel=41  ' )
+res.json(etc);
+//res.render('index')
+})
+
+
 router.get('/todosdtc/', async (req, res) => {
    
   
-  const etc = await pool.query ('select * from usuarios where nivel =20 OR nivel=21 or nivel =22 or nivel =23 or nivel =24 or nivel =25 or nivel =26 ' )
+  const etc = await pool.query ('select * from usuarios where nivel =20 OR nivel=21 or nivel =22 or nivel =23 or nivel =24 or nivel =25 or nivel =26 or nivel =27 ' )
 res.json(etc);
 //res.render('index')
 })

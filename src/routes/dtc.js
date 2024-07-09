@@ -551,7 +551,15 @@ router.post("/nuevochiquecadia", async (req, res) => {
     if (fecha_nacimiento == undefined) {
       fecha_nacimiento = "Sin asignar"
     }
-
+    if (fecha_ingreso == undefined) {
+      fecha_ingreso = "Sin asignar"
+    }
+    if (direccion == undefined) {
+      direccion = "Sin asignar"
+    }
+    if (fecha_fin == undefined) {
+      fecha_fin = "Sin asignar"
+    }
     if (dni == "Sin determinar") {
       await pool.query('insert cadia_chicos  set nombre=?,apellido=?,fecha_nacimiento=?,dni=?,fecha_ingreso=?,fecha_fin=?,direccion=?', [nombre, apellido,fecha_nacimiento, dni,fecha_ingreso,fecha_fin,direccion])
 
