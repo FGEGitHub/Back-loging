@@ -22,6 +22,34 @@ const upload = multer({ storage });
 
 
 
+router.get('/traerclasesprof/:id', async (req, res) => {
+  let id = req.params.id
+  try {
+    const clas = await pool.query(' select * from  cadia_clases_prof  where idtallerista=? ORDER BY id_clase DESC', [id])
+    env = []
+    for (iii in clas){
+      can = await pool.query('select * from dtc_asistencia_clase where id_clase=?',[clas[iii]['id_clase']])
+      nuev={
+        id:clas[iii]['id_clase'],
+        fecha:clas[iii]['fecha'],
+        titulo:clas[iii]['titulo'],
+        descripcion:clas[iii]['descripcion'],
+        id_tallerista:clas[iii]['id_tallerista'],
+        cantidad:can.length
+      }
+      env.push(nuev)
+    }
+
+    console.log(env)
+    res.json(env)
+  } catch (error) {
+    console.log(error)
+    res.json('Error')
+  }
+
+
+})
+
 router.get('/traerclasestaller/:id', async (req, res) => {
   let id = req.params.id
   try {
@@ -625,6 +653,20 @@ router.post("/nuevochique", async (req, res) => {
 
 
 
+router.post("/nuevaclaseprof", async (req, res) => {
+  let { id_tallerista, fecha, titulo } = req.body
+  console.log(id_tallerista, fecha, titulo)
+  try {
+    await pool.query('insert cadia_clases_prof  set idtallerista=?, fecha=?,titulo=?', [id_tallerista, fecha, titulo])
+
+    res.json("realizado")
+  } catch (error) {
+    console.log(error)
+    res.json('no realizado')
+  }
+
+})
+
 router.post("/nuevaclasetaller", async (req, res) => {
   let { id_tallerista, fecha, titulo } = req.body
   console.log(id_tallerista, fecha, titulo)
@@ -812,6 +854,24 @@ const confirm = await pool.query('select * from dtc_turnos where estado="Agendad
 
 
 })
+
+
+
+
+router.get('/traerpresentesdeclaseprof/:id', async (req, res) => {
+  const id = req.params.id
+  const existe = await pool.query('select * from cadia_asitencia_clases join (select id as idc,nombre from cadia_chicos) as sel on cadia_asitencia_clases.id_usuario=sel.idc  where id_clase=?', [id])//presentes
+  console.log(existe)
+  usuarios = await pool.query("select * from cadia_chicos left join (select id_asistencia as ida  from cadia_asitencia_clases where id_asistencia=? ) as sel on cadia_chicos.id=sel.ida ", [id])
+  //todos
+  res.json([existe, usuarios])
+
+
+})
+
+
+
+
 router.get('/traerpresentesdeclase/:id', async (req, res) => {
   const id = req.params.id
   const existe = await pool.query('select * from dtc_asistencia_clase join (select id as idc,nombre from dtc_chicos) as sel on dtc_asistencia_clase.id_usuario=sel.idc  where id_clase=?', [id])//presentes
@@ -873,6 +933,60 @@ router.get('/obtenerdetalle/:id', async (req, res) => {
   res.json(can)
 
 })
+
+router.get('/traerprofesionales/', async (req, res) => {
+  try {
+    // Obtiene todos los usuarios con nivel 26
+    const existe = await pool.query('SELECT * FROM usuarios WHERE nivel = 41');
+    enviar = [];
+
+    // Obtiene la fecha actual
+    const fechaActual = new Date();
+    const mesActual = fechaActual.getMonth() + 1; // Los meses en JavaScript son de 0 a 11
+    const añoActual = fechaActual.getFullYear();
+    const diaActual = fechaActual.getDate();
+
+    // Formatea el primer y último día del mes actual
+    const primerDiaMes = `${añoActual}-${mesActual.toString().padStart(2, '0')}-01`;
+    const ultimoDiaMes = `${añoActual}-${mesActual.toString().padStart(2, '0')}-31`;
+
+    // Formatea el día actual
+    const fechaHoy = `${añoActual}-${mesActual.toString().padStart(2, '0')}-${diaActual.toString().padStart(2, '0')}`;
+
+    for (const usuario of existe) {
+      // Cuenta todas las clases del tallerista
+      const totalClases = await pool.query('SELECT * FROM dtc_clases_taller WHERE id_tallerista = ?', [usuario.id]);
+
+      // Cuenta las clases del tallerista en el mes actual
+      const clasesMesActual = await pool.query(
+        'SELECT * FROM dtc_clases_taller WHERE id_tallerista = ? AND fecha BETWEEN ? AND ?',
+        [usuario.id, primerDiaMes, ultimoDiaMes]
+      );
+
+      // Cuenta las clases del tallerista hoy
+      const clasesHoy = await pool.query(
+        'SELECT * FROM dtc_clases_taller WHERE id_tallerista = ? AND fecha = ?',
+        [usuario.id, fechaHoy]
+      );
+
+      const nue = {
+        id: usuario.id,
+        nombre: usuario.nombre,
+        cantidad: totalClases.length,
+        cantidadMes: clasesMesActual.length,
+        cantidadHoy: clasesHoy.length,
+        usuario: usuario.usuario,
+      };
+
+      enviar.push(nue);
+    }
+
+    res.json([enviar]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Ocurrió un error al obtener los talleres' });
+  }
+});
 
 router.get('/traertalleres/', async (req, res) => {
   try {
@@ -1395,6 +1509,47 @@ router.post("/ponerpresente", async (req, res) => {
 
 })
 
+
+router.post("/ponerpresenteclaseprofs", async (req, res) => {
+  let { id_clase, id_usuario } = req.body
+  const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
+
+  console.log("La hora actual en Buenos Aires es:", horaBuenosAires);
+
+
+
+  let existe = await pool.query('select * from cadia_asitencia_clases where id_clase=? and id_usuario =? ', [id_clase, id_usuario])
+  let era
+  if (existe.length > 0) {
+    await pool.query('delete  from  cadia_asitencia_clases where id = ?', [existe[0]['id_asistencia']])
+    era = "puesto Ausente"
+
+
+  } else {
+    await pool.query('insert into cadia_asitencia_clases set id_clase=?, id_usuario=?,fecha=?', [id_clase, id_usuario, horaBuenosAires])
+    era = "puesto Presente"
+
+  }/* 
+ const clase = await pool.query('select * from dtc_clases_taller where id=?',[id_clase])
+ const [year, month, day] = clase[0]['fecha'].split('-');
+
+ // Convertir a números y eliminar ceros a la izquierda si existen
+ const dayNum = parseInt(day, 10);
+ const monthNum = parseInt(month, 10);
+
+ // Formatear la fecha como D-M-YYYY
+ const fechaTransformada = `${dayNum}-${monthNum}-${year}`;
+ console.log(fechaTransformada)
+ existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =? and id_tallerista=238', [id_usuario, fechaTransformada])
+console.log(existe)
+  if (existe.length == 0) {
+    await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?,id_tallerista=238,hora=?', [fechaTransformada, id_usuario, horaBuenosAires])
+
+  } ASITENCIA GENERAL DESACTIVADO */
+  res.json(era)
+
+
+})
 router.post("/ponerpresenteclase", async (req, res) => {
   let { id_clase, id_usuario } = req.body
   const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
