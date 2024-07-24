@@ -826,6 +826,28 @@ if(fecha_act==undefined){
 
 
 })
+router.get('/traerhorariosprofesional/:id', async (req, res) => {
+  const id = req.params.id
+
+  const pendientes = await pool.query('select * from cadia_horario where id_usuario=?',[id])
+  
+
+  
+    res.json(pendientes)
+  
+  
+  })
+
+  router.post('/agregarhorario', async (req, res) => {
+    const { titulo, fecha_inicio, fecha_fin, categoria,id_usuario,daysOfWeek} = req.body;
+    try {
+      const result = await pool.query('INSERT INTO cadia_horario set titulo=?, fecha_inicio=?, fecha_fin=?, categoria=?,id_usuario=?,dias=?', [titulo, fecha_inicio, fecha_fin, categoria,id_usuario,"["+daysOfWeek+"]"]);
+      res.json("Realizado");
+    } catch (error) {
+      console.log(error)
+      res.status(500).send(error);
+    }
+  });
 
 
 
