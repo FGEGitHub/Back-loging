@@ -826,6 +826,20 @@ if(fecha_act==undefined){
 
 
 })
+
+
+router.get('/traerhorariosprofesionales/', async (req, res) => {
+  const id = req.params.id
+
+  const pendientes = await pool.query('select * from cadia_horario join (select id as idu, nombre from usuarios) as sel on cadia_horario.id_usuario=sel.idu')
+  
+
+  
+    res.json(pendientes)
+  
+  
+  })
+
 router.get('/traerhorariosprofesional/:id', async (req, res) => {
   const id = req.params.id
 
@@ -837,7 +851,44 @@ router.get('/traerhorariosprofesional/:id', async (req, res) => {
   
   
   })
+  
 
+
+  router.get('/traerhorarioschicos', async (req, res) => {
+    const id = req.params.id
+  
+    const pendientes = await pool.query('select * from cadia_horarios_chicos  join (select id as idu, nombre from cadia_chicos) as sel on cadia_horarios_chicos.id_usuario=sel.idu ')
+    
+  
+    
+      res.json(pendientes)
+    
+    
+    })
+    
+
+  router.get('/traerhorarioschico/:id', async (req, res) => {
+    const id = req.params.id
+  
+    const pendientes = await pool.query('select * from cadia_horarios_chicos where id_usuario=?',[id])
+    
+  
+    
+      res.json(pendientes)
+    
+    
+    })
+    
+    router.post('/agregarhorariochico', async (req, res) => {
+      const { titulo, fecha_inicio, fecha_fin, categoria,id_usuario,daysOfWeek} = req.body;
+      try {
+        const result = await pool.query('INSERT INTO cadia_horarios_chicos set titulo=?, fecha_inicio=?, fecha_fin=?, categoria=?,id_usuario=?,dias=?', [titulo, fecha_inicio, fecha_fin, categoria,id_usuario,"["+daysOfWeek+"]"]);
+        res.json("Realizado");
+      } catch (error) {
+        console.log(error)
+        res.status(500).send(error);
+      }
+    });
   router.post('/agregarhorario', async (req, res) => {
     const { titulo, fecha_inicio, fecha_fin, categoria,id_usuario,daysOfWeek} = req.body;
     try {
