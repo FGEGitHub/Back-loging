@@ -754,7 +754,7 @@ router.post("/traeractividadeschico", async (req, res) => {
   const { id_usuario } = req.body;
 
   try {
-    const results = await pool.query('SELECT dtc_actividades_chicos.id, dtc_actividades_chicos.fecha,dtc_actividades_chicos.fecha_act, dtc_actividades_chicos.detalle, dtc_actividades_chicos.titulo, usuarios.nombre, selec2.nombree,selec2.apellido, selec2.dni,selec2.fecha_nacimiento,selec2.escuela,selec2.grado  FROM dtc_actividades_chicos JOIN usuarios ON dtc_actividades_chicos.id_tallerista = usuarios.id  join (select id as idu, nombre as nombree,apellido, fecha_nacimiento, dni, grado, escuela from dtc_chicos) as selec2 on dtc_actividades_chicos.id_usuario=selec2.idu WHERE dtc_actividades_chicos.id_usuario = ? ORDER BY dtc_actividades_chicos.id DESC',[id_usuario]);
+    const results = await pool.query('SELECT dtc_actividades_chicos.id,dtc_actividades_chicos.id_tallerista, dtc_actividades_chicos.fecha,dtc_actividades_chicos.fecha_act, dtc_actividades_chicos.detalle, dtc_actividades_chicos.titulo, usuarios.nombre, selec2.nombree,selec2.apellido, selec2.dni,selec2.fecha_nacimiento,selec2.escuela,selec2.grado  FROM dtc_actividades_chicos JOIN usuarios ON dtc_actividades_chicos.id_tallerista = usuarios.id  join (select id as idu, nombre as nombree,apellido, fecha_nacimiento, dni, grado, escuela from dtc_chicos) as selec2 on dtc_actividades_chicos.id_usuario=selec2.idu WHERE dtc_actividades_chicos.id_usuario = ? ORDER BY dtc_actividades_chicos.id DESC',[id_usuario]);
 
     const env = [];
 
@@ -771,6 +771,7 @@ router.post("/traeractividadeschico", async (req, res) => {
         nombree: results[i].nombree,
         apellido: results[i].apellido,
         dni: results[i].dni,
+        id_tallerista: results[i].id_tallerista, 
         fecha_nacimiento: results[i].fecha_nacimiento,
       };
       env.push(nuevo);
