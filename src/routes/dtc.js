@@ -1780,9 +1780,9 @@ router.post("/traerparaturnos", async (req, res) => {
 
 router.post("/traerpresentes", async (req, res) => {
   const { fecha, id } = req.body
-  console.log(id)
+
   const usua = await pool.query('select * from usuarios where id=?', [id])
-  console.log('uaua', usua)
+
   let prod = []
   let usuarios = []
   if ((usua[0].nivel == 20) || (usua[0].nivel == 22) || (usua[0].id == 262)) {
@@ -1823,14 +1823,15 @@ router.post("/traerpresentes", async (req, res) => {
 
   }
   raciones = await pool.query("select sum(racion) from dtc_asistencia  where fecha=? and id_tallerista=238", [fecha])
-  console.log(raciones)
+  premerienda = await pool.query("select sum(premerienda) from dtc_asistencia  where fecha=? and id_tallerista=238", [fecha])
+ 
   prod1 = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? and sel.kid='kid1' order by apellido", [fecha, 238])
   prod2 = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? and sel.kid='kid2'order by apellido", [fecha, 238])
   prod3 = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? and sel.kid='kid3'order by apellido", [fecha, 238])
 
   ext = await pool.query('select * from dtc_chicos where dato_escolar="Horario extendido"')
 
-  res.json([prod, usuarios, { kid1: prod1.length, kid2: prod2.length, kid3: prod3.length, horario: ext.length }, raciones[0]['sum(racion)']])
+  res.json([prod, usuarios, { kid1: prod1.length, kid2: prod2.length, kid3: prod3.length, horario: ext.length }, raciones[0]['sum(racion)'],premerienda[0]['sum(premerienda)']])
 
 
 })
