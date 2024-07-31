@@ -828,7 +828,16 @@ if(fecha_act==undefined){
 
 })
 
+router.get('/listaprofs/', async (req, res) => {
+  const id = req.params.id
 
+  const pendientes = await pool.query('select * from usuarios where nivel=41')
+  
+
+  
+    res.json([pendientes])
+})
+  
 router.get('/traerhorariosprofesionales/', async (req, res) => {
   const id = req.params.id
 
@@ -934,9 +943,11 @@ const confirm = await pool.query('select * from dtc_turnos where estado="Agendad
 
 router.get('/traerpresentesdeclaseprof/:id', async (req, res) => {
   const id = req.params.id
+  const id_profesional = await pool.query('select * from cadia_clases_prof  where id_clase=?',[id])
+
   const existe = await pool.query('select * from cadia_asitencia_clases join (select id as idc,nombre from cadia_chicos) as sel on cadia_asitencia_clases.id_usuario=sel.idc  where id_clase=?', [id])//presentes
   console.log(existe)
-  usuarios = await pool.query("select * from cadia_chicos left join (select id_asistencia as ida  from cadia_asitencia_clases where id_asistencia=? ) as sel on cadia_chicos.id=sel.ida ", [id])
+  usuarios = await pool.query("select * from cadia_chicos left join (select id_asistencia as ida  from cadia_asitencia_clases where id_asistencia=? ) as sel on cadia_chicos.id=sel.ida  join (select id_chico as idrelacion, id_profesional from cadia_chico_profesional) as sel2 on cadia_chicos.id=sel2.idrelacion where id_profesional=?", [id,id_profesional[0]['idtallerista']])
   //todos
   res.json([existe, usuarios])
 
@@ -1433,6 +1444,21 @@ router.post("/modificarkid", async (req, res) => {
     res.json('No realizado')
   }
 
+
+})
+
+
+router.post("/determinaprofesional", async (req, res) => {
+  const { id_chico, id_profesional } = req.body
+  try {
+    console.log( id_chico, id_profesional)
+    await pool.query('insert into cadia_chico_profesional set id_chico=?,id_profesional=?', [id_chico, id_profesional])
+
+    res.json('realizado')
+  } catch (error) {
+   console.log(error)
+    res.json('error, algo sucedio')
+  }
 
 })
 
