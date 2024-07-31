@@ -116,17 +116,16 @@ passport.use('local.signup', new LocalStrategy({
 
 
 
-
 passport.use('local.registroadmin', new LocalStrategy({
     usernameField: 'usuario',
     passwordField: 'password',
-    passReqToCallback: 'true'
+    passReqToCallback: true // Debe ser un booleano, no una cadena
 }, async (req, usuario, password, done) => {
 
-    let { nombre, mail, nivel } = req.body
-    //  const razon = await pool.query('Select razon from clientes where usuario like  ?', [usuario]) seleccionar razon
-    if (mail== undefined) {
-        mail = 'Sin definir'
+    let { nombre, mail, nivel } = req.body;
+    
+    if (!mail) {
+        mail = 'Sin definir';
     } 
 
     const newUser = {
@@ -135,48 +134,29 @@ passport.use('local.registroadmin', new LocalStrategy({
         nombre,
         nivel,
         mail,
+    };
 
-
-    }
-
-
-    //fin transformar 
     try {
-        var rows = await pool.query('SELECT * FROM usuarios WHERE usuario like  ?', [usuario]) // falta restringir si un usuario se puede registrar sin ser cliente
-        if (rows.length == 0) { // si ya hay un USER con ese dni 
-
-            
-           newUser.password = await helpers.encryptPassword(password)
-
+        const rows = await pool.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario]);
+        if (rows.length === 0) {
+            newUser.password = await helpers.encryptPassword(password);
             try {
-                console.log("asd1")
-                const result = await pool.query('INSERT INTO usuarios  set  usuario=?,nombre=?,mail=?,nivel=?,password=?', [ usuario,nombre, mail,nivel,newUser.password])
-                console.log("asd2")
-                newUser.id = result.insertId// porque newuser no tiene el id
-                console.log("asd3")
-                return done(null, newUser)// para continuar, y devuelve el newUser para que almacene en una sesion
-
+                const result = await pool.query('INSERT INTO usuarios SET usuario=?,nombre=?,mail=?,nivel=?,password=?', 
+                                                [usuario, nombre, mail, nivel, newUser.password]);
+                newUser.id = result.insertId;
+                return done(null, newUser); // Éxito, continuar
             } catch (error) {
-                console.log(error)
+                console.log(error);
+                return done(error); // Error en la inserción
             }
-        }
-
-        else {
-            console.log('error, ese cuit ya tiene un usuairo existente')
-            done(null, false, req.flash('message', 'error, ese cuit ya tiene un usuairo existente  ')) // false para no avanzar
-
+        } else {
+            return done(null, false, req.flash('message', 'Error, ese usuario ya existe'));
         }
     } catch (error) {
-        console.log(error)
-        req.flash('message', 'error,algo sucedio ')
-
-
+        console.log(error);
+        return done(error); // Error en la consulta
     }
-}
-
-
-))
-
+}));
 
 
 

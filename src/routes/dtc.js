@@ -832,7 +832,7 @@ if(fecha_act==undefined){
 router.get('/traerhorariosprofesionales/', async (req, res) => {
   const id = req.params.id
 
-  const pendientes = await pool.query('select * from cadia_horario join (select id as idu, nombre from usuarios) as sel on cadia_horario.id_usuario=sel.idu')
+  const pendientes = await pool.query('select * from cadia_horario join (select id as idu, nombre,mail from usuarios) as sel on cadia_horario.id_usuario=sel.idu')
   
 
   
@@ -858,7 +858,7 @@ router.get('/traerhorariosprofesional/:id', async (req, res) => {
   router.get('/traerhorarioschicos', async (req, res) => {
     const id = req.params.id
   
-    const pendientes = await pool.query('select * from cadia_horarios_chicos  join (select id as idu, nombre from cadia_chicos) as sel on cadia_horarios_chicos.id_usuario=sel.idu ')
+    const pendientes = await pool.query('select * from cadia_horarios_chicos  join (select id as idu, nombre, apellido from cadia_chicos) as sel on cadia_horarios_chicos.id_usuario=sel.idu ')
     
   
     

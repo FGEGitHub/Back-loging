@@ -76,6 +76,7 @@ router.post('/signin2', passport.authenticate('local.signin', { failureRedirect:
         id :req.user.id,
         usuario: req.user.usuario,
         nivel: req.user.nivel,
+        mail:  req.user.mail,
         token,
       
         
@@ -101,6 +102,7 @@ router.post('/signinde', passport.authenticate('local.signinde', { failureRedire
         id :req.user.id,
         usuario: req.user.usuario,
         nivel: req.user.nivel,
+        mail:  req.user.mail,
         token,
       
         
