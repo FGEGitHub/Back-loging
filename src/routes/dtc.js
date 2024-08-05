@@ -200,21 +200,54 @@ router.get('/listachicoscadia/', async (req, res) => {
 })
 
 router.get('/listachiques/', async (req, res) => {
+  try {
+    // Obtener todos los datos de la tabla 'dtc_chicos'
+    const chiques = await pool.query('SELECT * FROM dtc_chicos ORDER BY apellido');
 
-  const chiques = await pool.query('select * from dtc_chicos order by apellido')
-  const kid1 = await pool.query('select * from dtc_chicos where kid="kid1" ')
-  const kid2 = await pool.query('select * from dtc_chicos where kid="kid2"')
-  const kid3 = await pool.query('select * from dtc_chicos where kid="kid3"')
-  const sind = await pool.query('select * from dtc_chicos where kid not in("kid1","kid2","kid3")')
-  env = {
-    total: chiques.length,
-    kid1: kid1.length,
-    kid2: kid2.length,
-    kid3: kid3.length,
-    sind: sind.length
+    // Mapear los resultados para agregar el campo 'falta'
+    const chiquesConFalta = chiques.map(chique => {
+      // Lista de campos requeridos
+      const requiredFields = {
+        dni: 'DNI',
+        tel_responsable: 'Teléfono Responsable',
+        escuela: 'Escuela',
+        grado: 'Grado',
+        dato_escolar: 'Dato Escolar',
+        fecha_nacimiento: 'Fecha de Nacimiento',
+        domicilio: 'Domicilio'
+      };
+
+      // Verificar los campos que faltan
+      const faltantes = Object.keys(requiredFields).filter(field => !chique[field] || chique[field].trim() === '');
+
+      // Crear el campo 'falta' con la lista de campos faltantes o "Completo"
+      const falta = faltantes.length > 0 ? faltantes.map(field => requiredFields[field]).join(', ') : 'Completo';
+
+      return { ...chique, falta };
+    });
+
+    // Obtener el conteo de cada grupo específico (si es necesario)
+    const kid1 = chiques.filter(chique => chique.kid === 'kid1').length;
+    const kid2 = chiques.filter(chique => chique.kid === 'kid2').length;
+    const kid3 = chiques.filter(chique => chique.kid === 'kid3').length;
+    const sind = chiques.filter(chique => !['kid1', 'kid2', 'kid3'].includes(chique.kid)).length;
+
+    // Enviar la respuesta con la lista modificada y los datos adicionales
+    res.json([chiquesConFalta,
+       {
+        total: chiques.length,
+        kid1,
+        kid2,
+        kid3,
+        sind
+      }
+    ]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener la lista de chiques' });
   }
-  res.json([chiques, env])
-})
+});
+
 
 
 
