@@ -828,6 +828,21 @@ if(fecha_act==undefined){
 
 })
 
+router.post("/nuevaintervencion", async (req, res) => {
+  let { detalle, id_usuario, titulo, id_trabajador, fecha_referencia, fecha_carga } = req.body
+if(fecha_referencia==undefined){
+  fecha_referencia="04/07/2024"
+}
+const fechaActual = new Date();
+
+const fechaFormateada = fechaActual.toISOString().slice(0, 19).replace('T', ' ');
+
+  await pool.query('insert into dtc_asistencias_sociales set id_usuario=?, id_trabajador=?,titulo=?,detalle=?,fecha_referencia=?,fecha_carga=?', [id_usuario, id_trabajador, titulo, detalle,fecha_carga,fechaFormateada])
+
+  res.json('Realizado')
+
+
+})
 router.get('/listaprofs/', async (req, res) => {
   const id = req.params.id
 
@@ -955,7 +970,14 @@ router.get('/traerpresentesdeclaseprof/:id', async (req, res) => {
 })
 
 
+router.get('/traerasitenciasociales', async (req, res) => {
 
+  const existe = await pool.query('select * from dtc_asistencias_sociales join (select  id as idu, nombre from usuarios)as sel on dtc_asistencias_sociales.id_trabajador=sel.idu')//presentes
+  //todos
+  res.json(existe)
+
+
+})
 
 router.get('/traerpresentesdeclase/:id', async (req, res) => {
   const id = req.params.id
