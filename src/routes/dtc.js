@@ -766,6 +766,39 @@ router.post("/borraractividad", async (req, res) => {
 
 })
 
+router.post("/borraractividadsocial", async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    // Obtener la ubicación del archivo desde la base de datos
+    const result = await pool.query('SELECT ubicacion FROM dtc_asistencias_sociales WHERE id = ?', [id]);
+
+    if (result.length > 0) {
+      const archivoUbicacion = result[0].ubicacion;
+
+      // Construir la ruta completa del archivo
+      const filePath = path.join(__dirname, '../imagenesvendedoras', archivoUbicacion);
+
+      // Intentar eliminar el archivo del sistema de archivos si existe
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+        console.log('Archivo eliminado:', filePath);
+      } else {
+        console.log('El archivo no existe:', filePath);
+      }
+
+      // Eliminar la entrada de la base de datos
+      await pool.query('DELETE FROM dtc_asistencias_sociales WHERE id = ?', [id]);
+
+      res.json('Realizado');
+    } else {
+      res.json('No se encontró la entrada para el ID proporcionado');
+    }
+  } catch (error) {
+    console.error('Error al borrar la actividad social:', error);
+    res.json('No realizado');
+  }
+});
 
 
 router.post("/traertodaslasactividades", async (req, res) => {
@@ -1011,7 +1044,7 @@ router.get('/traerasitenciasociales', async (req, res) => {
 
   const existe = await pool.query('select * from dtc_asistencias_sociales left join (select  id as idu, nombre from usuarios)as sel on dtc_asistencias_sociales.id_trabajador=sel.idu')//presentes
   //todos
-  console.log(existe)
+
   res.json(existe)
 
 
