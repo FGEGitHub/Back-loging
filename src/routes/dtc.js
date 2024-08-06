@@ -896,7 +896,7 @@ if(fecha_act==undefined){
 
 router.post("/nuevaintervencion", upload.single("archivo"), async (req, res) => {
   let { detalle, id_usuario, titulo, id_trabajador } = req.body;
-  let ubicacion = req.file ? path.basename(req.file.path) : null; // Solo guarda el nombre del archivo
+  let ubicacion = req.file ? path.basename(req.file.path) : "no"; // Asigna "no" si no hay archivo
 
   const fechaActual = new Date();
   const fechaFormateada = fechaActual.toISOString().slice(0, 19).replace('T', ' ');
@@ -912,6 +912,7 @@ router.post("/nuevaintervencion", upload.single("archivo"), async (req, res) => 
     res.status(500).json({ error: 'Error al crear la intervención' });
   }
 });
+
 
 router.get('/listaprofs/', async (req, res) => {
   const id = req.params.id
