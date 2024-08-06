@@ -777,7 +777,14 @@ router.post("/borraractividadsocial", async (req, res) => {
       const archivoUbicacion = result[0].ubicacion;
 
       // Construir la ruta completa del archivo
-      const filePath = path.join(__dirname, '../imagenesvendedoras', archivoUbicacion);
+      let filePath = ''
+
+      try {
+         filePath = path.join(__dirname, '../imagenesvendedoras', archivoUbicacion);
+
+      } catch (error) {
+        
+      }
 
       // Intentar eliminar el archivo del sistema de archivos si existe
       if (fs.existsSync(filePath)) {
@@ -1569,6 +1576,23 @@ router.post("/traerracionesmes", async (req, res) => {
   console.log(enviar);
   res.json([enviar, { kid1: 1, kid2: 2, kid3: 3, cantidadmes: cantidadmes }]);
 });
+
+
+
+router.post("/modificarasist", async (req, res) => {
+  const { id, titulo, detalle, fecha_referencia  } = req.body
+
+  try {
+    await pool.query('update dtc_chicos  set titulo=?, detalle=?, fecha_referencia where id=?', [titulo, detalle, fecha_referencia, id])
+    res.json('realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('No realizado')
+  }
+
+
+})
+
 
 router.post("/modificarkid", async (req, res) => {
   const { id, kid } = req.body
