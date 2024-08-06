@@ -861,21 +861,25 @@ if(fecha_act==undefined){
 
 })
 
-router.post("/nuevaintervencion", async (req, res) => {
-  let { detalle, id_usuario, titulo, id_trabajador, fecha_referencia, fecha_carga } = req.body
-if(fecha_referencia==undefined){
-  fecha_referencia="04/07/2024"
-}
-const fechaActual = new Date();
+router.post("/nuevaintervencion", upload.single("archivo"), async (req, res) => {
+  let { detalle, id_usuario, titulo, id_trabajador } = req.body;
+  let ubicacion = req.file ? path.basename(req.file.path) : null; // Solo guarda el nombre del archivo
 
-const fechaFormateada = fechaActual.toISOString().slice(0, 19).replace('T', ' ');
+  const fechaActual = new Date();
+  const fechaFormateada = fechaActual.toISOString().slice(0, 19).replace('T', ' ');
 
-  await pool.query('insert into dtc_asistencias_sociales set id_usuario=?, id_trabajador=?,titulo=?,detalle=?,fecha_referencia=?,fecha_carga=?', [id_usuario, id_trabajador, titulo, detalle,fecha_carga,fechaFormateada])
+  try {
+    await pool.query(
+      'INSERT INTO dtc_asistencias_sociales (id_usuario, id_trabajador, titulo, detalle, fecha_carga, ubicacion) VALUES (?, ?, ?, ?, ?, ?)',
+      [id_usuario, id_trabajador, titulo, detalle, fechaFormateada, ubicacion]
+    );
+    res.json({ message: "Intervención creada con éxito" });
+  } catch (error) {
+    console.error('Error al crear la intervención:', error);
+    res.status(500).json({ error: 'Error al crear la intervención' });
+  }
+});
 
-  res.json('Realizado')
-
-
-})
 router.get('/listaprofs/', async (req, res) => {
   const id = req.params.id
 
@@ -1005,12 +1009,47 @@ router.get('/traerpresentesdeclaseprof/:id', async (req, res) => {
 
 router.get('/traerasitenciasociales', async (req, res) => {
 
-  const existe = await pool.query('select * from dtc_asistencias_sociales join (select  id as idu, nombre from usuarios)as sel on dtc_asistencias_sociales.id_trabajador=sel.idu')//presentes
+  const existe = await pool.query('select * from dtc_asistencias_sociales left join (select  id as idu, nombre from usuarios)as sel on dtc_asistencias_sociales.id_trabajador=sel.idu')//presentes
   //todos
+  console.log(existe)
   res.json(existe)
 
 
 })
+
+router.get('/verarchivo/:id', async (req, res) => {
+  const { id } = req.params;
+  console.log('ID solicitado:', id);
+
+  try {
+    const trabajocos = await pool.query('SELECT * FROM dtc_asistencias_sociales WHERE id = ?', [id]);
+    if (trabajocos.length === 0) {
+      return res.status(404).send('Asistencia social no encontrada');
+    }
+
+    const ubicacion = trabajocos[0]['ubicacion'];
+    const filePath = path.join(__dirname, '../imagenesvendedoras', ubicacion);
+
+    console.log('Ruta del archivo:', filePath);
+console.log(1456)
+    // Verificar si el archivo existe
+    if (!fs.existsSync(filePath)) {
+      console.error('Archivo no encontrado en la ruta:', filePath);
+      return res.status(404).send('Archivo no encontrado');
+    }
+
+    // Enviar el archivo al cliente
+    res.sendFile(filePath, (err) => {
+      if (err) {
+        console.error('Error al enviar el archivo:', err);
+        res.status(404).send('Archivo no encontrado');
+      }
+    });
+  } catch (error) {
+    console.error('Error al buscar la asistencia social:', error);
+    res.status(500).send('Error del servidor');
+  }
+});
 
 router.get('/traerpresentesdeclase/:id', async (req, res) => {
   const id = req.params.id
