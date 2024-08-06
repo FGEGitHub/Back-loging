@@ -895,7 +895,7 @@ if(fecha_act==undefined){
 })
 
 router.post("/nuevaintervencion", upload.single("archivo"), async (req, res) => {
-  let { detalle, id_usuario, titulo, id_trabajador } = req.body;
+  let { detalle, id_usuario, titulo, id_trabajador, fecha_referencia } = req.body;
   let ubicacion = req.file ? path.basename(req.file.path) : "no"; // Asigna "no" si no hay archivo
 
   const fechaActual = new Date();
@@ -903,8 +903,8 @@ router.post("/nuevaintervencion", upload.single("archivo"), async (req, res) => 
 
   try {
     await pool.query(
-      'INSERT INTO dtc_asistencias_sociales (id_usuario, id_trabajador, titulo, detalle, fecha_carga, ubicacion) VALUES (?, ?, ?, ?, ?, ?)',
-      [id_usuario, id_trabajador, titulo, detalle, fechaFormateada, ubicacion]
+      'INSERT INTO dtc_asistencias_sociales (id_usuario, id_trabajador, titulo, detalle, fecha_carga, ubicacion,fecha_referencia) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [id_usuario, id_trabajador, titulo, detalle, fechaFormateada, ubicacion, fecha_referencia]
     );
     res.json({ message: "Intervención creada con éxito" });
   } catch (error) {
