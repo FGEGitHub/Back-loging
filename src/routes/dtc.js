@@ -1583,7 +1583,7 @@ router.post("/modificarasist", async (req, res) => {
   const { id, titulo, detalle, fecha_referencia  } = req.body
 
   try {
-    await pool.query('update dtc_chicos  set titulo=?, detalle=?, fecha_referencia where id=?', [titulo, detalle, fecha_referencia, id])
+    await pool.query('update dtc_asistencias_sociales  set titulo=?, detalle=?, fecha_referencia=? where id=?', [titulo, detalle, fecha_referencia, id])
     res.json('realizado')
   } catch (error) {
     console.log(error)
