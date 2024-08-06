@@ -1040,6 +1040,15 @@ router.get('/traerpresentesdeclaseprof/:id', async (req, res) => {
 })
 
 
+router.get('/traercosassole/:id', async (req, res) => {
+const id  = req.params.id
+  const existe = await pool.query('select * from dtc_cosas_usuario where id_usuario=?',[id])//presentes
+  //todos
+
+  res.json(existe)
+
+
+})
 router.get('/traerasitenciasociales', async (req, res) => {
 
   const existe = await pool.query('select * from dtc_asistencias_sociales left join (select  id as idu, nombre from usuarios)as sel on dtc_asistencias_sociales.id_trabajador=sel.idu')//presentes
