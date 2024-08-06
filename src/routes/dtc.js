@@ -1059,7 +1059,7 @@ const id  = req.params.id
 })
 router.get('/traerasitenciasociales', async (req, res) => {
 
-  const existe = await pool.query('select * from dtc_asistencias_sociales left join (select  id as idu, nombre from usuarios)as sel on dtc_asistencias_sociales.id_trabajador=sel.idu')//presentes
+  const existe = await pool.query('select * from dtc_asistencias_sociales left join (select  id as idu, nombre from usuarios)as sel on dtc_asistencias_sociales.id_trabajador=sel.idu left join (select id as idch, nombre as nombree, apellido from dtc_chicos) as sel3 on dtc_asistencias_sociales.id_usuario=sel3.idch')//presentes
   //todos
 
   res.json(existe)
