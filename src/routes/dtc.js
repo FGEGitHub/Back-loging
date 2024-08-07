@@ -934,7 +934,7 @@ router.get('/listaprofs/', async (req, res) => {
 router.get('/traerhorariosprofesionales/', async (req, res) => {
   const id = req.params.id
 
-  const pendientes = await pool.query('select * from cadia_horario join (select id as idu, nombre,mail from usuarios) as sel on cadia_horario.id_usuario=sel.idu')
+  const pendientes = await pool.query('select * from cadia_horario join (select id as idu, nombre,mail, usuario from usuarios) as sel on cadia_horario.id_usuario=sel.idu')
   
 
   
@@ -1201,6 +1201,8 @@ router.get('/traerprofesionales/', async (req, res) => {
       const nue = {
         id: usuario.id,
         nombre: usuario.nombre,
+        nivel: usuario.nivel,
+        mail: usuario.mail,
         cantidad: totalClases.length,
         cantidadMes: clasesMesActual.length,
         cantidadHoy: clasesHoy.length,
