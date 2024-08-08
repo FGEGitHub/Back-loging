@@ -198,14 +198,29 @@ router.get('/listachicoscadia/', async (req, res) => {
   }
   res.json([chiques, env])
 })
-
 router.get('/listachiques/', async (req, res) => {
   try {
     // Obtener todos los datos de la tabla 'dtc_chicos'
     const chiques = await pool.query('SELECT * FROM dtc_chicos ORDER BY apellido');
 
-    // Mapear los resultados para agregar el campo 'falta'
+    // Mapear los resultados para agregar el campo 'falta' y calcular la edad
     const chiquesConFalta = chiques.map(chique => {
+      // Calcular la edad
+      const calcularEdad = (fechaNacimiento) => {
+        const hoy = new Date();
+        const [anio, mes, dia] = fechaNacimiento.split('-');
+        let edad = hoy.getFullYear() - anio;
+        const mesActual = hoy.getMonth() + 1; // Los meses en JavaScript son 0-11
+        const diaActual = hoy.getDate();
+
+        if (mesActual < mes || (mesActual === mes && diaActual < dia)) {
+          edad--;
+        }
+        return edad;
+      };
+
+      const edad = calcularEdad(chique.fecha_nacimiento);
+
       // Lista de campos requeridos
       const requiredFields = {
         dni: 'DNI',
@@ -223,7 +238,7 @@ router.get('/listachiques/', async (req, res) => {
       // Crear el campo 'falta' con la lista de campos faltantes o "Completo"
       const falta = faltantes.length > 0 ? faltantes.map(field => requiredFields[field]).join(', ') : 'Completo';
 
-      return { ...chique, falta };
+      return { ...chique, falta, edad };
     });
 
     // Obtener el conteo de cada grupo específico (si es necesario)
@@ -233,8 +248,9 @@ router.get('/listachiques/', async (req, res) => {
     const sind = chiques.filter(chique => !['kid1', 'kid2', 'kid3'].includes(chique.kid)).length;
 
     // Enviar la respuesta con la lista modificada y los datos adicionales
+    console.log(chiquesConFalta)
     res.json([chiquesConFalta,
-       {
+      {
         total: chiques.length,
         kid1,
         kid2,
@@ -247,6 +263,7 @@ router.get('/listachiques/', async (req, res) => {
     res.status(500).json({ message: 'Error al obtener la lista de chiques' });
   }
 });
+
 
 
 
