@@ -292,8 +292,13 @@ router.get('/datosdechique/:id', async (req, res) => {
 
     } else {
       rutaImagen = path.join(__dirname, '../imagenesvendedoras', chiques[0]['foto']);
-      imagenBuffer = fs.readFileSync(rutaImagen);
-      imagenBase64 = imagenBuffer.toString('base64');
+      try {
+        imagenBuffer = fs.readFileSync(rutaImagen);
+        imagenBase64 = imagenBuffer.toString('base64');
+      } catch (error) {
+        imagenBase64=null
+      }
+
     }
     const vinculos = await pool.query('select * from dtc_vinculo join (select id as idc, nombre, apellido from dtc_chicos ) as sel on dtc_vinculo.id_vinculo=sel.idc where id_usuario=?', [id])
     res.json([chiques, imagenBase64, vinculos])
