@@ -198,6 +198,32 @@ router.get('/listachicoscadia/', async (req, res) => {
   }
   res.json([chiques, env])
 })
+
+
+
+
+router.get('/listainventario/', async (req, res) => {
+  try {
+    // Obtener todos los datos de la tabla 'dtc_chicos'
+    const chiques = await pool.query('SELECT * FROM dtc_inventario left join (select id_inventario, fecha_inicio,fecha_fin, estado from dtc_prestacion_inventario) as sel on dtc_inventario.id ');
+console.log(chiques)
+    // Mapear los resultados para agregar el campo 'falta' y calcular la edad
+    
+    res.json([chiques,
+      {
+        total: chiques.length,
+        kid1:2,
+        kid2:3,
+        kid3:4,
+        
+      }
+    ]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al obtener la lista de chiques' });
+  }
+});
+
 router.get('/listachiques/', async (req, res) => {
   try {
     // Obtener todos los datos de la tabla 'dtc_chicos'
@@ -1689,7 +1715,7 @@ router.post("/modificarinformeps", async (req, res) => {
 
 router.post("/modificarasist", async (req, res) => {
   const { id, titulo, detalle, fecha_referencia  } = req.body
-
+console.log(id, titulo, detalle, fecha_referencia  )
   try {
     await pool.query('update dtc_asistencias_sociales  set titulo=?, detalle=?, fecha_referencia=? where id=?', [titulo, detalle, fecha_referencia, id])
     res.json('realizado')
