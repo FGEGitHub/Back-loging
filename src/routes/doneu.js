@@ -169,12 +169,12 @@ console.log(lotes)
 
 
 router.post("/determinarmapa1bosques", async (req, res) => {
-    const { mapa1, manzana, lote } = req.body
+    const { mapa1, manzana, lote, sector } = req.body
     console.log(mapa1, manzana, lote)
     let mensaje="Error"
     try {
       
-        const lot = await pool.query('select * from lotes where sector="Bosques" and manzana=? and lote=?', [manzana, lote])
+        const lot = await pool.query('select * from lotes where sector=? and manzana=? and lote=? ', [sector,manzana, lote])
         if (lot.length > 0) {
             await pool.query('update lotes set mapa1=? where id=?', [mapa1, lot[0]['id']])
             mensaje = "realizado"
