@@ -21,6 +21,18 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 
+router.get('/tablaprestacionesa/:id', async (req, res) => {
+  let id = req.params.id
+  try {
+    const clas = await pool.query(' select * from  dtc_prestacion_inventario join(select id as ida, nombre, detalle as detallee from dtc_inventario) as sel on dtc_prestacion_inventario.id_inventario=sel.ida where id_inventario=? ', [id])
+    res.json([clas])
+  } catch (error) {
+    console.log(error)
+    res.json('Error')
+  }
+
+
+})
 
 router.get('/traerclasesprof/:id', async (req, res) => {
   let id = req.params.id
@@ -205,11 +217,23 @@ router.get('/listachicoscadia/', async (req, res) => {
 router.get('/listainventario/', async (req, res) => {
   try {
     // Obtener todos los datos de la tabla 'dtc_chicos'
-    const chiques = await pool.query('SELECT * FROM dtc_inventario left join (select id_inventario, fecha_inicio,fecha_fin, estado from dtc_prestacion_inventario) as sel on dtc_inventario.id ');
-console.log(chiques)
-    // Mapear los resultados para agregar el campo 'falta' y calcular la edad
-    
-    res.json([chiques,
+    const chiques = await pool.query('SELECT * FROM dtc_inventario  ');
+   /// recorrer todo  y poner por cada uno prestaicon_inventario esado activo
+   let enviar=[]
+     for (aux in chiques){
+        let prestaciones = await pool.query('select * from dtc_prestacion_inventario where id_inventario=?',[chiques[aux]['id']])
+      nuevo={
+        id:chiques[aux]['id'],
+        detalle:chiques[aux]['detalle'],
+        nombre:chiques[aux]['nombre'],
+        stock:chiques[aux]['stock'],
+        prestadas:prestaciones.length
+
+
+      }
+enviar.push(nuevo)
+     }
+    res.json([enviar,
       {
         total: chiques.length,
         kid1:2,
@@ -633,6 +657,24 @@ router.post("/nuevapersonagim", async (req, res) => {
   
 })
 
+router.post("/nuevaprestacioninv", async (req, res) => {
+  let { detalle, persona, fecha_inicio, fecha_fin,id_inventario } = req.body
+  try {
+    if(fecha_fin== undefined){
+      fecha_fin="sin fecha"
+    }
+   console.log( detalle, persona, fecha_inicio, fecha_fin,id_inventario)
+    await pool.query('insert dtc_prestacion_inventario  set  detalle=?, persona=?, fecha_inicio=?, fecha_fin=?,id_inventario=? ', [ detalle, persona, fecha_inicio, fecha_fin,id_inventario])
+
+    res.json("Realizado")
+  } catch (error) {
+    console.log(error)
+    res.json("No realizado")
+  }
+
+  
+})
+
 router.post("/nuevoexpediente", async (req, res) => {
   let { titulo, inicio, cierre, detalle } = req.body
   try {
@@ -994,6 +1036,7 @@ if(fecha_act==undefined){
 
 router.post("/nuevoinformepsiq", upload.single("archivo"), async (req, res) => {
   let { detalle, id_usuario, titulo, id_trabajador, fecha_referencia } = req.body;
+  console.log(detalle, id_usuario, titulo, id_trabajador, fecha_referencia)
   let ubicacion = req.file ? path.basename(req.file.path) : "no"; // Asigna "no" si no hay archivo
 
   const fechaActual = new Date();
@@ -1177,7 +1220,7 @@ router.get('/traerasitenciasociales', async (req, res) => {
 })
 router.get('/traerinformes', async (req, res) => {
 
-  const existe = await pool.query('select * from dtc_informes_psic left join (select  id as idu, nombre from usuarios)as sel on dtc_informes_psic.id_trabajador=sel.idu left join (select id as idch, nombre as nombree, apellido from dtc_chicos) as sel3 on dtc_informes_psic.id_usuario=sel3.idch')//presentes
+  const existe = await pool.query('select * from dtc_informes_psic left join (select  id as idu, nombre from usuarios)as sel on dtc_informes_psic.id_trabajador=sel.idu left join (select id as idch, nombre as nombree, apellido from dtc_personas_psicologa) as sel3 on dtc_informes_psic.id_usuario=sel3.idch')//presentes
   //todos
 
   res.json(existe)
