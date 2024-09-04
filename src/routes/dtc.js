@@ -814,7 +814,12 @@ router.post("/nuevapersonapsiq", async (req, res) => {
     if (fecha_nacimiento == undefined) {
       fecha_nacimiento = "Sin asignar"
     }
-
+    if (dni == undefined) {
+      dni = "Sin asignar"
+    }
+    if (telefono == undefined) {
+      telefono = "Sin asignar"
+    }
 
     await pool.query('insert dtc_personas_psicologa  set nombre=?,apellido=?,fecha_nacimiento=?,observaciones=?,primer_ingreso=?,dni=?,domicilio=?,telefono=?', [nombre, apellido, fecha_nacimiento, observaciones, primer_ingreso, dni, domicilio, telefono])
 
@@ -2043,8 +2048,9 @@ router.post("/ponerausenteclase", async (req, res) => {
   }
 })
 router.post("/traertodoslosturnosfecha", async (req, res) => {
-  const { fecha, } = req.body
+  const { fecha } = req.body
   try {
+    console.log(fecha)
     const tunr = await pool.query('select * from dtc_turnos left join(select id as idp, nombre, apellido, dni from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where fecha=?', [fecha])
     const pendientes = await pool.query('select * from dtc_turnos  where estado="pendiente"')
     usuarios = await pool.query("select * from dtc_personas_psicologa left join (select fecha, id_persona  from dtc_turnos  where fecha=?) as sel on dtc_personas_psicologa.id=sel.id_persona ", [fecha])
@@ -2063,6 +2069,8 @@ router.get("/traertodoslosturnosaprobac", async (req, res) => {
     const tunr = await pool.query('select * from dtc_turnos join(select id as idp, nombre, apellido, dni from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.idp')
     const pendientes = await pool.query('select * from dtc_turnos  where estado="pendiente"')
     console.log(tunr)
+    console.log('traertodoslosturnosaprobac')
+    
     res.json([tunr, pendientes.length])
   } catch (error) {
     console.log(error)
