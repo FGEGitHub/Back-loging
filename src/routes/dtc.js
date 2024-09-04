@@ -567,7 +567,7 @@ router.post("/modificarusuariopsiq", async (req, res) => {
     if (admision == undefined) {
       admision = "Sin asignar"
     }
-    await pool.query('update dtc_personas_psicologa  set nombre=?,apellido=?,fecha_nacimiento=?,observaciones=?,primer_ingreso=?,admision=?,dni=?,domicilio=?,telefono=? where id=?', [nombre, apellido, fecha_nacimiento, observaciones, primer_ingreso, admision, dni, domicilio, telefono, id])
+    await pool.query('update dtc_personas_psicologa  set nombre=?,apellido=?,fecha_nacimiento=?,observaciones=?,primer_ingreso=?,dni=?,domicilio=?,telefono=? where id=?', [nombre, apellido, fecha_nacimiento, observaciones, primer_ingreso, admision, dni, domicilio, telefono, id])
 
     res.json('Modificado')
   } catch (error) {
