@@ -543,7 +543,27 @@ router.post("/modificarusuariopsiq", async (req, res) => {
     if (fecha_nacimiento == undefined) {
       fecha_nacimiento = "Sin asignar"
     }
-
+    if (dni == undefined) {
+      dni = "Sin asignar"
+    }
+    if (telefono == undefined) {
+      telefono = "Sin asignar"
+    }
+    if (autorizacion_imagen == undefined) {
+      autorizacion_imagen = "Sin asignar"
+    }
+    if (tel_responsable == undefined) {
+      tel_responsable = "Sin asignar"
+    }
+    if (fotoc_dni == undefined) {
+      fotoc_dni = "Sin asignar"
+    }
+    if (admision == undefined) {
+      admision = "Sin asignar"
+    }
+    if (primer_ingreso == undefined) {
+      primer_ingreso = "Sin asignar"
+    }
     await pool.query('update dtc_personas_psicologa  set nombre=?,apellido=?,fecha_nacimiento=?,observaciones=?,primer_ingreso=?,admision=?,dni=?,domicilio=?,telefono=? where id=?', [nombre, apellido, fecha_nacimiento, observaciones, primer_ingreso, admision, dni, domicilio, telefono, id])
 
     res.json('Modificado')
