@@ -309,11 +309,11 @@ router.get('/listadetodoslosturnos/', isLoggedInn2, async (req, res) => {
 
 router.get('/traerturnosparainscri/', async (req, res) => {
 
-  const tu = await pool.query('select * from turnos where etapa=3')
+  const tu = await pool.query('select * from turnos where etapa=5')
 
 
-  res.json([tu[10], tu[11], tu[5], tu[6], tu[7], tu[0], tu[1], tu[2], tu[3], tu[4], tu[12], tu[13], tu[14], tu[15], tu[16], tu[8], tu[9], tu[19], tu[20], tu[21], tu[17], tu[18], tu[22], tu[23], tu[24]])
-
+ // res.json([tu[10], tu[11], tu[5], tu[6], tu[7], tu[0], tu[1], tu[2], tu[3], tu[4], tu[12], tu[13], tu[14], tu[15], tu[16], tu[8], tu[9], tu[19], tu[20], tu[21], tu[17], tu[18], tu[22], tu[23], tu[24]])
+ res.json(tu)
 })
 
 router.get('/traerinscripcionesenc/:id', async (req, res) => {
