@@ -836,7 +836,7 @@ router.get('/incriptas2da/', async (req, res) => {
   }
 
   res.json([inscriptos, deuda_exigible, datos33]) */
-  inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria,id as idp from personas) as sel on inscripciones.dni_persona=sel.dni  where edicion=4')
+  inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria,id as idp from personas) as sel on inscripciones.dni_persona=sel.dni  where edicion=5')
   
   deuda_exigible = []
   datos33={}
