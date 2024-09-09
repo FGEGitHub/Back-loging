@@ -1381,7 +1381,7 @@ router.post("/enviarinscripcion2", async (req, res) => {
   if (emprendimiento == undefined) {
     emprendimiento = 'Sin determinar'
   }
-  console.log(nombre, fecha_nac, participante_feria, apellido, dni, tel, tel2, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, motivacion,modalidad ,genero, otrogenero  )
+  console.log(uno,dos,nombre, fecha_nac, participante_feria, apellido, dni, tel, tel2, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, motivacion,modalidad ,genero, otrogenero  )
 
   try {
     let pers = await pool.query('select * from personas where dni =?', [dni])
@@ -1407,6 +1407,7 @@ router.post("/enviarinscripcion2", async (req, res) => {
     else {
       fecha = (new Date(Date.now()))
       cat = await caregorizar.asignarcategoria(pers)
+      console.log(uno,dos)
       await pool.query('insert into inscripciones set uno=?,dos=?, fecha=?,dni_persona=?,emprendimiento=?,motivacion=?,id_persona=?,edicion=?', [uno, dos, fecha, dni, emprendimiento, motivacion, pers[0]['id'], 5])
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto'
     }
