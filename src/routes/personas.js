@@ -1358,7 +1358,7 @@ router.post("/enviarinscripcion", async (req, res) => {
 
 
 router.post("/enviarinscripcion2", async (req, res) => {
-  let { nombre, apellido, dni, tel, tel2, fecha_nac, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, participante_feria, motivacion,modalidad,emprendimiento,genero, otrogenero } = req.body
+  let {uno, dos, nombre, apellido, dni, tel, tel2, fecha_nac, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, participante_feria, motivacion,modalidad,emprendimiento,genero, otrogenero } = req.body
   ///participante_feria
   if (tipo_trabajo === undefined) {
     tipo_trabajo = 'Sin determinar'
@@ -1407,7 +1407,7 @@ router.post("/enviarinscripcion2", async (req, res) => {
     else {
       fecha = (new Date(Date.now()))
       cat = await caregorizar.asignarcategoria(pers)
-      await pool.query('insert into inscripciones set fecha=?,dni_persona=?,emprendimiento=?,motivacion=?,id_persona=?,edicion=?', [fecha, dni, emprendimiento, motivacion, pers[0]['id'], 5])
+      await pool.query('insert into inscripciones set uno=?,dos=?, fecha=?,dni_persona=?,emprendimiento=?,motivacion=?,id_persona=?,edicion=?', [uno, dos, fecha, dni, emprendimiento, motivacion, pers[0]['id'], 5])
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto'
     }
 
