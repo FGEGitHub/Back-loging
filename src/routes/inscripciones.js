@@ -943,7 +943,16 @@ router.post("/buscarestadopordni", async (req, res) => {
   }
 })
 
+router.post('/borrarinscripcionde/', async (req, res) => {
+const {id} = req.body
 
+
+
+  await pool.query('delete from inscripciones where id= ?',[id])
+
+  res.json('Realizado')
+
+})
 ////// desinscribir 
 router.get('/desinscribirtodos/', async (req, res) => {
 
