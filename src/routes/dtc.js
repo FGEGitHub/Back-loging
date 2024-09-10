@@ -62,6 +62,38 @@ router.get('/traerclasesprof/:id', async (req, res) => {
 
 })
 
+
+router.get('/traerclasestallercadia/:id', async (req, res) => {
+  let id = req.params.id
+  try {
+    const clas = await pool.query(' select * from  cadia_clases_prof  where idtallerista=? ORDER BY id_clase DESC', [id])
+    env = []
+    for (iii in clas){
+      can = await pool.query('select * from cadia_asitencia_clases where id_clase=?',[clas[iii]['id_clase']])
+      nuev={
+        id:clas[iii]['id_clase'],
+        fecha:clas[iii]['fecha'],
+        titulo:clas[iii]['titulo'],
+        descripcion:clas[iii]['descripcion'],
+        id_tallerista:clas[iii]['idtallerista'],
+        cantidad:can.length
+      }
+      env.push(nuev)
+    }
+
+    console.log(env)
+    res.json(env)
+  } catch (error) {
+    console.log(error)
+    res.json('Error')
+  }
+
+
+})
+
+
+
+
 router.get('/traerclasestaller/:id', async (req, res) => {
   let id = req.params.id
   try {
@@ -90,7 +122,34 @@ router.get('/traerclasestaller/:id', async (req, res) => {
 
 })
 
-
+router.post('/clasificarturno/', async (req, res) => {
+  let {id , estado} = req.body
+  console.log(id , estado)
+   try {
+     await pool.query(' UPDATE dtc_turnos SET estado=? where id=?', [estado,id])
+ 
+ 
+   } catch (error) {
+     console.log(error)
+     res.json('no realizado')
+   }
+ 
+   res.json('realizado')
+ })
+ router.post('/clasificarturnocadia/', async (req, res) => {
+  let {id , estado} = req.body
+  console.log(id , estado)
+   try {
+     await pool.query(' UPDATE cadia_turnos SET estado=? where id=?', [estado,id])
+ 
+ 
+   } catch (error) {
+     console.log(error)
+     res.json('no realizado')
+   }
+ 
+   res.json('realizado')
+ })
 router.get('/sumar1/:id', async (req, res) => {
  let id = req.params.id
   try {
