@@ -617,7 +617,21 @@ router.post("/borrarturno", async (req, res) => {
 
 })
 
+router.post("/borrarturnocadia", async (req, res) => {
+  let { id } = req.body
 
+  try {
+
+
+    await pool.query('delete from cadia_turnos  where id=?', [id])
+
+    res.json('Borrado')
+  } catch (error) {
+    console.log(error)
+    res.json('No Borrado')
+  }
+
+})
 router.post("/modificarclase", async (req, res) => {
   let { id, titulo, descripcion, fecha } = req.body
 
@@ -1187,17 +1201,48 @@ router.get('/traerhorariosprofesional/:id', async (req, res) => {
 
 router.get('/traercitas/:id', async (req, res) => {
   const id = req.params.id
-
-const pendientes = await pool.query('select * from dtc_turnos where id_psico=? and estado="Disponible"',[id])
-const confirm = await pool.query('select * from dtc_turnos where id_psico=?and estado="Agendado"',[id])
-
-
-
-  res.json([pendientes, confirm])
-
+  console.log(id)
+  const usua = await pool.query('select * from usuarios where id=?',[id])
+  if (usua.nivel==40){
+    const pendientes = await pool.query('select * from dtc_turnos where estado="Disponible"',[id])
+    const confirm = await pool.query('select * from dtc_turnos where  estado="Agendado"',[id])
+    console.log([pendientes, confirm])
+    
+      res.json([pendientes, confirm])
+  }else{
+    const pendientes = await pool.query('select * from dtc_turnos where id_psico=? and estado="Disponible"',[id])
+    const confirm = await pool.query('select * from dtc_turnos where id_psico=?and estado="Agendado"',[id])
+    console.log([pendientes, confirm])
+    
+    
+      res.json([pendientes, confirm])
+  }
 
 })
 
+
+router.get('/traercitascadia/:id', async (req, res) => {
+  const id = req.params.id
+console.log(id)
+const usua = await pool.query('select * from usuarios where id=?',[id])
+if (usua.nivel==40){
+  const pendientes = await pool.query('select * from cadia_turnos where estado="Disponible"',[id])
+  const confirm = await pool.query('select * from cadia_turnos where  estado="Agendado"',[id])
+  console.log([pendientes, confirm])
+  
+    res.json([pendientes, confirm])
+}else{
+  const pendientes = await pool.query('select * from cadia_turnos where id_psico=? and estado="Disponible"',[id])
+  const confirm = await pool.query('select * from cadia_turnos where id_psico=?and estado="Agendado"',[id])
+  console.log([pendientes, confirm])
+  
+  
+    res.json([pendientes, confirm])
+}
+
+
+
+})
 router.get('/traercitastodos/', async (req, res) => {
   const id = req.params.id
 
@@ -1211,7 +1256,18 @@ const confirm = await pool.query('select * from dtc_turnos where estado="Agendad
 
 })
 
+router.get('/traercitastodoscadia/', async (req, res) => {
+  const id = req.params.id
 
+const pendientes = await pool.query('select * from cadia_turnos where estado="Disponible"')
+const confirm = await pool.query('select * from cadia_turnos where estado="Agendado"')
+
+
+
+  res.json([pendientes, confirm])
+
+
+})
 
 
 router.get('/traerpresentesdeclaseprof/:id', async (req, res) => {
@@ -1408,6 +1464,18 @@ router.get('/traerprofesionales/', async (req, res) => {
   }
 });
 
+router.get('/traerpsicologos/', async (req, res) => {
+  try {
+    // Obtiene todos los usuarios con nivel 26
+    const existe = await pool.query('SELECT * FROM usuarios WHERE nivel = 24');
+   
+
+    res.json([existe]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Ocurrió un error al obtener los talleres' });
+  }
+});
 router.get('/traertalleres/', async (req, res) => {
   try {
     // Obtiene todos los usuarios con nivel 26
@@ -1907,8 +1975,13 @@ router.post("/ponerpresenteactividad", async (req, res) => {
 
 
 router.post("/agregarturno", async (req, res) => {
-  const { fecha, horario, id_psic } = req.body
-  console.log(fecha, horario, id_psic)
+  let { fecha, horario, id_psic,profesional} = req.body
+  console.log(fecha, horario, id_psic,profesional)
+  if(profesional != undefined){
+    id_psic=profesional
+    fecha=fecha.fecha
+  }
+  console.log(fecha)
   try {
     await pool.query('insert into dtc_turnos set fecha=?, detalle=?,id_psico=?, estado="Disponible"', [fecha, horario, id_psic])
     res.json('Realizado')
@@ -1920,7 +1993,22 @@ router.post("/agregarturno", async (req, res) => {
 })
 
 
+router.post("/agregarturnocadia", async (req, res) => {
+  let { fecha, horario, id_psic,profesional} = req.body
+  console.log(fecha, horario, id_psic,profesional)
+  if(profesional != undefined){
+    id_psic=profesional
+    fecha=fecha.fecha
+  }
+  try {
+    await pool.query('insert into cadia_turnos set fecha=?, detalle=?,id_psico=?, estado="Disponible"', [fecha, horario, id_psic])
+    res.json('Realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('No Realizado')
+  }
 
+})
 router.post("/agendarturno", async (req, res) => {
   let { id, id_persona } = req.body
 
@@ -1937,6 +2025,21 @@ router.post("/agendarturno", async (req, res) => {
 
 })
 
+router.post("/agendarturnocadia", async (req, res) => {
+  let { id, id_persona } = req.body
+
+  try {
+    const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
+    console.log(id, id_persona)
+    await pool.query('update cadia_turnos set id_persona=?,estado="Agendado",hora=? where id=?', [id_persona, horaBuenosAires + '-' + (new Date(Date.now())).toLocaleDateString(), id])
+    res.json('agendado')
+  } catch (error) {
+    console.log(error)
+    res.json('no agendado')
+  }
+
+
+})
 router.post("/sacarturno", async (req, res) => {
   let { id } = req.body
   try {
@@ -2085,6 +2188,21 @@ router.post("/traertodoslosturnosfecha", async (req, res) => {
     res.json(['Error', 'error'])
   }
 })
+
+router.post("/traertodoslosturnosfechacadia", async (req, res) => {
+  const { fecha } = req.body
+  try {
+    console.log(fecha)
+    const tunr = await pool.query('select * from cadia_turnos left join(select id as idp, nombre, apellido, dni from cadia_chicos) as sel on cadia_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on cadia_turnos.id_psico=sel2.idu where fecha=?', [fecha])
+    usuarios = await pool.query("select * from cadia_chicos left join (select fecha, id as idc  from cadia_turnos  where fecha=?) as sel on cadia_chicos.id=sel.idc ", [fecha])
+
+    console.log(tunr)
+    res.json([tunr, usuarios])
+  } catch (error) {
+    console.log(error)
+    res.json(['Error', 'error'])
+  }
+})
 router.get("/traertodoslosturnosaprobac", async (req, res) => {
 
 
@@ -2172,7 +2290,17 @@ router.post("/traerparaturnos", async (req, res) => {
 
 })
 
+router.post("/traerparaturnoscadia", async (req, res) => {
+  const { fecha, id } = req.body
+  console.log(fecha)
 
+  prod = await pool.query("select * from cadia_turnos join (select id as idc, nombre, apellido,dni from cadia_chicos ) as sel on cadia_turnos.id_persona=sel.idc where fecha=?  order by apellido", [fecha])
+  usuarios = await pool.query("select * from cadia_chicos left join (select fecha, id_persona  from cadia_turnos  where fecha=?) as sel on cadia_chicos.id=sel.id_persona ", [fecha])
+
+  res.json([prod, usuarios, {}])
+
+
+})
 router.post("/traerpresentes", async (req, res) => {
   const { fecha, id } = req.body
 
