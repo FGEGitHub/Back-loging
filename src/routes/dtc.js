@@ -126,7 +126,7 @@ router.post('/clasificarturno/', async (req, res) => {
   let {id , estado} = req.body
   console.log(id , estado)
    try {
-     await pool.query(' UPDATE dtc_turnos SET estado=? where id=?', [estado,id])
+     await pool.query(' UPDATE dtc_turnos SET presente=? where id=?', [estado,id])
  
  
    } catch (error) {
@@ -140,7 +140,7 @@ router.post('/clasificarturno/', async (req, res) => {
   let {id , estado} = req.body
   console.log(id , estado)
    try {
-     await pool.query(' UPDATE cadia_turnos SET estado=? where id=?', [estado,id])
+     await pool.query(' UPDATE cadia_turnos SET presente=? where id=?', [estado,id])
  
  
    } catch (error) {
