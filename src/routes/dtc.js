@@ -231,20 +231,50 @@ router.get('/listaexpedientes/', async (req, res) => {
   res.json([chiques, 0])
 })
 
-
 router.get('/listadepersonaspsiq/', async (req, res) => {
+  try {
+    const chiques = await pool.query(`
+      SELECT 
+        dtc_personas_psicologa.*, 
+        COALESCE(sel.cantidadturnos, 0) AS cantidadturnos 
+      FROM 
+        dtc_personas_psicologa 
+      LEFT JOIN (
+        SELECT 
+          id_persona, 
+          COUNT(id_persona) AS cantidadturnos 
+        FROM 
+          dtc_turnos 
+        GROUP BY 
+          id_persona
+      ) AS sel 
+      ON dtc_personas_psicologa.id = sel.id_persona 
+      ORDER BY 
+        cantidadturnos desc, apellido 
+    `);
 
-  const chiques = await pool.query('select * from dtc_personas_psicologa order by apellido')
+    // Convierte BigInt a número o cadena
+    const chiquesFormatted = chiques.map(row => {
+      return {
+        ...row,
+        cantidadturnos: typeof row.cantidadturnos === 'bigint' ? Number(row.cantidadturnos) : row.cantidadturnos
+      };
+    });
 
-  env = {
-    total: chiques.length,
-    kid1: 5,
-    kid2: 5,
-    kid3: 5,
-    sind: 5
+    const env = {
+      total: chiques.length,
+      kid1: 5,
+      kid2: 5,
+      kid3: 5,
+      sind: 5
+    };
+
+    res.json([chiquesFormatted, env]);
+  } catch (error) {
+    console.error('Error en la consulta:', error);
+    res.status(500).json({ error: 'Error en la consulta a la base de datos' });
   }
-  res.json([chiques, env])
-})
+});
 
 router.get('/listadepersonasgim/', async (req, res) => {
 
