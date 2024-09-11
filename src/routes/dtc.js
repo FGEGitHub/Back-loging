@@ -2248,6 +2248,51 @@ router.post("/traertodoslosturnosfecha", async (req, res) => {
   }
 })
 
+router.post('/agregarvariasfechas', async (req, res) => {
+  const { startDate, endDate, weekDays, schedules, profesional } = req.body;
+
+  // Convertir las fechas desde string a objetos Date
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  // Mapear días de la semana a sus correspondientes valores numéricos
+  const daysOfWeekMap = {
+    'domingo': 0,
+    'lunes': 1,
+    'martes': 2,
+    'miercoles': 3,
+    'jueves': 4,
+    'viernes': 5,
+    'sabado': 6,
+  };
+
+  let current = start;
+  const query = 'INSERT INTO cadia_turnos (fecha, detalle, id_psico,estado) VALUES (?, ?, ?, ?)';
+
+  try {
+    while (current <= end) {
+      // Obtener el día de la semana en formato string y convertirlo a su valor numérico
+      const currentDayOfWeek = current.getDay();
+      const dayName = Object.keys(daysOfWeekMap).find(day => daysOfWeekMap[day] === currentDayOfWeek);
+ 
+
+      // Verificar si el día actual está en la lista de días seleccionados
+      if (weekDays.includes(dayName)) {
+        for (const schedule of schedules) {
+         
+          // Ejecutar la consulta para cada horario en el día seleccionado
+          await pool.query(query, [current.toISOString().split('T')[0], schedule, profesional.profesional,"Disponible"]);
+        }
+      }
+      // Avanzar al siguiente día
+      current.setDate(current.getDate() + 1);
+    }
+    res.status(200).send('Agregados correctamente');
+  } catch (error) {
+    console.error('Error saving to the database:', error);
+    res.status(500).send('Internal server error');
+  }
+});
 router.post("/traertodoslosturnosfechacadia", async (req, res) => {
   const { fecha } = req.body
   try {
