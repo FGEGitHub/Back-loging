@@ -622,7 +622,7 @@ router.post("/modificarusuariocadia", async (req, res) => {
 
 
 router.post("/modificarusuariopsiq", async (req, res) => {
-  let { id, nombre, apellido, kid, fecha_nacimiento, observaciones, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, hora_merienda } = req.body
+  let { id, nombre, apellido,  fecha_nacimiento, observaciones, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, hora_merienda } = req.body
 
   console.log(id, nombre, apellido, fecha_nacimiento, observaciones, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, hora_merienda)
   try {
@@ -1550,6 +1550,32 @@ router.get('/traerprofesionales/', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Ocurrió un error al obtener los talleres' });
+  }
+});
+
+
+router.get('/traerhorariosdisponiblescadia/:id', async (req, res) => {
+const id = req.params.id
+    // Obtiene todos los usuarios con nivel 26
+    const existe = await pool.query('SELECT * FROM cadia_turnos join (select id as idu, nombre as nombreu,mail as prof  from usuarios) as sel on cadia_turnos.id_psico=sel.idu WHERE estado = "Disponible" or id_persona=? ',[id]);
+
+
+    res.json(existe);
+})
+
+
+router.post("/enviarhorariosdlchico", async (req, res) => {
+  const { id_persona, id_turno, id_cursado, horariosSeleccionados } = req.body;
+
+  try {
+    for (let idHorario of horariosSeleccionados) {
+      await pool.query('INSERT INTO dtc_clases_taller (id_persona, id_turno, id_cursado, id_horario) VALUES (?, ?, ?, ?)', 
+      [id_persona, id_turno, id_cursado, idHorario]);
+    }
+    res.json('Horarios almacenados correctamente');
+  } catch (error) {
+    console.log(error);
+    res.status(500).json('Error al almacenar los horarios');
   }
 });
 
