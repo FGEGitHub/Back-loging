@@ -1610,6 +1610,16 @@ router.get('/traeractividadesprofcadia/:id', async (req, res) => {
   console.log(existe)
       res.json(existe);
   })
+  
+  router.get('/traeractividadesprofcadiaadmin/', async (req, res) => {
+        // Obtiene todos los usuarios con nivel 26
+        const existe = await pool.query('SELECT * FROM cadia_informes join (select id as idu, nombre as nombreu,mail as prof  from usuarios) as sel on cadia_informes.id_trabajador=sel.idu  left join (select nombre,apellido,id as idc from cadia_chicos) as sel2 on cadia_informes.id_usuario=sel2.idc ');
+    
+    console.log(existe)
+        res.json(existe);
+    })
+
+
 router.post("/enviarhorariosdlchico", async (req, res) => {
   const { id_persona, horariosSeleccionados } = req.body; // No necesitamos id_turno ni id_cursado aquí.
 
