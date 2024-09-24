@@ -957,6 +957,23 @@ router.post("/nuevapersonapsiq", async (req, res) => {
 
 })
 
+
+router.post("/borraractividadchicocadia", async (req, res) => {
+  const { id } = req.body
+
+  try {
+    await pool.query('delete  from  cadia_informes where id = ?', [id])
+    res.json('Realizado')
+
+  } catch (error) {
+    console.log(error)
+    res.json('No realizado')
+  }
+
+
+})
+
+
 router.post("/borraractividadchico", async (req, res) => {
   const { id } = req.body
 
@@ -1165,6 +1182,25 @@ if(fecha_act==undefined){
 })
 
 
+router.post("/nuevoinformepsiqcadia", upload.single("archivo"), async (req, res) => {
+  let { detalle, id_usuario, titulo, id_trabajador, fecha_referencia } = req.body;
+  console.log(detalle, id_usuario, titulo, id_trabajador, fecha_referencia)
+  let ubicacion = req.file ? path.basename(req.file.path) : "no"; // Asigna "no" si no hay archivo
+
+  const fechaActual = new Date();
+  const fechaFormateada = fechaActual.toISOString().slice(0, 19).replace('T', ' ');
+
+  try {
+    await pool.query(
+      'INSERT INTO cadia_informes (id_usuario, id_trabajador, titulo, detalle, fecha_carga, ubicacion,fecha_referencia) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [id_usuario, id_trabajador, titulo, detalle, fechaFormateada, ubicacion, fecha_referencia]
+    );
+    res.json({ message: "Intervención creada con éxito" });
+  } catch (error) {
+    console.error('Error al crear la intervención:', error);
+    res.status(500).json({ error: 'Error al crear la intervención' });
+  }
+});
 router.post("/nuevoinformepsiq", upload.single("archivo"), async (req, res) => {
   let { detalle, id_usuario, titulo, id_trabajador, fecha_referencia } = req.body;
   console.log(detalle, id_usuario, titulo, id_trabajador, fecha_referencia)
@@ -1184,6 +1220,9 @@ router.post("/nuevoinformepsiq", upload.single("archivo"), async (req, res) => {
     res.status(500).json({ error: 'Error al crear la intervención' });
   }
 });
+
+
+
 router.post("/nuevaintervencion", upload.single("archivo"), async (req, res) => {
   let { detalle, id_usuario, titulo, id_trabajador, fecha_referencia } = req.body;
   let ubicacion = req.file ? path.basename(req.file.path) : "no"; // Asigna "no" si no hay archivo
@@ -1563,14 +1602,21 @@ const id = req.params.id
     res.json(existe);
 })
 
-
+router.get('/traeractividadesprofcadia/:id', async (req, res) => {
+  const id = req.params.id
+      // Obtiene todos los usuarios con nivel 26
+      const existe = await pool.query('SELECT * FROM cadia_informes join (select id as idu, nombre as nombreu,mail as prof  from usuarios) as sel on cadia_informes.id_trabajador=sel.idu  left join (select nombre,apellido,id as idc from cadia_chicos) as sel2 on cadia_informes.id_usuario=sel2.idc WHERE id_trabajador=? ',[id]);
+  
+  console.log(existe)
+      res.json(existe);
+  })
 router.post("/enviarhorariosdlchico", async (req, res) => {
-  const { id_persona, id_turno, id_cursado, horariosSeleccionados } = req.body;
+  const { id_persona, horariosSeleccionados } = req.body; // No necesitamos id_turno ni id_cursado aquí.
 
   try {
     for (let idHorario of horariosSeleccionados) {
-      await pool.query('INSERT INTO dtc_clases_taller (id_persona, id_turno, id_cursado, id_horario) VALUES (?, ?, ?, ?)', 
-      [id_persona, id_turno, id_cursado, idHorario]);
+      // Actualizamos el turno con el id_persona y cambiamos el estado a "Asignado"
+      await pool.query('UPDATE cadia_turnos SET id_persona = ?, estado = "Asignado" WHERE id = ?', [id_persona, idHorario]);
     }
     res.json('Horarios almacenados correctamente');
   } catch (error) {
@@ -1578,6 +1624,7 @@ router.post("/enviarhorariosdlchico", async (req, res) => {
     res.status(500).json('Error al almacenar los horarios');
   }
 });
+
 
 router.get('/traerpsicologos/', async (req, res) => {
   try {
