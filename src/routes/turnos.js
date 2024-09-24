@@ -306,7 +306,7 @@ router.get('/listadetodoslosturnos/', isLoggedInn2, async (req, res) => {
 
 })
 
-
+//conecta el call
 router.get('/traerturnosparainscri/', async (req, res) => {
 
   const tu = await pool.query('select * from turnos where etapa=5')
