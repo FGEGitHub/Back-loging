@@ -650,7 +650,7 @@ router.get('/traerinscripcionesenc/', async (req, res) => {
   const id = req.params.id
 
 
-  const etc = await pool.query('select * from turnos where  (id_call is null or id_call= 0) and etapa=4  ')
+  const etc = await pool.query('select * from turnos where  (id_call is null or id_call= 0) and etapa=5  ')
   console.log(etc)
 
   res.json(etc);

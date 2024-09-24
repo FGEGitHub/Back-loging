@@ -83,7 +83,7 @@ try {
   let envio = []
   asignados = 0
   for (encargado in encargados) {
-      let turnos = await pool.query('select * from turnos where id_call =? ', [encargados[encargado]['id']])
+      let turnos = await pool.query('select * from turnos where id_call =? and etapa=5 ', [encargados[encargado]['id']])
      
 
       sinc= 0
