@@ -1622,11 +1622,11 @@ router.get('/traeractividadesprofcadia/:id', async (req, res) => {
 
 router.post("/enviarhorariosdlchico", async (req, res) => {
   const { id_persona, horariosSeleccionados } = req.body; // No necesitamos id_turno ni id_cursado aquí.
-
+console.log( id_persona, horariosSeleccionados)
   try {
     for (let idHorario of horariosSeleccionados) {
-      // Actualizamos el turno con el id_persona y cambiamos el estado a "Asignado"
-      await pool.query('UPDATE cadia_turnos SET id_persona = ?, estado = "Asignado" WHERE id = ?', [id_persona, idHorario]);
+      // Actualizamos el turno con el id_persona y cambiamos el estado a "Agendado"
+      await pool.query('UPDATE cadia_turnos SET id_persona = ?, estado = "Agendado" WHERE id = ?', [id_persona, idHorario]);
     }
     res.json('Horarios almacenados correctamente');
   } catch (error) {
