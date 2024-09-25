@@ -2363,7 +2363,7 @@ router.post("/traertodoslosturnosfecha", async (req, res) => {
 
 router.post('/agregarvariasfechas', async (req, res) => {
   const { startDate, endDate, weekDays, schedules, profesional } = req.body;
-
+console.log(startDate, endDate, weekDays, schedules, profesional)
   // Convertir las fechas desde string a objetos Date
   const start = new Date(startDate);
   const end = new Date(endDate);
