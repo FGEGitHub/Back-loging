@@ -2407,10 +2407,12 @@ console.log(startDate, endDate, weekDays, schedules, profesional)
   }
 });
 router.post("/traertodoslosturnosfechacadia", async (req, res) => {
-  const { fecha } = req.body
+  const { fecha,id } = req.body
   try {
     console.log(fecha)
-    const tunr = await pool.query('select * from cadia_turnos left join(select id as idp, nombre, apellido, dni from cadia_chicos) as sel on cadia_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on cadia_turnos.id_psico=sel2.idu where fecha=?', [fecha])
+    let turn
+    tunr = await pool.query('select * from cadia_turnos left join(select id as idp, nombre, apellido, dni from cadia_chicos) as sel on cadia_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on cadia_turnos.id_psico=sel2.idu where fecha=? ', [fecha])
+
     usuarios = await pool.query("select * from cadia_chicos left join (select fecha, id as idc  from cadia_turnos  where fecha=?) as sel on cadia_chicos.id=sel.idc ", [fecha])
 
     console.log(tunr)
