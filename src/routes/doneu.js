@@ -20,6 +20,23 @@ router.get("/traerlotes", async (req, res) => {
 })
 
 
+
+router.get("/traerVentas", async (req, res) => {
+
+    try {
+        const lot = await pool.query('select * from ventas join (select id as idp, nombre from clientes) as sel on ventas.id_cliente=sel.idp join (select id as idl, sector,manzana,lote from lotes) as sel2 on ventas.id_lote=idl' )
+    const cli =  await pool.query('select * from clientes')
+
+     
+        res.json([lot,cli])
+    } catch (error) {
+        console.log("error",error)
+        res.json(["lot"])
+    }
+   
+  
+
+})
 router.get("/traerloteslogin", async (req, res) => {
 
     try {
