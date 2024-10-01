@@ -38,7 +38,7 @@ router.get('/clases/:id', async (req, res) => {
     todos.push(nuev)
   } */
   ////////id usuario encargado
-  turnos = await pool.query('select *  from turnos  where etapa=3 and turnos.id_encargado =?', [id])
+  turnos = await pool.query('select *  from turnos  where etapa=5 and turnos.id_encargado =?', [id])
 
   console.log(turnos)
   res.json(turnos);
@@ -47,6 +47,24 @@ router.get('/clases/:id', async (req, res) => {
 
 
 
+router.get('/cursadoparaasistencia/:id', async (req, res) => {
+  const id = req.params.id
+  try {
+    curso = await pool.query('select * from cursado join (select id as idp, nombre, apellido, dni, tel, tel2 from personas) as sel on cursado.id_persona=sel.idp join (select id as idi, estado from inscripciones) as sel2 on cursado.id_inscripcion=sel2.idi where id_turno=? and estado="Confirmada"order by apellido', [id])
+    // curso = await pool.query('select dni, COUNT(CASE  WHEN sel3.asistencia = "presente" THEN 1    WHEN sel3.asistencia = "No" THEN 2    WHEN sel3.asistencia is null THEN 3  ELSE NULL END) as cantidad_por_estado from cursado join (select id as idp, nombre, apellido, dni, tel, tel2 from personas) as sel on cursado.id_persona=sel.idp  left join (select id as idclase, id_turno as idtu  from clases) as sel2   on cursado.id_turno=sel2.idtu left join (select id as ida, asistencia, id_clase from asistencia) as sel3 on sel2.idclase=sel3.id_clase   where id_turno=?  group by dni', [id])
+   
+
+
+
+    res.json([curso])
+  } catch (error) {
+    console.log(error)
+    res.json(['error'])
+  }
+
+
+}
+)
 router.get('/alumnasdelcurso/:id', async (req, res) => {
   const id = req.params.id
   try {
@@ -243,6 +261,20 @@ for (xxx  in clases) {
  */
 
 
+router.post("/actualizarasistencia", async (req, res) => {
+  const { id, asistencia, clase } = req.body
+  console.log(id, asistencia, clase)
+
+  try {
+    const query = `UPDATE cursado SET ${clase} = ? WHERE id = ?`
+    await pool.query(query, [asistencia, id])
+
+    res.json("Realizado")
+  } catch (error) {
+    console.log(error)
+    res.json("No Realizado")
+  }
+})
 
 
 router.post("/cambiarestadocurado", async (req, res) => {
