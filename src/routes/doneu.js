@@ -25,10 +25,11 @@ router.get("/traerVentas", async (req, res) => {
 
     try {
         const lot = await pool.query('select * from ventas join (select id as idp, nombre from clientes) as sel on ventas.id_cliente=sel.idp join (select id as idl, sector,manzana,lote from lotes) as sel2 on ventas.id_lote=idl' )
-    const cli =  await pool.query('select * from clientes')
+        const lotes =  await pool.query('select * from lotes where estado="Disponible"')
+        const cli =  await pool.query('select * from clientes')
 
      
-        res.json([lot,cli])
+        res.json([lot,lotes,cli])
     } catch (error) {
         console.log("error",error)
         res.json(["lot"])
@@ -87,6 +88,18 @@ router.post("/modificarlotee", async (req, res) => {
 })
 
 
+
+router.post("/nuevaVenta", async (req, res) => {
+    const { observaciones, fecha_venta,modelo_venta,valor_escritura,nombre,lote} = req.body
+    console.log(observaciones, fecha_venta,modelo_venta,valor_escritura,nombre,lote)
+    try {
+        await pool.query('insert into ventas set observaciones=?, fecha=?,modelo_venta=?,valor_escritura=?,id_cliente=?,id_lote=?', [observaciones, fecha_venta,modelo_venta,valor_escritura,nombre,lote])
+        res.json('Realizado')
+    } catch (error) {
+        console.log(error)
+        res.json('No Realizado')
+    }
+})
 router.post("/actualizarventa", async (req, res) => {
     const { id, escritura,posecion, consctruccion} = req.body
     try {
