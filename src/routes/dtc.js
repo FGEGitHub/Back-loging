@@ -291,7 +291,7 @@ router.get('/listadepersonasgim/', async (req, res) => {
 })
 router.get('/listachicoscadia/', async (req, res) => {
 
-  const chiques = await pool.query('select * from cadia_chicos order by apellido')
+  const chiques = await pool.query('select * from cadia_chicos order by fecha_espera,apellido')
 
   env = {
     total: chiques.length,
@@ -819,11 +819,15 @@ router.post("/nuevoexpediente", async (req, res) => {
 })
 
 router.post("/nuevochiquecadia", async (req, res) => {
-  let { nombre, apellido, fecha_nacimiento, kid, observaciones, fecha_fin, primer_contacto, primer_ingreso, fecha_ingreso, dni, direccion, telefono, autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, hora_merienda, escuela, grado, fines } = req.body
+  let { fecha_espera,nombre, apellido, fecha_nacimiento, kid, observaciones, fecha_fin, primer_contacto, primer_ingreso, fecha_ingreso, dni, direccion, telefono, autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, hora_merienda, escuela, grado, fines } = req.body
 
   try {
+    console.log(fecha_espera)
     if (observaciones == undefined) {
       observaciones = "Sin observaciones"
+    }
+    if (fecha_espera == undefined) {
+      fecha_espera = "No"
     }
     if (fecha_nacimiento == undefined) {
       fecha_nacimiento = "Sin asignar"
@@ -838,7 +842,7 @@ router.post("/nuevochiquecadia", async (req, res) => {
       fecha_fin = "Sin asignar"
     }
     if (dni == "Sin determinar") {
-      await pool.query('insert cadia_chicos  set nombre=?,apellido=?,fecha_nacimiento=?,dni=?,fecha_ingreso=?,fecha_fin=?,direccion=?', [nombre, apellido,fecha_nacimiento, dni,fecha_ingreso,fecha_fin,direccion])
+      await pool.query('insert cadia_chicos  set nombre=?,apellido=?,fecha_nacimiento=?,dni=?,fecha_ingreso=?,fecha_fin=?,direccion=?,fecha_espera=?', [nombre, apellido,fecha_nacimiento, dni,fecha_ingreso,fecha_fin,direccion,fecha_espera])
 
       res.json('Agregado')
     } else {
@@ -846,7 +850,7 @@ router.post("/nuevochiquecadia", async (req, res) => {
       if (yahay.length > 0) {
         res.json('Error, dni ya tegistrado')
       } else {
-        await pool.query('insert cadia_chicos  set nombre=?,apellido=?,fecha_nacimiento=?,dni=?,fecha_ingreso=?,fecha_fin=?,direccion=?', [nombre, apellido, fecha_nacimiento, dni,fecha_ingreso,fecha_fin,direccion])
+        await pool.query('insert cadia_chicos  set nombre=?,apellido=?,fecha_nacimiento=?,dni=?,fecha_ingreso=?,fecha_fin=?,direccion=?,fecha_espera=?', [nombre, apellido, fecha_nacimiento, dni,fecha_ingreso,fecha_fin,direccion,fecha_espera])
 
         res.json('Agregado')
       }
