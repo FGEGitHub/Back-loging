@@ -1360,13 +1360,13 @@ const usua = await pool.query('select * from usuarios where id=?',[id])
 if (usua.nivel==40){
   const pendientes = await pool.query('select * from cadia_turnos where estado="Disponible"',[id])
   const confirm = await pool.query('select * from cadia_turnos where  estado="Agendado"',[id])
-  console.log([pendientes, confirm])
+
   
     res.json([pendientes, confirm])
 }else{
   const pendientes = await pool.query('select * from cadia_turnos where id_psico=? and estado="Disponible"',[id])
   const confirm = await pool.query('select * from cadia_turnos where id_psico=?and estado="Agendado"',[id])
-  console.log([pendientes, confirm])
+ 
   
   
     res.json([pendientes, confirm])
