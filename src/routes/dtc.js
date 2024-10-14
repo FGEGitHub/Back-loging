@@ -387,7 +387,7 @@ router.get('/listachiques/', async (req, res) => {
     const sind = chiques.filter(chique => !['kid1', 'kid2', 'kid3'].includes(chique.kid)).length;
 
     // Enviar la respuesta con la lista modificada y los datos adicionales
-    console.log(chiquesConFalta)
+  
     res.json([chiquesConFalta,
       {
         total: chiques.length,
@@ -1246,7 +1246,35 @@ router.post("/nuevaintervencion", upload.single("archivo"), async (req, res) => 
   }
 });
 
+router.post("/nuevacosa", upload.single("archivo"), async (req, res) => {
+  // Desestructuración de los datos del cuerpo, asignando valores por defecto si faltan
+  let {
+    detalle = "Sin detalle",  // Valor por defecto "Sin detalle" si no se proporciona
+    id_usuario = null,        // Valor por defecto null
+    titulo = "Sin título",    // Valor por defecto "Sin título"
+    id_trabajador = null,     // Valor por defecto null
+    fecha_referencia = null   // Valor por defecto null
+  } = req.body;
+console.log(titulo)
+  // Asigna "no" si no hay archivo
+  let ubicacion = req.file ? path.basename(req.file.path) : "no";
 
+  // Fecha actual formateada
+  const fechaActual = new Date();
+  const fechaFormateada = fechaActual.toISOString().slice(0, 19).replace('T', ' ');
+
+  try {
+    // Inserción en la base de datos con valores predeterminados si faltan datos
+    await pool.query(
+      'INSERT INTO dtc_cosas_usuario (id_usuario, titulo, detalle, fecha_carga, ubicacion, fecha_referencia) VALUES ( ?, ?, ?, ?, ?, ?)',
+      [id_trabajador, titulo, detalle, fechaFormateada, ubicacion, fecha_referencia]
+    );
+    res.json({ message: "Intervención creada con éxito" });
+  } catch (error) {
+    console.error('Error al crear la intervención:', error);
+    res.status(500).json({ error: 'Error al crear la intervención' });
+  }
+});
 router.get('/listaprofs/', async (req, res) => {
   const id = req.params.id
 
