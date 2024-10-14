@@ -1080,7 +1080,7 @@ router.post("/borrarcosa", async (req, res) => {
       }
 
       // Eliminar la entrada de la base de datos
-      await pool.query('DELETE FROM dtc_asistencias_sociales WHERE id = ?', [id]);
+      await pool.query('DELETE FROM dtc_cosas_usuario WHERE id = ?', [id]);
 
       res.json('Realizado');
     } else {
