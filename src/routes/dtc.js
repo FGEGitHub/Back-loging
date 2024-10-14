@@ -1056,7 +1056,7 @@ router.post("/borrarcosa", async (req, res) => {
 
   try {
     // Obtener la ubicación del archivo desde la base de datos
-    const result = await pool.query('SELECT ubicacion FROM stc_cosas_usuario WHERE id = ?', [id]);
+    const result = await pool.query('SELECT ubicacion FROM dtc_cosas_usuario WHERE id = ?', [id]);
 
     if (result.length > 0) {
       const archivoUbicacion = result[0].ubicacion;
@@ -1091,6 +1091,31 @@ router.post("/borrarcosa", async (req, res) => {
     res.json('No realizado');
   }
 });
+
+
+router.get('/traercosasole/:id', (req, res) => {
+  const id = req.params.id;
+
+  // Consulta SQL para obtener la ruta del archivo en función del id
+  const query = 'SELECT * FROM dtc_cosas_usuario WHERE id = ?';
+  db.query(query, [id], (err, result) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error en la consulta a la base de datos' });
+    }
+
+    if (result.length > 0) {
+      const filePath = path.join(__dirname, '../imagenesvendedoras', result[0].ubicacion);
+      res.sendFile(filePath); // Enviar el archivo al cliente
+    } else {
+      res.status(404).json({ message: 'Archivo no encontrado' });
+    }
+  });
+});
+
+
+
+
+
 router.post("/borraractividadsocial", async (req, res) => {
   const { id } = req.body;
 
