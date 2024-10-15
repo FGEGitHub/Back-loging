@@ -181,16 +181,20 @@ router.post("/nuevocliente", async (req, res) => {
 
 
 router.post("/enviarformlotes", async (req, res) => {
-    const { id, cantidad_cuotas, precio, preciofinanciado, escritura, construccion, posecion } = req.body;
+    const { id, cantidad_cuotas, precio, preciofinanciado, escritura, construccion, posecion,porcentaje_anticipo } = req.body;
   
     try {
       // Transacción para asegurarse de que todas las actualizaciones se realicen correctamente
-  
+      console.log(porcentaje_anticipo);
       // Actualiza los valores en la tabla 'lotes' (si se modificaron)
-      if (precio !== undefined || preciofinanciado !== undefined || cantidad_cuotas !== undefined) {
+      if (precio !== undefined || preciofinanciado !== undefined || cantidad_cuotas !== undefined || porcentaje_anticipo !== undefined) {
         let updateLotesQuery = 'UPDATE lotes SET ';
         const params = [];
-        
+        if (porcentaje_anticipo !== undefined) {
+            updateLotesQuery += 'porcentaje_anticipo = ?, ';
+            params.push(porcentaje_anticipo);
+          }
+          
         if (precio !== undefined) {
           updateLotesQuery += 'precio = ?, ';
           params.push(precio);
@@ -211,7 +215,7 @@ router.post("/enviarformlotes", async (req, res) => {
         updateLotesQuery += ' WHERE id = ?';
         params.push(id);
   
-        console.log(updateLotesQuery, params);
+
         await pool.query(updateLotesQuery, params);
       }
   
