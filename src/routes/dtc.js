@@ -1093,20 +1093,24 @@ router.post("/borrarcosa", async (req, res) => {
 });
 
 
-router.get('/traercosasole/:id', (req, res) => {
+router.get('/traerarcchivoo/:id', (req, res) => {
   const id = req.params.id;
 
   // Consulta SQL para obtener la ruta del archivo en función del id
   const query = 'SELECT * FROM dtc_cosas_usuario WHERE id = ?';
-  db.query(query, [id], (err, result) => {
+
+  pool.query(query, [id], (err, result) => {
     if (err) {
+      console.log(err)
       return res.status(500).json({ message: 'Error en la consulta a la base de datos' });
     }
-
+console.log(result)
     if (result.length > 0) {
       const filePath = path.join(__dirname, '../imagenesvendedoras', result[0].ubicacion);
+      console.log(filePath)
       res.sendFile(filePath); // Enviar el archivo al cliente
     } else {
+      console.log('dad')
       res.status(404).json({ message: 'Archivo no encontrado' });
     }
   });
