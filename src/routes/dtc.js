@@ -1093,28 +1093,42 @@ router.post("/borrarcosa", async (req, res) => {
 });
 
 
-router.get('/traerarcchivoo/:id', (req, res) => {
+
+router.get('/traerarcchivoo/:id',async (req, res) => {
   const id = req.params.id;
+  console.log(`ID recibido: ${id}`); // Muestra el ID recibido en la consola
 
   // Consulta SQL para obtener la ruta del archivo en función del id
-  const query = 'SELECT * FROM dtc_cosas_usuario WHERE id = ?';
+  const query = 'SELECT id, ubicacion FROM dtc_cosas_usuario WHERE id = ?';
+  try {
+    const query2 = await pool.query('SELECT id, ubicacion FROM dtc_cosas_usuario WHERE id = ?',[id])
+    const filePath = path.join(__dirname, '../imagenesvendedoras', query2[0].ubicacion);
+        console.log('Ruta del archivo:', filePath); // Muestra la ruta completa del archivo
+        res.sendFile(filePath); // Enviar el archivo al cliente
+  } catch (error) {
+    console.log(error)
+    res.json(èrror)
+  }
 
-  pool.query(query, [id], (err, result) => {
+ /* await pool.query(query, [id], (err, result) => {
     if (err) {
-      console.log(err)
+      console.log('Error en la consulta a la base de datos:', err);
       return res.status(500).json({ message: 'Error en la consulta a la base de datos' });
     }
-console.log(result)
+
+    console.log('Resultado de la consulta:', result); // Muestra el resultado de la consulta
+
     if (result.length > 0) {
       const filePath = path.join(__dirname, '../imagenesvendedoras', result[0].ubicacion);
-      console.log(filePath)
+      console.log('Ruta del archivo:', filePath); // Muestra la ruta completa del archivo
       res.sendFile(filePath); // Enviar el archivo al cliente
     } else {
-      console.log('dad')
+      console.log('Archivo no encontrado para el ID:', id); // Muestra que no se encontró un archivo
       res.status(404).json({ message: 'Archivo no encontrado' });
     }
-  });
+  }); */
 });
+
 
 
 
