@@ -179,7 +179,21 @@ router.post("/nuevocliente", async (req, res) => {
 
 
 
-
+router.post('/borrarlaventa/', async (req, res) => {
+    const {id} = req.body
+    console.log(id)
+    try {
+        await pool.query('delete from ventas where id= ?',[id])
+    
+        res.json('Realizado')
+    } catch (error) {
+        console.log(error)
+        res.json('No realizado')
+    }
+    
+     
+    
+    })
 router.post("/enviarformlotes", async (req, res) => {
     const { id, cantidad_cuotas, precio, preciofinanciado, escritura, construccion, posecion,porcentaje_anticipo } = req.body;
   
