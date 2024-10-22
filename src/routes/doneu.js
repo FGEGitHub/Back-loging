@@ -88,18 +88,27 @@ router.post("/modificarlotee", async (req, res) => {
 })
 
 
-
 router.post("/nuevaVenta", async (req, res) => {
-    const { observaciones, fecha_venta,modelo_venta,valor_escritura,nombre,lote} = req.body
-    console.log(observaciones, fecha_venta,modelo_venta,valor_escritura,nombre,lote)
-    try {
-        await pool.query('insert into ventas set observaciones=?, fecha=?,modelo_venta=?,valor_escritura=?,id_cliente=?,id_lote=?', [observaciones, fecha_venta,modelo_venta,valor_escritura,nombre,lote])
-        res.json('Realizado')
-    } catch (error) {
-        console.log(error)
-        res.json('No Realizado')
+    const { observaciones, fecha_venta, modelo_venta, valor_escritura, nombre, lote } = req.body;
+    
+    // Validar que nombre y lote estén presentes
+    if (!nombre || !lote) {
+        return res.json("Sin completar: nombre y lote son requeridos");
     }
-})
+
+    console.log(observaciones, fecha_venta, modelo_venta, valor_escritura, nombre, lote);
+
+    try {
+        await pool.query(
+            'INSERT INTO ventas SET observaciones=?, fecha=?, modelo_venta=?, valor_escritura=?, id_cliente=?, id_lote=?', 
+            [observaciones || 'sin completar', fecha_venta || 'sin completar', modelo_venta || 'sin completar', valor_escritura || 'sin completar', nombre, lote]
+        );
+        res.json('Realizado');
+    } catch (error) {
+        console.log(error);
+        res.json('No Realizado');
+    }
+});
 router.post("/actualizarventa", async (req, res) => {
     const { id, escritura,posecion, consctruccion} = req.body
     try {
