@@ -9,7 +9,8 @@ const path = require('path')
 const fse = require('fs').promises;
 const fs = require('fs');
 const moment = require('moment-timezone');
-
+const xlsx = require('xlsx');
+const XLSX = require('xlsx')
 const storage = multer.diskStorage({
   destination: path.join(__dirname, '../imagenesvendedoras'),
   filename: (req, file, cb) => {
@@ -19,6 +20,102 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+
+
+// Función para convertir un número serial de Excel en una fecha legible
+function convertirFechaExcel(fechaExcel) {
+  const fechaBase = new Date(1900, 0, 1);
+  return new Date(fechaBase.getTime() + (fechaExcel - 1) * 24 * 60 * 60 * 1000);
+}
+
+// Función para convertir fechas en formato texto (dd-mm-aaaa)
+function convertirFechaTexto(fechaTexto) {
+  const [dia, mes, año] = fechaTexto.split('-');
+  const fecha = new Date(`${año}-${mes}-${dia}`);
+  return isNaN(fecha.getTime()) ? null : fecha; // Verificar si la fecha es válida
+}
+
+
+
+router.get('/cargar-excel', async (req, res) => {
+  const workbook = xlsx.readFile('./src/routes/leer.xlsx');
+  const sheet_name = workbook.SheetNames[0]; // Leer la primera hoja
+  const worksheet = workbook.Sheets[sheet_name];
+
+  // Convertir la hoja en un formato JSON
+  const sheetData = xlsx.utils.sheet_to_json(worksheet);
+
+  // Procesar cada fila
+  sheetData.forEach((row) => {
+    const apellidoNombre = row['APELLIDO Y NOMBRE'] || ''; // Columna APELLIDO Y NOMBRE
+    let fechaNac = row['FECHA NAC'] || ''; // Columna FECHA NACIMIENTO
+    let fechaEsperaEval = row['fecha_espera_evaluacion'] || ''; // Columna FECHA ESPERA EVALUACION
+    const dni = row['DNI'] || 'sin datos'; // Columna DNI
+    const telefono =row['TELEFONO'] || 'sin datos';
+    // Separar la primera palabra (apellido) y el resto (nombre)
+    const [apellido, ...nombreArray] = apellidoNombre.split(' ');
+    const nombre = nombreArray.join(' ') || 'sin datos';
+
+    // Verificar si la fecha de nacimiento está vacía
+    if (fechaNac === '') {
+      fechaNac = 'sin datos';
+    } else {
+      // Verificar si la fecha es un número serial de Excel o texto
+      if (typeof fechaNac === 'number') {
+        fechaNac = convertirFechaExcel(fechaNac).toISOString().split('T')[0]; // Formato 'aaaa-mm-dd'
+      } else if (typeof fechaNac === 'string') {
+        const fechaConvertida = convertirFechaTexto(fechaNac);
+        fechaNac = fechaConvertida ? fechaConvertida.toISOString().split('T')[0] : 'sin datos';
+      }
+    }
+
+    // Verificar si la fecha de espera evaluación está vacía
+    if (fechaEsperaEval === '') {
+      fechaEsperaEval = 'sin datos';
+    } else {
+      // Verificar si la fecha es un número serial de Excel o texto
+      if (typeof fechaEsperaEval === 'number') {
+        fechaEsperaEval = convertirFechaExcel(fechaEsperaEval).toISOString().split('T')[0]; // Formato 'aaaa-mm-dd'
+      } else if (typeof fechaEsperaEval === 'string') {
+        const fechaConvertida = convertirFechaTexto(fechaEsperaEval);
+        fechaEsperaEval = fechaConvertida ? fechaConvertida.toISOString().split('T')[0] : 'sin datos';
+      }
+    }
+
+    // Mostrar en consola los resultados
+    console.log('Apellido:', apellido || 'sin datos');
+    console.log('Nombre:', nombre || 'sin datos');
+    console.log('Fecha de Nacimiento:', fechaNac);
+    console.log('Fecha de Espera Evaluación:', fechaEsperaEval);
+    console.log('DNI:', dni);
+    console.log('telefono:', telefono);
+    
+    // Insertar en la base de datos
+    const query = `
+      INSERT INTO cadia_chicos (apellido, nombre, fecha_nacimiento, fecha_espera_evaluacion, dni, telefono)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    const values = [
+      apellido || 'sin datos',
+      nombre || 'sin datos',
+      fechaNac,
+      fechaEsperaEval,
+      dni,
+      telefono
+    ];
+
+    pool.query(query, values, (error, results) => {
+      if (error) {
+        console.error('Error al insertar en la base de datos:', error);
+      } else {
+        console.log('Fila insertada correctamente:', results);
+      }
+    });
+  });
+
+  res.send('Los datos del archivo Excel han sido procesados correctamente e insertados en la base de datos.');
+});
 
 
 router.get('/tablaprestacionesa/:id', async (req, res) => {
