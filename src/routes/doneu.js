@@ -193,6 +193,8 @@ router.post('/borrarlaventa/', async (req, res) => {
     console.log(id)
     try {
         await pool.query('delete from ventas where id= ?',[id])
+        await pool.query('update lotes set esrado=? where  id=?', ["Disponible",id])
+
     
         res.json('Realizado')
     } catch (error) {
