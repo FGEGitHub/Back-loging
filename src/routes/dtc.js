@@ -2237,6 +2237,23 @@ router.post("/modificarinformeps", async (req, res) => {
 
 })
 
+router.post("/modificarinterv", async (req, res) => {
+  const { id, titulo, detalle, fecha_referencia  } = req.body
+console.log(id, titulo, detalle, fecha_referencia  )
+  try {
+    await pool.query('update dtc_actividades_chicos  set titulo=?, detalle=? where id=?', [titulo, detalle,  id])
+    res.json('realizado')
+  } catch (error) {
+    console.log(error)
+    res.json('No realizado')
+  }
+
+
+})
+
+
+
+
 router.post("/modificarasist", async (req, res) => {
   const { id, titulo, detalle, fecha_referencia  } = req.body
 console.log(id, titulo, detalle, fecha_referencia  )
