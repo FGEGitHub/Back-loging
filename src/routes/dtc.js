@@ -38,7 +38,9 @@ function convertirFechaTexto(fechaTexto) {
 
 
 router.get('/cargar-excel', async (req, res) => {
-  const workbook = xlsx.readFile('./src/routes/leer.xlsx');
+
+
+  const workbook = xlsx.readFile('./leer.xlsx');
   const sheet_name = workbook.SheetNames[0]; // Leer la primera hoja
   const worksheet = workbook.Sheets[sheet_name];
 
