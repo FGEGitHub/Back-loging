@@ -388,6 +388,34 @@ router.get('/listadepersonasgim/', async (req, res) => {
   }
   res.json([chiques, env])
 })
+
+
+router.get('/listachicoscadiaespera/', async (req, res) => {
+  try {
+    const chiques = await pool.query(`
+      SELECT 
+      id,
+        CONCAT(apellido, ' ', nombre) AS apellido_nombre, 
+        fecha_nacimiento, 
+        fecha_espera_evaluacion, 
+        dni, 
+        telefono
+      FROM cadia_chicos
+      WHERE fecha_espera_evaluacion <> "No"
+      ORDER BY fecha_espera_evaluacion, apellido
+    `);
+
+    const env = {
+      total: chiques.length,
+    };
+
+    res.json([chiques, env]);
+  } catch (error) {
+    console.error('Error al obtener los datos:', error);
+    res.status(500).send('Error al obtener los datos.');
+  }
+});
+
 router.get('/listachicoscadia/', async (req, res) => {
 
   const chiques = await pool.query('select * from cadia_chicos order by fecha_espera,apellido')
