@@ -86,11 +86,66 @@ router.post("/modificarlotee", async (req, res) => {
         res.json('No Realizado')
     }
 })
-
-
+router.post('/modificarventa', async (req, res) => { 
+    const { id, fecha, id_lote, id_cliente, modeloVenta, valorEscritura, observaciones } = req.body;
+    console.log(id, fecha, id_lote, id_cliente, modeloVenta, valorEscritura, observaciones);
+  
+    try {
+      const fieldsToUpdate = [];
+      const params = [];
+  
+      if (fecha !== undefined) {
+        fieldsToUpdate.push('fecha = ?');
+        params.push(fecha);
+      }
+      if (id_lote !== undefined) {
+        fieldsToUpdate.push('id_lote = ?');
+        params.push(id_lote);
+      }
+      if (id_cliente !== undefined) {
+        fieldsToUpdate.push('id_cliente = ?');
+        params.push(id_cliente);
+      }
+      if (modeloVenta !== undefined) {
+        fieldsToUpdate.push('modelo_venta = ?');
+        params.push(modeloVenta);
+      }
+      if (valorEscritura !== undefined) {
+        fieldsToUpdate.push('valor_escritura = ?');
+        params.push(valorEscritura);
+      }
+      if (observaciones !== undefined) {
+        fieldsToUpdate.push('observaciones = ?');
+        params.push(observaciones);
+      }
+  
+      if (fieldsToUpdate.length === 0) {
+        return res.status(400).json({ message: 'No se especificaron campos para actualizar' });
+      }
+  
+      const query = `UPDATE ventas SET ${fieldsToUpdate.join(', ')} WHERE id = ?`;
+      params.push(id);
+  
+      const result = await pool.query(query, params);
+      console.log(result); // Verifica la estructura de 'result' aquí
+  
+      if (result.affectedRows > 0) {
+        res.json({ message: 'Modificación exitosa' });
+      } else {
+        res.status(404).json({ message: 'Venta no encontrada' });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al modificar la venta' });
+    }
+  });
+  
+  
+  
 router.post("/nuevaVenta", async (req, res) => {
     const { observaciones, fecha_venta, modelo_venta, valor_escritura, nombre, lote } = req.body;
-    
+    console.log(observaciones, fecha_venta, modelo_venta, valor_escritura, nombre, lote);
+
     // Validar que nombre y lote estén presentes
     if (!nombre || !lote) {
         return res.json("Sin completar: nombre y lote son requeridos");
@@ -109,6 +164,8 @@ router.post("/nuevaVenta", async (req, res) => {
         res.json('No Realizado');
     }
 });
+
+
 router.post("/actualizarventa", async (req, res) => {
     const { id, escritura,posecion, consctruccion} = req.body
     try {
