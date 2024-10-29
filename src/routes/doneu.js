@@ -8,7 +8,7 @@ const pool = require('../database2')
 router.get("/traerlotes", async (req, res) => {
 
     try {
-        const lot = await pool.query('select * from lotes left join (select id as idventa, id_lote,id_cliente,posecion,construccion,escritura from ventas) as sel on lotes.id=sel.id_lote  left join (select id as idp, nombre from clientes) as sel2 on sel.id_cliente=sel2.idp')
+        const lot = await pool.query('select * from lotes left join (select id as idventa, id_lote,id_cliente from ventas) as sel on lotes.id=sel.id_lote  left join (select id as idp, nombre from clientes) as sel2 on sel.id_cliente=sel2.idp')
         res.json(lot)
     } catch (error) {
         console.log("error",error)
@@ -284,95 +284,97 @@ router.post('/borrarlaventa/', async (req, res) => {
      
     
     })
+    
+    
+    
     router.post("/enviarformlotes", async (req, res) => {
-        const {
-          id,
-          cantidad_cuotas,
-          precio,
-          preciofinanciado,
-          escritura,
-          construccion,
-          posecion,
-          porcentaje_anticipo,
-          adrema, // Nuevo campo adrema
-        } = req.body;
-      
-        try {
-          // Actualiza los valores en la tabla 'lotes' (si se modificaron)
-          if (precio !== undefined || preciofinanciado !== undefined || cantidad_cuotas !== undefined || porcentaje_anticipo !== undefined || adrema !== undefined) {
-            let updateLotesQuery = 'UPDATE lotes SET ';
-            const params = [];
-      
-            if (porcentaje_anticipo !== undefined) {
-              updateLotesQuery += 'porcentaje_anticipo = ?, ';
-              params.push(porcentaje_anticipo);
-            }
-      
-            if (precio !== undefined) {
-              updateLotesQuery += 'precio = ?, ';
-              params.push(precio);
-            }
-      
-            if (preciofinanciado !== undefined) {
-              updateLotesQuery += 'preciofinanciado = ?, ';
-              params.push(preciofinanciado);
-            }
-      
-            if (cantidad_cuotas !== undefined) {
-              updateLotesQuery += 'cantidad_cuotas = ?, ';
-              params.push(cantidad_cuotas);
-            }
-      
-            // Añadir adrema si se ha enviado
-            if (adrema !== undefined) {
-              updateLotesQuery += 'adrema = ?, ';
-              params.push(adrema);
-            }
-      
-            // Remover la coma final
-            updateLotesQuery = updateLotesQuery.slice(0, -2);
-            updateLotesQuery += ' WHERE id = ?';
-            params.push(id);
-      
-            await pool.query(updateLotesQuery, params);
+      const {
+        id,
+        cantidad_cuotas,
+        precio,
+        preciofinanciado,
+        escritura,
+        construccion,
+        posecion,
+        porcentaje_anticipo,
+        adrema, // Nuevo campo adrema
+      } = req.body;
+    
+      try {
+        // Actualiza los valores en la tabla 'lotes' (si se modificaron)
+        if (
+          precio !== undefined ||
+          preciofinanciado !== undefined ||
+          cantidad_cuotas !== undefined ||
+          porcentaje_anticipo !== undefined ||
+          adrema !== undefined ||
+          escritura !== undefined ||
+          construccion !== undefined ||
+          posecion !== undefined
+        ) {
+          let updateLotesQuery = 'UPDATE lotes SET ';
+          const params = [];
+    
+          if (porcentaje_anticipo !== undefined) {
+            updateLotesQuery += 'porcentaje_anticipo = ?, ';
+            params.push(porcentaje_anticipo);
           }
-      
-          // Actualiza los valores en la tabla 'ventas' (si se modificaron)
-          if (escritura !== undefined || construccion !== undefined || posecion !== undefined) {
-            let updateVentasQuery = 'UPDATE ventas SET ';
-            const paramsVentas = [];
-      
-            if (escritura !== undefined) {
-              updateVentasQuery += 'escritura = ?, ';
-              paramsVentas.push(escritura);
-            }
-      
-            if (construccion !== undefined) {
-              updateVentasQuery += 'construccion = ?, ';
-              paramsVentas.push(construccion);
-            }
-      
-            if (posecion !== undefined) {
-              updateVentasQuery += 'posecion = ?, ';
-              paramsVentas.push(posecion);
-            }
-      
-            // Remover la coma final
-            updateVentasQuery = updateVentasQuery.slice(0, -2);
-            updateVentasQuery += ' WHERE id_lote = ?';
-            paramsVentas.push(id);
-      
-            console.log(updateVentasQuery, paramsVentas);
-            await pool.query(updateVentasQuery, paramsVentas);
+    
+          if (precio !== undefined) {
+            updateLotesQuery += 'precio = ?, ';
+            params.push(precio);
           }
-      
-          res.json("Realizado");
-      
-        } catch (error) {
-          console.error(error);
-          res.status(500).send({ message: 'Error actualizando los datos' });
+    
+          if (preciofinanciado !== undefined) {
+            updateLotesQuery += 'preciofinanciado = ?, ';
+            params.push(preciofinanciado);
+          }
+    
+          if (cantidad_cuotas !== undefined) {
+            updateLotesQuery += 'cantidad_cuotas = ?, ';
+            params.push(cantidad_cuotas);
+          }
+    
+          // Añadir adrema si se ha enviado
+          if (adrema !== undefined) {
+            updateLotesQuery += 'adrema = ?, ';
+            params.push(adrema);
+          }
+    
+          // Añadir escritura si se ha enviado
+          if (escritura !== undefined) {
+            updateLotesQuery += 'escritura = ?, ';
+            params.push(escritura);
+          }
+    
+          // Añadir construccion si se ha enviado
+          if (construccion !== undefined) {
+            updateLotesQuery += 'construccion = ?, ';
+            params.push(construccion);
+          }
+    
+          // Añadir posecion si se ha enviado
+          if (posecion !== undefined) {
+            updateLotesQuery += 'posecion = ?, ';
+            params.push(posecion);
+          }
+    
+          // Remover la coma final
+          updateLotesQuery = updateLotesQuery.slice(0, -2);
+          updateLotesQuery += ' WHERE id = ?';
+          params.push(id);
+    
+          await pool.query(updateLotesQuery, params);
         }
-      });
+    
+        res.json("Realizado");
+    
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: 'Error actualizando los datos' });
+      }
+    });
+    
       
 
 
