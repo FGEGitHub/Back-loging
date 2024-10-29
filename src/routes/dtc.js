@@ -51,6 +51,107 @@ router.get('/cargar-excel', async (req, res) => {
   sheetData.forEach((row) => {
     const apellidoNombre = row['APELLIDO Y NOMBRE'] || ''; // Columna APELLIDO Y NOMBRE
     let fechaNac = row['FECHA NAC'] || ''; // Columna FECHA NACIMIENTO
+    let fechaEsperaEval = row['TURNO ASIGNADO'] || ''; // Columna FECHA ESPERA EVALUACION
+    console.log(row['TURNO ASIGNADO'])
+    console.log(row['fecha_espera_evaluacion'])
+    let fechaEsperadesde = row['fecha_espera_evaluacion'] || ''; // Columna FECHA ESPERA EVALUACION
+    const dni = row['DNI'] || 'sin datos'; // Columna DNI
+    const telefono =row['TELEFONO'] || 'sin datos';
+    // Separar la primera palabra (apellido) y el resto (nombre)
+    const [apellido, ...nombreArray] = apellidoNombre.split(' ');
+    const nombre = nombreArray.join(' ') || 'sin datos';
+
+    // Verificar si la fecha de nacimiento está vacía
+    if (fechaNac === '') {
+      fechaNac = 'sin datos';
+    } else {
+      // Verificar si la fecha es un número serial de Excel o texto
+      if (typeof fechaNac === 'number') {
+        fechaNac = convertirFechaExcel(fechaNac).toISOString().split('T')[0]; // Formato 'aaaa-mm-dd'
+      } else if (typeof fechaNac === 'string') {
+        const fechaConvertida = convertirFechaTexto(fechaNac);
+        fechaNac = fechaConvertida ? fechaConvertida.toISOString().split('T')[0] : 'sin datos';
+      }
+    }
+
+    // Verificar si la fecha de espera evaluación está vacía
+    // Verificar si la fecha de espera evaluación está vacía
+/*     if (fechaEsperaEval === '') {
+      fechaEsperaEval = 'sin datos';
+    } else {
+      // Verificar si la fecha es un número serial de Excel o texto
+      if (typeof fechaEsperaEval === 'number') {
+        fechaEsperaEval = convertirFechaExcel(fechaEsperaEval).toISOString().split('T')[0]; // Formato 'aaaa-mm-dd'
+      } else if (typeof fechaEsperaEval === 'string') {
+        const fechaConvertida = convertirFechaTexto(fechaEsperaEval);
+        fechaEsperaEval = fechaConvertida ? fechaConvertida.toISOString().split('T')[0] : 'sin datos';
+      }
+    }
+     */
+    if (fechaEsperadesde === '') {
+      fechaEsperadesde = 'sin datos';
+    } else {
+      // Verificar si la fecha es un número serial de Excel o texto
+      if (typeof fechaEsperadesde === 'number') {
+        fechaEsperadesde = convertirFechaExcel(fechaEsperadesde).toISOString().split('T')[0]; // Formato 'aaaa-mm-dd'
+      } else if (typeof fechaEsperadesde === 'string') {
+        const fechaConvertida = convertirFechaTexto(fechaEsperadesde);
+        fechaEsperadesde = fechaConvertida ? fechaConvertida.toISOString().split('T')[0] : 'sin datos';
+      }
+    }
+    // Mostrar en consola los resultados
+    console.log('Apellido:', apellido || 'sin datos');
+    console.log('Nombre:', nombre || 'sin datos');
+    console.log('Fecha de Nacimiento:', fechaNac);
+    console.log('Fecha de Espera Evaluación:', fechaEsperaEval);
+    console.log('Fecha turno:', fechaEsperaEval);
+    console.log('DNI:', dni);
+    console.log('telefono:', telefono);
+    
+    // Insertar en la base de datos
+    const query = `
+      INSERT INTO cadia_chicos (apellido, nombre, fecha_nacimiento, fecha_espera_evaluacion, dni, telefono,fecha_evaluacion)
+      VALUES (?, ?, ?, ?, ?, ?,?)
+    `;
+
+    const values = [
+      apellido || 'sin datos',
+      nombre || 'sin datos',
+      fechaNac,
+      fechaEsperadesde,
+      dni,
+      telefono,
+      fechaEsperaEval
+    ];
+
+    pool.query(query, values, (error, results) => {
+      if (error) {
+        console.error('Error al insertar en la base de datos:', error);
+      } else {
+        console.log('Fila insertada correctamente:', results);
+      }
+    });
+  });
+
+  res.send('Los datos del archivo Excel han sido procesados correctamente e insertados en la base de datos.');
+});
+
+
+
+router.get('/act-excel', async (req, res) => {
+
+  rutaImagen = path.join(__dirname, './leer.xlsx');
+  const workbook = xlsx.readFile(rutaImagen);
+  const sheet_name = workbook.SheetNames[0]; // Leer la primera hoja
+  const worksheet = workbook.Sheets[sheet_name];
+
+  // Convertir la hoja en un formato JSON
+  const sheetData = xlsx.utils.sheet_to_json(worksheet);
+
+  // Procesar cada fila
+  sheetData.forEach((row) => {
+    const apellidoNombre = row['APELLIDO Y NOMBRE'] || ''; // Columna APELLIDO Y NOMBRE
+    let fechaNac = row['FECHA NAC'] || ''; // Columna FECHA NACIMIENTO
     let fechaEsperaEval = row['fecha_espera_evaluacion'] || ''; // Columna FECHA ESPERA EVALUACION
     const dni = row['DNI'] || 'sin datos'; // Columna DNI
     const telefono =row['TELEFONO'] || 'sin datos';
@@ -118,6 +219,9 @@ router.get('/cargar-excel', async (req, res) => {
 
   res.send('Los datos del archivo Excel han sido procesados correctamente e insertados en la base de datos.');
 });
+
+
+
 
 
 router.get('/tablaprestacionesa/:id', async (req, res) => {
@@ -415,6 +519,8 @@ router.get('/listachicoscadiaespera/', async (req, res) => {
     res.status(500).send('Error al obtener los datos.');
   }
 });
+
+
 
 router.get('/listachicoscadia/', async (req, res) => {
 
