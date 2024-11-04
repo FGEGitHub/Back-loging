@@ -298,6 +298,7 @@ router.post('/borrarlaventa/', async (req, res) => {
         posecion,
         porcentaje_anticipo,
         adrema, // Nuevo campo adrema
+        superficie // Nuevo campo superficie
       } = req.body;
     
       try {
@@ -310,7 +311,8 @@ router.post('/borrarlaventa/', async (req, res) => {
           adrema !== undefined ||
           escritura !== undefined ||
           construccion !== undefined ||
-          posecion !== undefined
+          posecion !== undefined ||
+          superficie !== undefined // Verifica también superficie
         ) {
           let updateLotesQuery = 'UPDATE lotes SET ';
           const params = [];
@@ -359,6 +361,12 @@ router.post('/borrarlaventa/', async (req, res) => {
             params.push(posecion);
           }
     
+          // Añadir superficie si se ha enviado
+          if (superficie !== undefined) {
+            updateLotesQuery += 'superficie = ?, ';
+            params.push(superficie);
+          }
+    
           // Remover la coma final
           updateLotesQuery = updateLotesQuery.slice(0, -2);
           updateLotesQuery += ' WHERE id = ?';
@@ -374,6 +382,7 @@ router.post('/borrarlaventa/', async (req, res) => {
         res.status(500).send({ message: 'Error actualizando los datos' });
       }
     });
+    
     
       
 
