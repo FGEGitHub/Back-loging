@@ -2,7 +2,8 @@ const express = require('express')
 const router = express.Router()
 const { isLoggedIn, isLoggedInn, isLoggedInn2, isLoggedInn4 } = require('../lib/auth') //proteger profile
 const pool = require('../database2')
-
+const nodemailer = require('nodemailer');
+const bodyParser = require('body-parser');
 
 
 router.get("/traerlotes", async (req, res) => {
@@ -140,6 +141,42 @@ router.post('/modificarventa', async (req, res) => {
     }
   });
   
+
+  router.post('/enviarconsulta', async (req, res) => {
+    const { nombre, apellido, email, telefono, mensaje } = req.body;
+  console.log(nombre, apellido, email, telefono, mensaje)
+    // Configurar nodemailer para enviar el correo
+    const transporter = nodemailer.createTransport({
+      service: 'gmail', // O el servicio de correo que utilices
+      auth: {
+        user: 'contactodoneulogio@gmail.com', // Reemplaza con tu correo
+        pass: 'qrge grqt cszu qpnh' // Reemplaza con tu contraseña
+      }
+    });
+  
+    const mailOptions = {
+      from: email,
+      to: 'doneulogio.ua@gmail.com',
+      subject: 'Nueva Consulta de la web',
+      text: `
+        Nombre: ${nombre}
+        Apellido: ${apellido}
+        Email: ${email}
+        Teléfono: ${telefono}
+        Mensaje: ${mensaje}
+      `
+    };
+  
+    try {
+      await transporter.sendMail(mailOptions);
+      res.status(200).send('Correo enviado correctamente');
+    } catch (error) {
+      console.error('Error al enviar el correo:', error);
+      res.status(500).send('Error al enviar el correo');
+    }
+  });
+
+
   
   
 router.post("/nuevaVenta", async (req, res) => {
