@@ -1836,7 +1836,7 @@ router.get('/traerpresentesdeclase/:id', async (req, res) => {
 
 
 router.get('/traeretapacocinacadia/', async (req, res) => {
-  const existe = await pool.query('SELECT * FROM dtc_etapa_cadia WHERE ORDER BY id DESC');
+  const existe = await pool.query('SELECT * FROM dtc_etapa_cadia  ORDER BY id DESC');
 
 
   res.json([existe])
