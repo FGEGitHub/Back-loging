@@ -24,7 +24,6 @@ try {
 })
 
 
-
 router.get('/traercantidades', async (req, res) => {
  
   const can = await pool.query('Select * from rk where id=5' )
@@ -37,6 +36,19 @@ router.get('/sumarjugada', async (req, res) => {
   
   res.json(can[0])
 })
+router.get('/traervotos', async (req, res) => {
+  id= req.params.id
+   const can = await pool.query('select * from votacion' )
+   
+   res.json(can)
+ })
+router.get('/sumarvoto/:id', async (req, res) => {
+ id= req.params.id
+  const can = await pool.query('update votacion  SET votes = votes + 1  where id=?',[id] )
+  
+  res.json('Realizado')
+})
+
 router.get('/tllamadoscarnaval', async (req, res) => {
  
  
