@@ -37,4 +37,14 @@ router.get('/lista/:id', isLoggedInn2, async (req, res) => {
 
 
 
+router.post('/enviardatosvoto', async (req, res) => {
+    const {nombre  ,telefono} = req.body
+    console.log(nombre  ,telefono)
+
+   // await pool.query('insert into rk set name=?, punt=?', [name, punt])
+
+    res.json("Si")
+
+})
+
 module.exports = router
