@@ -689,6 +689,7 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
 
           // Agregar al resultado
           resultado.push({
+            id: chico.id,
               nombre: chico.nombre,
               apellido: chico.apellido,
               dni: chico.dni,
