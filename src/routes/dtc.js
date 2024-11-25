@@ -638,6 +638,82 @@ router.get('/listachiques/', async (req, res) => {
 
 
 
+router.get('/listachiquesmomentaneo/', async (req, res) => {
+  try {
+      // Obtener los datos de las tablas
+      const chiques = await pool.query('SELECT * FROM dtc_chicos ORDER BY apellido');
+      
+      // Obtener fechas únicas de asistencias agrupadas directamente en SQL
+      const fechasUnicas = await pool.query('SELECT DISTINCT fecha FROM dtc_asistencia ORDER BY fecha');
+
+      // Crear un array para almacenar la respuesta final
+      const resultado = [];
+
+      // Función para convertir fechas de 'DD-M-YYYY' a un formato manejable
+      const convertirFecha = (fecha) => {
+          const [dia, mes, anio] = fecha.split('-').map(Number); // Convertir directamente a números
+          return new Date(anio, mes - 1, dia); // Meses en Date van de 0 a 11
+      };
+
+      // Convertir y ordenar fechas únicas obtenidas de la consulta SQL
+      const fechasClasesUnicas = fechasUnicas.map(row => convertirFecha(row.fecha)).sort((a, b) => a - b);
+
+      // Procesar cada chico
+      for (const chico of chiques) {
+          // Filtrar asistencias por id_usuario
+          const asistenciasChico = await pool.query(
+              'SELECT fecha FROM dtc_asistencia WHERE id_usuario = ? ORDER BY fecha',
+              [chico.id]
+          );
+
+          // Convertir fechas y ordenarlas
+          const fechasAsistencias = asistenciasChico.map(row => convertirFecha(row.fecha));
+          fechasAsistencias.sort((a, b) => a - b);
+
+          // Calcular la primera asistencia
+          const primeraAsistencia = fechasAsistencias[0]
+              ? `${fechasAsistencias[0].getDate()}-${fechasAsistencias[0].getMonth() + 1}-${fechasAsistencias[0].getFullYear()}`
+              : null;
+
+          // Filtrar las fechas de clases únicas desde la primera asistencia
+          const fechasDesdePrimeraAsistencia = fechasClasesUnicas.filter(fecha => 
+              fechasAsistencias[0] ? fecha >= fechasAsistencias[0] : false
+          );
+
+          // Calcular datos finales
+          const cantAsistencias = fechasAsistencias.length; // Asistencias totales del chico
+          const totalDiasDesdePrimeraAsistencia = fechasDesdePrimeraAsistencia.length; // Total de días disponibles desde la primera asistencia
+          const porcentajeAsistencia = totalDiasDesdePrimeraAsistencia
+              ? ((cantAsistencias / totalDiasDesdePrimeraAsistencia) * 100).toFixed(2)
+              : 0;
+
+          // Agregar al resultado
+          resultado.push({
+              nombre: chico.nombre,
+              apellido: chico.apellido,
+              dni: chico.dni,
+              fecha_nacimiento: chico.fecha_nacimiento,
+              primer_asis: primeraAsistencia,
+              cant_asist: cantAsistencias,
+              total_asis: totalDiasDesdePrimeraAsistencia,
+              porcentajeasis: `${porcentajeAsistencia}%`
+          });
+      }
+
+      // Responder con el array procesado
+      res.json([resultado]);
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Ocurrió un error al procesar los datos' });
+  }
+});
+
+
+
+
+
+
+
 
 
 
