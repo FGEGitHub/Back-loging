@@ -40,10 +40,24 @@ router.get('/lista/:id', isLoggedInn2, async (req, res) => {
 router.post('/enviardatosvoto', async (req, res) => {
     const {nombre  ,telefono} = req.body
     console.log(nombre  ,telefono)
+ 
+            try {
+                const exis = await pool.query('select * from rk where punt=?',[telefono])
+                if (exis.length>0){
+                    res.json("Ya existe telefono registrado")
+                }else{
+                    await pool.query('insert into rk set name=?, punt=?', [nombre, telefono])
 
-   // await pool.query('insert into rk set name=?, punt=?', [name, punt])
+                    res.json("Si")
+                }
+              
+            } catch (error) {
 
-    res.json("Si")
+               console.log(error)
+
+                res.json("Error, no se puedo guardar datos, verifica que el telefono contenga solo numeros ")
+            }
+
 
 })
 
