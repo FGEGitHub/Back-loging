@@ -1078,7 +1078,12 @@ router.post("/borraretapa", async (req, res) => {
 })
 router.post("/traerasistenciasdetaller", async (req, res) => {
   let { id_tallerista, id_usuario } = req.body
-  const resp = await pool.query('select * from dtc_asistencia where id_tallerista=? and id_usuario=?', [id_tallerista, id_usuario])
+  let resp = await pool.query('select * from dtc_asistencia where id_tallerista=? and id_usuario=?', [id_tallerista, id_usuario])
+if(resp.length==0){
+  resp = await pool.query('select id, id_clase, id_usuario,sel.fecha from dtc_asistencia_clase join (select id as idc, id_tallerista,fecha from dtc_clases_taller) as sel on dtc_asistencia_clase.id_clase=sel.idc  where id_tallerista=? and id_usuario=?', [id_tallerista, id_usuario])
+}
+
+
   res.json([resp])
 })
 
