@@ -750,7 +750,7 @@ router.get('/datosdechique/:id', async (req, res) => {
       }
 
     }
-    const vinculos = await pool.query('select * from dtc_vinculo join (select id as idc, nombre, apellido from dtc_chicos ) as sel on dtc_vinculo.id_vinculo=sel.idc where id_usuario=?', [id])
+    const vinculos = await pool.query('select * from dtc_vinculo join (select id as idc, nombre, apellido from dtc_chicos ) as sel on dtc_vinculo.id_vinculo=sel.idc   join (select id as idcc, nombre as nombree, apellido as apellidoo from dtc_chicos ) as sel2  on dtc_vinculo.id_usuario=sel2.idcc where id_usuario=? or id_vinculo=?', [id,id])
     res.json([chiques, imagenBase64, vinculos])
   } catch (error) {
     console.log(error)
