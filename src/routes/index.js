@@ -35,7 +35,7 @@ router.get('/sumarjugada', async (req, res) => {
   const can = await pool.query('UPDATE rk SET punt = punt + 1  where id=5' )
   
   res.json(can[0])
-})
+})     
 router.get('/traervotos', async (req, res) => {
   id= req.params.id
    const can = await pool.query('select * from votacion' )
