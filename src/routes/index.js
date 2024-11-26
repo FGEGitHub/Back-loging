@@ -52,19 +52,17 @@ router.get('/traervotos', async (req, res) => {
 
       // Traer la columna 'votos' del usuario desde la tabla 'rk'
       const [rkRecord] = await pool.query('SELECT votos FROM rk WHERE id = ?', [idVotante]);
-
+      console.log(rkRecord)
       // Si no se encuentra el registro
-      if (!rkRecord || rkRecord.length === 0) {
-          return res.status(404).json({ mensaje: 'El votante no existe' });
-      }
+    
 
       let votosArray = [];
 
       // Verificar si 'votos' tiene un valor no nulo   
       if (rkRecord.votos) {
           try {
-              // Intentar parsear el valor como JSON
-              votosArray = rkRecord.votos;
+              // Intentar parsear el valor como JSON (el campo votos es un string en LONGTEXT)
+              votosArray = JSON.parse(rkRecord.votos);
 
               // Validar que el resultado sea un arreglo
               if (!Array.isArray(votosArray)) {
@@ -81,7 +79,7 @@ router.get('/traervotos', async (req, res) => {
           votosArray.push(idOpcion);
       }
 
-      // Actualizar la columna 'votos' en la tabla 'rk'
+      // Actualizar la columna 'votos' en la tabla 'rk' con el nuevo arreglo de votos
       await pool.query('UPDATE rk SET votos = ? WHERE id = ?', [JSON.stringify(votosArray), idVotante]);
 
       // Devolver el arreglo actualizado de votos
@@ -94,6 +92,7 @@ router.get('/traervotos', async (req, res) => {
       res.status(500).json({ mensaje: 'Error al procesar el voto' });
   }
 });
+
 
 
 router.get('/tllamadoscarnaval', async (req, res) => {

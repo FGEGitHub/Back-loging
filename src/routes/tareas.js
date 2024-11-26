@@ -14,50 +14,61 @@ router.get('/rk/', async (req, res) => {
 
 })
 router.get('/traervotantes', async (req, res) => {
-  try {
-      // Obtener todos los registros de la tabla 'votacion'
-      const votaciones = await pool.query('SELECT * FROM rk');
-
-      // Procesar cada registro
-      for (const votacion of votaciones) {
-          // Inicializar votos procesados como un arreglo vacío
-          let votosDetallados = [];
+    try {
+        // Obtener todos los registros de la tabla 'rk'
+        const votaciones = await pool.query('SELECT * FROM rk');
   
-          if (votacion.votos) {
-              try {
-                console.log(votacion.votos)
-                  // Parsear el campo 'votos' como JSON
-                 // const votosArray = JSON.parse(votacion.votos);
-                //  console.log(votacion.votos)
-                 // console.log(votosArray)
-                  // Verificar que el valor parseado sea un arreglo
-                  if (Array.isArray(votacion.votos)) {
-                      // Obtener detalles de cada ID en el campo 'votos'
-                      console.log()
-                      const detalles = await pool.query(
-                          `SELECT  name as candidadp, category as categoria, subcategory as subcategoria FROM votacion WHERE id IN (?)`,
-                          [votacion.votos]
-                      );
-
-                      // Reemplazar IDs por los detalles correspondientes
-                      votosDetallados = detalles;
-                  }
-              } catch (error) {
-                  console.error(`Error al procesar los votos para votacion.id=${votacion.id}:`, error);
-              }
-          }
-
-          // Actualizar el campo 'votos' con los detalles obtenidos
-          votacion.votos = JSON.stringify(votosDetallados);
-      }
-      console.log(votaciones)
-      // Devolver la tabla 'votacion' con los votos transformados
-      res.json(votaciones);
-  } catch (error) {
-      console.error('Error al obtener votaciones:', error);
-      res.status(500).json({ mensaje: 'Error al obtener las votaciones' });
-  }
-});
+        // Procesar cada registro
+        for (const votacion of votaciones) {
+            // Inicializar votos procesados como un arreglo vacío
+            let votosDetallados = [];
+    
+            if (votacion.votos) {
+                try {
+                    console.log('Votos en formato LONGTEXT:', votacion.votos);
+  
+                    // Intentar parsear el campo 'votos' que es un LONGTEXT (puede ser un array de ids en formato JSON)
+                    let votosArray = [];
+                    try {
+                        votosArray = JSON.parse(votacion.votos); // Intenta parsear la cadena LONGTEXT a un array
+                    } catch (error) {
+                        console.error(`Error al parsear votos de votacion.id=${votacion.id}:`, error);
+                        votosArray = [];
+                    }
+  
+                    // Verificar que el valor parseado sea un arreglo de IDs
+                    if (Array.isArray(votosArray)) {
+                        // Obtener detalles de cada ID en el campo 'votos'
+                        const detalles = await pool.query(
+                            `SELECT name AS candidato, category AS categoria, subcategory AS subcategoria 
+                             FROM votacion 
+                             WHERE id IN (?)`,
+                            [votosArray] // Pasamos el array de IDs
+                        );
+  
+                        // Reemplazar IDs por los detalles correspondientes
+                        votosDetallados = detalles;
+                    } else {
+                        console.error(`El campo votos no es un array válido en votacion.id=${votacion.id}`);
+                    }
+                } catch (error) {
+                    console.error(`Error al procesar los votos para votacion.id=${votacion.id}:`, error);
+                }
+            }
+  
+            // Actualizar el campo 'votos' con los detalles obtenidos como un string JSON
+            votacion.votos = JSON.stringify(votosDetallados);
+        }
+  
+        // Devolver la lista de votaciones con los votos transformados
+        console.log('Votaciones con votos detallados:', votaciones);
+        res.json(votaciones);
+    } catch (error) {
+        console.error('Error al obtener votaciones:', error);
+        res.status(500).json({ mensaje: 'Error al obtener las votaciones' });
+    }
+  });
+  
 router.post('/guardar', async (req, res) => {
     const {name, punt} = req.body
     console.log(id)
