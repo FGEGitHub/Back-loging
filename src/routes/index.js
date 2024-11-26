@@ -42,12 +42,59 @@ router.get('/traervotos', async (req, res) => {
    
    res.json(can)
  })
-router.get('/sumarvoto/:id', async (req, res) => {
- id= req.params.id
-  const can = await pool.query('update votacion  SET votes = votes + 1  where id=?',[id] )
-  
-  res.json('Realizado')
-})
+ router.post('/sumarvoto/', async (req, res) => {
+  const { idOpcion, idVotante } = req.body;
+  console.log(idOpcion, idVotante);
+
+  try {
+      // Incrementar el voto en la tabla 'votacion'
+      await pool.query('UPDATE votacion SET votes = votes + 1 WHERE id = ?', [idOpcion]);
+
+      // Traer la columna 'votos' del usuario desde la tabla 'rk'
+      const [rkRecord] = await pool.query('SELECT votos FROM rk WHERE id = ?', [idVotante]);
+
+      // Si no se encuentra el registro
+      if (!rkRecord || rkRecord.length === 0) {
+          return res.status(404).json({ mensaje: 'El votante no existe' });
+      }
+
+      let votosArray = [];
+
+      // Verificar si 'votos' tiene un valor no nulo
+      if (rkRecord.votos) {
+          try {
+              // Intentar parsear el valor como JSON
+              votosArray = rkRecord.votos;
+
+              // Validar que el resultado sea un arreglo
+              if (!Array.isArray(votosArray)) {
+                  throw new Error('El campo votos no es un arreglo válido');
+              }
+          } catch (error) {
+              console.error('Error al parsear votos:', error);
+              return res.status(500).json({ mensaje: 'Error en el formato de la columna votos' });
+          }
+      }
+
+      // Agregar el nuevo idOpcion al arreglo de votos (evitar duplicados)
+      if (!votosArray.includes(idOpcion)) {
+          votosArray.push(idOpcion);
+      }
+
+      // Actualizar la columna 'votos' en la tabla 'rk'
+      await pool.query('UPDATE rk SET votos = ? WHERE id = ?', [JSON.stringify(votosArray), idVotante]);
+
+      // Devolver el arreglo actualizado de votos
+      res.json({
+          mensaje: 'Voto registrado y actualizado',
+          votos: votosArray,
+      });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ mensaje: 'Error al procesar el voto' });
+  }
+});
+
 
 router.get('/tllamadoscarnaval', async (req, res) => {
  

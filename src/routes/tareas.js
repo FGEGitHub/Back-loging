@@ -43,29 +43,34 @@ router.get('/lista/:id', isLoggedInn2, async (req, res) => {
 })
 
 
-
 router.post('/enviardatosvoto', async (req, res) => {
-    const {nombre  ,telefono} = req.body
-    console.log(nombre  ,telefono)
- 
-            try {
-                const exis = await pool.query('select * from rk where punt=?',[telefono])
-                if (exis.length>0){
-                    res.json("Ya existe telefono registrado")
-                }else{
-                    await pool.query('insert into rk set name=?, punt=?', [nombre, telefono])
+    const { nombre, telefono } = req.body;
+    console.log(nombre, telefono);
 
-                    res.json("Si")
-                }
-              
-            } catch (error) {
+    try {
+        // Verificar si el teléfono ya existe
+        const exis = await pool.query('SELECT * FROM rk WHERE punt = ?', [telefono]);
 
-               console.log(error)
+        if (exis.length > 0) {
+            res.json("Ya existe teléfono registrado");
+        } else {
+            // Insertar nuevo registro
+            const resultado = await pool.query('INSERT INTO rk (name, punt) VALUES (?, ?)', [nombre, telefono]);
 
-                res.json("Error, no se puedo guardar datos, verifica que el telefono contenga solo numeros ")
-            }
+            // Obtener el id generado
+            const idVotante = resultado.insertId;
+            console.log( Number(idVotante))
+            // Enviar el ID como respuesta
+            res.json({ mensaje: "Registro exitoso", id: Number(idVotante) });
+        }
+    } catch (error) {
+        console.error(error);
 
+        res.status(500).json({
+            mensaje: "Error al guardar datos. Verifica que el teléfono contenga solo números."
+        });
+    }
+});
 
-})
 
 module.exports = router
