@@ -13,7 +13,14 @@ router.get('/rk/', async (req, res) => {
     res.json(tareas)
 
 })
+router.get('/traervotantes/', async (req, res) => {
+   
 
+    tareas = await pool.query('select * from rk ')
+
+    res.json(tareas)
+
+})
 router.post('/guardar', async (req, res) => {
     const {name, punt} = req.body
     console.log(id)
