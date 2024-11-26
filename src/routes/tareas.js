@@ -13,14 +13,51 @@ router.get('/rk/', async (req, res) => {
     res.json(tareas)
 
 })
-router.get('/traervotantes/', async (req, res) => {
-   
+router.get('/traervotantes', async (req, res) => {
+  try {
+      // Obtener todos los registros de la tabla 'votacion'
+      const votaciones = await pool.query('SELECT * FROM rk');
 
-    tareas = await pool.query('select * from rk ')
+      // Procesar cada registro
+      for (const votacion of votaciones) {
+          // Inicializar votos procesados como un arreglo vacío
+          let votosDetallados = [];
+  
+          if (votacion.votos) {
+              try {
+                console.log(votacion.votos)
+                  // Parsear el campo 'votos' como JSON
+                 // const votosArray = JSON.parse(votacion.votos);
+                //  console.log(votacion.votos)
+                 // console.log(votosArray)
+                  // Verificar que el valor parseado sea un arreglo
+                  if (Array.isArray(votacion.votos)) {
+                      // Obtener detalles de cada ID en el campo 'votos'
+                      console.log()
+                      const detalles = await pool.query(
+                          `SELECT  name as candidadp, category as categoria, subcategory as subcategoria FROM votacion WHERE id IN (?)`,
+                          [votacion.votos]
+                      );
 
-    res.json(tareas)
+                      // Reemplazar IDs por los detalles correspondientes
+                      votosDetallados = detalles;
+                  }
+              } catch (error) {
+                  console.error(`Error al procesar los votos para votacion.id=${votacion.id}:`, error);
+              }
+          }
 
-})
+          // Actualizar el campo 'votos' con los detalles obtenidos
+          votacion.votos = JSON.stringify(votosDetallados);
+      }
+      console.log(votaciones)
+      // Devolver la tabla 'votacion' con los votos transformados
+      res.json(votaciones);
+  } catch (error) {
+      console.error('Error al obtener votaciones:', error);
+      res.status(500).json({ mensaje: 'Error al obtener las votaciones' });
+  }
+});
 router.post('/guardar', async (req, res) => {
     const {name, punt} = req.body
     console.log(id)
