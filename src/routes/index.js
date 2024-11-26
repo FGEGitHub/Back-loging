@@ -46,7 +46,7 @@ router.get('/traervotos', async (req, res) => {
   const { idOpcion, idVotante } = req.body;
   console.log(idOpcion, idVotante);
 
-  try {
+  try { 
       // Incrementar el voto en la tabla 'votacion'
       await pool.query('UPDATE votacion SET votes = votes + 1 WHERE id = ?', [idOpcion]);
 
@@ -60,7 +60,7 @@ router.get('/traervotos', async (req, res) => {
 
       let votosArray = [];
 
-      // Verificar si 'votos' tiene un valor no nulo
+      // Verificar si 'votos' tiene un valor no nulo   
       if (rkRecord.votos) {
           try {
               // Intentar parsear el valor como JSON
