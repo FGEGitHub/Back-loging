@@ -773,21 +773,34 @@ router.get('/datosdepersonapsi/:id', async (req, res) => {
 
 })
 router.get('/traerasistencia/:id', async (req, res) => {
-  const id = req.params.id
-  const asis = await pool.query('select count(usuario),usuario,idu from dtc_asistencia join(select id as idu, usuario from usuarios) as sel on dtc_asistencia.id_tallerista=sel.idu where id_usuario =? group by usuario,idu', [id])
+  const id = req.params.id;
 
-  const resultadosConvertidos = asis.map(resultado => ({
+  try {
+    const asis = await pool.query(
+      'SELECT COUNT(usuario) AS count, usuario, idu FROM dtc_asistencia JOIN (SELECT id AS idu, usuario FROM usuarios) AS sel ON dtc_asistencia.id_tallerista = sel.idu WHERE id_usuario = ? GROUP BY usuario, idu',
+      [id]
+    );
 
-    count: Number(resultado['count(usuario)']),
-    taller: resultado.usuario,// Convertir BigInt a Number
-    id_tallerista: resultado.idu
-  }));
+    const asistaller = await pool.query(
+      'SELECT COUNT(usuario) AS count, usuario, idu FROM dtc_asistencia_clase JOIN (SELECT id AS idclase, id_tallerista FROM dtc_clases_taller) AS sel8 ON dtc_asistencia_clase.id_clase = sel8.idclase JOIN (SELECT id AS idu, usuario FROM usuarios) AS sel ON sel8.id_tallerista = sel.idu WHERE id_usuario = ? GROUP BY usuario, idu',
+      [id]
+    );
 
-  console.log(resultadosConvertidos)
+    // Combina ambos resultados y transforma los datos
+    const resultados = [...asis, ...asistaller].map((resultado) => ({
+      count: Number(resultado.count), // Asegúrate de que `count` sea un número
+      taller: resultado.usuario,
+      id_tallerista: resultado.idu,
+    }));
 
-  res.json([resultadosConvertidos])
+    // Devuelve los resultados unidos
+    res.json([resultados]);
+  } catch (error) {
+    console.error('Error al obtener asistencia:', error);
+    res.status(500).json({ error: 'Error al obtener asistencia' });
+  }
+});
 
-})
 router.get('/traerfoto/:id', async (req, res) => {
   const id = req.params.id
   const productosdeunapersona = await pool.query('select * from dtc_legajos where id =?', [id])
@@ -2737,6 +2750,7 @@ console.log(existe)
 })
 router.post("/ponerpresenteclase", async (req, res) => {
   let { id_clase, id_usuario } = req.body
+  console.log( id_clase, id_usuario)
   const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
 
   console.log("La hora actual en Buenos Aires es:", horaBuenosAires);
