@@ -92,18 +92,18 @@ router.get('/lista/:id', isLoggedInn2, async (req, res) => {
 
 
 router.post('/enviardatosvoto', async (req, res) => {
-    const { nombre, telefono } = req.body;
-    console.log(nombre, telefono);
+    const { nombre, telefono, apellido, dni,barrio } = req.body;
+    console.log(nombre, telefono, apellido, dni,barrio);
 
     try {
         // Verificar si el teléfono ya existe
-        const exis = await pool.query('SELECT * FROM rk WHERE punt = ?', [telefono]);
+        const exis = await pool.query('SELECT * FROM rk WHERE punt = ? or dni = ?  ', [telefono,dni]);
 
         if (exis.length > 0) {
-            res.json("Ya existe teléfono registrado");
+            res.json("Ya existe dni o  teléfono registrado");
         } else {
             // Insertar nuevo registro
-            const resultado = await pool.query('INSERT INTO rk (name, punt) VALUES (?, ?)', [nombre, telefono]);
+            const resultado = await pool.query('INSERT INTO rk (name,lastname,dni, punt, barrio) VALUES (?, ?, ?, ?, ?)', [nombre,apellido,dni, telefono, barrio]);
 
             // Obtener el id generado
             const idVotante = resultado.insertId;
@@ -115,7 +115,7 @@ router.post('/enviardatosvoto', async (req, res) => {
         console.error(error);
 
         res.status(500).json({
-            mensaje: "Error al guardar datos. Verifica que el teléfono contenga solo números."
+            mensaje: "Error al guardar datos. Verifica los  datos."
         });
     }
 });
