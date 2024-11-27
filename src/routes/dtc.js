@@ -636,7 +636,6 @@ router.get('/listachiques/', async (req, res) => {
   }
 });
 
-
 router.get('/listachiquesmomentaneo/', async (req, res) => {
   try {
     // Obtener los datos de las tablas
@@ -703,17 +702,24 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
 
     // Generar estadísticas agrupadas por la columna 'kid'
     const estadisticas = {};
+    let total = 0;
     for (const chico of chiques) {
-      estadisticas[chico.kid] = (estadisticas[chico.kid] || 0) + 1;
+      const key = chico.kid === 'Sin definir' ? 'sin_definir' : chico.kid;
+      estadisticas[key] = (estadisticas[key] || 0) + 1;
+      total++;
     }
-console.log(resultado)
+
+    // Agregar el total a las estadísticas
+    estadisticas.total = total;
+console.log(estadisticas)
     // Responder con el array procesado y las estadísticas
-    res.json([ resultado, estadisticas] );
+    res.json([resultado, estadisticas]);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Ocurrió un error al procesar los datos' });
   }
 });
+
 
 
 
