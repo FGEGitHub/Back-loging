@@ -638,61 +638,84 @@ router.get('/listachiques/', async (req, res) => {
 
 router.get('/listachiquesmomentaneo/', async (req, res) => {
   try {
-    // Obtener los datos de las tablas
-    const chiques = await pool.query('SELECT * FROM dtc_chicos ORDER BY apellido');
-    
-    // Obtener fechas únicas de asistencias agrupadas directamente en SQL
-    const fechasUnicas = await pool.query('SELECT DISTINCT fecha FROM dtc_asistencia ORDER BY fecha');
+    const calcularEdad = (fechaNacimiento) => {
+      const hoy = new Date();
+      const [anio, mes, dia] = fechaNacimiento.split('-');
+      let edad = hoy.getFullYear() - anio;
+      const mesActual = hoy.getMonth() + 1;
+      const diaActual = hoy.getDate();
 
-    // Crear un array para almacenar la respuesta final
-    const resultado = [];
-
-    // Función para convertir fechas de 'DD-M-YYYY' a un formato manejable
-    const convertirFecha = (fecha) => {
-      const [dia, mes, anio] = fecha.split('-').map(Number); // Convertir directamente a números
-      return new Date(anio, mes - 1, dia); // Meses en Date van de 0 a 11
+      if (mesActual < mes || (mesActual === mes && diaActual < dia)) {
+        edad--;
+      }
+      return edad;
     };
 
-    // Convertir y ordenar fechas únicas obtenidas de la consulta SQL
+    // Lista de campos requeridos (sin duplicados)
+    const requiredFields = {
+      dni: 'DNI',
+      tel_responsable: 'Teléfono Responsable',
+      escuela: 'Escuela',
+      grado: 'Grado',
+      domicilio: 'Domicilio',
+      dato_escolar: 'Dato Escolar',
+      fecha_nacimiento: 'Fecha de Nacimiento'
+    };
+
+    // Obtener datos de la tabla principal
+    const chiques = await pool.query('SELECT * FROM dtc_chicos ORDER BY apellido');
+
+    // Calcular campo 'falta' y 'edad' para cada chico
+    const chiquesConFalta = chiques.map(chique => {
+      const faltantes = Object.keys(requiredFields).filter(field => {
+        const value = chique[field];
+        return !value || value.trim() === '' || value.trim().toLowerCase() === 'sin determinar';
+      });
+
+      const falta = faltantes.length > 0 
+        ? faltantes.map(field => requiredFields[field]).join(', ') 
+        : 'Completo';
+      
+      const edad = calcularEdad(chique.fecha_nacimiento);
+
+      return { ...chique, falta, edad };
+    });
+
+    // Obtener datos de asistencia
+    const fechasUnicas = await pool.query('SELECT DISTINCT fecha FROM dtc_asistencia ORDER BY fecha');
+    const convertirFecha = (fecha) => {
+      const [dia, mes, anio] = fecha.split('-').map(Number);
+      return new Date(anio, mes - 1, dia);
+    };
+
     const fechasClasesUnicas = fechasUnicas.map(row => convertirFecha(row.fecha)).sort((a, b) => a - b);
 
-    // Procesar cada chico
-    for (const chico of chiques) {
-      // Filtrar asistencias por id_usuario
+    const chiquesMomentaneo = [];
+    for (const chico of chiquesConFalta) {
       const asistenciasChico = await pool.query(
         'SELECT fecha FROM dtc_asistencia WHERE id_usuario = ? ORDER BY fecha',
         [chico.id]
       );
 
-      // Convertir fechas y ordenarlas
       const fechasAsistencias = asistenciasChico.map(row => convertirFecha(row.fecha));
       fechasAsistencias.sort((a, b) => a - b);
 
-      // Calcular la primera asistencia
       const primeraAsistencia = fechasAsistencias[0]
         ? `${fechasAsistencias[0].getDate()}-${fechasAsistencias[0].getMonth() + 1}-${fechasAsistencias[0].getFullYear()}`
         : null;
 
-      // Filtrar las fechas de clases únicas desde la primera asistencia
       const fechasDesdePrimeraAsistencia = fechasClasesUnicas.filter(fecha => 
         fechasAsistencias[0] ? fecha >= fechasAsistencias[0] : false
       );
 
-      // Calcular datos finales
-      const cantAsistencias = fechasAsistencias.length; // Asistencias totales del chico
-      const totalDiasDesdePrimeraAsistencia = fechasDesdePrimeraAsistencia.length; // Total de días disponibles desde la primera asistencia
+      const cantAsistencias = fechasAsistencias.length;
+      const totalDiasDesdePrimeraAsistencia = fechasDesdePrimeraAsistencia.length;
       const porcentajeAsistencia = totalDiasDesdePrimeraAsistencia
         ? ((cantAsistencias / totalDiasDesdePrimeraAsistencia) * 100).toFixed(2)
         : 0;
 
-      // Agregar al resultado
-      resultado.push({
-        id: chico.id,
-        kid: chico.kid,
-        nombre: chico.nombre,
-        apellido: chico.apellido,
-        dni: chico.dni,
-        fecha_nacimiento: chico.fecha_nacimiento,
+      chiquesMomentaneo.push({
+        ...chico,
         primer_asis: primeraAsistencia,
         cant_asist: cantAsistencias,
         total_asis: totalDiasDesdePrimeraAsistencia,
@@ -700,30 +723,69 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
       });
     }
 
-    // Generar estadísticas agrupadas por la columna 'kid'
+    // Generar estadísticas
     const estadisticas = {};
     let total = 0;
-    for (const chico of chiques) {
+    for (const chico of chiquesConFalta) {
       const key = chico.kid === 'Sin definir' ? 'sin_definir' : chico.kid;
       estadisticas[key] = (estadisticas[key] || 0) + 1;
       total++;
     }
-
-    // Agregar el total a las estadísticas
     estadisticas.total = total;
-console.log(estadisticas)
-    // Responder con el array procesado y las estadísticas
-    res.json([resultado, estadisticas]);
+
+    // Responder con los datos fusionados
+    res.json([chiquesMomentaneo, estadisticas]);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Ocurrió un error al procesar los datos' });
+    res.status(500).json({ error: 'Ocurrió un error al procesar los datos definitivos' });
   }
 });
 
 
 
+router.get('/get-map', (req, res) => {
+  const kmlFilePath = path.join(__dirname, 'services/dtc/mapadtc.kml');
 
+  fs.readFile(kmlFilePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Error al leer el archivo KML.' });
+    }
+    res.send(data);
+  });
+});
 
+// Ruta para guardar un nuevo punto en el archivo KML
+router.post('/api/save-point', (req, res) => {
+  const { name, lat, lng } = req.body;
+  const kmlFilePath = path.join(__dirname, 'services/dtc/mapadtc.kml');
+
+  const newPoint = `
+    <Placemark>
+      <name>${name}</name>
+      <Point>
+        <coordinates>${lng},${lat},0</coordinates>
+      </Point>
+    </Placemark>`;
+
+  fs.readFile(kmlFilePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Error al leer el archivo KML.' });
+    }
+
+    const updatedKml = data.replace('</Document>', `${newPoint}\n</Document>`);
+
+    fs.writeFile(kmlFilePath, updatedKml, (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Error al escribir en el archivo KML.' });
+      }
+
+      res.json({ message: 'Punto guardado exitosamente.' });
+    });
+  });
+});
 
 
 
