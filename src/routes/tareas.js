@@ -90,24 +90,27 @@ router.get('/lista/:id', isLoggedInn2, async (req, res) => {
 
 })
 
-
 router.post('/enviardatosvoto', async (req, res) => {
-    const { nombre, telefono, apellido, dni,barrio } = req.body;
-    console.log(nombre, telefono, apellido, dni,barrio);
+    const { nombre, telefono, apellido, dni, barrio } = req.body;
+    console.log(nombre, telefono, apellido, dni, barrio);
 
     try {
-        // Verificar si el teléfono ya existe
-        const exis = await pool.query('SELECT * FROM rk WHERE punt = ? or dni = ?  ', [telefono,dni]);
+        // Verificar si el teléfono o DNI ya existen
+        const exis = await pool.query('SELECT * FROM rk WHERE punt = ? OR dni = ?', [telefono, dni]);
 
         if (exis.length > 0) {
-            res.json("Ya existe dni o  teléfono registrado");
+            res.json("Ya existe dni o teléfono registrado");
         } else {
-            // Insertar nuevo registro
-            const resultado = await pool.query('INSERT INTO rk (name,lastname,dni, punt, barrio) VALUES (?, ?, ?, ?, ?)', [nombre,apellido,dni, telefono, barrio]);
+            // Insertar nuevo registro con fecha y hora actuales
+            const resultado = await pool.query(
+                'INSERT INTO rk (name, lastname, dni, punt, barrio, hora) VALUES (?, ?, ?, ?, ?, NOW())',
+                [nombre, apellido, dni, telefono, barrio]
+            );
 
             // Obtener el id generado
             const idVotante = resultado.insertId;
-            console.log( Number(idVotante))
+            console.log(Number(idVotante));
+            
             // Enviar el ID como respuesta
             res.json({ mensaje: "Registro exitoso", id: Number(idVotante) });
         }
@@ -115,7 +118,7 @@ router.post('/enviardatosvoto', async (req, res) => {
         console.error(error);
 
         res.status(500).json({
-            mensaje: "Error al guardar datos. Verifica los  datos."
+            mensaje: "Error al guardar datos. Verifica los datos."
         });
     }
 });
