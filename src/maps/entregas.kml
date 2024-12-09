@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+  <Document id="142Fjry7jq1a2SFjcC04rGcw6jOvch1N4">
+    <name>Sin título</name>
+    <gx:CascadingStyle kml:id="__managed_style_2EAFDE0C953229E8423F">
+      <styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+      <Style>
+        <IconStyle>
+          <scale>1.2</scale>
+          <Icon>
+            <href>https://earth.google.com/earth/rpc/cc/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+          </Icon>
+          <hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+        </IconStyle>
+        <LabelStyle>
+			</LabelStyle>
+        <LineStyle>
+          <color>ff2dc0fb</color>
+          <width>4.8</width>
+        </LineStyle>
+        <PolyStyle>
+          <color>40ffffff</color>
+        </PolyStyle>
+        <BalloonStyle>
+			</BalloonStyle>
+      </Style>
+    </gx:CascadingStyle>
+    <gx:CascadingStyle kml:id="__managed_style_157C4CB2F93229E8423F">
+      <styleUrl>https://earth.google.com/balloon_components/base/1.0.26.0/card_template.kml#main</styleUrl>
+      <Style>
+        <IconStyle>
+          <Icon>
+            <href>https://earth.google.com/earth/rpc/cc/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+          </Icon>
+          <hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+        </IconStyle>
+        <LabelStyle>
+			</LabelStyle>
+        <LineStyle>
+          <color>ff2dc0fb</color>
+          <width>3.2</width>
+        </LineStyle>
+        <PolyStyle>
+          <color>40ffffff</color>
+        </PolyStyle>
+        <BalloonStyle>
+			</BalloonStyle>
+      </Style>
+    </gx:CascadingStyle>
+    <gx:CascadingStyle kml:id="__managed_style_1F2735D5B83229E8423C">
+      <Style>
+        <IconStyle>
+          <scale>1.2</scale>
+          <Icon>
+            <href>https://earth.google.com/earth/rpc/cc/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+          </Icon>
+          <hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+        </IconStyle>
+        <LabelStyle>
+			</LabelStyle>
+        <LineStyle>
+          <color>ff2dc0fb</color>
+          <width>4.8</width>
+        </LineStyle>
+        <PolyStyle>
+          <color>40ffffff</color>
+        </PolyStyle>
+        <BalloonStyle>
+			</BalloonStyle>
+      </Style>
+    </gx:CascadingStyle>
+    <gx:CascadingStyle kml:id="__managed_style_008AD8561D3229E8423C">
+      <Style>
+        <IconStyle>
+          <Icon>
+            <href>https://earth.google.com/earth/rpc/cc/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+          </Icon>
+          <hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+        </IconStyle>
+        <LabelStyle>
+			</LabelStyle>
+        <LineStyle>
+          <color>ff2dc0fb</color>
+          <width>3.2</width>
+        </LineStyle>
+        <PolyStyle>
+          <color>40ffffff</color>
+        </PolyStyle>
+        <BalloonStyle>
+			</BalloonStyle>
+      </Style>
+    </gx:CascadingStyle>
+    <StyleMap id="__managed_style_0F9D66E4663229E8423F">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#__managed_style_157C4CB2F93229E8423F</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#__managed_style_2EAFDE0C953229E8423F</styleUrl>
+      </Pair>
+    </StyleMap>
+    <StyleMap id="__managed_style_0C60E72AED3229E8423B">
+      <Pair>
+        <key>normal</key>
+        <styleUrl>#__managed_style_008AD8561D3229E8423C</styleUrl>
+      </Pair>
+      <Pair>
+        <key>highlight</key>
+        <styleUrl>#__managed_style_1F2735D5B83229E8423C</styleUrl>
+      </Pair>
+    </StyleMap>
+    <Folder id="0F2389D4993215AB51B7">
+      <name>usuarios dtc</name>
+      <styleUrl>#__managed_style_0C60E72AED3229E8423B</styleUrl>
+    </Folder>
+    <Placemark id="07C527B78B3215C45A59">
+      <name>dtc</name>
+      <LookAt>
+        <longitude>-58.82802244030228</longitude>
+        <latitude>-27.50803425612402</latitude>
+        <altitude>59.46960985327257</altitude>
+        <heading>0</heading>
+        <tilt>0</tilt>
+        <gx:fovy>30</gx:fovy>
+        <range>1000</range>
+        <altitudeMode>absolute</altitudeMode>
+      </LookAt>
+      <styleUrl>#__managed_style_0C60E72AED3229E8423B</styleUrl>
+      <Point>
+        <coordinates>-58.8280168266479,-27.50782036487793,59.46960985327257</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark id="081FE891893216C69892">
+      <name>bautista torales</name>
+      <LookAt>
+        <longitude>-58.82854120543693</longitude>
+        <latitude>-27.51308657063627</latitude>
+        <altitude>59.85330086843351</altitude>
+        <heading>359.9999999999997</heading>
+        <tilt>0</tilt>
+        <gx:fovy>35</gx:fovy>
+        <range>268.2600149931022</range>
+        <altitudeMode>absolute</altitudeMode>
+      </LookAt>
+      <styleUrl>#__managed_style_0C60E72AED3229E8423B</styleUrl>
+      <Point>
+        <coordinates>-58.82854120543693,-27.51308657063627,59.85330086843351</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark id="0BD80D0236321A8136F1">
+      <name>Silva oziel y misael</name>
+      <LookAt>
+        <longitude>-58.82912920491442</longitude>
+        <latitude>-27.51341021212486</latitude>
+        <altitude>60.82106347878712</altitude>
+        <heading>43.86074796863416</heading>
+        <tilt>0</tilt>
+        <gx:fovy>35</gx:fovy>
+        <range>150.9056873707596</range>
+        <altitudeMode>absolute</altitudeMode>
+      </LookAt>
+      <styleUrl>#__managed_style_0C60E72AED3229E8423B</styleUrl>
+      <Point>
+        <coordinates>-58.82912920491442,-27.51341021212486,60.82106347878712</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark id="04B2E655CA321A8D2938">
+      <name>Silva rocio</name>
+      <LookAt>
+        <longitude>-58.82928783432177</longitude>
+        <latitude>-27.51354682707867</latitude>
+        <altitude>59.70069583513815</altitude>
+        <heading>75.65727487320636</heading>
+        <tilt>0</tilt>
+        <gx:fovy>35</gx:fovy>
+        <range>132.8453195192378</range>
+        <altitudeMode>absolute</altitudeMode>
+      </LookAt>
+      <styleUrl>#__managed_style_0C60E72AED3229E8423B</styleUrl>
+      <Point>
+        <coordinates>-58.82928783432177,-27.51354682707867,59.70069583513815</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark id="0A7A66B327321AA5C26E">
+      <name> suarez sila, delfina , gabriel</name>
+      <LookAt>
+        <longitude>-58.82883137689655</longitude>
+        <latitude>-27.51413501238813</latitude>
+        <altitude>60.35301438940697</altitude>
+        <heading>71.07485000575859</heading>
+        <tilt>0</tilt>
+        <gx:fovy>35</gx:fovy>
+        <range>469.3966824259405</range>
+        <altitudeMode>absolute</altitudeMode>
+      </LookAt>
+      <styleUrl>#__managed_style_0C60E72AED3229E8423B</styleUrl>
+      <Point>
+        <coordinates>-58.82883137689655,-27.51413501238813,60.35301438940697</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark id="02FA31B798321AD676CE">
+      <name>toledo serrati, fiorella, benjamín, oriana</name>
+      <LookAt>
+        <longitude>-58.82911449348558</longitude>
+        <latitude>-27.51439090763991</latitude>
+        <altitude>60.39423561689136</altitude>
+        <heading>248.1379474436055</heading>
+        <tilt>0</tilt>
+        <gx:fovy>35</gx:fovy>
+        <range>662.4739654766017</range>
+        <altitudeMode>absolute</altitudeMode>
+      </LookAt>
+      <styleUrl>#__managed_style_0C60E72AED3229E8423B</styleUrl>
+      <Point>
+        <coordinates>-58.82923948179499,-27.51425110995629,60.39649956926086</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark id="0510B80C95321BD2D8FD">
+      <name>navarro alexia, jorge, eduardo</name>
+      <LookAt>
+        <longitude>-58.82820970015588</longitude>
+        <latitude>-27.51749701327332</latitude>
+        <altitude>62.76863167628647</altitude>
+        <heading>291.7137008085552</heading>
+        <tilt>0</tilt>
+        <gx:fovy>35</gx:fovy>
+        <range>500.3790138837213</range>
+        <altitudeMode>absolute</altitudeMode>
+      </LookAt>
+      <styleUrl>#__managed_style_0C60E72AED3229E8423B</styleUrl>
+      <Point>
+        <coordinates>-58.82820970015588,-27.51749701327332,62.76863167628647</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark id="0CDDF44491321BF8219F">
+      <name>Segovia lautaro</name>
+      <LookAt>
+        <longitude>-58.82838271506808</longitude>
+        <latitude>-27.51217426954209</latitude>
+        <altitude>59.37414605775251</altitude>
+        <heading>25.26587682435844</heading>
+        <tilt>0</tilt>
+        <gx:fovy>35</gx:fovy>
+        <range>259.3004358293911</range>
+        <altitudeMode>absolute</altitudeMode>
+      </LookAt>
+      <styleUrl>#__managed_style_0C60E72AED3229E8423B</styleUrl>
+      <Point>
+        <coordinates>-58.82838271506808,-27.51217426954209,59.37414605775251</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark id="032C118B95321C024E2F">
+      <name>romero darían alexander</name>
+      <LookAt>
+        <longitude>-58.8302193</longitude>
+        <latitude>-27.5133763</latitude>
+        <altitude>59.7229982467051</altitude>
+        <heading>257.5531921386719</heading>
+        <tilt>0</tilt>
+        <gx:fovy>35</gx:fovy>
+        <range>500</range>
+        <altitudeMode>absolute</altitudeMode>
+      </LookAt>
+      <styleUrl>#__managed_style_0C60E72AED3229E8423B</styleUrl>
+      <Point>
+        <coordinates>-58.83008409814445,-27.51327828131457,59.7229982467051</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark id="0FA6875211321C0B711A">
+      <name>ovella damaris</name>
+      <LookAt>
+        <longitude>-58.83067672596526</longitude>
+        <latitude>-27.51151735483025</latitude>
+        <altitude>60.24404771409408</altitude>
+        <heading>165.3391864536329</heading>
+        <tilt>0</tilt>
+        <gx:fovy>35</gx:fovy>
+        <range>1153.281928770302</range>
+        <altitudeMode>absolute</altitudeMode>
+      </LookAt>
+      <styleUrl>#__managed_style_0C60E72AED3229E8423B</styleUrl>
+      <Point>
+        <coordinates>-58.83067672596526,-27.51151735483025,60.24404771409408</coordinates>
+      </Point>
+    </Placemark>
+  </Document>
+</kml>

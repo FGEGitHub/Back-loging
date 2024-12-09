@@ -13,7 +13,7 @@ const xlsx = require('xlsx');
 const xml2js = require('xml2js');
 
 const kmlFilePath = path.join(__dirname, '../maps/mapadtc.kml');
-
+const kmlFilePath2 = path.join(__dirname, '../maps/entregas.kml');
 
 
 const storage = multer.diskStorage({
@@ -852,7 +852,115 @@ router.post('/borrarpuntoenmapa',async (req, res) => {
   });
 });
 
+/////////////////////////////entregas
 
+
+router.get('/traermapaentregas', (req, res) => {
+  const kmlFilePath2 = path.join(__dirname, '../maps/mapadtc.kml');
+
+  fs.readFile(kmlFilePath2, 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Error al leer el archivo KML.' });
+    }
+    res.type('application/vnd.google-earth.kml+xml'); // Especificar el tipo MIME de KML
+    res.send(data);
+  });
+});
+
+router.post('/actualizarmapaentregas', async (req, res) => {
+  const { updatedKml } = req.body;
+
+  if (!updatedKml) {
+    return res.status(400).json({ error: 'No se proporcionó contenido para el archivo KML.' });
+  }
+
+  try {
+    // Leer el archivo KML actual
+    const currentKml = await fs.promises.readFile(kmlFilePath2, 'utf8');
+    
+    // Parsear el contenido KML existente
+    const parser = new xml2js.Parser();
+    const builder = new xml2js.Builder();
+
+    const currentKmlObject = await parser.parseStringPromise(currentKml);
+    const newKmlObject = await parser.parseStringPromise(updatedKml);
+
+    // Insertar el nuevo marcador en el archivo existente
+    if (!currentKmlObject.kml.Document[0].Placemark) {
+      currentKmlObject.kml.Document[0].Placemark = [];
+    }
+    currentKmlObject.kml.Document[0].Placemark.push(newKmlObject.kml.Document[0].Placemark[0]);
+
+    // Convertir el KML actualizado a cadena
+    const updatedKmlContent = builder.buildObject(currentKmlObject);
+
+    // Guardar el archivo actualizado
+    await fs.promises.writeFile(kmlFilePath2, updatedKmlContent, 'utf8');
+
+    res.status(200).json({ message: 'Archivo KML actualizado correctamente.' });
+  } catch (error) {
+    console.error('Error al actualizar el archivo KML:', error);
+    res.status(500).json({ error: 'Error al actualizar el archivo KML.' });
+  }
+});
+
+
+router.post('/borrarpuntoenmapentregas',async (req, res) => {
+  const { lat, lng } = req.body;
+  console.log(lat, lng)
+
+  // Leer el archivo KML
+  fs.readFile(kmlFilePath2, 'utf8', (err, data) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error al leer el archivo KML' });
+    }
+
+    // Parsear el contenido del archivo KML a un objeto JS
+    xml2js.parseString(data, (err, result) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error al parsear el archivo KML' });
+      }
+
+      // Acceder a los puntos en el archivo KML
+      const placemarks = result.kml.Document[0].Placemark;
+      let puntoEliminado = false;
+
+      // Buscar y eliminar el punto por latitud y longitud
+      for (let i = 0; i < placemarks.length; i++) {
+        const point = placemarks[i].Point[0].coordinates[0].split(',');
+        const pointLat = parseFloat(point[1].trim());
+        const pointLng = parseFloat(point[0].trim());
+
+        if (pointLat === lat && pointLng === lng) {
+          // Eliminar el punto
+          placemarks.splice(i, 1);
+          puntoEliminado = true;
+          break;
+        }
+      }
+
+      if (!puntoEliminado) {
+        return res.status(404).json({ message: 'Punto no encontrado' });
+      }
+
+      // Volver a convertir el objeto JS a KML
+      const builder = new xml2js.Builder();
+      const updatedKml = builder.buildObject(result);
+
+      // Escribir el archivo KML actualizado
+      fs.writeFile(kmlFilePath2, updatedKml, 'utf8', (err) => {
+        if (err) {
+          return res.status(500).json({ message: 'Error al escribir el archivo KML' });
+        }
+        res.status(200).json({ message: 'Punto eliminado exitosamente' });
+      });
+    });
+  });
+});
+
+
+///////////////////finamapas entrgas
 
 router.get('/datosdechiquecadia/:id', async (req, res) => {
   const id = req.params.id
