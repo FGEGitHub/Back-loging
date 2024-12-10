@@ -906,59 +906,63 @@ router.post('/actualizarmapaentregas', async (req, res) => {
 });
 
 
-router.post('/borrarpuntoenmapentregas',async (req, res) => {
-  const { lat, lng } = req.body;
-  console.log(lat, lng)
 
-  // Leer el archivo KML
-  fs.readFile(kmlFilePath2, 'utf8', (err, data) => {
-    if (err) {
-      return res.status(500).json({ message: 'Error al leer el archivo KML' });
-    }
+router.post('/borrarpuntoenmapentregas', async (req, res) => {
+  const { lat, lng } = req.body;
+  console.log('Coordenadas recibidas:', lat, lng);
+
+  if (!lat || !lng) {
+    return res.status(400).json({ message: 'Latitud y longitud son requeridas' });
+  }
+
+  try {
+    // Leer el archivo KML
+    const data = fs.readFileSync(kmlFilePath2, 'utf8');
+    console.log('Archivo KML leído con éxito.');
 
     // Parsear el contenido del archivo KML a un objeto JS
-    xml2js.parseString(data, (err, result) => {
-      if (err) {
-        return res.status(500).json({ message: 'Error al parsear el archivo KML' });
+    const result = await xml2js.parseStringPromise(data);
+    console.log('Archivo KML parseado exitosamente.');
+
+    // Acceder a los puntos en el archivo KML
+    const placemarks = result.kml.Document[0].Placemark || [];
+    console.log(`Placemarks antes de la eliminación: ${placemarks.length}`);
+
+    let puntoEliminado = false;
+
+    // Buscar y eliminar el punto por latitud y longitud
+    for (let i = placemarks.length - 1; i >= 0; i--) { // Iterar al revés para evitar problemas al eliminar
+      const point = placemarks[i].Point[0].coordinates[0].split(',');
+      const pointLat = parseFloat(point[1].trim());
+      const pointLng = parseFloat(point[0].trim());
+
+      if (pointLat === parseFloat(lat) && pointLng === parseFloat(lng)) {
+        console.log('Eliminando Placemark:', JSON.stringify(placemarks[i], null, 2));
+        placemarks.splice(i, 1); // Elimina el `Placemark` completo
+        puntoEliminado = true;
       }
+    }
 
-      // Acceder a los puntos en el archivo KML
-      const placemarks = result.kml.Document[0].Placemark;
-      let puntoEliminado = false;
+    if (!puntoEliminado) {
+      return res.status(404).json({ message: 'Punto no encontrado' });
+    }
 
-      // Buscar y eliminar el punto por latitud y longitud
-      for (let i = 0; i < placemarks.length; i++) {
-        const point = placemarks[i].Point[0].coordinates[0].split(',');
-        const pointLat = parseFloat(point[1].trim());
-        const pointLng = parseFloat(point[0].trim());
+    console.log(`Placemarks después de la eliminación: ${placemarks.length}`);
 
-        if (pointLat === lat && pointLng === lng) {
-          // Eliminar el punto
-          placemarks.splice(i, 1);
-          puntoEliminado = true;
-          break;
-        }
-      }
+    // Volver a convertir el objeto JS a KML
+    const builder = new xml2js.Builder();
+    const updatedKml = builder.buildObject(result);
 
-      if (!puntoEliminado) {
-        return res.status(404).json({ message: 'Punto no encontrado' });
-      }
+    // Escribir el archivo KML actualizado
+    fs.writeFileSync(kmlFilePath2, updatedKml, 'utf8');
+    console.log('Archivo KML actualizado y guardado con éxito.');
 
-      // Volver a convertir el objeto JS a KML
-      const builder = new xml2js.Builder();
-      const updatedKml = builder.buildObject(result);
-
-      // Escribir el archivo KML actualizado
-      fs.writeFile(kmlFilePath2, updatedKml, 'utf8', (err) => {
-        if (err) {
-          return res.status(500).json({ message: 'Error al escribir el archivo KML' });
-        }
-        res.status(200).json({ message: 'Punto eliminado exitosamente' });
-      });
-    });
-  });
+    return res.status(200).json({ message: 'Punto eliminado exitosamente' });
+  } catch (error) {
+    console.error('Error al procesar el archivo KML:', error);
+    return res.status(500).json({ message: 'Error interno del servidor' });
+  }
 });
-
 
 ///////////////////finamapas entrgas
 
