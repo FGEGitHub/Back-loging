@@ -2198,6 +2198,15 @@ router.get('/traeretapacocina/:id', async (req, res) => {
 })
 
 
+router.get('/traerstock', async (req, res) => {
+  const id = req.params.id
+  const existe = await pool.query('SELECT * FROM dtc_stock  ORDER BY id DESC');
+
+console.log(existe)
+  res.json([existe])
+
+
+})
 
 router.get('/traerintervenciones/', async (req, res) => {
   let can = await pool.query(`
@@ -2810,6 +2819,20 @@ router.post("/determinaprofesional", async (req, res) => {
   try {
     console.log( id_chico, id_profesional)
     await pool.query('insert into cadia_chico_profesional set id_chico=?,id_profesional=?', [id_chico, id_profesional])
+
+    res.json('realizado')
+  } catch (error) {
+   console.log(error)
+    res.json('error, algo sucedio')
+  }
+
+})
+
+router.post("/nuevoproducto", async (req, res) => {
+  const { nombre, descripcion } = req.body
+  try {
+  
+    await pool.query('insert into dtc_stock set nombre=?,descripcion=?', [nombre, descripcion])
 
     res.json('realizado')
   } catch (error) {
