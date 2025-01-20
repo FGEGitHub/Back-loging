@@ -1377,6 +1377,26 @@ router.post("/nuevaprestacioninv", async (req, res) => {
   
 })
 
+router.post("/agregarconsumo", async (req, res) => {
+  let { id_producto, cantidad, fecha } = req.body
+  try {
+    if(fecha== undefined){
+      fecha="sin fecha"
+    }
+   
+   console.log(id_producto, cantidad, fecha)
+    await pool.query('insert dtc_consumo  set  id_producto=?, cantidad=?, fecha=? ', [ id_producto, cantidad, fecha])
+
+    res.json("Realizado")
+  } catch (error) {
+    console.log(error)
+    res.json("No realizado")
+  }
+
+  
+})
+
+
 router.post("/nuevoexpediente", async (req, res) => {
   let { titulo, inicio, cierre, detalle } = req.body
   try {
@@ -2187,6 +2207,16 @@ router.get('/traeretapacocinacadia/', async (req, res) => {
 
 })
 
+router.get('/traerparasumar/', async (req, res) => {
+  const existe = await pool.query('SELECT * FROM dtc_etapa_cadia  ORDER BY id DESC');
+  const existe2 = await pool.query('SELECT * FROM dtc_stock  ORDER BY id DESC');
+
+  res.json([existe,existe2])
+
+
+})
+
+
 router.get('/traeretapacocina/:id', async (req, res) => {
   const id = req.params.id
   const existe = await pool.query('SELECT * FROM dtc_etapa WHERE id_usuario=? ORDER BY id DESC', [id]);
@@ -2198,15 +2228,37 @@ router.get('/traeretapacocina/:id', async (req, res) => {
 })
 
 
+
 router.get('/traerstock', async (req, res) => {
-  const id = req.params.id
-  const existe = await pool.query('SELECT * FROM dtc_stock  ORDER BY id DESC');
+  try {
+    const existe = await pool.query(`
+      SELECT 
+        s.*, 
+        COALESCE(recepcion.total_recepcion, 0) AS total_recepcion,
+        COALESCE(consumo.total_consumo, 0) AS total_consumo
+      FROM dtc_stock s
+      LEFT JOIN (
+          SELECT id_producto, SUM(cantidad) AS total_recepcion 
+          FROM dtc_recepcion_stock 
+          GROUP BY id_producto
+      ) AS recepcion ON s.id = recepcion.id_producto
+      LEFT JOIN (
+          SELECT id_producto, SUM(cantidad) AS total_consumo 
+          FROM dtc_consumo 
+          GROUP BY id_producto
+      ) AS consumo ON s.id = consumo.id_producto
+      ORDER BY s.id DESC;
+    `);
 
-console.log(existe)
-  res.json([existe])
+    console.log(existe);
+    res.json([existe]);
+  } catch (error) {
+    console.error('Error al traer stock:', error);
+    res.status(500).json({ message: 'Error al obtener el stock' });
+  }
+});
 
 
-})
 
 router.get('/traerintervenciones/', async (req, res) => {
   let can = await pool.query(`
@@ -2841,6 +2893,27 @@ router.post("/nuevoproducto", async (req, res) => {
   }
 
 })
+
+router.post("/sumarstock", async (req, res) => {
+  const { fecha,id_producto,id_exp,cantidad } = req.body
+  try {
+if(fecha==undefined){
+  await pool.query('insert into dtc_recepcion_stock set id_producto=?, id_exp=?,cantidad=?', [ id_producto,id_exp,cantidad])
+
+}else{
+  await pool.query('insert into dtc_recepcion_stock set fecha=? ,id_producto=?, id_exp=?,cantidad=?', [ fecha,id_producto,id_exp,cantidad])
+
+}
+
+    res.json('realizado')
+  } catch (error) {
+   console.log(error)
+    res.json('error, algo sucedio')
+  }
+
+})
+
+
 
 router.post("/determinarvinculo", async (req, res) => {
   const { id_usuario, id_vinculo, vinculoo } = req.body
