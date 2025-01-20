@@ -2605,7 +2605,7 @@ router.post("/traerestadisticas", async (req, res) => {
 
 router.post("/nuevaetapacadia", async (req, res) => {
   let { fecha, descripcion, expediente, id_usuario, titulo, etapa, proyecto } = req.body
-  console.log(fecha, descripcion, expediente, id_usuario, titulo)
+  console.log(fecha, descripcion, expediente, id_usuario, titulo,etapa, proyecto )
   if (titulo == undefined) {
     titulo = "Sin completar"
   }
@@ -2746,6 +2746,48 @@ console.log(id, titulo, detalle, fecha_referencia  )
 
 
 })
+router.post('/modificaretapa', async (req, res) => {
+  const { id, titulo, fecha, estado, descripcion, fecha_fin,proyectar } = req.body;
+console.log( id, titulo, fecha, estado, descripcion, fecha_fin,proyectar )
+  if (!id) {
+    return res.status(400).json({ message: 'El ID es obligatorio' });
+  }
+
+  try {
+    const existingData = await pool.query('SELECT * FROM dtc_etapa_cadia WHERE id = ?', [id]);
+
+    if (existingData.length === 0) {
+      return res.status(404).json({ message: 'Elemento no encontrado' });
+    }
+
+    const updatedFields = {
+      titulo: titulo || existingData[0].titulo,
+      fecha: fecha || existingData[0].fecha,
+      proyectar: proyectar || existingData[0].proyectar,
+      estado: estado || existingData[0].estado,
+      descripcion: descripcion || existingData[0].descripcion,
+      fecha_fin: fecha_fin || existingData[0].fecha_fin,
+    };
+
+    await pool.query(
+      'UPDATE dtc_etapa_cadia SET titulo=?, fecha=?, estado=?, descripcion=?, fecha_fin=?, proyectar=? WHERE id=?',
+      [
+        updatedFields.titulo,
+        updatedFields.fecha,
+        updatedFields.estado,
+        updatedFields.descripcion,
+        updatedFields.fecha_fin,
+        updatedFields.proyectar,
+        id,
+      ]
+    );
+
+    res.json({ message: 'Elemento modificado con éxito' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al modificar el elemento' });
+  }
+});
 
 
 router.post("/modificarkid", async (req, res) => {
