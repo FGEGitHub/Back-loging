@@ -1190,6 +1190,35 @@ router.post("/modificarusuariocadia", async (req, res) => {
 
 })
 
+router.post('/inscribiracurso', async (req, res) => {
+  let { id, option, days, number } = req.body; // Obtener datos del cuerpo de la solicitud
+console.log(id, option, days, number)
+  try {
+    if (!id || !option || !days || !number) {
+      return res.status(400).json({ message: 'Faltan datos obligatorios' });
+    }
+
+    // Mapear los días y realizar la inserción para cada uno
+    const insertPromises = days.map(async (day) => {
+      return await pool.query(
+        'INSERT INTO dtc_cursado (id_chico, dia, hora, id_curso) VALUES (?, ?, ?, ?)',
+        [id, day, number, option]
+      );
+    });
+
+    await Promise.all(insertPromises); // Ejecutar todas las inserciones en paralelo
+
+    res.json({ message: 'Inscripción realizada con éxito' });
+  } catch (error) {
+    console.error('Error al inscribir al curso:', error);
+    res.status(500).json({ message: 'Error al inscribir al curso' });
+  }
+});
+
+
+
+
+
 router.post("/modificarusuariopsiq", async (req, res) => {
   try {
     const {
