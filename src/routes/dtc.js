@@ -1190,52 +1190,61 @@ router.post("/modificarusuariocadia", async (req, res) => {
 
 })
 
-
-
 router.post("/modificarusuariopsiq", async (req, res) => {
-  let { id, nombre, apellido,  fecha_nacimiento, observaciones, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, hora_merienda } = req.body
-
-  console.log(id, nombre, apellido, fecha_nacimiento, observaciones, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, hora_merienda)
   try {
-    if (observaciones == undefined) {
-      observaciones = "Sin observaciones"
-    }
-    if (fecha_nacimiento == undefined) {
-      fecha_nacimiento = "Sin asignar"
-    }
-    if (dni == undefined) {
-      dni = "Sin asignar"
-    }
-    if (telefono == undefined) {
-      telefono = "Sin asignar"
-    }
-    if (autorizacion_imagen == undefined) {
-      autorizacion_imagen = "Sin asignar"
-    }
-    if (tel_responsable == undefined) {
-      tel_responsable = "Sin asignar"
-    }
-    if (fotoc_dni == undefined) {
-      fotoc_dni = "Sin asignar"
-    }
-    if (admision == undefined) {
-      admision = "Sin asignar"
-    }
-    if (primer_ingreso == undefined) {
-      primer_ingreso = "Sin asignar"
-    }
-    if (admision == undefined) {
-      admision = "Sin asignar"
-    }
-    await pool.query('update dtc_personas_psicologa  set nombre=?,apellido=?,fecha_nacimiento=?,observaciones=?,primer_ingreso=?,dni=?,domicilio=?,telefono=? where id=?', [nombre, apellido, fecha_nacimiento, observaciones, primer_ingreso, admision, dni, domicilio, telefono, id])
+    const {
+      id,
+      nombre,
+      apellido,
+      fecha_nacimiento,
+      observaciones,
+      primer_contacto,
+      primer_ingreso,
+   
+      dni,
+      domicilio,
+      telefono,
 
-    res.json('Modificado')
+    } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ error: "El ID es obligatorio" });
+    }
+
+    // Crear un objeto con los valores recibidos
+    const datos = {
+      nombre,
+      apellido,
+      fecha_nacimiento: fecha_nacimiento || "Sin asignar",
+      observaciones: observaciones || "Sin observaciones",
+      primer_contacto,
+      primer_ingreso: primer_ingreso || "Sin asignar",
+    
+      dni: dni || "Sin asignar",
+      domicilio,
+      telefono: telefono || "Sin asignar",
+
+    };
+
+    // Filtrar los datos que no son undefined
+    const columnas = Object.keys(datos).filter((key) => datos[key] !== undefined);
+    const valores = columnas.map((key) => datos[key]);
+
+    // Construir la consulta dinámica
+    const setQuery = columnas.map((key) => `${key} = ?`).join(", ");
+    const query = `UPDATE dtc_personas_psicologa SET ${setQuery} WHERE id = ?`;
+
+    valores.push(id); // Agregar el ID al final de los valores
+
+    // Ejecutar la consulta
+    await pool.query(query, valores);
+
+    res.json("Modificado");
   } catch (error) {
-    console.log(error)
-    res.json('No modificado')
+    console.error(error);
+    res.status(500).json("No modificado");
   }
-
-})
+});
 
 router.post("/modificarusuario", async (req, res) => {
   let { talle, id, nombre, apellido, kid, fecha_nacimiento, observaciones, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, hora_merienda, escuela, grado, fines } = req.body
