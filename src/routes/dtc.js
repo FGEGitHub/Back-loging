@@ -979,6 +979,20 @@ router.get('/datosdechiquecadia/:id', async (req, res) => {
 
 })
 
+
+router.get('/obtenerinfodecursos/:id', async (req, res) => {
+  id = req.params.id
+  const chiques = await pool.query('SELECT dia, hora, COUNT(sel.kid) AS cantidad_kids, GROUP_CONCAT(sel.kid SEPARATOR ", ") AS nombres_kids FROM dtc_cursado JOIN (SELECT kid, id AS idc FROM dtc_chicos) AS sel ON dtc_cursado.id_chico = sel.idc WHERE id_curso = ? GROUP BY dia, hora ORDER BY FIELD(dia, "lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"), hora', [id]);
+
+
+  res.json(chiques.map(row => ({
+    ...row,
+    cantidad_kids: Number(row.cantidad_kids), // Convertir BigInt a número
+    nombres_kids: String(row.nombres_kids) // Asegurarte de que es una cadena
+  })));
+})
+
+
 router.get('/datosdechique/:id', async (req, res) => {
   const id = req.params.id
   const chiques = await pool.query('select * from dtc_chicos where id =?', [id])
@@ -998,7 +1012,11 @@ router.get('/datosdechique/:id', async (req, res) => {
 
     }
     const vinculos = await pool.query('select * from dtc_vinculo join (select id as idc, nombre, apellido from dtc_chicos ) as sel on dtc_vinculo.id_vinculo=sel.idc   join (select id as idcc, nombre as nombree, apellido as apellidoo from dtc_chicos ) as sel2  on dtc_vinculo.id_usuario=sel2.idcc where id_usuario=? or id_vinculo=?', [id,id])
-    res.json([chiques, imagenBase64, vinculos])
+    
+    
+    const clasesinscrip = await pool.query('select * from dtc_cursado where id_chico =?', [id])
+
+    res.json([chiques, imagenBase64, vinculos,clasesinscrip])
   } catch (error) {
     console.log(error)
     res.json([])
