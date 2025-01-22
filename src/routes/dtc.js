@@ -1014,7 +1014,7 @@ router.get('/datosdechique/:id', async (req, res) => {
     const vinculos = await pool.query('select * from dtc_vinculo join (select id as idc, nombre, apellido from dtc_chicos ) as sel on dtc_vinculo.id_vinculo=sel.idc   join (select id as idcc, nombre as nombree, apellido as apellidoo from dtc_chicos ) as sel2  on dtc_vinculo.id_usuario=sel2.idcc where id_usuario=? or id_vinculo=?', [id,id])
     
     
-    const clasesinscrip = await pool.query('select * from dtc_cursado where id_chico =?', [id])
+    const clasesinscrip = await pool.query('select * from dtc_cursado join(select id as idu, mail from usuarios ) as sel on dtc_cursado.id_curso=sel.idu where id_chico =? order by mail , dia', [id])
 
     res.json([chiques, imagenBase64, vinculos,clasesinscrip])
   } catch (error) {
@@ -1317,13 +1317,15 @@ router.post("/modificarusuario", async (req, res) => {
 
 })
 
-router.post("/borrarturno", async (req, res) => {
+
+
+router.post("/eliminarhorario", async (req, res) => {
   let { id } = req.body
 
   try {
 
 
-    await pool.query('delete from dtc_turnos  where id=?', [id])
+    await pool.query('delete from dtc_cursado  where id=?', [id])
 
     res.json('Borrado')
   } catch (error) {
@@ -1332,7 +1334,6 @@ router.post("/borrarturno", async (req, res) => {
   }
 
 })
-
 router.post("/borrarturnocadia", async (req, res) => {
   let { id } = req.body
 
