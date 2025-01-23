@@ -987,7 +987,7 @@ router.get('/obtenerinfodecursos/:id', async (req, res) => {
   const chiques = await pool.query('SELECT dia, hora, COUNT(sel.kid) AS cantidad_kids, GROUP_CONCAT(CONCAT(sel.kid, " - ", sel.nombre, " ", sel.apellido) SEPARATOR ", ") AS nombres_kids FROM dtc_cursado JOIN (SELECT kid, nombre, apellido, id AS idc FROM dtc_chicos) AS sel ON dtc_cursado.id_chico = sel.idc WHERE id_curso = ? GROUP BY dia, hora ORDER BY FIELD(dia, "lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"), hora', [id]);
 
 
-  res.json(chiques.map(row => ({
+  res.json(chiques.map(row => ({ 
     ...row,
     cantidad_kids: Number(row.cantidad_kids), // Convertir BigInt a número
     nombres_kids: String(row.nombres_kids) // Asegurarte de que es una cadena
