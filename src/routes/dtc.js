@@ -11,7 +11,7 @@ const fs = require('fs');
 const moment = require('moment-timezone');
 const xlsx = require('xlsx');
 const xml2js = require('xml2js');
-
+const cron = require('node-cron');
 const kmlFilePath = path.join(__dirname, '../maps/mapadtc.kml');
 const kmlFilePath2 = path.join(__dirname, '../maps/entregas.kml');
 
@@ -313,6 +313,8 @@ router.get('/traerclasestaller/:id', async (req, res) => {
         id:clas[iii]['id'],
         fecha:clas[iii]['fecha'],
         titulo:clas[iii]['titulo'],
+        dia:clas[iii]['dia'],
+        hora:clas[iii]['hora'],
         descripcion:clas[iii]['descripcion'],
         id_tallerista:clas[iii]['id_tallerista'],
         cantidad:can.length
@@ -2245,10 +2247,13 @@ console.log(1456)
 
 router.get('/traerpresentesdeclase/:id', async (req, res) => {
   const id = req.params.id
+  const clase =await pool.query('select * from dtc_clases_taller where id=?',[id])
+  const cursado =await pool.query('select * from dtc_cursado where id_curso=? and dia=? and hora=?',[clase[0]['id_tallerista'],clase[0]['dia'],clase[0]['hora']])
   const existe = await pool.query('select * from dtc_asistencia_clase join (select id as idc,nombre from dtc_chicos) as sel on dtc_asistencia_clase.id_usuario=sel.idc  where id_clase=?', [id])//presentes
   console.log(existe)
-  usuarios = await pool.query("select * from dtc_chicos left join (select id as ida  from dtc_asistencia_clase where id=? ) as sel on dtc_chicos.id=sel.ida ", [id])
-  //todos
+ //// funcion para traer todos los usuarios con su presente en el taller usuarios = await pool.query("select * from dtc_chicos left join (select id as ida  from dtc_asistencia_clase where id=? ) as sel on dtc_chicos.id=sel.ida ", [id])
+  //nueva consulta para solo los incriptosdias etc
+usuarios = await pool.query("select * from dtc_chicos left join (select id as ida  from dtc_asistencia_clase where id=? ) as sel on dtc_chicos.id=sel.ida join(select id as idcursado,id_chico from dtc_cursado where id=?) as sel2 on dtc_chicos.id=sel2.id_chico ", [id,cursado[0]['id']])
   res.json([existe, usuarios])
 
 
@@ -3536,5 +3541,63 @@ router.post("/borrarlegajo", async (req, res) => {
   }
 
 })
+
+////cron.schedule('0 9 * * 1-5'
+cron.schedule('33 12 * * 1-5', async () => {
+  console.log('El sistema esta creando los cursos automaticamente');
+
+  function obtenerDiaDeLaSemana() {
+    // Obtener la fecha actual
+    const fecha = new Date();
+
+    const fechaa=`${fecha.getDate()}/${fecha.getMonth() + 1}/${fecha.getFullYear()}`
+    
+    console.log(fechaa);
+    // Obtener el número del día de la semana (0 = Domingo, 1 = Lunes, ..., 6 = Sábado)
+    const dia = fecha.getDay();
+  
+    // Array de días de la semana
+    const diasSemana = [
+      'domingo', 
+      'lunes', 
+      'martes', 
+      'miércoles', 
+      'jueves', 
+      'viernes', 
+      'sábado'
+    ];
+  
+    // Mapear el día actual
+    console.log('Hoy es:', diasSemana[dia]);
+    
+    const id_curso = [240, 265, 304, 306, 307, 308,309];
+  
+    // Recorrer los id_curso
+    id_curso.forEach(async (idcurso) => {
+      // Verificar si el idcurso es 307 (solo días martes, jueves y viernes)
+      if (idcurso === 307) {
+        if (dia === 2 || dia === 4 || dia === 5) {
+          // Insertar solo si es martes, jueves o viernes
+          await pool.query('insert into dtc_clases_taller set fecha=?, id_tallerista=?,titulo=?, dia=?,  hora=14', [fechaa, idcurso,"Clase del dia "+diasSemana[dia] ,diasSemana[dia]]);
+          await pool.query('insert into dtc_clases_taller set fecha=?, id_tallerista=?,titulo=?, dia=?,  hora=15', [fechaa, idcurso,"Clase del dia "+diasSemana[dia] ,diasSemana[dia]]);
+          await pool.query('insert into dtc_clases_taller set fecha=?, id_tallerista=?,titulo=?, dia=?,  hora=16', [fechaa, idcurso,"Clase del dia "+diasSemana[dia] ,diasSemana[dia]]);
+        }
+      } else {
+        // Para los demás id_curso, se guardan todos los días de lunes a viernes
+        if (dia >= 1 && dia <= 5) {
+          await pool.query('insert into dtc_clases_taller set fecha=?, id_tallerista=?,titulo=?, dia=?,  hora=14', [fechaa, idcurso,"Clase del dia "+diasSemana[dia] ,diasSemana[dia]]);
+          await pool.query('insert into dtc_clases_taller set fecha=?, id_tallerista=?,titulo=?, dia=?,  hora=15', [fechaa, idcurso,"Clase del dia "+diasSemana[dia] ,diasSemana[dia]]);
+          await pool.query('insert into dtc_clases_taller set fecha=?, id_tallerista=?,titulo=?, dia=?,  hora=16', [fechaa, idcurso,"Clase del dia "+diasSemana[dia] ,diasSemana[dia]]);
+        }
+      }
+    });
+  }
+  
+  // Llamar a la función
+  obtenerDiaDeLaSemana();
+});
+
+
+
 module.exports = router
 
