@@ -1111,7 +1111,6 @@ router.get('/obtenerinfodecursostodos', async (req, res) => {
         nombres_kids: datoReal ? String(datoReal.nombres_kids) : null
       };
     });
-console.log(resultados)
     res.json(resultados);
   } catch (error) {
     console.error(error);
