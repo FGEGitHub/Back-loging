@@ -1050,6 +1050,76 @@ router.get('/obtenerinfodecursos/:id', async (req, res) => {
 });
 
 
+router.get('/obtenerinfodecursostodos', async (req, res) => {
+  // Define los días y horarios que siempre deben aparecer
+  const dias = ["lunes", "martes", "miércoles", "jueves", "viernes"];
+  const horas = [14, 15, 16];
+
+  try {
+    // Consulta los cursos filtrados por los IDs especificados
+    const cursos = await pool.query(
+      `SELECT DISTINCT id AS id_curso, mail AS nombre_curso 
+       FROM usuarios 
+       WHERE id IN (240, 304, 306, 265, 307, 308, 309)`
+    );
+
+    // Crear una estructura auxiliar con todas las combinaciones posibles para cada curso
+    const combinaciones = cursos.flatMap(curso =>
+      dias.flatMap(dia =>
+        horas.map(hora => ({
+          id_curso: curso.id_curso,
+          nombre_curso: curso.nombre_curso,
+          dia,
+          hora,
+          cantidad_kids: 0,
+          nombres_kids: null
+        }))
+      )
+    );
+
+    // Consulta los datos reales desde la base de datos
+    const chiques = await pool.query(
+      `SELECT c.dia, c.hora, COUNT(sel.kid) AS cantidad_kids, 
+              GROUP_CONCAT(CONCAT(sel.kid, " - ", sel.nombre, " ", sel.apellido) SEPARATOR ", ") AS nombres_kids, 
+              u.mail AS nombre_curso, u.id AS id_curso
+       FROM dtc_cursado AS c
+       JOIN (SELECT kid, nombre, apellido, id AS idc FROM dtc_chicos) AS sel 
+       ON c.id_chico = sel.idc
+       JOIN usuarios AS u
+       ON c.id_curso = u.id
+       WHERE u.id IN (240, 304, 306, 265, 307, 308, 309)
+       GROUP BY c.dia, c.hora, u.mail, u.id
+       ORDER BY u.mail, FIELD(c.dia, "lunes", "martes", "miércoles", "jueves", "viernes"), c.hora`
+    );
+
+    // Convertir los datos reales en un mapa clave-valor para buscar fácilmente
+    const datosReales = new Map(
+      chiques.map(row => [`${row.id_curso}-${row.dia}-${row.hora}`, row])
+    );
+
+    // Combinar los datos reales con las combinaciones
+    const resultados = combinaciones.map(combinacion => {
+      const key = `${combinacion.id_curso}-${combinacion.dia}-${combinacion.hora}`;
+      const datoReal = datosReales.get(key);
+
+      return {
+        id_curso: combinacion.id_curso,
+        nombre_curso: combinacion.nombre_curso,
+        dia: combinacion.dia,
+        hora: combinacion.hora,
+        cantidad_kids: datoReal ? Number(datoReal.cantidad_kids) : 0,
+        nombres_kids: datoReal ? String(datoReal.nombres_kids) : null
+      };
+    });
+console.log(resultados)
+    res.json(resultados);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener los datos de la base de datos" });
+  }
+});
+
+
 router.get('/datosdechique/:id', async (req, res) => {
   const id = req.params.id
   const chiques = await pool.query('select * from dtc_chicos where id =?', [id])
