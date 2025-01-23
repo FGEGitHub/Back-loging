@@ -2251,9 +2251,10 @@ router.get('/traerpresentesdeclase/:id', async (req, res) => {
   const cursado =await pool.query('select * from dtc_cursado where id_curso=? and dia=? and hora=?',[clase[0]['id_tallerista'],clase[0]['dia'],clase[0]['hora']])
   const existe = await pool.query('select * from dtc_asistencia_clase join (select id as idc,nombre from dtc_chicos) as sel on dtc_asistencia_clase.id_usuario=sel.idc  where id_clase=?', [id])//presentes
   console.log(existe)
- //// funcion para traer todos los usuarios con su presente en el taller usuarios = await pool.query("select * from dtc_chicos left join (select id as ida  from dtc_asistencia_clase where id=? ) as sel on dtc_chicos.id=sel.ida ", [id])
+ //// funcion para traer todos los usuarios con su presente en el taller 
+ usuarios = await pool.query("select * from dtc_chicos left join (select id as ida  from dtc_asistencia_clase where id=? ) as sel on dtc_chicos.id=sel.ida ", [id])
   //nueva consulta para solo los incriptosdias etc
-usuarios = await pool.query("select * from dtc_chicos left join (select id as ida  from dtc_asistencia_clase where id=? ) as sel on dtc_chicos.id=sel.ida join(select id as idcursado,id_chico from dtc_cursado where id=?) as sel2 on dtc_chicos.id=sel2.id_chico ", [id,cursado[0]['id']])
+//usuarios = await pool.query("select * from dtc_chicos left join (select id as ida  from dtc_asistencia_clase where id=? ) as sel on dtc_chicos.id=sel.ida join(select id as idcursado,id_chico from dtc_cursado where id=?) as sel2 on dtc_chicos.id=sel2.id_chico ", [id,cursado[0]['id']])
   res.json([existe, usuarios])
 
 
@@ -3594,7 +3595,7 @@ cron.schedule('33 12 * * 1-5', async () => {
   }
   
   // Llamar a la función
-  obtenerDiaDeLaSemana();
+//  obtenerDiaDeLaSemana();
 });
 
 
