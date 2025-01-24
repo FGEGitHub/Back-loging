@@ -289,7 +289,7 @@ router.get('/traerclasestallercadia/:id', async (req, res) => {
       env.push(nuev)
     }
 
-    console.log(env)
+
     res.json(env)
   } catch (error) {
     console.log(error)
@@ -322,7 +322,7 @@ router.get('/traerclasestaller/:id', async (req, res) => {
       env.push(nuev)
     }
 
-    console.log(env)
+    
     res.json(env)
   } catch (error) {
     console.log(error)
@@ -3668,7 +3668,7 @@ router.post("/borrarlegajo", async (req, res) => {
 })
 
 ////cron.schedule('0 9 * * 1-5'
-cron.schedule('33 12 * * 1-5', async () => {
+/* cron.schedule('33 12 * * 1-5', async () => {
   console.log('El sistema esta creando los cursos automaticamente');
 
   function obtenerDiaDeLaSemana() {
@@ -3721,7 +3721,7 @@ cron.schedule('33 12 * * 1-5', async () => {
   // Llamar a la función
 //  obtenerDiaDeLaSemana();
 });
-
+ */
 
 
 module.exports = router
