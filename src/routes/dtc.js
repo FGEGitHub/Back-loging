@@ -3310,7 +3310,12 @@ router.post("/agregarturnocadia", async (req, res) => {
         // Enviar mensaje de WhatsApp
         const mensaje = `Hola ${profesionall[0]['nombre']}, tenes un nuevo turno para el dia ${profesionall[0]['fecha']} a las ${profesionall[0]['detalle']} del paciente ${personapsiq[0]['nombre']} ${personapsiq[0]['apellido']}Un saludo DTC.`;
 console.log(mensaje)
-     await  client.sendMessage(telefono, mensaje); // Enviar mensaje
+try {
+  await  client.sendMessage(telefono, mensaje); // Enviar mensaje
+} catch (error) {
+  console.log(error)
+}
+
 
         res.json('agendado');
     } catch (error) {
