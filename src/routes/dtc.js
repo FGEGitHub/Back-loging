@@ -3291,10 +3291,9 @@ router.post("/agregarturnocadia", async (req, res) => {
         const fecha = (new Date(Date.now())).toLocaleDateString();
 
         console.log(id, id_persona);
-        const profesionall = await pool.query('select * from dtc_turnos join (select id as idu, telefono  from usuarios)as sel on dtc_turnos.id_psico=sel.idu  where id=?',[id])
+        const profesionall = await pool.query('select * from dtc_turnos join (select id as idu, telefono, nombre  from usuarios)as sel on dtc_turnos.id_psico=sel.idu  where id=?',[id])
         const personapsiq = await pool.query('select * from dtc_personas_psicologa where id =?',[id_persona])
         telefono= profesionall[0]['telefono']+'@c.us'
-nombre='Fernando'
         // Actualizar el turno en la base de datos
         await pool.query(
             'UPDATE dtc_turnos SET id_persona=?, estado="Agendado", hora=? WHERE id=?',
@@ -3302,7 +3301,7 @@ nombre='Fernando'
         );
 
         // Enviar mensaje de WhatsApp
-        const mensaje = `Hola ${nombre}, tenes un nuevo turno para el dia ${profesionall[0]['fecha']} a las ${profesionall[0]['detalle']} del paciente ${personapsiq[0]['nombre']} ${personapsiq[0]['apellido']}Un saludo DTC.`;
+        const mensaje = `Hola ${profesionall[0]['nombre']}, tenes un nuevo turno para el dia ${profesionall[0]['fecha']} a las ${profesionall[0]['detalle']} del paciente ${personapsiq[0]['nombre']} ${personapsiq[0]['apellido']}Un saludo DTC.`;
 console.log(mensaje)
      await  client.sendMessage(telefono, mensaje); // Enviar mensaje
 
