@@ -1087,46 +1087,49 @@ router.get('/obtenerinfodecursos/:id', async (req, res) => {
   }
 });
 
-
 router.get('/obtenerinfodecursostodos', async (req, res) => {
-  // Define los días y horarios que siempre deben aparecer
+  // Define los días y horarios predeterminados
   const dias = ["lunes", "martes", "miércoles", "jueves", "viernes"];
-  const horas = [14, 15, 16];
+  const horariosEstandar = ["14:00", "15:00", "16:00"];
+  const horariosEspeciales = ["14:30", "15:30", "16:30"];
 
   try {
     // Consulta los cursos filtrados por los IDs especificados
     const cursos = await pool.query(
-      `SELECT DISTINCT id AS id_curso, mail AS nombre_curso 
+      `SELECT DISTINCT id AS id_curso, mail AS nombre_curso, materia 
        FROM usuarios 
        WHERE id IN (240, 304, 306, 265, 307, 308, 309)`
     );
 
     // Crear una estructura auxiliar con todas las combinaciones posibles para cada curso
-    const combinaciones = cursos.flatMap(curso =>
-      dias.flatMap(dia =>
-        horas.map(hora => ({
+    const combinaciones = cursos.flatMap(curso => {
+      const horarios = curso.id_curso === 304 ? horariosEspeciales : horariosEstandar;
+
+      return dias.flatMap(dia =>
+        horarios.map(hora => ({
           id_curso: curso.id_curso,
           nombre_curso: curso.nombre_curso,
           dia,
           hora,
           cantidad_kids: 0,
-          nombres_kids: null
+          nombres_kids: null,
+          materia: curso.materia
         }))
-      )
-    );
+      );
+    });
 
     // Consulta los datos reales desde la base de datos
     const chiques = await pool.query(
       `SELECT c.dia, c.hora, COUNT(sel.kid) AS cantidad_kids, 
               GROUP_CONCAT(CONCAT(sel.kid, " - ", sel.nombre, " ", sel.apellido) SEPARATOR ", ") AS nombres_kids, 
-              u.mail AS nombre_curso, u.id AS id_curso
+              u.mail AS nombre_curso, u.id AS id_curso, u.materia
        FROM dtc_cursado AS c
        JOIN (SELECT kid, nombre, apellido, id AS idc FROM dtc_chicos) AS sel 
        ON c.id_chico = sel.idc
        JOIN usuarios AS u
        ON c.id_curso = u.id
        WHERE u.id IN (240, 304, 306, 265, 307, 308, 309)
-       GROUP BY c.dia, c.hora, u.mail, u.id
+       GROUP BY c.dia, c.hora, u.mail, u.id, u.materia
        ORDER BY u.mail, FIELD(c.dia, "lunes", "martes", "miércoles", "jueves", "viernes"), c.hora`
     );
 
@@ -1146,15 +1149,19 @@ router.get('/obtenerinfodecursostodos', async (req, res) => {
         dia: combinacion.dia,
         hora: combinacion.hora,
         cantidad_kids: datoReal ? Number(datoReal.cantidad_kids) : 0,
-        nombres_kids: datoReal ? String(datoReal.nombres_kids) : null
+        nombres_kids: datoReal ? String(datoReal.nombres_kids) : null,
+        materia: combinacion.materia
       };
     });
+console.log(resultados)
     res.json(resultados);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al obtener los datos de la base de datos" });
   }
 });
+
+
 
 
 router.get('/datosdechique/:id', async (req, res) => {
