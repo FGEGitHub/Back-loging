@@ -1475,6 +1475,21 @@ router.post("/borrarturnocadia", async (req, res) => {
   }
 
 })
+router.post("/borrarturno", async (req, res) => {
+  let { id } = req.body
+
+  try {
+
+
+    await pool.query('delete from dtc_turnos  where id=?', [id])
+
+    res.json('Borrado')
+  } catch (error) {
+    console.log(error)
+    res.json('No Borrado')
+  }
+
+})
 router.post("/modificarclase", async (req, res) => {
   let { id, titulo, descripcion, fecha } = req.body
 
