@@ -19,11 +19,17 @@ const kmlFilePath2 = path.join(__dirname, '../maps/entregas.kml');
  ////////////whatapweb
  const qrcode = require('qrcode-terminal');
  const { Client, LocalAuth } = require('whatsapp-web.js');
- 
+ const puppeteer = require('puppeteer-core');
+
+const client = new Client({
+    puppeteer: {
+        args: ['--no-sandbox', '--disable-setuid-sandbox'], // Agregar estos argumentos
+    },
+    // Si necesitas especificar la ruta del navegador, puedes agregar la opción executablePath:
+    // executablePath: '/path/to/your/chrome',
+});
  // Crear el cliente con LocalAuth para guardar la sesión
- const client = new Client({
-     authStrategy: new LocalAuth() // Esto guarda la sesión automáticamente
- });
+
  
  client.on('qr', (qr) => {
      qrcode.generate(qr, { small: true });
