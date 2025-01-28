@@ -16,6 +16,38 @@ const kmlFilePath = path.join(__dirname, '../maps/mapadtc.kml');
 const kmlFilePath2 = path.join(__dirname, '../maps/entregas.kml');
 
 
+ ////////////whatapweb
+ const qrcode = require('qrcode-terminal');
+ const { Client, LocalAuth } = require('whatsapp-web.js');
+ 
+ // Crear el cliente con LocalAuth para guardar la sesión
+ const client = new Client({
+     authStrategy: new LocalAuth() // Esto guarda la sesión automáticamente
+ });
+ 
+ client.on('qr', (qr) => {
+     qrcode.generate(qr, { small: true });
+     console.log('Escanea el código QR con tu aplicación de WhatsApp.');
+ });
+ 
+ client.on('ready', () => {
+     console.log('¡Cliente de WhatsApp listo y sesión guardada!');
+ });
+ 
+ client.on('authenticated', () => {
+     console.log('Sesión autenticada.');
+ });
+ 
+ client.on('auth_failure', (message) => {
+     console.error('Fallo de autenticación: ', message);
+ });
+ 
+ client.on('disconnected', (reason) => {
+     console.log('Cliente desconectado:', reason);
+ });
+ 
+ client.initialize();
+    ////////////whatapweb
 const storage = multer.diskStorage({
   destination: path.join(__dirname, '../imagenesvendedoras'),
   filename: (req, file, cb) => {
@@ -3230,7 +3262,7 @@ router.post("/agregarturnocadia", async (req, res) => {
   }
 
 })
-router.post("/agendarturno", async (req, res) => {
+/* router.post("/agendarturno", async (req, res) => {
   let { id, id_persona } = req.body
 
   try {
@@ -3244,7 +3276,37 @@ router.post("/agendarturno", async (req, res) => {
   }
 
 
-})
+}) */
+  router.post("/agendarturno", async (req, res) => {
+    let { id, id_persona} = req.body;
+
+    try {
+        const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
+        const fecha = (new Date(Date.now())).toLocaleDateString();
+
+        console.log(id, id_persona);
+        const profesionall = await pool.query('select * from dtc_turnos join (select id as idu, telefono  from usuarios)as sel on dtc_turnos.id_psico=sel.idu  where id=?',[id])
+        const personapsiq = await pool.query('select * from dtc_personas_psicologa where id =?',[id_persona])
+        telefono= profesionall[0]['telefono']+'@c.us'
+nombre='Fernando'
+        // Actualizar el turno en la base de datos
+        await pool.query(
+            'UPDATE dtc_turnos SET id_persona=?, estado="Agendado", hora=? WHERE id=?',
+            [id_persona, `${horaBuenosAires}-${fecha}`, id]
+        );
+
+        // Enviar mensaje de WhatsApp
+        const mensaje = `Hola ${nombre}, tenes un nuevo turno para el dia ${profesionall[0]['fecha']} a las ${profesionall[0]['detalle']} del paciente ${personapsiq[0]['nombre']} ${personapsiq[0]['apellido']}Un saludo DTC.`;
+console.log(mensaje)
+     await  client.sendMessage(telefono, mensaje); // Enviar mensaje
+
+        res.json('agendado');
+    } catch (error) {
+        console.error(error);
+        res.json('no agendado');
+    }
+});
+
 
 router.post("/agendarturnocadia", async (req, res) => {
   let { id, id_persona } = req.body
