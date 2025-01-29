@@ -52,7 +52,7 @@ const client = new Client({
      console.log('Cliente desconectado:', reason);
  });
  
- client.initialize();
+ //client.initialize();
     ////////////whatapweb
 const storage = multer.diskStorage({
   destination: path.join(__dirname, '../imagenesvendedoras'),
