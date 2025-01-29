@@ -1090,8 +1090,10 @@ router.get('/obtenerinfodecursos/:id', async (req, res) => {
 router.get('/obtenerinfodecursostodos', async (req, res) => {
   // Define los días y horarios predeterminados
   const dias = ["lunes", "martes", "miércoles", "jueves", "viernes"];
+  const dias307 = ["martes", "jueves", "viernes"]; // Días específicos para el curso 307
   const horariosEstandar = ["14:00", "15:00", "16:00"];
   const horariosEspeciales = ["14:30", "15:30", "16:30"];
+  const horario309 = ["17:00"]; // Horario exclusivo para el curso 309
 
   try {
     // Consulta los cursos filtrados por los IDs especificados
@@ -1103,9 +1105,18 @@ router.get('/obtenerinfodecursostodos', async (req, res) => {
 
     // Crear una estructura auxiliar con todas las combinaciones posibles para cada curso
     const combinaciones = cursos.flatMap(curso => {
-      const horarios = curso.id_curso === 304 ? horariosEspeciales : horariosEstandar;
+      let horarios = horariosEstandar;
+      let diasFiltrados = dias;
 
-      return dias.flatMap(dia =>
+      if (curso.id_curso === 304) {
+        horarios = horariosEspeciales; // 304 tiene horarios especiales
+      } else if (curso.id_curso === 309) {
+        horarios = horario309; // 309 solo tiene el horario 17:00
+      } else if (curso.id_curso === 307) {
+        diasFiltrados = dias307; // 307 solo martes, jueves y viernes
+      }
+
+      return diasFiltrados.flatMap(dia =>
         horarios.map(hora => ({
           id_curso: curso.id_curso,
           nombre_curso: curso.nombre_curso,
@@ -1153,13 +1164,15 @@ router.get('/obtenerinfodecursostodos', async (req, res) => {
         materia: combinacion.materia
       };
     });
-console.log(resultados)
+
+    console.log(resultados);
     res.json(resultados);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al obtener los datos de la base de datos" });
   }
 });
+
 
 
 
