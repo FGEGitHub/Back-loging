@@ -1031,61 +1031,73 @@ router.get('/obtenerinfodecursos/:id', async (req, res) => {
     nombres_kids: String(row.nombres_kids) // Asegurarte de que es una cadena
   })));
 }) */
-router.get('/obtenerinfodecursos/:id', async (req, res) => {
-  const id = req.params.id;
-
-  // Define los días y horarios que siempre deben aparecer
-  const dias = ["lunes", "martes", "miércoles", "jueves", "viernes"];
-  const horas = [14, 15, 16];
-
-  // Crear una estructura auxiliar con todas las combinaciones posibles
-  const combinaciones = dias.flatMap(dia =>
-    horas.map(hora => ({
-      dia,
-      hora,
-      cantidad_kids: 0,
-      nombres_kids: null
-    }))
-  );
-
-  try {
-    // Consulta los datos reales desde la base de datos
-    const chiques = await pool.query(
-      `SELECT dia, hora, COUNT(sel.kid) AS cantidad_kids, 
-              GROUP_CONCAT(CONCAT(sel.kid, " - ", sel.nombre, " ", sel.apellido) SEPARATOR ", ") AS nombres_kids 
-       FROM dtc_cursado 
-       JOIN (SELECT kid, nombre, apellido, id AS idc FROM dtc_chicos) AS sel 
-       ON dtc_cursado.id_chico = sel.idc 
-       WHERE id_curso = ? 
-       GROUP BY dia, hora 
-       ORDER BY FIELD(dia, "lunes", "martes", "miércoles", "jueves", "viernes"), hora`,
-      [id]
+  router.get('/obtenerinfodecursos/:id', async (req, res) => {
+    const id = req.params.id;
+  
+    // Definir días y horarios en base al ID del curso
+    let dias, horas;
+  
+    if (id === "304") {
+      dias = ["lunes", "martes", "miércoles", "jueves", "viernes"];
+      horas = ["14:30", "15:30", "16:30"];
+    } else if (id === "307") {
+      dias = ["martes", "jueves", "viernes"];
+      horas = [14, 15, 16];
+    } else {
+      dias = ["lunes", "martes", "miércoles", "jueves", "viernes"];
+      horas = [14, 15, 16];
+    }
+  
+    // Crear combinaciones de días y horarios
+    const combinaciones = dias.flatMap(dia =>
+      horas.map(hora => ({
+        dia,
+        hora,
+        cantidad_kids: 0,
+        nombres_kids: null
+      }))
     );
-
-    // Convertir los datos reales en un mapa clave-valor para buscar fácilmente
-    const datosReales = new Map(
-      chiques.map(row => [`${row.dia}-${row.hora}`, row])
-    );
-
-    // Combinar los datos reales con las combinaciones
-    const resultados = combinaciones.map(combinacion => {
-      const key = `${combinacion.dia}-${combinacion.hora}`;
-      const datoReal = datosReales.get(key);
-
-      return {
-        dia: combinacion.dia,
-        hora: combinacion.hora,
-        cantidad_kids: datoReal ? Number(datoReal.cantidad_kids) : 0,
-        nombres_kids: datoReal ? String(datoReal.nombres_kids) : null
-      };
-    });
-
-    res.json(resultados);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al obtener los datos de la base de datos" });
-  }
-});
+  
+    try {
+      // Consulta los datos reales desde la base de datos
+      const chiques = await pool.query(
+        `SELECT dia, hora, COUNT(sel.kid) AS cantidad_kids, 
+                GROUP_CONCAT(CONCAT(sel.kid, " - ", sel.nombre, " ", sel.apellido) SEPARATOR ", ") AS nombres_kids 
+         FROM dtc_cursado 
+         JOIN (SELECT kid, nombre, apellido, id AS idc FROM dtc_chicos) AS sel 
+         ON dtc_cursado.id_chico = sel.idc 
+         WHERE id_curso = ? 
+         GROUP BY dia, hora 
+         ORDER BY FIELD(dia, "lunes", "martes", "miércoles", "jueves", "viernes"), hora`,
+        [id]
+      );
+  
+      // Convertir los datos reales en un mapa clave-valor para buscar fácilmente
+      const datosReales = new Map(
+        chiques.map(row => [`${row.dia}-${row.hora}`, row])
+      );
+  
+      // Combinar los datos reales con las combinaciones
+      const resultados = combinaciones.map(combinacion => {
+        const key = `${combinacion.dia}-${combinacion.hora}`;
+        const datoReal = datosReales.get(key);
+  
+        return {
+          dia: combinacion.dia,
+          hora: combinacion.hora,
+          cantidad_kids: datoReal ? Number(datoReal.cantidad_kids) : 0,
+          nombres_kids: datoReal ? String(datoReal.nombres_kids) : null
+        };
+      });
+  
+      res.json(resultados);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Error al obtener los datos de la base de datos" });
+    }
+  });
+  
+  
 
 router.get('/obtenerinfodecursostodos', async (req, res) => {
   // Define los días y horarios predeterminados
