@@ -1113,7 +1113,7 @@ router.get('/obtenerinfodecursostodos', async (req, res) => {
     const cursos = await pool.query(
       `SELECT DISTINCT id AS id_curso, mail AS nombre_curso, materia 
        FROM usuarios 
-       WHERE id IN (240, 304, 306, 265, 307, 308, 309)`
+       WHERE id IN (266,240, 304, 306, 265, 307, 308, 309)`
     );
 
     // Crear una estructura auxiliar con todas las combinaciones posibles para cada curso
@@ -1152,7 +1152,7 @@ router.get('/obtenerinfodecursostodos', async (req, res) => {
        ON c.id_chico = sel.idc
        JOIN usuarios AS u
        ON c.id_curso = u.id
-       WHERE u.id IN (240, 304, 306, 265, 307, 308, 309)
+       WHERE u.id IN (266,240, 304, 306, 265, 307, 308, 309)
        GROUP BY c.dia, c.hora, u.mail, u.id, u.materia
        ORDER BY u.mail, FIELD(c.dia, "lunes", "martes", "miércoles", "jueves", "viernes"), c.hora`
     );
