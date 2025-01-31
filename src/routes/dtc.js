@@ -1172,7 +1172,7 @@ router.get('/obtenerinfodecursos/:id', async (req, res) => {
           materia: combinacion.materia
         };
       });
-  
+  console.log(resultados)
       res.json(resultados);
     } catch (error) {
       console.error(error);
@@ -1180,8 +1180,125 @@ router.get('/obtenerinfodecursos/:id', async (req, res) => {
     }
   });
   
+  
+  router.get('/informaciondeinscriptos', async (req, res) => {
+    try {
+      // Obtener la cantidad total de registros en dtc_cursado
+      const totalCursado = await pool.query('SELECT COUNT(*) AS total FROM dtc_cursado');
+      
+      // Obtener la cantidad de chicos distintos en dtc_cursado
+      const distinctChicos = await pool.query('SELECT COUNT(DISTINCT id_chico) AS total_distinct FROM dtc_cursado');
+  
+      // Listado de chicos con al menos una inscripción
+      const chicos = await pool.query(`
+        SELECT DISTINCT c.id, c.nombre, c.apellido 
+        FROM dtc_chicos c
+        JOIN dtc_cursado d ON c.id = d.id_chico
+      `);
+  
+      res.json({
+        total_cursado: Number(totalCursado[0].total),  // Convertimos BigInt a Number
+        total_distinct_chicos: Number(distinctChicos[0].total_distinct),  // Convertimos BigInt a Number
+        listado_chicos: chicos.map(chico => ({
+          id: Number(chico.id),  // Convertimos BigInt a Number
+          nombre: chico.nombre,
+          apellido: chico.apellido
+        }))
+      });
+    } catch (error) {
+      console.error('Error al obtener información:', error);
+      res.status(500).json({ error: 'Error en el servidor' });
+    }
+  });
+/*
 
+router.get('/obtenerinfodecursostodos', async (req, res) => {
+  // Define los días y horarios predeterminados
+  const dias = ["lunes", "martes", "miércoles", "jueves", "viernes"];
+  const dias307 = ["martes", "jueves", "viernes"]; // Días específicos para el curso 307
+  const horariosEstandar = ["14:00", "15:00", "16:00"];
+  const horariosEspeciales = ["14:30", "15:30", "16:30"];
+  const horario309 = ["17:00"]; // Horario exclusivo para el curso 309
 
+  try {
+    // Consulta los cursos filtrados por los IDs especificados
+    const cursos = await pool.query(
+      `SELECT DISTINCT id AS id_curso, mail AS nombre_curso, materia 
+       FROM usuarios 
+       WHERE id IN (266,240, 304, 306, 265, 307, 308, 309)`
+    );
+
+    // Crear una estructura auxiliar con todas las combinaciones posibles para cada curso
+    const combinaciones = cursos.flatMap(curso => {
+      let horarios = horariosEstandar;
+      let diasFiltrados = dias;
+
+      if (curso.id_curso === 304) {
+        horarios = horariosEspeciales; // 304 tiene horarios especiales
+      } else if (curso.id_curso === 309) {
+        horarios = horario309; // 309 solo tiene el horario 17:00
+      } else if (curso.id_curso === 307) {
+        diasFiltrados = dias307; // 307 solo martes, jueves y viernes
+      }
+
+      return diasFiltrados.flatMap(dia =>
+        horarios.map(hora => ({
+          id_curso: curso.id_curso,
+          nombre_curso: curso.nombre_curso,
+          dia,
+          hora,
+          cantidad_kids: 0,
+          nombres_kids: null,
+          materia: curso.materia
+        }))
+      );
+    });
+
+    // Consulta los datos reales desde la base de datos
+    const chiques = await pool.query(
+      `SELECT c.dia, c.hora, COUNT(sel.kid) AS cantidad_kids, 
+              GROUP_CONCAT(CONCAT(sel.kid, " - ", sel.nombre, " ", sel.apellido) SEPARATOR ", ") AS nombres_kids, 
+              u.mail AS nombre_curso, u.id AS id_curso, u.materia
+       FROM dtc_cursado AS c
+       JOIN (SELECT kid, nombre, apellido, id AS idc FROM dtc_chicos) AS sel 
+       ON c.id_chico = sel.idc
+       JOIN usuarios AS u
+       ON c.id_curso = u.id
+       WHERE u.id IN (266,240, 304, 306, 265, 307, 308, 309)
+       GROUP BY c.dia, c.hora, u.mail, u.id, u.materia
+       ORDER BY u.mail, FIELD(c.dia, "lunes", "martes", "miércoles", "jueves", "viernes"), c.hora`
+    );
+
+    // Convertir los datos reales en un mapa clave-valor para buscar fácilmente
+    const datosReales = new Map(
+      chiques.map(row => [`${row.id_curso}-${row.dia}-${row.hora}`, row])
+    );
+
+    // Combinar los datos reales con las combinaciones
+    const resultados = combinaciones.map(combinacion => {
+      const key = `${combinacion.id_curso}-${combinacion.dia}-${combinacion.hora}`;
+      const datoReal = datosReales.get(key);
+
+      return {
+        id_curso: combinacion.id_curso,
+        nombre_curso: combinacion.nombre_curso,
+        dia: combinacion.dia,
+        hora: combinacion.hora,
+        cantidad_kids: datoReal ? Number(datoReal.cantidad_kids) : 0,
+        nombres_kids: datoReal ? String(datoReal.nombres_kids) : null,
+        materia: combinacion.materia
+      };
+    });
+
+    console.log(resultados);
+    res.json(resultados);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener los datos de la base de datos" });
+  }
+});
+
+*/ 
 
 
 
