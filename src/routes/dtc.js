@@ -19,16 +19,17 @@ const kmlFilePath2 = path.join(__dirname, '../maps/entregas.kml');
  ////////////whatapweb
  const qrcode = require('qrcode-terminal');
  const { Client, LocalAuth } = require('whatsapp-web.js');
- const puppeteer = require('puppeteer-core');
-
-const client = new Client({
-    puppeteer: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox'], // Agregar estos argumentos
-    },
-    // Si necesitas especificar la ruta del navegador, puedes agregar la opción executablePath:
-    // executablePath: '/path/to/your/chrome',
+ 
+ const client = new Client({
+  authStrategy: new LocalAuth({
+      dataPath: './.wwebjs_auth' 
+  }),
+  puppeteer: {
+      executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+  }
 });
- // Crear el cliente con LocalAuth para guardar la sesión
 
  
  client.on('qr', (qr) => {
@@ -49,10 +50,12 @@ const client = new Client({
  });
  
  client.on('disconnected', (reason) => {
-     console.log('Cliente desconectado:', reason);
- });
+  console.error('Cliente desconectado:', reason);
+  console.log('Reiniciando cliente...');
+  client.initialize(); // Reiniciar automáticamente
+});
+
  
- //
  client.initialize();
     ////////////whatapweb
 const storage = multer.diskStorage({
