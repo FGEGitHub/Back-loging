@@ -682,6 +682,42 @@ router.get('/listachiques/', async (req, res) => {
   }
 });
 
+
+
+
+
+
+router.get('/listachiquesparainscribir/', async (req, res) => {
+  try {
+    const chiques = await pool.query(`
+      SELECT 
+        c.id, 
+        c.nombre, 
+        c.apellido, 
+        c.fecha_nacimiento,
+        c.dni,
+    
+   
+        CASE 
+          WHEN cu.id_chico IS NOT NULL THEN TRUE 
+          ELSE FALSE 
+        END AS yaincripto
+      FROM dtc_chicos AS c
+      LEFT JOIN dtc_cursado AS cu ON c.id = cu.id_chico
+      GROUP BY c.id
+      ORDER BY c.apellido
+    `);
+console.log(chiques)
+    res.json([chiques]);
+  } catch (error) {
+    console.error("Error al obtener la lista de chiques:", error);
+    res.status(500).json({ error: "Error al obtener la lista de chiques" });
+  }
+});
+
+
+
+
 router.get('/listachiquesmomentaneo/', async (req, res) => {
   try {
     const calcularEdad = (fechaNacimiento) => {
