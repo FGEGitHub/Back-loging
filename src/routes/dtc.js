@@ -2015,7 +2015,7 @@ router.post("/borrarinformeps", async (req, res) => {
       }
 
       // Eliminar la entrada de la base de datos
-      await pool.query('DELETE FROM dtc_asistencias_sociales WHERE id = ?', [id]);
+      await pool.query('DELETE FROM dtc_informes_psic WHERE id = ?', [id]);
 
       res.json('Realizado');
     } else {
