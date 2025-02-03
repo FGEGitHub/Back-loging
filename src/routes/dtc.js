@@ -2567,6 +2567,41 @@ console.log(1456)
   }
 });
 
+
+router.get('/verarchivopsiq/:id', async (req, res) => {
+  const { id } = req.params;
+  console.log('ID solicitado:', id);
+
+  try {
+    const trabajocos = await pool.query('SELECT * FROM dtc_informes_psic WHERE id = ?', [id]);
+    if (trabajocos.length === 0) {
+      return res.status(404).send('Asistencia social no encontrada');
+    }
+
+    const ubicacion = trabajocos[0]['ubicacion'];
+    const filePath = path.join(__dirname, '../imagenesvendedoras', ubicacion);
+
+    console.log('Ruta del archivo:', filePath);
+console.log(1456)
+    // Verificar si el archivo existe
+    if (!fs.existsSync(filePath)) {
+      console.error('Archivo no encontrado en la ruta:', filePath);
+      return res.status(404).send('Archivo no encontrado');
+    }
+
+    // Enviar el archivo al cliente
+    res.sendFile(filePath, (err) => {
+      if (err) {
+        console.error('Error al enviar el archivo:', err);
+        res.status(404).send('Archivo no encontrado');
+      }
+    });
+  } catch (error) {
+    console.error('Error al buscar la asistencia social:', error);
+    res.status(500).send('Error del servidor');
+  }
+});
+
 router.get('/traerpresentesdeclase/:id', async (req, res) => {
   const id = req.params.id
   const clase =await pool.query('select * from dtc_clases_taller where id=?',[id])
