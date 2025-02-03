@@ -1034,69 +1034,100 @@ router.get('/obtenerinfodecursos/:id', async (req, res) => {
 }) */
   router.get('/obtenerinfodecursos/:id', async (req, res) => {
     const id = req.params.id;
-  
+
+    // Verificar que el ID sea válido
+    if (!/^\d+$/.test(id)) {
+        return res.status(400).json({ error: "ID de curso inválido" });
+    }
+
     // Definir días y horarios en base al ID del curso
-    let dias, horas;
-  
+    const dias = ["lunes", "martes", "miércoles", "jueves", "viernes"];
+    const dias307 = ["martes", "jueves", "viernes"];
+    const horariosEstandar = ["14:00", "15:00", "16:00"];
+    const horariosEspeciales = ["14:30", "15:30", "16:30"];
+    const horario309 = ["17:00"];
+
+    let horarios = horariosEstandar;
+    let diasFiltrados = dias;
+
     if (id === "304") {
-      dias = ["lunes", "martes", "miércoles", "jueves", "viernes"];
-      horas = ["14:30", "15:30", "16:30"];
+        horarios = horariosEspeciales;
+    } else if (id === "309") {
+        horarios = horario309;
     } else if (id === "307") {
-      dias = ["martes", "jueves", "viernes"];
-      horas = [14, 15, 16];
-    } else {
-      dias = ["lunes", "martes", "miércoles", "jueves", "viernes"];
-      horas = [14, 15, 16];
+        diasFiltrados = dias307;
     }
-  
-    // Crear combinaciones de días y horarios
-    const combinaciones = dias.flatMap(dia =>
-      horas.map(hora => ({
-        dia,
-        hora,
-        cantidad_kids: 0,
-        nombres_kids: null
-      }))
-    );
-  
+
     try {
-      // Consulta los datos reales desde la base de datos
-      const chiques = await pool.query(
-        `SELECT dia, hora, COUNT(sel.kid) AS cantidad_kids, 
-                GROUP_CONCAT(CONCAT(sel.kid, " - ", sel.nombre, " ", sel.apellido) SEPARATOR ", ") AS nombres_kids 
-         FROM dtc_cursado 
-         JOIN (SELECT kid, nombre, apellido, id AS idc FROM dtc_chicos) AS sel 
-         ON dtc_cursado.id_chico = sel.idc 
-         WHERE id_curso = ? 
-         GROUP BY dia, hora 
-         ORDER BY FIELD(dia, "lunes", "martes", "miércoles", "jueves", "viernes"), hora`,
-        [id]
-      );
-  
-      // Convertir los datos reales en un mapa clave-valor para buscar fácilmente
-      const datosReales = new Map(
-        chiques.map(row => [`${row.dia}-${row.hora}`, row])
-      );
-  
-      // Combinar los datos reales con las combinaciones
-      const resultados = combinaciones.map(combinacion => {
-        const key = `${combinacion.dia}-${combinacion.hora}`;
-        const datoReal = datosReales.get(key);
-  
-        return {
-          dia: combinacion.dia,
-          hora: combinacion.hora,
-          cantidad_kids: datoReal ? Number(datoReal.cantidad_kids) : 0,
-          nombres_kids: datoReal ? String(datoReal.nombres_kids) : null
-        };
-      });
-  
-      res.json(resultados);
+        // Obtener información del curso solicitado
+        const curso = await pool.query(
+            `SELECT id AS id_curso, mail AS nombre_curso, materia 
+             FROM usuarios 
+             WHERE id = ?`, 
+            [id]
+        );
+
+        if (curso.length === 0) {
+            return res.status(404).json({ error: "Curso no encontrado" });
+        }
+
+        // Generar combinaciones de días y horarios para este curso
+        const combinaciones = diasFiltrados.flatMap(dia =>
+            horarios.map(hora => ({
+                id_curso: curso[0].id_curso,
+                nombre_curso: curso[0].nombre_curso,
+                dia,
+                hora,
+                cantidad_kids: 0,
+                nombres_kids: null,
+                materia: curso[0].materia
+            }))
+        );
+
+        // Obtener los inscriptos del curso específico
+        const chiques = await pool.query(
+            `SELECT c.dia, c.hora, COUNT(sel.kid) AS cantidad_kids, 
+                    GROUP_CONCAT(CONCAT(sel.kid, " - ", sel.nombre, " ", sel.apellido, " (", TIMESTAMPDIFF(YEAR, sel.fecha_nacimiento, CURDATE()), " años)") SEPARATOR ", ") AS nombres_kids 
+             FROM dtc_cursado AS c
+             JOIN (SELECT kid, nombre, apellido, id AS idc, fecha_nacimiento 
+                   FROM dtc_chicos) AS sel 
+             ON c.id_chico = sel.idc
+             WHERE c.id_curso = ?
+             GROUP BY c.dia, c.hora
+             ORDER BY FIELD(c.dia, "lunes", "martes", "miércoles", "jueves", "viernes"), c.hora`,
+            [id]
+        );
+
+        // Mapear los datos reales para fusionarlos con las combinaciones
+        const datosReales = new Map(
+            chiques.map(row => [`${row.dia}-${row.hora}`, row])
+        );
+
+        // Combinar datos reales con combinaciones predefinidas
+        const resultados = combinaciones.map(combinacion => {
+            const key = `${combinacion.dia}-${combinacion.hora}`;
+            const datoReal = datosReales.get(key);
+
+            return {
+                id_curso: combinacion.id_curso,
+                nombre_curso: combinacion.nombre_curso,
+                dia: combinacion.dia,
+                hora: combinacion.hora,
+                cantidad_kids: datoReal ? Number(datoReal.cantidad_kids) : 0,
+                nombres_kids: datoReal ? String(datoReal.nombres_kids) : null,
+                materia: combinacion.materia
+            };
+        });
+
+        res.json(resultados);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Error al obtener los datos de la base de datos" });
+        console.error("Error al obtener los datos de la base de datos:", error);
+        res.status(500).json({ error: "Error al obtener los datos de la base de datos" });
     }
-  });
+});
+
+
+
   
   
 
