@@ -2572,6 +2572,8 @@ router.get('/traerpresentesdeclaseprof/:id', async (req, res) => {
 })
 
 
+
+
 router.get('/traercosassole/:id', async (req, res) => {
 const id  = req.params.id
   const existe = await pool.query('select * from dtc_cosas_usuario where id_usuario=?',[id])//presentes
@@ -2669,7 +2671,74 @@ console.log(1456)
   }
 });
 
-router.get('/traerpresentesdeclase/:id', async (req, res) => {
+router.post("/traerdatosdeclasehorausuario/", async (req, res) => {
+  try {
+    let { hora, id_taller } = req.body;
+
+    console.log("Solicitud recibida con datos:", req.body);
+
+    // Convertir "1430" -> "14:30"
+    if (hora && hora.length === 4) {
+      hora = `${hora.slice(0, 2)}:${hora.slice(2)}`;
+    }
+
+    console.log("Hora formateada:", hora);
+
+    const fecha = new Date().toISOString().split("T")[0];
+    const diasSemana = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+    const dia = diasSemana[new Date().getDay()];
+
+    console.log("Fecha actual:", fecha, "Día:", dia);
+
+    // Buscar si la clase ya existe
+    const result = await pool.query(
+      "SELECT * FROM marketing.dtc_clases_taller WHERE dia = ? AND hora = ? AND id_tallerista = ? AND fecha = ?",
+      [dia, hora, id_taller, fecha]
+    );
+
+    if (result.length === 0) {
+      return res.json([[], []]); // Si no hay clase, devuelve arrays vacíos
+    }
+
+    const id_clase = result[0].id; // Obtener el ID de la clase encontrada
+
+    console.log("ID de la clase encontrada:", id_clase);
+
+    // Buscar en dtc_cursado y hacer LEFT JOIN con dtc_asistencia_clase
+    const usuariosResult = await pool.query(
+      `SELECT 
+        sel.idc AS id_chico,
+        sel.apellido, 
+        sel.nombre, 
+        CASE 
+          WHEN dtc_asistencia_clase.id_usuario IS NOT NULL THEN 'Presente' 
+          ELSE '0' 
+        END AS presente 
+      FROM marketing.dtc_cursado 
+      JOIN (SELECT id AS idc, nombre, apellido FROM dtc_chicos) AS sel 
+        ON dtc_cursado.id_chico = sel.idc 
+      LEFT JOIN dtc_asistencia_clase 
+        ON dtc_cursado.id_chico = dtc_asistencia_clase.id_usuario 
+        AND dtc_asistencia_clase.id_clase = ? 
+      WHERE dtc_cursado.dia = ? 
+        AND dtc_cursado.hora = ? 
+        AND dtc_cursado.id_curso = ?`,
+      [id_clase, dia, hora, id_taller]
+    );
+
+    console.log(usuariosResult);
+    res.json([result, usuariosResult]);
+  } catch (error) {
+    console.error("Error en la API:", error);
+    res.status(500).json({ error: "Error al obtener los datos." });
+  }
+});
+
+
+
+
+
+/* router.get('/traerpresentesdeclase/:id', async (req, res) => {
   const id = req.params.id
   const clase =await pool.query('select * from dtc_clases_taller where id=?',[id])
   const cursado =await pool.query('select * from dtc_cursado where id_curso=? and dia=? and hora=?',[clase[0]['id_tallerista'],clase[0]['dia'],clase[0]['hora']])
@@ -2682,8 +2751,7 @@ router.get('/traerpresentesdeclase/:id', async (req, res) => {
   res.json([existe, usuarios])
 
 
-})
-
+}) */
 
 router.get('/traeretapacocinacadia/', async (req, res) => {
   const existe = await pool.query('SELECT * FROM dtc_etapa_cadia  ORDER BY id DESC');
@@ -2737,7 +2805,7 @@ router.get('/traerstock', async (req, res) => {
       ORDER BY s.id DESC;
     `);
 
-    console.log(existe);
+
     res.json([existe]);
   } catch (error) {
     console.error('Error al traer stock:', error);
@@ -4054,60 +4122,79 @@ router.post("/borrarlegajo", async (req, res) => {
 })
 
 ////cron.schedule('0 9 * * 1-5'
-/* cron.schedule('33 12 * * 1-5', async () => {
+ cron.schedule('40 12 * * 1-5', async () => {
   console.log('El sistema esta creando los cursos automaticamente');
 
-  function obtenerDiaDeLaSemana() {
-    // Obtener la fecha actual
-    const fecha = new Date();
-
-    const fechaa=`${fecha.getDate()}/${fecha.getMonth() + 1}/${fecha.getFullYear()}`
-    
-    console.log(fechaa);
-    // Obtener el número del día de la semana (0 = Domingo, 1 = Lunes, ..., 6 = Sábado)
-    const dia = fecha.getDay();
+  async function obtenerDiaDeLaSemana() {
+    try {
+      // Obtener la fecha actual en formato YYYY-MM-DD
+      const fecha = new Date();
+      const fechaa = fecha.toISOString().split("T")[0]; // Formato 2025-02-03
   
-    // Array de días de la semana
-    const diasSemana = [
-      'domingo', 
-      'lunes', 
-      'martes', 
-      'miércoles', 
-      'jueves', 
-      'viernes', 
-      'sábado'
-    ];
+      console.log("Fecha actual:", fechaa);
   
-    // Mapear el día actual
-    console.log('Hoy es:', diasSemana[dia]);
-    
-    const id_curso = [240, 265, 304, 306, 307, 308,309];
+      // Obtener el número del día de la semana (0 = Domingo, ..., 6 = Sábado)
+      const dia = fecha.getDay();
   
-    // Recorrer los id_curso
-    id_curso.forEach(async (idcurso) => {
-      // Verificar si el idcurso es 307 (solo días martes, jueves y viernes)
-      if (idcurso === 307) {
-        if (dia === 2 || dia === 4 || dia === 5) {
-          // Insertar solo si es martes, jueves o viernes
-          await pool.query('insert into dtc_clases_taller set fecha=?, id_tallerista=?,titulo=?, dia=?,  hora=14', [fechaa, idcurso,"Clase del dia "+diasSemana[dia] ,diasSemana[dia]]);
-          await pool.query('insert into dtc_clases_taller set fecha=?, id_tallerista=?,titulo=?, dia=?,  hora=15', [fechaa, idcurso,"Clase del dia "+diasSemana[dia] ,diasSemana[dia]]);
-          await pool.query('insert into dtc_clases_taller set fecha=?, id_tallerista=?,titulo=?, dia=?,  hora=16', [fechaa, idcurso,"Clase del dia "+diasSemana[dia] ,diasSemana[dia]]);
+      // Array de días de la semana
+      const diasSemana = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  
+      console.log("Hoy es:", diasSemana[dia]);
+  
+      // Lista de IDs de cursos
+      const id_curso = [240, 265, 304, 306, 307, 308, 309];
+  
+      // Recorrer los cursos usando for...of para usar await correctamente
+      for (const idcurso of id_curso) {
+        let horarios = [];
+  
+        if (idcurso === 307) {
+          // Si es curso 307, solo martes (2), jueves (4) y viernes (5)
+          if (dia === 2 || dia === 4 || dia === 5) {
+            horarios = ["14:00", "15:00", "16:00"];
+          }
+        } else if (idcurso === 304) {
+          // Si es curso 304, usar horarios específicos
+          if (dia >= 1 && dia <= 5) {
+            horarios = ["14:30", "15:30", "16:30"];
+          }
+        } else if (idcurso === 309) {
+          // Si es curso 309, solo un horario a las 17:00
+          if (dia >= 1 && dia <= 5) {
+            horarios = ["17:00"];
+          }
+        } else {
+          // Para los demás cursos, de lunes a viernes (1-5)
+          if (dia >= 1 && dia <= 5) {
+            horarios = ["14:00", "15:00", "16:00"];
+          }
         }
-      } else {
-        // Para los demás id_curso, se guardan todos los días de lunes a viernes
-        if (dia >= 1 && dia <= 5) {
-          await pool.query('insert into dtc_clases_taller set fecha=?, id_tallerista=?,titulo=?, dia=?,  hora=14', [fechaa, idcurso,"Clase del dia "+diasSemana[dia] ,diasSemana[dia]]);
-          await pool.query('insert into dtc_clases_taller set fecha=?, id_tallerista=?,titulo=?, dia=?,  hora=15', [fechaa, idcurso,"Clase del dia "+diasSemana[dia] ,diasSemana[dia]]);
-          await pool.query('insert into dtc_clases_taller set fecha=?, id_tallerista=?,titulo=?, dia=?,  hora=16', [fechaa, idcurso,"Clase del dia "+diasSemana[dia] ,diasSemana[dia]]);
+  
+        // Insertar horarios en la base de datos
+        if (horarios.length > 0) {
+          await Promise.all(
+            horarios.map((hora) =>
+              pool.query(
+                "INSERT INTO dtc_clases_taller (fecha, id_tallerista, titulo, dia, hora) VALUES (?, ?, ?, ?, ?)",
+                [fechaa, idcurso, "Clase del día " + diasSemana[dia], diasSemana[dia], hora]
+              )
+            )
+          );
+          console.log(`Horarios insertados para id_curso ${idcurso}:`, horarios);
         }
       }
-    });
+    } catch (error) {
+      console.error("Error al insertar horarios:", error);
+    }
   }
   
+  
+  
+  
   // Llamar a la función
-//  obtenerDiaDeLaSemana();
+ obtenerDiaDeLaSemana();
 });
- */
+ 
 
 
 module.exports = router
