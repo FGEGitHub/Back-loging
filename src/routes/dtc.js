@@ -4122,7 +4122,7 @@ router.post("/borrarlegajo", async (req, res) => {
 })
 
 ////cron.schedule('0 9 * * 1-5'
- cron.schedule('45 12 * * 1-5', async () => {
+ cron.schedule('46 15 * * 1-5', async () => {
   console.log('El sistema esta creando los cursos automaticamente');
 
   async function obtenerDiaDeLaSemana() {
