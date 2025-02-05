@@ -1519,6 +1519,24 @@ router.get('/listadelegajos/:id', async (req, res) => {
 })
 
 
+router.post("/enviarconsumomerienda", upload.single('imagen'), async (req, res) => {
+  try {
+      const { fecha, cantidad } = req.body; // Extraer datos del body
+      //console.log(req.file.filename) ;
+      const fileName = req.file ? req.file.filename : null; // Si hay imagen, guarda el nombre; si no, null
+
+      // Insertar en la base de datos
+      const query = 'INSERT INTO dtc_meriendas ( ubicacion, fecha, cantidad) VALUES (?, ?, ?)';
+      const values = [ fileName, fecha, cantidad];
+
+      await pool.query(query, values);
+      res.json('Registro insertado correctamente');
+  } catch (error) {
+      console.error('Error al insertar merienda:', error);
+      res.status(500).json('No se pudo registrar la información');
+  }
+});
+
 
 router.post("/subirfotoperfil", upload.single('imagen'), async (req, res) => {
 
@@ -2618,6 +2636,53 @@ router.get('/traerinformes', async (req, res) => {
 
 
 })
+
+router.get('/traermeriendas', async (req, res) => {
+
+  const existe = await pool.query('select * from dtc_meriendas order by id desc')//presentes
+  //todos
+
+  res.json(existe)
+
+
+})
+
+
+
+router.get('/verimagendemerienda/:id', async (req, res) => {
+  const { id } = req.params;
+  console.log('ID solicitado:', id);
+
+  try {
+    const trabajocos = await pool.query('SELECT * FROM dtc_meriendas WHERE id = ?', [id]);
+    if (trabajocos.length === 0) {
+      return res.status(404).send(' no encontrada');
+    }
+
+    const ubicacion = trabajocos[0]['ubicacion'];
+    const filePath = path.join(__dirname, '../imagenesvendedoras', ubicacion);
+
+    console.log('Ruta del archivo:', filePath);
+
+    // Verificar si el archivo existe
+    if (!fs.existsSync(filePath)) {
+      console.error('Archivo no encontrado en la ruta:', filePath);
+      return res.status(404).send('Archivo no encontrado');
+    }
+
+    // Enviar el archivo al cliente
+    console.log('enviando')
+    res.sendFile(filePath, (err) => {
+      if (err) {
+        console.error('Error al enviar el archivo:', err);
+        res.status(404).send('Archivo no encontrado');
+      }
+    });
+  } catch (error) {
+    console.error('Error al buscar la asistencia social:', error);
+    res.status(500).send('Error del servidor');
+  }
+});
 
 router.get('/verarchivo/:id', async (req, res) => {
   const { id } = req.params;
