@@ -685,35 +685,51 @@ router.get('/listachiques/', async (req, res) => {
 
 
 
+router.post('/listachiquesparainscribir/', async (req, res) => {
+  const { id, dia, hora } = req.body;
+  console.log("Datos recibidos:", { id, dia, hora });
 
-
-router.get('/listachiquesparainscribir/', async (req, res) => {
   try {
-    const chiques = await pool.query(`
+    const chiques = await pool.query(
+      `
       SELECT 
         c.id, 
         c.nombre, 
         c.apellido, 
         c.fecha_nacimiento,
         c.dni,
-    
-   
         CASE 
           WHEN cu.id_chico IS NOT NULL THEN TRUE 
           ELSE FALSE 
-        END AS yaincripto
+        END AS yainscripto
       FROM dtc_chicos AS c
-      LEFT JOIN dtc_cursado AS cu ON c.id = cu.id_chico
-      GROUP BY c.id
+      LEFT JOIN dtc_cursado AS cu 
+        ON c.id = cu.id_chico 
+        AND cu.id_curso = ?
+        AND cu.dia = ?
+        AND cu.hora = ?
       ORDER BY c.apellido
-    `);
-console.log(chiques)
+      `,
+      [id, dia, hora]
+    );
+
+    // Convertir BigInt a String si es necesario
+    const resultado = chiques.map(chico => ({
+      ...chico,
+      id: chico.id.toString(),
+      dni: chico.dni ? chico.dni.toString() : null,
+    }));
+
+    // Mostrar en consola solo los inscritos
+    console.log("Chiques ya inscritos:", resultado.filter(ch => ch.yainscripto));
+
     res.json([chiques]);
   } catch (error) {
     console.error("Error al obtener la lista de chiques:", error);
     res.status(500).json({ error: "Error al obtener la lista de chiques" });
   }
 });
+
 
 
 
@@ -1239,7 +1255,7 @@ router.get('/obtenerinfodecursos/:id', async (req, res) => {
           materia: combinacion.materia
         };
       });
-  console.log(resultados)
+  
       res.json(resultados);
     } catch (error) {
       console.error(error);
@@ -4142,7 +4158,7 @@ router.post("/borrarlegajo", async (req, res) => {
       console.log("Hoy es:", diasSemana[dia]);
   
       // Lista de IDs de cursos
-      const id_curso = [240, 265, 304, 306, 307, 308, 309];
+      const id_curso = [240, 265, 304, 306, 307, 308, 309,266];
   
       // Recorrer los cursos usando for...of para usar await correctamente
       for (const idcurso of id_curso) {
