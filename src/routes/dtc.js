@@ -3616,31 +3616,46 @@ router.post("/agregarturnocadia", async (req, res) => {
 
 }) */
   router.post("/agendarturno", async (req, res) => {
-    let { id, id_persona} = req.body;
+    let { id, id_persona, nuevoUsuario, nombre, apellido } = req.body;
 
     try {
         const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
-        const fecha = (new Date(Date.now())).toLocaleDateString();
+        const fecha = new Date().toLocaleDateString();
+
+        if (nuevoUsuario) {
+            // Insertar nuevo usuario en dtc_personas_psicologa
+            const insertResult = await pool.query(
+                'INSERT INTO dtc_personas_psicologa (nombre, apellido) VALUES (?, ?)',
+                [nombre, apellido]
+            );
+            id_persona = insertResult.insertId; // Obtener el ID generado
+        }
 
         console.log(id, id_persona);
-        const profesionall = await pool.query('select * from dtc_turnos join (select id as idu, telefono, nombre  from usuarios)as sel on dtc_turnos.id_psico=sel.idu  where id=?',[id])
-        const personapsiq = await pool.query('select * from dtc_personas_psicologa where id =?',[id_persona])
-        telefono= profesionall[0]['telefono']+'@c.us'
+
+        const profesionall = await pool.query(
+            'SELECT * FROM dtc_turnos JOIN (SELECT id AS idu, telefono, nombre FROM usuarios) AS sel ON dtc_turnos.id_psico = sel.idu WHERE id = ?',
+            [id]
+        );
+        const personapsiq = await pool.query('SELECT * FROM dtc_personas_psicologa WHERE id = ?', [id_persona]);
+
+        const telefono = profesionall[0]?.telefono + '@c.us';
+
         // Actualizar el turno en la base de datos
         await pool.query(
-            'UPDATE dtc_turnos SET id_persona=?, estado="Agendado", hora=? WHERE id=?',
+            'UPDATE dtc_turnos SET id_persona = ?, estado = "Agendado", hora = ? WHERE id = ?',
             [id_persona, `${horaBuenosAires}-${fecha}`, id]
         );
 
         // Enviar mensaje de WhatsApp
-        const mensaje = `Hola ${profesionall[0]['nombre']}, tenes un nuevo turno para el dia ${profesionall[0]['fecha']} a las ${profesionall[0]['detalle']} del paciente ${personapsiq[0]['nombre']} ${personapsiq[0]['apellido']}Un saludo DTC.`;
-console.log(mensaje)
-try {
-  await  client.sendMessage(telefono, mensaje); // Enviar mensaje
-} catch (error) {
-  console.log(error)
-}
+        const mensaje = `Hola ${profesionall[0]?.nombre}, tenés un nuevo turno para el día ${profesionall[0]?.fecha} a las ${profesionall[0]?.detalle} del paciente ${personapsiq[0]?.nombre} ${personapsiq[0]?.apellido}. Un saludo, DTC.`;
 
+        console.log(mensaje);
+        try {
+            await client.sendMessage(telefono, mensaje);
+        } catch (error) {
+            console.log(error);
+        }
 
         res.json('agendado');
     } catch (error) {
@@ -3648,6 +3663,9 @@ try {
         res.json('no agendado');
     }
 });
+
+
+
 
 
 router.post("/agendarturnocadia", async (req, res) => {
