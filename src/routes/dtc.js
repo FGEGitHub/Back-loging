@@ -2784,7 +2784,7 @@ router.post("/traerdatosdeclasehorausuario/", async (req, res) => {
 
     const id_clase = result[0].id; // Obtener el ID de la clase encontrada
 
-    console.log("ID de la clase encontrada:", id_clase);
+ 
 
     // Buscar en dtc_cursado y hacer LEFT JOIN con dtc_asistencia_clase
     const usuariosResult = await pool.query(
@@ -2808,7 +2808,7 @@ router.post("/traerdatosdeclasehorausuario/", async (req, res) => {
       [id_clase, dia, hora, id_taller]
     );
 
-    console.log(usuariosResult);
+ 
     res.json([result, usuariosResult]);
   } catch (error) {
     console.error("Error en la API:", error);
@@ -2834,6 +2834,49 @@ router.post("/traerdatosdeclasehorausuario/", async (req, res) => {
 
 
 }) */
+  router.post('/traerpresentesdeclase2/', async (req, res) => {
+    try {
+        const { hora, id_taller } = req.body;
+
+        // Obtener el día actual del sistema en español
+        const dias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+        const dia = dias[new Date().getDay()]; // Obtiene el día actual en texto
+
+        // Formatear la hora a HH:mm
+        let horaFormateada = hora.toString().padStart(4, '0'); // Asegura que tenga 4 dígitos
+        horaFormateada = `${horaFormateada.slice(0, 2)}:${horaFormateada.slice(2)}`; // Convierte "1500" a "15:00"
+
+        console.log(`Día del sistema: ${dia}, Hora: ${horaFormateada}, ID Taller: ${id_taller}`);
+
+        const clase = await pool.query(
+            'SELECT * FROM dtc_clases_taller WHERE id_tallerista = ? AND dia = ? AND hora = ?',
+            [id_taller, dia, horaFormateada]
+        );
+
+        if (clase.length === 0) {
+            return res.json({ error: "No se encontró la clase con esos datos" });
+        }
+
+        const id_clase = clase[0].id;
+
+        const existe = await pool.query(
+            'SELECT * FROM dtc_asistencia_clase JOIN (SELECT id AS idc, nombre FROM dtc_chicos) AS sel ON dtc_asistencia_clase.id_usuario = sel.idc WHERE id_clase = ?',
+            [id_clase]
+        );
+
+        const usuarios = await pool.query(
+            "SELECT * FROM dtc_chicos LEFT JOIN (SELECT id AS ida FROM dtc_asistencia_clase WHERE id_clase = ?) AS sel ON dtc_chicos.id = sel.ida",
+            [id_clase]
+        );
+
+        res.json([existe, usuarios] );
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error en el servidor" });
+    }
+});
+
 
 router.get('/traeretapacocinacadia/', async (req, res) => {
   const existe = await pool.query('SELECT * FROM dtc_etapa_cadia  ORDER BY id DESC');
@@ -3827,47 +3870,123 @@ console.log(existe)
 
 
 })
+// router.post("/ponerpresenteclase", async (req, res) => {
+//   let { id_clase, id_usuario } = req.body
+//   console.log( id_clase, id_usuario)
+//   const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
+
+//   console.log("La hora actual en Buenos Aires es:", horaBuenosAires);
+
+
+
+//   let existe = await pool.query('select * from dtc_asistencia_clase where id_clase=? and id_usuario =? ', [id_clase, id_usuario])
+//   let era
+//   if (existe.length > 0) {
+//     await pool.query('delete  from  dtc_asistencia_clase where id = ?', [existe[0]['id']])
+//     era = "puesto Ausente"
+
+
+//   } else {
+//     await pool.query('insert into dtc_asistencia_clase set id_clase=?, id_usuario=?,fecha=?', [id_clase, id_usuario, horaBuenosAires])
+//     era = "puesto Presente"
+
+//   }
+//  const clase = await pool.query('select * from dtc_clases_taller where id=?',[id_clase])
+//  const [year, month, day] = clase[0]['fecha'].split('-');
+
+//  // Convertir a números y eliminar ceros a la izquierda si existen
+//  const dayNum = parseInt(day, 10);
+//  const monthNum = parseInt(month, 10);
+
+//  // Formatear la fecha como D-M-YYYY
+//  const fechaTransformada = `${dayNum}-${monthNum}-${year}`;
+//  console.log(fechaTransformada)
+//  existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =? and id_tallerista=238', [id_usuario, fechaTransformada])
+// console.log(existe)
+//   if (existe.length == 0) {
+//     await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?,id_tallerista=238,hora=?', [fechaTransformada, id_usuario, horaBuenosAires])
+
+//   }
+//   res.json(era)
+
+
+// })
+
+
+
+
 router.post("/ponerpresenteclase", async (req, res) => {
-  let { id_clase, id_usuario } = req.body
-  console.log( id_clase, id_usuario)
-  const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
+  try {
+    let { id_tallerista, hora, id_usuario } = req.body;
 
-  console.log("La hora actual en Buenos Aires es:", horaBuenosAires);
+    // Obtener el día actual en español
+    const dias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+    const dia = dias[new Date().getDay()];
 
+    // Formatear la hora a HH:mm
+    let horaFormateada = hora.toString().padStart(4, "0");
+    horaFormateada = `${horaFormateada.slice(0, 2)}:${horaFormateada.slice(2)}`;
 
+    // Hora actual en Buenos Aires con segundos
+    const horaBuenosAires = moment().tz("America/Argentina/Buenos_Aires").format("HH:mm:ss");
 
-  let existe = await pool.query('select * from dtc_asistencia_clase where id_clase=? and id_usuario =? ', [id_clase, id_usuario])
-  let era
-  if (existe.length > 0) {
-    await pool.query('delete  from  dtc_asistencia_clase where id = ?', [existe[0]['id']])
-    era = "puesto Ausente"
+    console.log(`Día del sistema: ${dia}, Hora ingresada: ${horaFormateada}, ID Tallerista: ${id_tallerista}, ID Usuario: ${id_usuario}`);
 
+    // Buscar si la clase existe
+    let existe2 = await pool.query(
+      "SELECT * FROM dtc_clases_taller WHERE id_tallerista = ? AND hora = ? AND dia = ?",
+      [id_tallerista, horaFormateada, dia]
+    );
 
-  } else {
-    await pool.query('insert into dtc_asistencia_clase set id_clase=?, id_usuario=?,fecha=?', [id_clase, id_usuario, horaBuenosAires])
-    era = "puesto Presente"
+    if (existe2.length === 0) {
+      return res.status(404).json({ error: "No se encontró la clase" });
+    }
 
+    const id_clase = existe2[0]["id"];
+
+    // Buscar si el usuario ya tiene asistencia registrada
+    let existe = await pool.query(
+      "SELECT * FROM dtc_asistencia_clase WHERE id_clase = ? AND id_usuario = ?",
+      [id_clase, id_usuario]
+    );
+
+    let mensaje;
+    if (existe.length > 0) {
+      await pool.query("DELETE FROM dtc_asistencia_clase WHERE id = ?", [existe[0]["id"]]);
+      mensaje = "Puesto Ausente";
+    } else {
+      await pool.query(
+        "INSERT INTO dtc_asistencia_clase (id_clase, id_usuario, fecha) VALUES (?, ?,  ?)",
+        [id_clase, id_usuario, horaBuenosAires]
+      );
+      mensaje = "Puesto Presente";
+    }
+
+    // Obtener la fecha del sistema en formato "D-M-YYYY"
+    const fechaHoy = moment().tz("America/Argentina/Buenos_Aires").format("D-M-YYYY");
+    console.log("Fecha de asistencia:", fechaHoy);
+
+    // Verificar asistencia general
+    existe = await pool.query(
+      "SELECT * FROM dtc_asistencia WHERE id_usuario = ? AND fecha = ? AND id_tallerista = 238",
+      [id_usuario, fechaHoy]
+    );
+
+    if (existe.length === 0) {
+      await pool.query(
+        "INSERT INTO dtc_asistencia (fecha, id_usuario, id_tallerista, hora) VALUES (?, ?, 238, ?)",
+        [fechaHoy, id_usuario, horaBuenosAires]
+      );
+    }
+
+    res.json({ mensaje });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error en el servidor" });
   }
- const clase = await pool.query('select * from dtc_clases_taller where id=?',[id_clase])
- const [year, month, day] = clase[0]['fecha'].split('-');
+});
 
- // Convertir a números y eliminar ceros a la izquierda si existen
- const dayNum = parseInt(day, 10);
- const monthNum = parseInt(month, 10);
-
- // Formatear la fecha como D-M-YYYY
- const fechaTransformada = `${dayNum}-${monthNum}-${year}`;
- console.log(fechaTransformada)
- existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =? and id_tallerista=238', [id_usuario, fechaTransformada])
-console.log(existe)
-  if (existe.length == 0) {
-    await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?,id_tallerista=238,hora=?', [fechaTransformada, id_usuario, horaBuenosAires])
-
-  }
-  res.json(era)
-
-
-})
 
 
 router.post("/ponerausenteclase", async (req, res) => {
