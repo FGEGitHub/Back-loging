@@ -271,8 +271,8 @@ router.get('/act-excel', async (req, res) => {
 router.get('/verusosdeproducto/:id', async (req, res) => {
   let id = req.params.id;
   try {
-    const clas = await pool.query('SELECT id_producto,cantidad as cantidadconsumo, fecha FROM dtc_consumo WHERE id_producto=?', [id]);
-    const clas2 = await pool.query('SELECT id_producto,cantidad as cantidadrecibido, fecha FROM dtc_recepcion_stock WHERE id_producto=?', [id]);
+    const clas = await pool.query('SELECT id , id_producto,cantidad as cantidadconsumo, fecha FROM dtc_consumo WHERE id_producto=?', [id]);
+    const clas2 = await pool.query('SELECT id , id_producto,cantidad as cantidadrecibido, fecha FROM dtc_recepcion_stock WHERE id_producto=?', [id]);
 
     // Unir los dos arrays
     const resultados = clas.concat(clas2);
@@ -3693,6 +3693,31 @@ router.post("/borrarusuariodtcpsiq", async (req, res) => {
   try {
     await pool.query('delete  from  dtc_personas_psicologa where id = ?', [id])
     res.json('Usuario borrado')
+  } catch (error) {
+    console.log(error)
+    res.json('UsuarNooio borrado, algo sucedio')
+  }
+
+})
+
+router.post("/borrarusoconsumo", async (req, res) => {
+  const { id } = req.body
+
+  try {
+    await pool.query('delete  from  dtc_consumo where id = ?', [id])
+    res.json('consumo')
+  } catch (error) {
+    console.log(error)
+    res.json('UsuarNooio borrado, algo sucedio')
+  }
+
+})
+router.post("/borrarrecepcion", async (req, res) => {
+  const { id } = req.body
+
+  try {
+    await pool.query('delete  from  dtc_recepcion_stock where id = ?', [id])
+    res.json('consumo')
   } catch (error) {
     console.log(error)
     res.json('UsuarNooio borrado, algo sucedio')
