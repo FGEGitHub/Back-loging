@@ -2088,6 +2088,46 @@ router.post("/borraractividad", async (req, res) => {
 })
 
 
+router.post("/borrarracion", async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    // Obtener la ubicación del archivo desde la base de datos
+    const result = await pool.query('SELECT ubicacion FROM dtc_meriendas WHERE id = ?', [id]);
+
+    if (result.length > 0) {
+      const archivoUbicacion = result[0].ubicacion;
+
+      // Construir la ruta completa del archivo
+      let filePath = ''
+
+      try {
+         filePath = path.join(__dirname, '../imagenesvendedoras', archivoUbicacion);
+
+      } catch (error) {
+        
+      }
+
+      // Intentar eliminar el archivo del sistema de archivos si existe
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+        console.log('Archivo eliminado:', filePath);
+      } else {
+        console.log('El archivo no existe:', filePath);
+      }
+
+      // Eliminar la entrada de la base de datos
+      await pool.query('DELETE FROM dtc_meriendas WHERE id = ?', [id]);
+
+      res.json('Realizado');
+    } else {
+      res.json('No se encontró la entrada para el ID proporcionado');
+    }
+  } catch (error) {
+    console.error('Error al borrar la actividad social:', error);
+    res.json('No realizado');
+  }
+});
 router.post("/borrarinformeps", async (req, res) => {
   const { id } = req.body;
 
@@ -2651,18 +2691,14 @@ router.get('/traermeriendas', async (req, res) => {
 
 router.get('/verimagendemerienda/:id', async (req, res) => {
   const { id } = req.params;
-  console.log('ID solicitado:', id);
-
   try {
     const trabajocos = await pool.query('SELECT * FROM dtc_meriendas WHERE id = ?', [id]);
     if (trabajocos.length === 0) {
-      return res.status(404).send(' no encontrada');
+      return res.status(404).send('Imagen no encontrada');
     }
 
     const ubicacion = trabajocos[0]['ubicacion'];
     const filePath = path.join(__dirname, '../imagenesvendedoras', ubicacion);
-
-    console.log('Ruta del archivo:', filePath);
 
     // Verificar si el archivo existe
     if (!fs.existsSync(filePath)) {
@@ -2670,19 +2706,15 @@ router.get('/verimagendemerienda/:id', async (req, res) => {
       return res.status(404).send('Archivo no encontrado');
     }
 
-    // Enviar el archivo al cliente
-    console.log('enviando')
-    res.sendFile(filePath, (err) => {
-      if (err) {
-        console.error('Error al enviar el archivo:', err);
-        res.status(404).send('Archivo no encontrado');
-      }
-    });
+    console.log('Enviando imagen desde:', filePath);
+    res.setHeader('Content-Type', 'image/png'); // Cambia según el formato real
+    res.sendFile(filePath);
   } catch (error) {
-    console.error('Error al buscar la asistencia social:', error);
+    console.error('Error del servidor:', error);
     res.status(500).send('Error del servidor');
   }
 });
+
 
 router.get('/verarchivo/:id', async (req, res) => {
   const { id } = req.params;
@@ -3918,7 +3950,7 @@ console.log(existe)
 router.post("/ponerpresenteclase", async (req, res) => {
   try {
     let { id_tallerista, hora, id_usuario } = req.body;
-
+console.log( id_tallerista, hora, id_usuario)
     // Obtener el día actual en español
     const dias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
     const dia = dias[new Date().getDay()];
