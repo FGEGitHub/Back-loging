@@ -2717,14 +2717,17 @@ router.get('/verimagendemerienda/:id', async (req, res) => {
     const filePath = path.join(__dirname, '../imagenesvendedoras', ubicacion);
 
     // Verificar si el archivo existe
-    if (!fs.existsSync(filePath)) {
-      console.error('Archivo no encontrado en la ruta:', filePath);
-      return res.status(404).send('Archivo no encontrado');
-    }
+  //rutaImagen = path.join(__dirname, '../imagenesvendedoras', chiques[0]['foto']);
+      try {
+        imagenBuffer = fs.readFileSync(filePath);
+        imagenBase64 = imagenBuffer.toString('base64');
+      } catch (error) {
+        imagenBase64=null
+      }
 
-    console.log('Enviando imagen desde:', filePath);
+    //console.log('Enviando imagen desde:', filePath);
     res.setHeader('Content-Type', 'image/png'); // Cambia según el formato real
-    res.sendFile(filePath);
+    res.json(imagenBase64);
   } catch (error) {
     console.error('Error del servidor:', error);
     res.status(500).send('Error del servidor');
