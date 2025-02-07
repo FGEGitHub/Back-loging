@@ -268,6 +268,22 @@ router.get('/act-excel', async (req, res) => {
 
 
 
+router.get('/verusosdeproducto/:id', async (req, res) => {
+  let id = req.params.id;
+  try {
+    const clas = await pool.query('SELECT id_producto,cantidad as cantidadconsumo, fecha FROM dtc_consumo WHERE id_producto=?', [id]);
+    const clas2 = await pool.query('SELECT id_producto,cantidad as cantidadrecibido, fecha FROM dtc_recepcion_stock WHERE id_producto=?', [id]);
+
+    // Unir los dos arrays
+    const resultados = clas.concat(clas2);
+
+    res.json(resultados);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Error al obtener datos' });
+  }
+});
+
 
 router.get('/tablaprestacionesa/:id', async (req, res) => {
   let id = req.params.id
