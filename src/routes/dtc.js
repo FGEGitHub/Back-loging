@@ -4055,7 +4055,7 @@ router.post("/agregarturnocadia", async (req, res) => {
         );
 
         // Enviar mensaje de WhatsApp
-        const mensaje = `Hola ${profesionall[0]?.nombre}, tenés un nuevo turno para el día ${profesionall[0]?.fecha} a las ${profesionall[0]?.detalle} del paciente ${personapsiq[0]?.nombre} ${personapsiq[0]?.apellido}. Un saludo, DTC.`;
+        const mensaje = `Hola ${profesionall[0]?.nombre}, de parte del DTC te notificamos que tenés un nuevo turno para el día ${profesionall[0]?.fecha} a las ${profesionall[0]?.detalle} del paciente ${personapsiq[0]?.nombre} ${personapsiq[0]?.apellido}. Un saludo, DTC.`;
 
         console.log(mensaje);
         try {
