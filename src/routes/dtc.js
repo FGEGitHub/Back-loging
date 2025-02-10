@@ -54,7 +54,7 @@ const client = new Client({
  
  //
  //
- //client.initialize();
+ client.initialize();
     ////////////whatapweb
 const storage = multer.diskStorage({
   destination: path.join(__dirname, '../imagenesvendedoras'),
