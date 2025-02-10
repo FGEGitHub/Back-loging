@@ -1811,20 +1811,45 @@ router.post("/borrarturno", async (req, res) => {
 
 })
 router.post("/modificarclase", async (req, res) => {
-  let { id, titulo, descripcion, fecha } = req.body
+  let { id, titulo, descripcion, fecha } = req.body;
 
   try {
+    // Construcción dinámica de la consulta SQL
+    let campos = [];
+    let valores = [];
 
+    if (titulo !== undefined) {
+      campos.push("titulo = ?");
+      valores.push(titulo);
+    }
 
-    await pool.query('update dtc_clases_taller  set  titulo=?, descripcion=?, fecha=? where id=?', [titulo, descripcion, fecha , id])
+    if (descripcion !== undefined) {
+      campos.push("descripcion = ?");
+      valores.push(descripcion);
+    }
 
-    res.json('modificado')
+    if (fecha !== undefined) {
+      campos.push("fecha = ?");
+      valores.push(fecha);
+    }
+
+    if (campos.length === 0) {
+      return res.status(400).json({ error: "No se proporcionaron campos para modificar" });
+    }
+
+    valores.push(id); // Agregar el ID al final para la cláusula WHERE
+
+    let query = `UPDATE dtc_clases_taller SET ${campos.join(", ")} WHERE id = ?`;
+
+    await pool.query(query, valores);
+
+    res.json("Modificado");
   } catch (error) {
-    console.log(error)
-    res.json('No modificado')
+    console.log(error);
+    res.status(500).json("No modificado");
   }
+});
 
-})
 
 router.post("/borraretapa", async (req, res) => {
   let { id } = req.body
