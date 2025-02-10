@@ -1241,9 +1241,7 @@ router.get('/obtenerinfodecursos/:id', async (req, res) => {
           horarios = horariosEspeciales;
         } else if (curso.id_curso === 309) {
           horarios = horario309;
-        } else if (curso.id_curso === 307) {
-          diasFiltrados = dias307;
-        }
+        } 
   
         return diasFiltrados.flatMap(dia =>
           horarios.map(hora => ({
@@ -3120,7 +3118,7 @@ router.post("/traerdatosdeclasehorausuario/", async (req, res) => {
         let horaFormateada = hora.toString().padStart(4, '0'); // Asegura que tenga 4 dígitos
         horaFormateada = `${horaFormateada.slice(0, 2)}:${horaFormateada.slice(2)}`; // Convierte "1500" a "15:00"
 
-        console.log(`Día del sistema: ${dia}, Hora: ${horaFormateada}, ID Taller: ${id_taller}`);
+       // console.log(`Día del sistema: ${dia}, Hora: ${horaFormateada}, ID Taller: ${id_taller}`);
 
         const clase = await pool.query(
             'SELECT * FROM dtc_clases_taller WHERE id_tallerista = ? AND dia = ? AND hora = ?',
