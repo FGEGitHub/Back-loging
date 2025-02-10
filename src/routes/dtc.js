@@ -1142,9 +1142,7 @@ router.get('/obtenerinfodecursos/:id', async (req, res) => {
         horarios = horariosEspeciales;
     } else if (id === "309") {
         horarios = horario309;
-    } else if (id === "307") {
-        diasFiltrados = dias307;
-    }
+    } 
 
     try {
         // Obtener información del curso solicitado
@@ -4666,7 +4664,7 @@ router.post("/borrarlegajo", async (req, res) => {
   
         if (idcurso === 307) {
           // Si es curso 307, solo martes (2), jueves (4) y viernes (5)
-          if (dia === 2 || dia === 4 || dia === 5) {
+          if (dia >= 1 && dia <= 5) {
             horarios = ["14:00", "15:00", "16:00"];
           }
         } else if (idcurso === 304) {
