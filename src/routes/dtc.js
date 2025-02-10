@@ -54,7 +54,7 @@ const client = new Client({
  
  //
  //
- client.initialize();
+ //client.initialize();
     ////////////whatapweb
 const storage = multer.diskStorage({
   destination: path.join(__dirname, '../imagenesvendedoras'),
@@ -63,7 +63,26 @@ const storage = multer.diskStorage({
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   },
 });
+////////para subir pdf
+const uploadDir = path.join(__dirname, "../imagenesvendedoras");
 
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Configuración de `multer`
+const storage2 = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir); // Guardar en la carpeta especificada
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = `${Date.now()}-${file.originalname}`;
+    cb(null, uniqueName);
+  }
+});
+
+const upload2 = multer({ storage2 });
+/////////
 const upload = multer({ storage });
 
 
@@ -1834,6 +1853,105 @@ if(resp.length==0){
 })
 
 
+router.get("/traaeroficios", async (req, res) => {
+  try {
+    let resp = await pool.query(`
+      SELECT dtc_oficios.*, 
+             dtc_pdf_oficios.id AS expediente_id, 
+             dtc_pdf_oficios.ubicacion AS expediente_archivo 
+      FROM dtc_oficios 
+      LEFT JOIN dtc_pdf_oficios ON dtc_oficios.id = dtc_pdf_oficios.id_oficio
+    `);
+
+    // Agrupar los expedientes bajo su respectivo oficio
+    let oficiosMap = {};
+
+    resp.forEach(row => {
+      if (!oficiosMap[row.id]) {
+        oficiosMap[row.id] = {
+          id: row.id,
+          expediente: row.expediente,
+          juzgado: row.juzgado,
+          causa: row.causa,
+          solicitud: row.solicitud,
+          oficio: row.oficio,
+          fecha: row.fecha,
+          expedientes: []
+        };
+      }
+
+      if (row.expediente_id) {
+        oficiosMap[row.id].expedientes.push({
+          id: row.expediente_id,
+          archivo: row.expediente_archivo
+        });
+      }
+    });
+
+    // Convertir el objeto en un array de oficios
+    let resultado = Object.values(oficiosMap);
+
+    res.json([resultado]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al traer los oficios" });
+  }
+});
+
+
+// Ruta para subir el archivo y guardar en la base de datos
+router.post("/subirexpediente", upload.single("archivo"), async (req, res) => {
+  try {
+    const { id_oficio, fecha } = req.body;
+ 
+
+console.log( id_oficio, req.file.filename)
+    if (!req.file) {
+      return res.status(400).json({ message: "No se recibió ningún archivo" });
+    }
+
+    const ubicacion = req.file.filename; // Nombre del archivo guardado
+
+    // Insertar en la base de datos
+    const result = await pool.query(
+      "INSERT INTO dtc_pdf_oficios (id_oficio, ubicacion) VALUES (?, ?)",
+      [id_oficio, ubicacion, fecha]
+    );
+
+    res.json({ message: "Archivo guardado exitosamente" });
+  } catch (error) {
+    console.error("Error al subir el archivo:", error);
+    res.status(500).json({ message: "Error al subir el archivo" });
+  }
+});
+
+router.get("/obtenerexpediente/:id", async (req, res) => {
+  try {
+      const { id } = req.params;
+
+      // Buscar el expediente en la base de datos
+      const result = await pool.query("SELECT ubicacion FROM dtc_pdf_oficios WHERE id = ?", [id]);
+
+      if (result.length === 0) {
+          return res.status(404).json({ message: "Expediente no encontrado" });
+      }
+
+      const nombreArchivo = result[0].ubicacion;
+      const rutaArchivo = path.join(__dirname, "../imagenesvendedoras", nombreArchivo);
+
+      // Verificar si el archivo existe
+      if (!fs.existsSync(rutaArchivo)) {
+          return res.status(404).json({ message: "Archivo no encontrado" });
+      }
+
+      // Enviar el archivo PDF
+      res.sendFile(rutaArchivo);
+  } catch (error) {
+      console.error("Error al obtener el expediente:", error);
+      res.status(500).json({ message: "Error al recuperar el expediente" });
+  }
+});
+
 
 router.post("/nuevapersonagim", async (req, res) => {
   let { nombre, apellido, dni, tel, direccion } = req.body
@@ -1875,6 +1993,31 @@ router.post("/nuevaprestacioninv", async (req, res) => {
 
   
 })
+
+router.post("/nuevooficio", async (req, res) => {
+  try {
+    const campos = req.body; // Captura todos los valores enviados en la petición
+    console.log("Datos recibidos:", campos);
+
+    if (Object.keys(campos).length === 0) {
+      return res.status(400).json({ error: "No se enviaron datos" });
+    }
+
+    // Construcción dinámica de la consulta SQL
+    const columnas = Object.keys(campos).join(", ");
+    const valores = Object.values(campos);
+    const placeholders = valores.map(() => "?").join(", ");
+
+    const sql = `INSERT INTO dtc_oficios (${columnas}) VALUES (${placeholders})`;
+
+    await pool.query(sql, valores);
+
+    res.json({ mensaje: "Oficio guardado correctamente" });
+  } catch (error) {
+    console.error("Error al guardar el oficio:", error);
+    res.status(500).json({ error: "No se pudo guardar el oficio" });
+  }
+});
 
 router.post("/agregarconsumo", async (req, res) => {
   let { id_producto, cantidad, fecha } = req.body
