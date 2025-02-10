@@ -2019,6 +2019,61 @@ router.post("/nuevooficio", async (req, res) => {
   }
 });
 
+
+//////actualizar 
+router.post("/actualizaroficio", async (req, res) => {
+  try {
+      const { id, juzgado, causa, solicitud, fecha } = req.body;
+      console.log(id, juzgado, causa, solicitud, fecha);
+
+      if (!id) {
+          return res.status(400).json({ error: "El ID del oficio es obligatorio." });
+      }
+
+      // Construimos dinámicamente la consulta según los campos proporcionados
+      let updateFields = [];
+      let values = [];
+
+      if (juzgado) {
+          updateFields.push("juzgado = ?");
+          values.push(juzgado);
+      }
+      if (causa) {
+          updateFields.push("causa = ?");
+          values.push(causa);
+      }
+      if (solicitud) {
+          updateFields.push("solicitud = ?");
+          values.push(solicitud);
+      }
+      if (fecha) {
+          updateFields.push("fecha = ?");
+          values.push(fecha);
+      }
+
+      if (updateFields.length === 0) {
+          return res.status(400).json({ error: "No se enviaron campos para actualizar." });
+      }
+
+      values.push(id); // Agregamos el ID al final para el WHERE
+
+      const query = `UPDATE dtc_oficios SET ${updateFields.join(", ")} WHERE id = ?`;
+
+      const result = await pool.query(query, values);
+
+      if (result.affectedRows === 0) {
+          return res.status(404).json({ error: "No se encontró el oficio o no hubo cambios." });
+      }
+
+      res.json({ message: "Oficio actualizado con éxito" });
+  } catch (error) {
+      console.error("Error al actualizar el oficio:", error);
+      res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+
+
 router.post("/agregarconsumo", async (req, res) => {
   let { id_producto, cantidad, fecha } = req.body
   try {
