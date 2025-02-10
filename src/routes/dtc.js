@@ -1926,7 +1926,7 @@ console.log( id_oficio, req.file.filename)
 });
 
 router.get("/obtenerexpediente/:id", async (req, res) => {
-  try {
+  try { 
       const { id } = req.params;
 
       // Buscar el expediente en la base de datos
