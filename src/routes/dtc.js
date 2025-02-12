@@ -3176,7 +3176,7 @@ router.get('/traeretapacocina/:id', async (req, res) => {
 
 
 })
-router.get('/creaeclasemiercoles/', async (req, res) => {
+/* router.get('/creaeclasemiercoles/', async (req, res) => {
   const id = req.params.id
    await pool.query('UPDATE `marketing`.`dtc_clases_taller` SET `dia` = "miércoles" WHERE (`id` = "682");');
 
@@ -3184,7 +3184,7 @@ router.get('/creaeclasemiercoles/', async (req, res) => {
   res.json(['existe'])
 
 
-})
+}) */
 
 
 router.get('/traerstock', async (req, res) => {
