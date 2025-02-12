@@ -3183,7 +3183,7 @@ router.get('/traeretapacocina/:id', async (req, res) => {
 
   res.json(['existe'])
 
-
+ 
 }) */
 
 
