@@ -4656,7 +4656,7 @@ router.post("/borrarlegajo", async (req, res) => {
       console.log("Hoy es:", diasSemana[dia]);
   
       // Lista de IDs de cursos
-      const id_curso = [240, 265, 304, 306, 307, 308, 309,266];
+      const id_curso = [240, 265, 304, 306, 307, 308, 309,266,312];
   
       // Recorrer los cursos usando for...of para usar await correctamente
       for (const idcurso of id_curso) {
@@ -4676,6 +4676,11 @@ router.post("/borrarlegajo", async (req, res) => {
           // Si es curso 309, solo un horario a las 17:00
           if (dia >= 1 && dia <= 5) {
             horarios = ["17:00"];
+          }
+        }else if (idcurso === 312) {
+          // Si es curso 309, solo un horario a las 14:00
+          if (dia >= 1 && dia <= 5) {
+            horarios = ["14:00"];
           }
         } else {
           // Para los demás cursos, de lunes a viernes (1-5)
