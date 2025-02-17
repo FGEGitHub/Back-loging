@@ -4033,16 +4033,16 @@ router.post("/agregarturnocadia", async (req, res) => {
         const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
         const fecha = new Date().toLocaleDateString();
 
-        if (nuevoUsuario) {
-            // Insertar nuevo usuario en dtc_personas_psicologa
-            const insertResult = await pool.query(
-                'INSERT INTO dtc_personas_psicologa (nombre, apellido) VALUES (?, ?)',
-                [nombre, apellido]
-            );
-            id_persona = insertResult.insertId; // Obtener el ID generado
-        }
-
-        console.log(id, id_persona);
+        if (nuevoUsuario) { 
+          // Insertar nuevo usuario en dtc_personas_psicologa
+          const insertResult = await pool.query(
+              'INSERT INTO dtc_personas_psicologa (nombre, apellido) VALUES (?, ?)',
+              [nombre, apellido]
+          );
+          id_persona = Number(insertResult.insertId); // Convertir BigInt a número
+      }
+      
+      console.log(id, id_persona);
 
         const profesionall = await pool.query(
             'SELECT * FROM dtc_turnos JOIN (SELECT id AS idu, telefono, nombre FROM usuarios) AS sel ON dtc_turnos.id_psico = sel.idu WHERE id = ?',
