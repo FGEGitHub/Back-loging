@@ -1453,9 +1453,10 @@ router.get('/datosdepersonapsi/:id', async (req, res) => {
   const id = req.params.id
   const chiques = await pool.query('select * from dtc_personas_psicologa where id =?', [id])
 
+const turnosss = await pool.query('select * from dtc_turnos  where id_persona =?', [id])
 
   try {
-    res.json([chiques])
+    res.json([chiques,turnosss])
   } catch (error) {
     res.json([])
   }
