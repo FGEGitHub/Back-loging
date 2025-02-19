@@ -1448,6 +1448,31 @@ router.get('/datosdechique/:id', async (req, res) => {
 
 })
 
+router.get('/traerproximosturnos/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const turnosss = await pool.query(
+      `SELECT dtc_turnos.*, dtc_personas_psicologa.id AS idp, dtc_personas_psicologa.nombre, dtc_personas_psicologa.apellido
+       FROM dtc_turnos  
+       JOIN dtc_personas_psicologa ON dtc_turnos.id_persona = dtc_personas_psicologa.id
+       WHERE dtc_turnos.id_psico = ? 
+       AND STR_TO_DATE(dtc_turnos.fecha, '%Y-%m-%d') >= CURDATE()`, 
+      [id]
+    );
+
+    console.log(turnosss);
+    res.json(turnosss);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener los turnos" });
+  }
+});
+
+
+
+
+
 
 router.get('/datosdepersonapsi/:id', async (req, res) => {
   const id = req.params.id
@@ -2800,18 +2825,18 @@ router.get('/traerhorariosprofesional/:id', async (req, res) => {
 
 router.get('/traercitas/:id', async (req, res) => {
   const id = req.params.id
-  console.log(id)
+  
   const usua = await pool.query('select * from usuarios where id=?',[id])
   if (usua.nivel==40){
     const pendientes = await pool.query('select * from dtc_turnos where estado="Disponible"',[id])
     const confirm = await pool.query('select * from dtc_turnos where  estado="Agendado"',[id])
-    console.log([pendientes, confirm])
+    
     
       res.json([pendientes, confirm])
   }else{
     const pendientes = await pool.query('select * from dtc_turnos  join (select id as idu, nombre from usuarios) as sel on dtc_turnos.id_psico=sel.idu where id_psico=? and estado="Disponible"',[id])
     const confirm = await pool.query('select * from dtc_turnos join (select id as idu, nombre from usuarios) as sel on dtc_turnos.id_psico=sel.idu where id_psico=?and estado="Agendado"',[id])
-    console.log([pendientes, confirm])
+  
     
     
       res.json([pendientes, confirm])
