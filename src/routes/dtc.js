@@ -1821,9 +1821,29 @@ router.post("/borrarturno", async (req, res) => {
   let { id } = req.body
 
   try {
+      const turrnoo = await pool.query( ' select * from dtc_turnos left join  (select id as idp, nombre, apellido from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.idp join (select id as idprof, nombre as  nombreprof,telefono from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idprof  where id=?',[id])
+console.log(turrnoo)
 
 
+
+const telefono = turrnoo[0]?.telefono + '@c.us';
+console.log(turrnoo[0])
     await pool.query('delete from dtc_turnos  where id=?', [id])
+   let mensaje=''
+if(turrnoo[0].nombre != undefined){
+   mensaje = `Hola ${turrnoo[0].nombreprof}, de parte del DTC te notificamos que se ha borrado el turno del día ${turrnoo[0]?.fecha} a las ${turrnoo[0]?.detalle} del paciente ${turrnoo[0]?.nombre} ${turrnoo[0]?.apellido}. Un saludo, DTC.`;
+}else{
+  console.log('no tiene')
+}
+
+    console.log(mensaje);
+    try {
+      await client.sendMessage(telefono, mensaje);
+    } catch (error) {
+       // console.log(error);
+    }
+
+
 
     res.json('Borrado')
   } catch (error) {
@@ -4060,6 +4080,80 @@ router.post("/agregarturnocadia", async (req, res) => {
         const fecha = new Date().toLocaleDateString();
 
         if (nuevoUsuario) { 
+            const insertResult = await pool.query(
+                'INSERT INTO dtc_personas_psicologa (nombre, apellido) VALUES (?, ?)',
+                [nombre, apellido]
+            );
+            id_persona = Number(insertResult.insertId);
+        }
+
+        console.log(id, id_persona);
+
+        const profesionall = await pool.query(
+            'SELECT * FROM dtc_turnos JOIN (SELECT id AS idu, telefono, nombre FROM usuarios) AS sel ON dtc_turnos.id_psico = sel.idu WHERE id = ?',
+            [id]
+        );
+        const personapsiq = await pool.query('SELECT * FROM dtc_personas_psicologa WHERE id = ?', [id_persona]);
+        const telefono = profesionall[0]?.telefono + '@c.us';
+
+        await pool.query(
+            'UPDATE dtc_turnos SET id_persona = ?, estado = "Agendado", hora = ? WHERE id = ?',
+            [id_persona, `${horaBuenosAires}-${fecha}`, id]
+        );
+
+        // Obtener turnos agendados y disponibles
+        const turnosOcupados = await pool.query(
+            'SELECT detalle FROM dtc_turnos WHERE estado = "Agendado" AND fecha = ?',
+            [profesionall[0]?.fecha]
+        );
+        const turnosDisponibles = await pool.query(
+            'SELECT detalle FROM dtc_turnos WHERE estado = "Disponible" AND fecha = ?',
+            [profesionall[0]?.fecha]
+        );
+
+        // Construcción del mensaje con los turnos ocupados y disponibles
+        let mensaje = `Hola ${profesionall[0]?.nombre}, de parte del DTC te notificamos que tenés un nuevo turno para el día ${profesionall[0]?.fecha} a las ${profesionall[0]?.detalle} del paciente ${personapsiq[0]?.nombre} ${personapsiq[0]?.apellido}.`;
+        
+        if (turnosOcupados.length > 0) {
+            mensaje += '\n\nTe recuerdo que hasta el momento tienes ocupados los siguientes horarios:';
+            turnosOcupados.forEach(turno => {
+                mensaje += `\n- ${turno.detalle}`;
+            });
+        }
+        
+        if (turnosDisponibles.length > 0) {
+            mensaje += '\n\nHorarios disponibles para ese día:';
+            turnosDisponibles.forEach(turno => {
+                mensaje += `\n- ${turno.detalle}`;
+            });
+        } else {
+            mensaje += '\n\nNo hay horarios disponibles para ese día.';
+        }
+
+        console.log(mensaje);
+        try {
+           // await client.sendMessage(telefono, mensaje);
+        } catch (error) {
+            console.log(error);
+        }
+
+        res.json('agendado');
+    } catch (error) {
+        console.error(error);
+        res.json('no agendado');
+    }
+});
+
+
+/*
+  router.post("/agendarturno", async (req, res) => {
+    let { id, id_persona, nuevoUsuario, nombre, apellido } = req.body;
+
+    try {
+        const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
+        const fecha = new Date().toLocaleDateString();
+
+        if (nuevoUsuario) { 
           // Insertar nuevo usuario en dtc_personas_psicologa
           const insertResult = await pool.query(
               'INSERT INTO dtc_personas_psicologa (nombre, apellido) VALUES (?, ?)',
@@ -4084,6 +4178,8 @@ router.post("/agregarturnocadia", async (req, res) => {
             [id_persona, `${horaBuenosAires}-${fecha}`, id]
         );
 
+        turnosdeesedia = await pool.query('select * from dtc_turnos where estado ="Agendado" and fecha=?',[profesionall][0]['fecha'])
+
         // Enviar mensaje de WhatsApp
         const mensaje = `Hola ${profesionall[0]?.nombre}, de parte del DTC te notificamos que tenés un nuevo turno para el día ${profesionall[0]?.fecha} a las ${profesionall[0]?.detalle} del paciente ${personapsiq[0]?.nombre} ${personapsiq[0]?.apellido}. Un saludo, DTC.`;
 
@@ -4100,10 +4196,7 @@ router.post("/agregarturnocadia", async (req, res) => {
         res.json('no agendado');
     }
 });
-
-
-
-
+*/
 
 router.post("/agendarturnocadia", async (req, res) => {
   let { id, id_persona } = req.body
