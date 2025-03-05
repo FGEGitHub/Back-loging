@@ -4132,7 +4132,7 @@ router.post("/agregarturnocadia", async (req, res) => {
 
         console.log(mensaje);
         try {
-           // await client.sendMessage(telefono, mensaje);
+           await client.sendMessage(telefono, mensaje);
         } catch (error) {
             console.log(error);
         }
