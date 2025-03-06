@@ -4816,7 +4816,7 @@ router.post("/borrarlegajo", async (req, res) => {
       console.log("Hoy es:", diasSemana[dia]);
   
       // Lista de IDs de cursos
-      const id_curso = [240, 265, 304, 306, 307, 308, 309,266,312];
+      const id_curso = [240, 265, 304, 306, 307, 308, 309,266];
   
       // Recorrer los cursos usando for...of para usar await correctamente
       for (const idcurso of id_curso) {
