@@ -4115,7 +4115,7 @@ router.post("/agregarturnocadia", async (req, res) => {
         let mensaje = `Hola ${profesionall[0]?.nombre}, de parte del DTC te notificamos que tenés un nuevo turno para el día ${profesionall[0]?.fecha} a las ${profesionall[0]?.detalle} del paciente ${personapsiq[0]?.nombre} ${personapsiq[0]?.apellido}.`;
         
         if (turnosOcupados.length > 0) {
-            mensaje += '\n\nTe recuerdo que hasta el momento tienes ocupados los siguientes horarios:';
+            mensaje += '\n\nTe recuerdo que hasta el momento ese dia tienes ocupados los siguientes horarios:';
             turnosOcupados.forEach(turno => {
                 mensaje += `\n- ${turno.detalle}`;
             });
