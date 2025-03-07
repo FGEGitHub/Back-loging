@@ -4427,7 +4427,7 @@ console.log(existe2)
       [id_usuario, fechaHoy]
     );
 
-    if (existe.length === 0) {
+    if (existe.length == 0) {
       await pool.query(
         "INSERT INTO dtc_asistencia (fecha, id_usuario, id_tallerista, hora) VALUES (?, ?, 238, ?)",
         [fechaHoy, id_usuario, horaBuenosAires]
