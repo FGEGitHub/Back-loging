@@ -672,8 +672,14 @@ router.get('/listachiques/', async (req, res) => {
         }
         return edad;
       };
+      let edad=""
+      try {
+               edad = calcularEdad(chique.fecha_nacimiento);
+      } catch (error) {
+        
+      }
 
-      const edad = calcularEdad(chique.fecha_nacimiento);
+
 
       // Lista de campos requeridos
       const requiredFields = {
@@ -809,8 +815,13 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
       const falta = faltantes.length > 0 
         ? faltantes.map(field => requiredFields[field]).join(', ') 
         : 'Completo';
-      
-      const edad = calcularEdad(chique.fecha_nacimiento);
+        let edad =""
+      try {
+         edad = calcularEdad(chique.fecha_nacimiento);
+      } catch (error) {
+        
+      }
+
 
       return { ...chique, falta, edad };
     });
