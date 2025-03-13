@@ -2723,7 +2723,7 @@ router.post("/nuevoinformepsiq", upload.single("archivo"), async (req, res) => {
 
 
 router.post("/nuevaintervencion", upload.single("archivo"), async (req, res) => {
-  let { detalle, id_usuario, titulo, id_trabajador, fecha_referencia } = req.body;
+  let { detalle, id_usuario, titulo, id_trabajador, fecha_referencia, usuariodispositivo} = req.body;
   let ubicacion = req.file ? path.basename(req.file.path) : "no"; // Asigna "no" si no hay archivo
 
   const fechaActual = new Date();
@@ -2731,8 +2731,8 @@ router.post("/nuevaintervencion", upload.single("archivo"), async (req, res) => 
 
   try {
     await pool.query(
-      'INSERT INTO dtc_asistencias_sociales (id_usuario, id_trabajador, titulo, detalle, fecha_carga, ubicacion,fecha_referencia) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [id_usuario, id_trabajador, titulo, detalle, fechaFormateada, ubicacion, fecha_referencia]
+      'INSERT INTO dtc_asistencias_sociales (id_usuario, id_trabajador, titulo, detalle, fecha_carga, ubicacion,fecha_referencia,usuariodispositivo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [id_usuario, id_trabajador, titulo, detalle, fechaFormateada, ubicacion, fecha_referencia,usuariodispositivo]
     );
     res.json({ message: "Intervención creada con éxito" });
   } catch (error) {
@@ -2951,14 +2951,60 @@ const id  = req.params.id
 
 })
 router.get('/traerasitenciasociales', async (req, res) => {
+  try {
+    const consulta = `
+      SELECT 
+        das.*, 
+        u.nombre AS trabajador_nombre,
+        dc.nombre AS usuario_nombre,
+        dc.apellido AS usuario_apellido,
+        dpp.nombre AS psicologa_nombre
+      FROM dtc_asistencias_sociales AS das
+      LEFT JOIN usuarios AS u ON das.id_trabajador = u.id
+      LEFT JOIN dtc_chicos AS dc ON das.id_usuario = dc.id
+      LEFT JOIN dtc_personas_psicologa AS dpp 
+        ON das.id_usuario = dpp.id 
+        AND das.usuariodispositivo = 'No'
+    `;
 
-  const existe = await pool.query('select * from dtc_asistencias_sociales left join (select  id as idu, nombre from usuarios)as sel on dtc_asistencias_sociales.id_trabajador=sel.idu left join (select id as idch, nombre as nombree, apellido from dtc_chicos) as sel3 on dtc_asistencias_sociales.id_usuario=sel3.idch')//presentes
-  //todos
+    const existe = await pool.query(consulta);
+    console.log(existe)
+    res.json(existe);
+  } catch (error) {
+    console.error('Error al obtener las asistencias sociales:', error);
+    res.status(500).json({ error: 'Error al obtener las asistencias sociales' });
+  }
+});
 
-  res.json(existe)
 
+/*
+router.get('/traerasitenciasociales', async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        dtc_asistencias_sociales.*, 
+        sel.nombre AS trabajador_nombre, 
+        COALESCE(sel3.nombree, sel4.nombree) AS usuario_nombre,
+        COALESCE(sel3.apellido, sel4.apellido) AS usuario_apellido
+      FROM dtc_asistencias_sociales
+      LEFT JOIN (SELECT id AS idu, nombre FROM usuarios) AS sel 
+        ON dtc_asistencias_sociales.id_trabajador = sel.idu
+      LEFT JOIN dtc_chicos AS sel3 
+        ON dtc_asistencias_sociales.id_usuario = sel3.id
+        AND dtc_asistencias_sociales.usuariodispositivo = 'Si'
+      LEFT JOIN dtc_personas_psicologa AS sel4 
+        ON dtc_asistencias_sociales.id_usuario = sel4.id
+        AND dtc_asistencias_sociales.usuariodispositivo = 'No'
+    `;
 
-})
+    const existe = await pool.query(query);
+    res.json(existe);
+  } catch (error) {
+    console.error('Error al obtener asistencias sociales:', error);
+    res.status(500).json({ error: 'Error al obtener datos' });
+  }
+});
+*/
 router.get('/traerinformes', async (req, res) => {
 
   const existe = await pool.query('select * from dtc_informes_psic left join (select  id as idu, nombre from usuarios)as sel on dtc_informes_psic.id_trabajador=sel.idu left join (select id as idch, nombre as nombree, apellido from dtc_personas_psicologa) as sel3 on dtc_informes_psic.id_usuario=sel3.idch')//presentes
@@ -4631,8 +4677,19 @@ router.get("/nivelar", async (req, res) => {
 })
 
 
+router.get("/listatodosdeldtc", async (req, res) => {
+  try {
+    const listadtc = await pool.query("SELECT * FROM dtc_chicos");
+    const listapsiq = await pool.query("SELECT * FROM dtc_personas_psicologa"); // Cambia esto si es otra tabla
 
+    const resultado = [...listadtc, ...listapsiq];
 
+    res.json([resultado]);
+  } catch (error) {
+    console.error("Error al obtener datos:", error);
+    res.status(500).json({ error: "Error en el servidor" });
+  }
+});
 
 
 router.post("/traercumples", async (req, res) => {
