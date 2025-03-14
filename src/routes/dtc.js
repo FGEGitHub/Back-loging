@@ -4132,7 +4132,9 @@ router.post("/agregarturnocadia", async (req, res) => {
 }) */
   router.post("/agendarturno", async (req, res) => {
     let { id, id_persona, nuevoUsuario, nombre, apellido,usuariodispositivo } = req.body;
-
+if(usuariodispositivo == undefined){
+  usuariodispositivo="No"
+}
     try {
         const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
         const fecha = new Date().toLocaleDateString();
