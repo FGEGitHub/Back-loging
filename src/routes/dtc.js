@@ -1830,18 +1830,20 @@ router.post("/borrarturnocadia", async (req, res) => {
 })
 router.post("/borrarturno", async (req, res) => {
   let { id } = req.body
-
+ const turrnoo = await pool.query( ' select * from dtc_turnos   where id=?',[id])
   try {
-      const turrnoo = await pool.query( ' select * from dtc_turnos left join  (select id as idp, nombre, apellido from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.idp join (select id as idprof, nombre as  nombreprof,telefono from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idprof  where id=?',[id])
+     
+   
+    
 console.log(turrnoo)
 
 
 
 const telefono = turrnoo[0]?.telefono + '@c.us';
-console.log(turrnoo[0])
+
     await pool.query('delete from dtc_turnos  where id=?', [id])
    let mensaje=''
-if(turrnoo[0].nombre != undefined){
+if(turrnoo[0].id_persona != undefined){
    mensaje = `Hola ${turrnoo[0].nombreprof}, de parte del DTC te notificamos que se ha borrado el turno del día ${turrnoo[0]?.fecha} a las ${turrnoo[0]?.detalle} del paciente ${turrnoo[0]?.nombre} ${turrnoo[0]?.apellido}. Un saludo, DTC.`;
 }else{
   console.log('no tiene')
@@ -2968,7 +2970,6 @@ router.get('/traerasitenciasociales', async (req, res) => {
     `;
 
     const existe = await pool.query(consulta);
-    console.log(existe)
     res.json(existe);
   } catch (error) {
     console.error('Error al obtener las asistencias sociales:', error);
@@ -4130,7 +4131,7 @@ router.post("/agregarturnocadia", async (req, res) => {
 
 }) */
   router.post("/agendarturno", async (req, res) => {
-    let { id, id_persona, nuevoUsuario, nombre, apellido } = req.body;
+    let { id, id_persona, nuevoUsuario, nombre, apellido,usuariodispositivo } = req.body;
 
     try {
         const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
@@ -4142,20 +4143,28 @@ router.post("/agregarturnocadia", async (req, res) => {
                 [nombre, apellido]
             );
             id_persona = Number(insertResult.insertId);
+            usuariodispositivo="No"
         }
 
-        console.log(id, id_persona);
+      //  console.log(id, id_persona);
 
         const profesionall = await pool.query(
             'SELECT * FROM dtc_turnos JOIN (SELECT id AS idu, telefono, nombre FROM usuarios) AS sel ON dtc_turnos.id_psico = sel.idu WHERE id = ?',
             [id]
         );
-        const personapsiq = await pool.query('SELECT * FROM dtc_personas_psicologa WHERE id = ?', [id_persona]);
+        personapsiq=""
+        if(usuariodispositivo=="Si"){
+           personapsiq = await pool.query('SELECT * FROM dtc_chicos WHERE id = ?', [id_persona]);
+
+        }else{
+           personapsiq = await pool.query('SELECT * FROM dtc_personas_psicologa WHERE id = ?', [id_persona]);
+
+        }
         const telefono = profesionall[0]?.telefono + '@c.us';
 
         await pool.query(
-            'UPDATE dtc_turnos SET id_persona = ?, estado = "Agendado", hora = ? WHERE id = ?',
-            [id_persona, `${horaBuenosAires}-${fecha}`, id]
+            'UPDATE dtc_turnos SET id_persona = ?, estado = "Agendado", hora = ?,usuariodispositivo=? WHERE id = ?',
+            [id_persona, `${horaBuenosAires}-${fecha}`, usuariodispositivo,id]
         );
 
         // Obtener turnos agendados y disponibles
@@ -4172,7 +4181,7 @@ router.post("/agregarturnocadia", async (req, res) => {
         let mensaje = `Hola ${profesionall[0]?.nombre}, de parte del DTC te notificamos que tenés un nuevo turno para el día ${profesionall[0]?.fecha} a las ${profesionall[0]?.detalle} del paciente ${personapsiq[0]?.nombre} ${personapsiq[0]?.apellido}.`;
         
         if (turnosOcupados.length > 0) {
-            mensaje += '\n\nTe recuerdo que hasta el momento ese dia tienes ocupados los siguientes horarios:';
+            mensaje += '\n\nL los siguientes horarios tienes ocupados ese dia:';
             turnosOcupados.forEach(turno => {
                 mensaje += `\n- ${turno.detalle}`;
             });
@@ -4191,7 +4200,7 @@ router.post("/agregarturnocadia", async (req, res) => {
         try {
            await client.sendMessage(telefono, mensaje);
         } catch (error) {
-            console.log(error);
+            //console.log(error);
         }
 
         res.json('agendado');
@@ -4513,21 +4522,35 @@ router.post("/ponerausenteclase", async (req, res) => {
     res.json('Error')
   }
 })
-router.post("/traertodoslosturnosfecha", async (req, res) => {
+
+
+
+ router.post("/traertodoslosturnosfecha", async (req, res) => {
   const { fecha } = req.body
   try {
     console.log(fecha)
-    const tunr = await pool.query('select * from dtc_turnos left join(select id as idp, nombre, apellido, dni from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where fecha=?', [fecha])
-    const pendientes = await pool.query('select * from dtc_turnos  where estado="pendiente"')
+    const tunr = await pool.query('select * from dtc_turnos left join(select id as idp, nombre, apellido, dni from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where fecha=? and (usuariodispositivo is null or usuariodispositivo="No")', [fecha])
+       const tunr2 = await pool.query('select * from dtc_turnos join(select id as idp, nombre, apellido, dni from dtc_chicos) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where (fecha=?) and (usuariodispositivo="Si")', [fecha])
+       const resultado = tunr.concat(tunr2);
+   console.log('tunr',tunr)
+   console.log('tunr2',tunr2)
+   console.log('tunr',tunr.length)
+   console.log('tunr2',tunr2.length)
     usuarios = await pool.query("select * from dtc_personas_psicologa left join (select fecha, id_persona  from dtc_turnos  where fecha=?) as sel on dtc_personas_psicologa.id=sel.id_persona ", [fecha])
+    usuarios2 = await pool.query("select * from dtc_chicos left join (select fecha, id_persona  from dtc_turnos  where fecha=? and  (usuariodispositivo='Si') ) as sel on dtc_chicos.id=sel.id_persona ", [fecha])
+    resultado2= usuarios.concat(usuarios2);
 
-    console.log(tunr)
-    res.json([tunr, usuarios])
+    res.json([resultado, resultado2])
   } catch (error) {
     console.log(error)
     res.json(['Error', 'error'])
   }
-})
+}) 
+
+  
+
+
+
 
 router.post('/agregarvariasfechas', async (req, res) => {
   const { startDate, endDate, weekDays, schedules, profesional } = req.body;
@@ -4728,7 +4751,7 @@ router.post("/traerpresentesdeactividad", async (req, res) => {
 
 
 
-router.post("/traerparaturnos", async (req, res) => {
+/* router.post("/traerparaturnos", async (req, res) => {
   const { fecha, id } = req.body
   console.log(fecha)
 
@@ -4739,7 +4762,40 @@ router.post("/traerparaturnos", async (req, res) => {
 
 
 })
+ */
 
+router.post("/traerparaturnos", async (req, res) => {
+  const { fecha, id } = req.body;
+  console.log(fecha);
+
+  // Consulta para obtener los turnos y concatenar nombres y apellidos
+  prod = await pool.query(`
+    SELECT 
+      GROUP_CONCAT(DISTINCT CONCAT(nombre, ' ', apellido) ORDER BY apellido) AS usuarios,
+      dni
+    FROM dtc_turnos 
+    JOIN (SELECT id AS idc, nombre, apellido, dni FROM dtc_personas_psicologa) AS sel 
+    ON dtc_turnos.id_persona = sel.idc 
+    WHERE fecha = ? 
+    ORDER BY apellido`, [fecha]);
+
+  // Consulta para obtener usuarios sin turno y concatenar fechas
+  usuarios = await pool.query(`
+    SELECT 
+      nombre, 
+      apellido, 
+      GROUP_CONCAT(DISTINCT sel.fecha ORDER BY sel.fecha) AS fechas_sin_turno
+    FROM dtc_personas_psicologa 
+    LEFT JOIN (
+      SELECT fecha, id_persona  
+      FROM dtc_turnos 
+      WHERE fecha = ? AND usuariodispositivo IS NULL
+    ) AS sel 
+    ON dtc_personas_psicologa.id = sel.id_persona
+    GROUP BY dtc_personas_psicologa.id`, [fecha]);
+
+  res.json([prod, usuarios, {}]);
+});
 router.post("/traerparaturnoscadia", async (req, res) => {
   const { fecha, id } = req.body
   console.log(fecha)
