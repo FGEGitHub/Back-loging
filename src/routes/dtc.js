@@ -286,6 +286,19 @@ router.get('/act-excel', async (req, res) => {
 
 
 
+router.get('/eliminartodosloshorariosdeusuario/:id', async (req, res) => {
+  let id = req.params.id;
+  try {
+    await pool.query('delete from dtc_cursado  where id_chico=?', [id])
+    res.json('Borrado')
+  } catch (error) {
+    console.log()
+    res.json('No Borrado')
+  }
+
+
+})
+
 
 router.get('/verusosdeproducto/:id', async (req, res) => {
   let id = req.params.id;
