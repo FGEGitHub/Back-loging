@@ -2935,6 +2935,7 @@ router.get('/traerpresentesdeclaseprof/:id', async (req, res) => {
   console.log(existe)
   usuarios = await pool.query("select * from cadia_chicos left join (select id_asistencia as ida  from cadia_asitencia_clases where id_asistencia=? ) as sel on cadia_chicos.id=sel.ida  join (select id_chico as idrelacion, id_profesional from cadia_chico_profesional) as sel2 on cadia_chicos.id=sel2.idrelacion where id_profesional=?", [id,id_profesional[0]['idtallerista']])
   //todos
+
   res.json([existe, usuarios])
 
 
@@ -4530,19 +4531,18 @@ router.post("/ponerausenteclase", async (req, res) => {
  router.post("/traertodoslosturnosfecha", async (req, res) => {
   const { fecha } = req.body
   try {
-    console.log(fecha)
+  
     const tunr = await pool.query('select * from dtc_turnos left join(select id as idp, nombre, apellido, dni from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where fecha=? and (usuariodispositivo is null or usuariodispositivo="No")', [fecha])
        const tunr2 = await pool.query('select * from dtc_turnos join(select id as idp, nombre, apellido, dni from dtc_chicos) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where (fecha=?) and (usuariodispositivo="Si")', [fecha])
        const resultado = tunr.concat(tunr2);
-   console.log('tunr',tunr)
-   console.log('tunr2',tunr2)
-   console.log('tunr',tunr.length)
-   console.log('tunr2',tunr2.length)
+
     usuarios = await pool.query("select * from dtc_personas_psicologa left join (select fecha, id_persona  from dtc_turnos  where fecha=?) as sel on dtc_personas_psicologa.id=sel.id_persona ", [fecha])
     usuarios2 = await pool.query("select * from dtc_chicos left join (select fecha, id_persona  from dtc_turnos  where fecha=? and  (usuariodispositivo='Si') ) as sel on dtc_chicos.id=sel.id_persona ", [fecha])
-    resultado2= usuarios.concat(usuarios2);
-
-    res.json([resultado, resultado2])
+   
+    const resultado2 = [...usuarios, ...usuarios2];
+   // resultado2= usuarios2.concat(usuarios2);
+   
+    res.json([resultado, usuarios,usuarios2])
   } catch (error) {
     console.log(error)
     res.json(['Error', 'error'])
@@ -4861,7 +4861,7 @@ router.post("/traerpresentes", async (req, res) => {
   prod3 = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? and sel.kid='kid3'order by apellido", [fecha, 238])
 
   ext = await pool.query('select * from dtc_chicos where dato_escolar="Horario extendido"')
-
+//console.log(usuarios)
   res.json([prod, usuarios, { kid1: prod1.length, kid2: prod2.length, kid3: prod3.length, horario: ext.length }, raciones[0]['sum(racion)'],premerienda[0]['sum(premerienda)']])
 
 
