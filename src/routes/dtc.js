@@ -4145,7 +4145,8 @@ router.post("/agregarturnocadia", async (req, res) => {
 
 }) */
   router.post("/agendarturno", async (req, res) => {
-    let { id, id_persona, nuevoUsuario, nombre, apellido,usuariodispositivo } = req.body;
+    let { id, id_persona, nuevoUsuario, nombre, apellido,usuariodispositivo,agendadopor } = req.body;
+    console.log(agendadopor)
 if(usuariodispositivo == undefined){
   usuariodispositivo="No"
 }
