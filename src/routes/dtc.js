@@ -4550,7 +4550,7 @@ router.post("/ponerausenteclase", async (req, res) => {
     const tunr2 = await pool.query('select * from dtc_turnos join(select id as idp, nombre, apellido, dni from dtc_chicos) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where (fecha=?) and (usuariodispositivo="Si")', [fecha])
     const resultado = tunr.concat(tunr2);
 
-    usuarios = await pool.query("select * from dtc_personas_psicologa left join (select fecha, id_persona  from dtc_turnos  where fecha=?) as sel on dtc_personas_psicologa.id=sel.id_persona ", [fecha])
+    usuarios = await pool.query("select * from dtc_personas_psicologa left join (select fecha, id_persona  from dtc_turnos  where fecha=?) as sel on dtc_personas_psicologa.id=sel.id_persona order by apellido ", [fecha])
     usuarios2 = await pool.query("select * from dtc_chicos left join (select fecha, id_persona  from dtc_turnos  where fecha=? and  (usuariodispositivo='Si') ) as sel on dtc_chicos.id=sel.id_persona ", [fecha])
    
    // resultado2= usuarios2.concat(usuarios2);
