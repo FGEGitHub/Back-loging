@@ -117,6 +117,21 @@ enviar.push(nuevo)
 
 })
 
+router.get('/traermovimientos/:id', async (req, res) => {
+  const id = req.params.id
+  console.log(id)
+  const productosdeunapersona = await pool.query('select * from esme_movimientos where id_usuario=?', [id])
+res.json(productosdeunapersona)
+
+})
+router.get('/traerproductos/:id', async (req, res) => {
+  const id = req.params.id
+  console.log(id)
+  const productosdeunapersona = await pool.query('select * from esme_productos where id_usuario=?', [id])
+res.json(productosdeunapersona)
+
+})
+
 
 router.get('/listadeproductos/:id', async (req, res) => {
   const id = req.params.id
@@ -168,6 +183,34 @@ enviar.push(nuevo)
 
 })
 
+router.post("/crearnuevoproducto", async (req, res) => {
+  try {
+    const { nombre, categoria, costo, transporte, packaging, precioVenta, usuarioId } = req.body;
+    
+    // Si los campos numéricos no se completan, asignamos 0
+    const nuevoProducto = {
+      nombre,
+      categoria,
+      costo: costo ? Number(costo) : 0,
+      transporte: transporte ? Number(transporte) : 0,
+      packaging: packaging ? Number(packaging) : 0,
+      precioVenta: precioVenta ? Number(precioVenta) : 0,
+      id_usuario:usuarioId,
+    };
+
+    // Aquí iría la lógica para guardar el producto en la base de datos
+    // Ejemplo con MySQL
+    // 
+      categoria,
+      categoria,
+      await pool.query("INSERT INTO esme_productos SET producto=?,categoria=?,costo=?,transporte=?,packaging=?,precio_venta=?,id_usuario=?", [nombre,categoria,costo ? Number(costo) : 0,transporte ? Number(transporte) : 0, packaging ? Number(packaging) : 0, precioVenta ? Number(precioVenta) : 0,usuarioId]);
+    
+    res.status(201).json("Producto creado con éxito");
+  } catch (error) {
+    console.error("Error al crear el producto", error);
+    res.status(500).json({ message: "Error en el servidor" });
+  }
+});
 
 
 module.exports = router
