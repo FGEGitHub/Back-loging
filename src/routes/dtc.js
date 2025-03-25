@@ -388,37 +388,44 @@ router.get('/traerclasestallercadia/:id', async (req, res) => {
 })
 
 
-
-
 router.get('/traerclasestaller/:id', async (req, res) => {
-  let id = req.params.id
+  let id = req.params.id;
   try {
-    const clas = await pool.query(' select * from  dtc_clases_taller  where id_tallerista=? ORDER BY id DESC', [id])
-    env = []
-    for (iii in clas){
-      can = await pool.query('select * from dtc_asistencia_clase where id_clase=?',[clas[iii]['id']])
-      nuev={
-        id:clas[iii]['id'],
-        fecha:clas[iii]['fecha'],
-        titulo:clas[iii]['titulo'],
-        dia:clas[iii]['dia'],
-        hora:clas[iii]['hora'],
-        descripcion:clas[iii]['descripcion'],
-        id_tallerista:clas[iii]['id_tallerista'],
-        cantidad:can.length
+    const clas = await pool.query(
+      'SELECT * FROM dtc_clases_taller WHERE id_tallerista=? ORDER BY id DESC',
+      [id]
+    );
+    
+    let env = [];
+
+    for (const clase of clas) {
+      const can = await pool.query(
+        'SELECT * FROM dtc_asistencia_clase WHERE id_clase=?',
+        [clase.id]
+      );
+
+      if (can.length > 0) { // Solo agregar si hay asistentes
+        const nuev = {
+          id: clase.id,
+          fecha: clase.fecha,
+          titulo: clase.titulo,
+          dia: clase.dia,
+          hora: clase.hora,
+          descripcion: clase.descripcion,
+          id_tallerista: clase.id_tallerista,
+          cantidad: can.length
+        };
+        env.push(nuev);
       }
-      env.push(nuev)
     }
 
-    
-    res.json(env)
+    res.json(env);
   } catch (error) {
-    console.log(error)
-    res.json('Error')
+    console.log(error);
+    res.status(500).json({ error: 'Error al obtener las clases' });
   }
+});
 
-
-})
 
 router.post('/clasificarturno/', async (req, res) => {
   let {id , estado} = req.body
@@ -3563,40 +3570,37 @@ router.post("/borrarclasee", async (req, res) => {
 
 })
 router.post("/consultarasitencias", async (req, res) => {
-  let { fecha_inicio, fecha_fin } = req.body
-  ///presentes mensuales 
-  console.log(fecha_inicio, fecha_fin)
+  let { fecha_inicio, fecha_fin } = req.body;
+
+  console.log("Fechas recibidas:", fecha_inicio, fecha_fin);
+
   try {
+    // Consulta SQL corregida para comparar fechas correctamente
+    const query = `
+      SELECT fecha, COUNT(fecha) AS cantidad 
+      FROM dtc_asistencia 
+      WHERE STR_TO_DATE(fecha, '%Y-%m-%d') 
+      BETWEEN STR_TO_DATE(?, '%Y-%m-%d') 
+      AND STR_TO_DATE(?, '%Y-%m-%d') 
+      GROUP BY fecha
+    `;
 
-
-    function transformarFecha(fecha) {
-      // Dividir la fecha en partes [YYYY, MM, DD]
-      const [year, month, day] = fecha.split('-');
-
-      // Convertir a números y eliminar ceros a la izquierda si existen
-      const dayNum = parseInt(day, 10);
-      const monthNum = parseInt(month, 10);
-
-      // Formatear la fecha como D-M-YYYY
-      const fechaTransformada = `${dayNum}-${monthNum}-${year}`;
-
-      return fechaTransformada;
-    }
-    fecha_inicio = transformarFecha(fecha_inicio);
-    fecha_fin = transformarFecha(fecha_fin);
-    console.log(fecha_inicio, fecha_fin)
-    const resultados = await pool.query('SELECT fecha, count(fecha) as cantidad FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") BETWEEN STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(?, "%d-%m-%Y") group by fecha', [fecha_inicio, fecha_fin]);
+    const resultados = await pool.query(query, [fecha_inicio, fecha_fin]);
+console.log(resultados)
+    // Convertir los resultados para asegurar que los valores numéricos sean correctos
     const resultadosConvertidos = resultados.map(row => ({
       fecha: row.fecha,
-      cantidad: Number(row.cantidad)
+      cantidad: Number(row.cantidad),
     }));
-    console.log(resultadosConvertidos)
-    res.json(resultadosConvertidos)
+
+    console.log("Resultados:", resultadosConvertidos);
+    res.json(resultadosConvertidos);
   } catch (error) {
-    console.log(error)
-    res.json([{ fecha: "Error", cantidad: "Error" }])
+    console.error("Error en la consulta:", error);
+    res.status(500).json([{ fecha: "Error", cantidad: "Error" }]);
   }
-})
+});
+
 
 router.post("/traerestadisticas", async (req, res) => {
   let { fecha } = req.body
@@ -4146,7 +4150,7 @@ router.post("/agregarturnocadia", async (req, res) => {
 }) */
   router.post("/agendarturno", async (req, res) => {
     let { id, id_persona, nuevoUsuario, nombre, apellido,usuariodispositivo,agendadopor } = req.body;
-    console.log(agendadopor)
+    console.log(id, id_persona, nuevoUsuario, nombre, apellido,usuariodispositivo,agendadopor)
 if(usuariodispositivo == undefined){
   usuariodispositivo="No"
 }
