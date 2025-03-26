@@ -1338,7 +1338,7 @@ router.post("/enviarinscripcion", async (req, res) => {
     else {
       fecha = (new Date(Date.now()))
       cat = await caregorizar.asignarcategoria(pers)
-      await pool.query('insert into inscripciones set fecha=?,dni_persona=?, uno=?,dos=?,motivacion=?,id_persona=?,edicion=?', [fecha, dni, prioridad1, prioridad2, motivacion, pers[0]['id'], 3])
+      await pool.query('insert into inscripciones set fecha=?,dni_persona=?, uno=?,dos=?,motivacion=?,id_persona=?,edicion=?', [fecha, dni, prioridad1, prioridad2, motivacion, pers[0]['id'], 6])
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto'
     }
 
@@ -1388,10 +1388,10 @@ router.post("/enviarinscripcion2", async (req, res) => {
     if (pers.length > 0) {
       cat = await caregorizar.asignarcategoria(pers)
 
-      await pool.query('update personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?, categoria=?,participante_feria=?,genero=?, otrogenero=?  where dni=? ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, cat, participante_feria,genero, otrogenero, dni])
+      await pool.query('update personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?, categoria=?,participante_feria=?  where dni=? ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, cat, participante_feria, dni])
     } else {
 
-      await pool.query('insert into personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?,participante_feria=?,genero=?, otrogenero=?   ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, participante_feria,genero, otrogenero])
+      await pool.query('insert into personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?,participante_feria=?  ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, participante_feria])
       pers = await pool.query('select * from personas where dni =?', [dni])
       cat = await caregorizar.asignarcategoria(pers)
 
@@ -1399,16 +1399,16 @@ router.post("/enviarinscripcion2", async (req, res) => {
 
     }
     pers = await pool.query('select * from personas where dni =?', [dni])
-    const yainsc = await pool.query('select * from inscripciones where id_persona =? and edicion=5', [pers[0]['id']])
+    const yainsc = await pool.query('select * from inscripciones where id_persona =? and edicion=6', [pers[0]['id']])
     let mensaje = ''
     if (yainsc.length > 0) {
-      mensaje = 'Ya estas inscripta!'
+      mensaje = 'Te informamos que ya estas inscripta!, ya has completado el formulario de esta edicion'
     }
     else {
       fecha = (new Date(Date.now()))
       cat = await caregorizar.asignarcategoria(pers)
       console.log(uno,dos)
-      await pool.query('insert into inscripciones set uno=?,dos=?, fecha=?,dni_persona=?,emprendimiento=?,motivacion=?,id_persona=?,edicion=?', [uno, dos, fecha, dni, emprendimiento, motivacion, pers[0]['id'], 5])
+      await pool.query('insert into inscripciones set uno=?,dos=?, fecha=?,dni_persona=?,emprendimiento=?,motivacion=?,id_persona=?,edicion=?', [uno, dos, fecha, dni, emprendimiento, motivacion, pers[0]['id'], 6])
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto'
     }
 

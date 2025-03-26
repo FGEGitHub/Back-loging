@@ -97,6 +97,13 @@ res.json([enviar,resumen])
 }))
 
 
+router.post('/registroemprendedora',passport.authenticate('local.registroemprendedora', {
+  successRedirect: '/exitosignup',
+  failureRedirect:'/noexito',
+  failureFlash:true
+
+}))
+
 router.post('/modificarusuario',  passport.authenticate('local.modificadoradmin', {
   successRedirect: '/exitosignupp',
   failureRedirect:'/exitosignupp',
