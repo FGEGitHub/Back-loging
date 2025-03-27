@@ -1904,8 +1904,9 @@ if(turrnoo[0].id_persona != undefined){
   }
 
 })
-router.post("/modificarclase", async (req, res) => {
-  let { id, titulo, descripcion, fecha } = req.body;
+router.post("/modificarclase", upload.single('imagen'), async (req, res) => {
+  let { id, titulo, descripcion, fecha, } = req.body;
+  const fileName = req.file ? req.file.filename : null; // Si hay imagen, guarda el nombre; si no, null
 
   try {
     // Construcción dinámica de la consulta SQL
@@ -1926,7 +1927,11 @@ router.post("/modificarclase", async (req, res) => {
       campos.push("fecha = ?");
       valores.push(fecha);
     }
-
+    
+    if (fileName !== undefined) {
+      campos.push("ubicacion = ?");
+      valores.push(fileName);
+    }
     if (campos.length === 0) {
       return res.status(400).json({ error: "No se proporcionaron campos para modificar" });
     }
@@ -3057,20 +3062,27 @@ router.get('/traerinformes', async (req, res) => {
 })
 
 router.get('/traermeriendas', async (req, res) => {
-
+  try {
   const existe = await pool.query('select * from dtc_meriendas order by id desc')//presentes
   //todos
 
   res.json(existe)
-
-
+} catch (error) {
+  res.json([])
+}
 })
-router.get('/traercolaciones', async (req, res) => {
 
+
+router.get('/traercolaciones', async (req, res) => {
+try {
   const existe = await pool.query('select * from dtc_colacion order by id desc')//presentes
   //todos
 
   res.json(existe)
+} catch (error) {
+  res.json([])
+}
+ 
 
 
 })
@@ -3228,9 +3240,27 @@ router.post("/traerdatosdeclasehorausuario/", async (req, res) => {
         AND dtc_cursado.id_curso = ?`,
       [id_clase, dia, hora, id_taller]
     );
+try {   
+   if (result[0]['ubicacion'] === null) {
+  imagenBase64 = null
 
- console.log(usuariosResult)
-    res.json([result, usuariosResult]);
+} else {
+
+  rutaImagen = path.join(__dirname, '../imagenesvendedoras', result[0]['ubicacion']);
+  try {
+    imagenBuffer = fs.readFileSync(rutaImagen);
+    imagenBase64 = imagenBuffer.toString('base64');
+  } catch (error) {
+    imagenBase64=null
+  }
+
+}
+  
+} catch (error) {
+  
+}
+
+    res.json([result, usuariosResult,imagenBase64]);
   } catch (error) {
     console.error("Error en la API:", error);
     res.status(500).json({ error: "Error al obtener los datos." });
