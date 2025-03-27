@@ -1607,6 +1607,25 @@ router.get('/listadelegajos/:id', async (req, res) => {
 })
 
 
+router.post("/enviarconsumocolacion", upload.single('imagen'), async (req, res) => {
+  try {
+      const { fecha, cantidad } = req.body; // Extraer datos del body
+      //console.log(req.file.filename) ;
+      const fileName = req.file ? req.file.filename : null; // Si hay imagen, guarda el nombre; si no, null
+
+      // Insertar en la base de datos
+      const query = 'INSERT INTO dtc_colacion ( ubicacion, fecha, cantidad) VALUES (?, ?, ?)';
+      const values = [ fileName, fecha, cantidad];
+
+      await pool.query(query, values);
+      res.json('Registro insertado correctamente');
+  } catch (error) {
+      console.error('Error al insertar merienda:', error);
+      res.status(500).json('No se pudo registrar la información');
+  }
+});
+
+
 router.post("/enviarconsumomerienda", upload.single('imagen'), async (req, res) => {
   try {
       const { fecha, cantidad } = req.body; // Extraer datos del body
@@ -3046,7 +3065,15 @@ router.get('/traermeriendas', async (req, res) => {
 
 
 })
+router.get('/traercolaciones', async (req, res) => {
 
+  const existe = await pool.query('select * from dtc_colacion order by id desc')//presentes
+  //todos
+
+  res.json(existe)
+
+
+})
 
 
 router.get('/verimagendemerienda/:id', async (req, res) => {
