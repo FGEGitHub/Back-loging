@@ -450,7 +450,7 @@ router.get('/borrarturno/:id', async (req, res) => {
 router.get('/listadetodoslosturnos/', isLoggedInn2, async (req, res) => {
   try {
   //  tur = await pool.query('select * from turnos   join  (select id as idcurso, nombre as nombrecurso from cursos) as selec1  on turnos.id_curso= selec1.idcurso left join (select id as idu, nombre as encargado from usuarios) as selec2 on turnos.id_encargado=selec2.idu  left join (select id as idu2, nombre as coordinador from usuarios) as selec3 on turnos.id_coordinador=selec3.idu2 where etapa=2')
-    tur = await pool.query('select * from turnos   join  (select id as idcurso, nombre as nombrecurso from cursos) as selec1  on turnos.id_curso= selec1.idcurso left join (select id as idu, nombre as encargado from usuarios) as selec2 on turnos.id_encargado=selec2.idu  left join (select id as idu2, nombre as coordinador from usuarios) as selec3 on turnos.id_coordinador=selec3.idu2 where  etapa=5')
+    tur = await pool.query('select * from turnos   join  (select id as idcurso, nombre as nombrecurso from cursos) as selec1  on turnos.id_curso= selec1.idcurso left join (select id as idu, nombre as encargado from usuarios) as selec2 on turnos.id_encargado=selec2.idu  left join (select id as idu2, nombre as coordinador from usuarios) as selec3 on turnos.id_coordinador=selec3.idu2 where  etapa=6')
 let enviar=[]
 for (i in tur ){
 
@@ -470,18 +470,18 @@ enviar.push(nuevo)
  
 
 
-const unoq = await pool.query('select * from cursado where categoria ="uno" and etapa=3')
-const dosq = await pool.query('select * from cursado where categoria ="dos" and etapa=3')
-const tresq = await pool.query('select * from cursado where categoria ="tres" and etapa=3')
-const cuatroq = await pool.query('select * from cursado where categoria ="cuatro" and etapa=3')
-const cincoq = await pool.query('select * from cursado where categoria ="cinco" and etapa=3')
-const seisq = await pool.query('select * from cursado where categoria ="seis" and etapa=3')
-const sieteq = await pool.query('select * from cursado where categoria ="siete" and etapa=3')
-const ochoq = await pool.query('select * from cursado where categoria ="ocho" and etapa=3')
-const nueveq = await pool.query('select * from cursado where categoria ="nueve" and etapa=3')
-const diezq = await pool.query('select * from cursado where categoria ="diez" and etapa=3')
-const onceq = await pool.query('select * from cursado where categoria ="once" and etapa=3')
-const doceq = await pool.query('select * from cursado where categoria ="doce" and etapa=3')
+const unoq = await pool.query('select * from cursado where categoria ="uno" and etapa=6')
+const dosq = await pool.query('select * from cursado where categoria ="dos" and etapa=6')
+const tresq = await pool.query('select * from cursado where categoria ="tres" and etapa=6')
+const cuatroq = await pool.query('select * from cursado where categoria ="cuatro" and etapa=6')
+const cincoq = await pool.query('select * from cursado where categoria ="cinco" and etapa=6')
+const seisq = await pool.query('select * from cursado where categoria ="seis" and etapa=6')
+const sieteq = await pool.query('select * from cursado where categoria ="siete" and etapa=6')
+const ochoq = await pool.query('select * from cursado where categoria ="ocho" and etapa=6')
+const nueveq = await pool.query('select * from cursado where categoria ="nueve" and etapa=6')
+const diezq = await pool.query('select * from cursado where categoria ="diez" and etapa=6')
+const onceq = await pool.query('select * from cursado where categoria ="once" and etapa=6')
+const doceq = await pool.query('select * from cursado where categoria ="doce" and etapa=6')
 
 resultado={
   uno:unoq.length,
