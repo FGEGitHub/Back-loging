@@ -650,7 +650,7 @@ router.get('/traerinscripcionesenc/', async (req, res) => {
   const id = req.params.id
 
 
-  const etc = await pool.query('select * from turnos where  (id_call is null or id_call= 0) and etapa=5  ')
+  const etc = await pool.query('select * from turnos where  (id_call is null or id_call= 0) and etapa=6  ')
   console.log(etc)
 
   res.json(etc);
@@ -836,7 +836,7 @@ router.get('/incriptas2da/', async (req, res) => {
   }
 
   res.json([inscriptos, deuda_exigible, datos33]) */
-  inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria,id as idp from personas) as sel on inscripciones.dni_persona=sel.dni join(select id as idt,descripcion from turnos) as sel2 on inscripciones.uno=sel2.idt join(select id as idt2,descripcion as descripcion2 from turnos) as sel3 on inscripciones.dos=sel3.idt2 left join(select id_inscripcion, id_turno from cursado) as sel8 on inscripciones.id=sel8.id_inscripcion left join(select id as idttt,descripcion as descripcursado from turnos) as sel9 on sel8.id_turno=sel9.idttt where edicion=6')
+  inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria,id as idp,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join(select id as idt,descripcion from turnos) as sel2 on inscripciones.uno=sel2.idt join(select id as idt2,descripcion as descripcion2 from turnos) as sel3 on inscripciones.dos=sel3.idt2 left join(select id_inscripcion, id_turno from cursado) as sel8 on inscripciones.id=sel8.id_inscripcion left join(select id as idttt,descripcion as descripcursado from turnos) as sel9 on sel8.id_turno=sel9.idttt where edicion=6')
   
   deuda_exigible = []
   datos33={}
