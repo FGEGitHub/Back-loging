@@ -4611,11 +4611,74 @@ router.post("/ponerausenteclase", async (req, res) => {
     const tunr2 = await pool.query('select * from dtc_turnos join(select id as idp, nombre, apellido, dni from dtc_chicos) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where (fecha=?) and (usuariodispositivo="Si")', [fecha])
     const resultado = tunr.concat(tunr2);
 
-    usuarios = await pool.query("select * from dtc_personas_psicologa left join (select fecha, id_persona  from dtc_turnos  where fecha=?) as sel on dtc_personas_psicologa.id=sel.id_persona order by apellido ", [fecha])
-    usuarios2 = await pool.query("select * from dtc_chicos left join (select fecha, id_persona  from dtc_turnos  where fecha=? and  (usuariodispositivo='Si') ) as sel on dtc_chicos.id=sel.id_persona ", [fecha])
+    //usuarios = await pool.query("select * from dtc_personas_psicologa left join (select fecha, id_persona  from dtc_turnos  where fecha=?) as sel on dtc_personas_psicologa.id=sel.id_persona order by apellido ", [fecha])
+    //usuarios2 = await pool.query("select * from dtc_chicos left join (select fecha, id_persona , id_psico from dtc_turnos  where fecha=? and  (usuariodispositivo='Si') ) as sel on dtc_chicos.id=sel.id_persona l ", [fecha])
    
-   // resultado2= usuarios2.concat(usuarios2);
-   
+    const usuarios = await pool.query(`
+      SELECT 
+          p.*, 
+          t_max.fecha, 
+          u.nombrepsic
+      FROM dtc_personas_psicologa p
+      LEFT JOIN (
+          SELECT id_persona, id_psico, MAX(fecha) as fecha
+          FROM dtc_turnos
+          GROUP BY id_persona, id_psico
+      ) t_max ON p.id = t_max.id_persona
+      LEFT JOIN (
+          SELECT id as idu, nombre as nombrepsic
+          FROM usuarios
+      ) u ON t_max.id_psico = u.idu
+      WHERE NOT EXISTS (
+          SELECT 1 FROM (
+              SELECT id_persona, id_psico, COUNT(*) as cantidad
+              FROM dtc_turnos
+              GROUP BY id_persona, id_psico
+          ) t2
+          WHERE t2.id_persona = t_max.id_persona
+            AND t2.id_psico != t_max.id_psico
+            AND t2.cantidad > (
+                SELECT COUNT(*) FROM dtc_turnos t3
+                WHERE t3.id_persona = t_max.id_persona
+                  AND t3.id_psico = t_max.id_psico
+            )
+      )
+      ORDER BY p.apellido;
+      `);
+      const usuarios2 = await pool.query(`
+        SELECT 
+            c.*, 
+            t_max.fecha, 
+            u.nombrepsic
+        FROM dtc_chicos c
+        LEFT JOIN (
+            SELECT id_persona, id_psico, MAX(fecha) as fecha
+            FROM dtc_turnos
+            WHERE usuariodispositivo = 'Si'
+            GROUP BY id_persona, id_psico
+        ) t_max ON c.id = t_max.id_persona
+        LEFT JOIN (
+            SELECT id as idu, nombre as nombrepsic
+            FROM usuarios
+        ) u ON t_max.id_psico = u.idu
+        WHERE NOT EXISTS (
+            SELECT 1 FROM (
+                SELECT id_persona, id_psico, COUNT(*) as cantidad
+                FROM dtc_turnos
+                WHERE usuariodispositivo = 'Si'
+                GROUP BY id_persona, id_psico
+            ) t2
+            WHERE t2.id_persona = t_max.id_persona
+              AND t2.id_psico != t_max.id_psico
+              AND t2.cantidad > (
+                  SELECT COUNT(*) FROM dtc_turnos t3
+                  WHERE t3.id_persona = t_max.id_persona
+                    AND t3.id_psico = t_max.id_psico
+                    AND t3.usuariodispositivo = 'Si'
+              )
+        );
+        `);
+        console.log(usuarios)
     res.json([resultado, usuarios,usuarios2])
   } catch (error) {
     console.log(error)
