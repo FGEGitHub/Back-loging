@@ -4678,7 +4678,7 @@ router.post("/ponerausenteclase", async (req, res) => {
               )
         );
         `);
-        console.log(usuarios)
+       
     res.json([resultado, usuarios,usuarios2])
   } catch (error) {
     console.log(error)
