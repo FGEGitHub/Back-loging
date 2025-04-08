@@ -1252,7 +1252,7 @@ router.get('/obtenerinfodecursos/:id', async (req, res) => {
     const dias = ["lunes", "martes", "miércoles", "jueves", "viernes"];
     const dias307 = ["martes", "jueves", "viernes"];
     const horariosEstandar = ["14:00", "15:00", "16:00"];
-    const horariosEspeciales = ["14:30", "15:30", "16:30"];
+    const horariosEspeciales = ["14:00", "15:30", "16:30"];
     const horario309 = ["17:00"];
   
     try {
@@ -5108,7 +5108,7 @@ router.post("/borrarlegajo", async (req, res) => {
         } else if (idcurso === 304) {
           // Si es curso 304, usar horarios específicos
           if (dia >= 1 && dia <= 5) {
-            horarios = ["14:30", "15:30", "16:30"];
+            horarios = ["14:00", "15:30", "16:30"];
           }
         } else if (idcurso === 309) {
           // Si es curso 309, solo un horario a las 17:00
