@@ -4032,8 +4032,11 @@ router.post("/nuevoproducto", async (req, res) => {
 })
 
 router.post("/sumarstock", async (req, res) => {
-  const { fecha,id_producto,id_exp,cantidad } = req.body
+  let { fecha,id_producto,id_exp,cantidad } = req.body
   try {
+    if(id_exp==undefined){
+      id_exp=16
+    }
 if(fecha==undefined){
   await pool.query('insert into dtc_recepcion_stock set id_producto=?, id_exp=?,cantidad=?', [ id_producto,id_exp,cantidad])
 
@@ -4374,11 +4377,12 @@ router.post("/ponerpresente", async (req, res) => {
   const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
 
   console.log("La hora actual en Buenos Aires es:", horaBuenosAires);
-
+  
   id_tallerista = 238
 
   const existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =? and id_tallerista=?', [id, fecha, id_tallerista])
   let era
+  console.log(existe)
   if (existe.length > 0) {
     await pool.query('delete  from  dtc_asistencia where id = ?', [existe[0]['id']])
     era = "puesto Ausente"
@@ -4387,6 +4391,7 @@ router.post("/ponerpresente", async (req, res) => {
   } else {
     await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?,id_tallerista=?,hora=?', [fecha, id, id_tallerista, horaBuenosAires])
     era = "puesto Presente"
+    console.log('puesto Presente')
 
   }
 
