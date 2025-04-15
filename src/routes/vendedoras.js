@@ -205,7 +205,7 @@ router.post("/crearnuevoproducto", async (req, res) => {
       categoria,
       await pool.query("INSERT INTO esme_productos SET producto=?,categoria=?,costo=?,transporte=?,packaging=?,precio_venta=?,id_usuario=?", [nombre,categoria,costo ? Number(costo) : 0,transporte ? Number(transporte) : 0, packaging ? Number(packaging) : 0, precioVenta ? Number(precioVenta) : 0,usuarioId]);
     
-    res.status(201).json("Producto creado con éxito");
+    res.json("Producto creado con éxito");
   } catch (error) {
     console.error("Error al crear el producto", error);
     res.status(500).json({ message: "Error en el servidor" });

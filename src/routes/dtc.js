@@ -395,7 +395,7 @@ router.get('/traerclasestaller/:id', async (req, res) => {
       'SELECT * FROM dtc_clases_taller WHERE id_tallerista=? ORDER BY id DESC',
       [id]
     );
-    
+   
     let env = [];
 
     for (const clase of clas) {
@@ -418,7 +418,7 @@ router.get('/traerclasestaller/:id', async (req, res) => {
         env.push(nuev);
       }
     }
-
+console.log(env)
     res.json(env);
   } catch (error) {
     console.log(error);
@@ -426,6 +426,21 @@ router.get('/traerclasestaller/:id', async (req, res) => {
   }
 });
 
+router.get('/traerclasestaller2/:id', async (req, res) => {
+  let id = req.params.id;
+  try {
+    const clas = await pool.query(
+      'SELECT * FROM dtc_clases_taller WHERE id_tallerista=? ORDER BY id DESC',
+      [id]
+    );
+   
+   
+    res.json(clas);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Error al obtener las clases' });
+  }
+});
 
 router.post('/clasificarturno/', async (req, res) => {
   let {id , estado} = req.body
@@ -2969,7 +2984,20 @@ const confirm = await pool.query('select * from cadia_turnos where estado="Agend
 
 
 })
+router.get('/traerpresentesdeclase/:id', async (req, res) => {
+  const id = req.params.id
+  const clase =await pool.query('select * from dtc_clases_taller where id=?',[id])
+  const cursado =await pool.query('select * from dtc_cursado where id_curso=? and dia=? and hora=?',[clase[0]['id_tallerista'],clase[0]['dia'],clase[0]['hora']])
+  const existe = await pool.query('select * from dtc_asistencia_clase join (select id as idc,nombre from dtc_chicos) as sel on dtc_asistencia_clase.id_usuario=sel.idc  where id_clase=?', [id])//presentes
+  console.log(existe)
+ //// funcion para traer todos los usuarios con su presente en el taller 
+ usuarios = await pool.query("select * from dtc_chicos left join (select id as ida  from dtc_asistencia_clase where id=? ) as sel on dtc_chicos.id=sel.ida ", [id])
+  //nueva consulta para solo los incriptosdias etc
+//usuarios = await pool.query("select * from dtc_chicos left join (select id as ida  from dtc_asistencia_clase where id=? ) as sel on dtc_chicos.id=sel.ida join(select id as idcursado,id_chico from dtc_cursado where id=?) as sel2 on dtc_chicos.id=sel2.id_chico ", [id,cursado[0]['id']])
+  res.json([existe, usuarios])
 
+
+})
 
 router.get('/traerpresentesdeclaseprof/:id', async (req, res) => {
   const id = req.params.id
