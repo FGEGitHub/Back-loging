@@ -120,7 +120,7 @@ enviar.push(nuevo)
 router.get('/traermovimientos/:id', async (req, res) => {
   const id = req.params.id
   console.log(id)
-  const productosdeunapersona = await pool.query('select * from esme_movimientos where id_usuario=?', [id])
+  const productosdeunapersona = await pool.query('select * from esme_movimientos join(select id as idp, id_usuario from esme_productos) as sel on esme_movimientos.id_producto=sel.idp where id_usuario=?', [id])
 res.json(productosdeunapersona)
 
 })
@@ -182,6 +182,51 @@ enviar.push(nuevo)
   //  res.json(tareas)
 
 })
+
+
+router.post("/enviarmovimiento", async (req, res) => {
+  const {
+    productoId,
+    fecha,
+    tipo_movimiento,
+    facturaCompra = 0,
+    facturaVenta = 0,
+    proveedor = 0,
+    cliente = 0, // no se guarda en la tabla, pero lo recibís
+    id_usuario = 1, // ajustar según tu lógica de usuario logueado
+    cantidad,
+    precio,
+    variedad = 0
+  } = req.body;
+
+  try {
+    const query = `
+      INSERT INTO movimientos 
+        (id_producto, fecha, tipo, factura_compra, factura_venta, proveedor, id_usuario, variedad, cantidad, precio)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const values = [
+      productoId,
+      fecha,
+      tipo_movimiento,
+      facturaCompra,
+      facturaVenta,
+      proveedor,
+      id_usuario,
+      variedad,
+      cantidad,
+      precio
+    ];
+
+    await pool.query(query, values);
+    res.status(200).json({ message: "Movimiento guardado correctamente" });
+  } catch (error) {
+    console.error("Error al guardar movimiento:", error);
+    res.status(500).json({ error: "Error al guardar el movimiento" });
+  }
+});
+
 
 router.post("/crearnuevoproducto", async (req, res) => {
   try {
