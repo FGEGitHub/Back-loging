@@ -284,6 +284,88 @@ router.post("/crearnuevoproducto", async (req, res) => {
     res.status(500).json({ message: "Error en el servidor" });
   }
 });
+router.post("/modificarproductoesme", async (req, res) => {
+  try {
+    const {
+      id,
+      nombre,
+      categoria,
+      costo,
+      transporte,
+      packaging,
+      precioVenta,
+      usuarioId,
+      variable1,
+      costovariable1,
+      variable2,
+      costovariable2,
+    } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: "Falta el ID del producto" });
+    }
+
+    const toNumber = (val) => {
+      const num = Number(val);
+      return isNaN(num) ? 0 : num;
+    };
+
+    const campos = [];
+    const valores = [];
+
+    if (nombre !== undefined) {
+      campos.push("producto = ?");
+      valores.push(nombre);
+    }
+    if (categoria !== undefined) {
+      campos.push("categoria = ?");
+      valores.push(categoria);
+    }
+    if (costo !== undefined) {
+      campos.push("costo = ?");
+      valores.push(toNumber(costo));
+    }
+    if (variable1 !== undefined) {
+      campos.push("variable1 = ?");
+      valores.push(toNumber(variable1));
+    }
+    if (costovariable1 !== undefined) {
+      campos.push("costovariable1 = ?");
+      valores.push(toNumber(costovariable1));
+    }
+    if (variable2 !== undefined) {
+      campos.push("variable2 = ?");
+      valores.push(toNumber(variable2));
+    }
+    if (costovariable2 !== undefined) {
+      campos.push("costovariable2 = ?");
+      valores.push(toNumber(costovariable2));
+    }
+    if (precioVenta !== undefined) {
+      campos.push("precio_venta = ?");
+      valores.push(toNumber(precioVenta));
+    }
+    if (usuarioId !== undefined) {
+      campos.push("id_usuario = ?");
+      valores.push(usuarioId);
+    }
+
+    if (campos.length === 0) {
+      return res.status(400).json({ message: "No hay campos para actualizar" });
+    }
+
+    valores.push(id); // ID al final para el WHERE
+
+    const query = `UPDATE esme_productos SET ${campos.join(", ")} WHERE id = ?`;
+
+    await pool.query(query, valores);
+
+    res.json("Producto modificado con éxito");
+  } catch (error) {
+    console.error("Error al modificar producto:", error);
+    res.status(500).json({ message: "Error en el servidor" });
+  }
+});
 
 
 module.exports = router
