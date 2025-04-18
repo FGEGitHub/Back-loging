@@ -53,6 +53,23 @@ router.post("/borrararticulo",  async (req, res) => {
 })
 
 
+router.post("/borrarproducto",  async (req, res) => {
+  const {id} = req.body
+  console.log(id)
+
+  try {
+    await pool.query('delete  from  esme_productos where id = ?', [id])
+  
+  } catch (error) {
+    console.log(error)
+  }
+  
+    res.json('Borrado')
+
+
+})
+
+
 router.post("/nuevoprpducto", upload.single('imagen'), async (req, res) => {
 
 
