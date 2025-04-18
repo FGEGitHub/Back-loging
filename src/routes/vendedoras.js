@@ -230,26 +230,54 @@ router.post("/enviarmovimiento", async (req, res) => {
 
 router.post("/crearnuevoproducto", async (req, res) => {
   try {
-    const { nombre, categoria, costo, transporte, packaging, precioVenta, usuarioId } = req.body;
-    
-    // Si los campos numéricos no se completan, asignamos 0
+    const {
+      nombre,
+      categoria,
+      costo,
+      transporte,
+      packaging,
+      precioVenta,
+      usuarioId,
+      variable1,
+      costovariable1,
+      variable2,
+      costovariable2,
+    } = req.body;
+
+    // Validar numéricos, asegurándonos que sean número válidos
+    const toNumber = (val) => {
+      const num = Number(val);
+      return isNaN(num) ? 0 : num;
+    };
+
     const nuevoProducto = {
       nombre,
       categoria,
-      costo: costo ? Number(costo) : 0,
-      transporte: transporte ? Number(transporte) : 0,
-      packaging: packaging ? Number(packaging) : 0,
-      precioVenta: precioVenta ? Number(precioVenta) : 0,
-      id_usuario:usuarioId,
+      costo: toNumber(costo),
+      variable1: toNumber(variable1),
+      costovariable1: toNumber(costovariable1),
+      variable2: toNumber(variable2),
+      costovariable2: toNumber(costovariable2),
+      precio_venta: toNumber(precioVenta),
+      id_usuario: usuarioId,
     };
 
-    // Aquí iría la lógica para guardar el producto en la base de datos
-    // Ejemplo con MySQL
-    // 
-      categoria,
-      categoria,
-      await pool.query("INSERT INTO esme_productos SET producto=?,categoria=?,costo=?,transporte=?,packaging=?,precio_venta=?,id_usuario=?", [nombre,categoria,costo ? Number(costo) : 0,transporte ? Number(transporte) : 0, packaging ? Number(packaging) : 0, precioVenta ? Number(precioVenta) : 0,usuarioId]);
-    
+    // Ejecutar query usando los campos definidos arriba
+    await pool.query(
+      "INSERT INTO esme_productos (producto, categoria, costo, variable1, variable2, costovariable1, costovariable2, precio_venta, id_usuario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        nuevoProducto.nombre,
+        nuevoProducto.categoria,
+        nuevoProducto.costo,
+        nuevoProducto.variable1,
+        nuevoProducto.variable2,
+        nuevoProducto.costovariable1,
+        nuevoProducto.costovariable2,
+        nuevoProducto.precio_venta,
+        nuevoProducto.id_usuario,
+      ]
+    );
+
     res.json("Producto creado con éxito");
   } catch (error) {
     console.error("Error al crear el producto", error);
