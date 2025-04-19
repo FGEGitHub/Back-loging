@@ -191,48 +191,94 @@ res.json(productosdeunapersona)
 */
 router.get('/traerproductos/:id', async (req, res) => {
   const id = req.params.id;
-  console.log(id);
+
 
   try {
     const productos = await pool.query('SELECT * FROM esme_productos WHERE id_usuario=?', [id]);
-    const [trabajo] = await pool.query('SELECT trabajo FROM usuarios WHERE id=?', [id]);
-    const [costosfijos] = await pool.query(
+    const trabajo = await pool.query('SELECT trabajo FROM usuarios WHERE id=?', [id]);
+    const costosfijos= await pool.query(
       'SELECT SUM(CAST(precio AS DECIMAL(10,2))) AS total FROM esme_costos_fijos WHERE id_vendedora = ?',
       [id]
     );
+    
+    const totalinvertido = await pool.query(`
+      SELECT 
+        SUM(CASE WHEN tipo = 'Compra' THEN CAST(precio AS DECIMAL(10,2)) ELSE 0 END) AS total
+      FROM esme_movimientos
+    
+    `);
+    console.log('totalinvertido',totalinvertido[0].total)
     // Procesar productos: convertir strings y calcular valor total de cada producto
-    const productosConValor = productos.map((producto) => {
+    const productosConValor = await Promise.all(productos.map(async (producto) => {
       const costo = parseFloat(producto.costo) || 0;
       const costovariable1 = parseFloat(producto.costovariable1) || 0;
       const costovariable2 = parseFloat(producto.costovariable2) || 0;
-
+    
       const valorTotal = costo + costovariable1 + costovariable2;
-      console.log(costosfijos)
-      console.log(parseFloat(costosfijos))
-      console.log(parseFloat(trabajo))
+    
+      const resultado = await pool.query(`
+        SELECT 
+          SUM(CASE WHEN tipo = 'Compra' THEN CAST(precio AS DECIMAL(10,2)) ELSE 0 END) AS total
+        FROM esme_movimientos
+        WHERE id_producto = ?
+      `, [producto.id]);
+      const stock = await pool.query(`
+        SELECT 
+          SUM(CASE WHEN tipo = 'Compra' THEN CAST(cantidad AS DECIMAL(10,2)) ELSE 0 END) AS total
+        FROM esme_movimientos
+        WHERE id_producto = ?
+      `, [producto.id]);
+       porcentajedeinvercion = 0
+    
+       adicional =  0
+       valortotal2 =0
+       precioventa="No hay stock para calcular"
+      if(parseFloat(resultado[0].total)>0){
+        console.log(resultado[0].tota)
+        console.log( totalinvertido[0].total)
+         porcentajedeinvercion = parseFloat(((resultado[0].total / totalinvertido[0].total) * 100).toFixed(2));
+         console.log( porcentajedeinvercion+"%")
+         console.log( costosfijos[0].total)
+         console.log( parseFloat(stock[0].total))
+         adicional = parseFloat(
+          (
+            (parseFloat(costosfijos[0].total) * (porcentajedeinvercion / 100)) /
+            parseFloat(stock[0].total)
+          ).toFixed(2)
+        );         console.log("adicional",adicional)
+         valortotal2 = parseFloat(adicional) + valorTotal;
+         variableganancia=100
+         if(trabajo[0]['trabajo']){
+          variableganancia=trabajo[0]['trabajo']
+         }
+         precioventa=valortotal2*(parseFloat(variableganancia)/100)      
+        
+        }
+    
 
-      console.log((parseFloat(costosfijos)*parseFloat(trabajo)))
-
-const adicional = (parseFloat(costosfijos)*parseFloat(trabajo))/100
-const valortotal2 =parseFloat(adicional)+valorTotal
+     
+      
       return {
         ...producto,
         valorTotal,
         adicional,
-        valortotal2
+        valortotal2,
+        stockcomprado:parseInt(stock[0].total),
+        porcentajedeinvercion,
+        precioventa
       };
-    });
-
+    }));
     // Calcular total de todos los valores
-    const totalGeneral = productosConValor.reduce((sum, prod) => sum + prod.valorTotal, 0);
+   // const totalGeneral = productosConValor.reduce((sum, prod) => sum + prod.valorTotal, 0);
 
     // Agregar el porcentaje a cada producto
-    const productosFinal = productosConValor.map((prod) => ({
+/*     const productosFinal = productosConValor.map((prod) => ({
       ...prod,
       porcentaje: totalGeneral > 0 ? ((prod.valorTotal / totalGeneral) * 100).toFixed(2) : "0.00"
     }));
-console.log(productosFinal)
-    res.json(productosFinal);
+console.log(productosFinal) */
+console.log(productosConValor)
+    res.json(productosConValor);
   } catch (error) {
     console.error("Error al traer productos:", error);
     res.status(500).json({ error: "Error al procesar los productos." });
@@ -323,7 +369,7 @@ router.post("/enviarmovimiento", async (req, res) => {
 
   try {
     const query = `
-      INSERT INTO movimientos 
+      INSERT INTO esme_movimientos 
         (id_producto, fecha, tipo, factura_compra, factura_venta, proveedor, id_usuario, variedad, cantidad, precio)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
