@@ -59,6 +59,8 @@ router.post("/borrarproducto",  async (req, res) => {
 
   try {
     await pool.query('delete  from  esme_productos where id = ?', [id])
+    await pool.query('delete  from  esme_movimientos where id_producto = ?', [id])
+
   
   } catch (error) {
     console.log(error)
@@ -69,6 +71,22 @@ router.post("/borrarproducto",  async (req, res) => {
 
 })
 
+router.post("/borrarmovimiento",  async (req, res) => {
+  const {id} = req.body
+  console.log(id)
+
+  try {
+    await pool.query('delete  from  esme_movimientos where id = ?', [id])
+    res.json('Borrado')
+  } catch (error) {
+    console.log(error)
+    res.json('BNorrado')
+  }
+  
+  
+
+
+})
 router.post("/agregarcostofijo", async (req, res) => {
   const { titulo, monto, usuarioId } = req.body;
 console.log( titulo, monto, usuarioId)
@@ -234,12 +252,9 @@ router.get('/traerproductos/:id', async (req, res) => {
        valortotal2 =0
        precioventa="No hay stock para calcular"
       if(parseFloat(resultado[0].total)>0){
-        console.log(resultado[0].tota)
-        console.log( totalinvertido[0].total)
+       
          porcentajedeinvercion = parseFloat(((resultado[0].total / totalinvertido[0].total) * 100).toFixed(2));
-         console.log( porcentajedeinvercion+"%")
-         console.log( costosfijos[0].total)
-         console.log( parseFloat(stock[0].total))
+
          adicional = parseFloat(
           (
             (parseFloat(costosfijos[0].total) * (porcentajedeinvercion / 100)) /
