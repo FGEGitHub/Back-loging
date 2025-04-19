@@ -193,7 +193,39 @@ router.get('/traermovimientos/:id', async (req, res) => {
 res.json(productosdeunapersona)
 
 })
-/*router.get('/traerproductos/:id', async (req, res) => {
+
+
+router.get('/traerstock/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const productosConStock = await pool.query(`
+      SELECT 
+        p.producto,
+        p.id,
+        COALESCE(SUM(CASE WHEN m.tipo = 'Compra' THEN m.cantidad ELSE 0 END), 0) AS total_compras,
+        COALESCE(SUM(CASE WHEN m.tipo = 'Venta' THEN m.cantidad ELSE 0 END), 0) AS total_ventas,
+        COALESCE(SUM(CASE WHEN m.tipo = 'Compra' THEN m.cantidad ELSE 0 END), 0) -
+        COALESCE(SUM(CASE WHEN m.tipo = 'Venta' THEN m.cantidad ELSE 0 END), 0) AS stock_actual
+      FROM esme_productos p
+      LEFT JOIN esme_movimientos m ON p.id = m.id_producto
+      WHERE p.id_usuario = ?
+      GROUP BY p.id, p.producto
+    `, [id]);
+
+    res.json(productosConStock);
+  } catch (error) {
+    console.error("Error al traer stock:", error);
+    res.status(500).json({ error: "Error al procesar el stock." });
+  }
+});
+
+
+
+
+/*rout
+
+er.get('/traerproductos/:id', async (req, res) => {
   const id = req.params.id
   console.log(id)
   const productosdeunapersona = await pool.query('select * from esme_productos where id_usuario=?', [id])
