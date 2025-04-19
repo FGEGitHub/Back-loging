@@ -69,6 +69,40 @@ router.post("/borrarproducto",  async (req, res) => {
 
 })
 
+router.post("/agregarcostofijo", async (req, res) => {
+  const { titulo, monto, usuarioId } = req.body;
+console.log( titulo, monto, usuarioId)
+  if (!titulo || !monto || !usuarioId) {
+    return res.status(400).json({ error: "Faltan campos obligatorios" });
+  }
+
+  try {
+    const sql = "INSERT INTO esme_costos_fijos (titulo, precio, id_vendedora) VALUES (?, ?, ?)";
+    await pool.query(sql, [titulo, monto, usuarioId]);
+    res.json("Costo fijo agregado correctamente" );
+  } catch (error) {
+    console.error("Error al guardar costo fijo:", error);
+    res.status(500).json({ error: "Error al guardar costo fijo" });
+  }
+});
+
+router.post("/modisficarcostosfijos/", async (req, res) => {
+
+  const { id,titulo, monto } = req.body;
+
+  if (!titulo || !monto) {
+    return res.status(400).json({ error: "Faltan campos obligatorios" });
+  }
+
+  try {
+    const sql = "UPDATE costos_fijos SET titulo = ?, monto = ? WHERE id = ?";
+    await connection.query(sql, [titulo, monto, id]);
+    res.status(200).json({ mensaje: "Costo fijo actualizado correctamente" });
+  } catch (error) {
+    console.error("Error al actualizar costo fijo:", error);
+    res.status(500).json({ error: "Error al actualizar costo fijo" });
+  }
+});
 
 router.post("/nuevoprpducto", upload.single('imagen'), async (req, res) => {
 
@@ -149,7 +183,21 @@ res.json(productosdeunapersona)
 
 })
 
+router.get('/traercostosfijos/:id', async (req, res) => {
+  const id = req.params.id
+  console.log(id)
+  const productosdeunapersona = await pool.query('select * from esme_costos_fijos where id_vendedora=?', [id])
+res.json(productosdeunapersona)
 
+})
+
+router.get('/traerganancia/:id', async (req, res) => {
+  const id = req.params.id
+  console.log(id)
+  const productosdeunapersona = await pool.query('select * from usuarios where id=?', [id])
+res.json(productosdeunapersona)
+
+})
 router.get('/listadeproductos/:id', async (req, res) => {
   const id = req.params.id
   console.log(id)
@@ -384,5 +432,21 @@ router.post("/modificarproductoesme", async (req, res) => {
   }
 });
 
+router.post("/modificarganancia", (req, res) => {
+  const { id, ganancia } = req.body;
 
+  if (!id || ganancia === undefined) {
+    return res.status(400).json({ error: "Faltan datos" });
+  }
+
+  const query = "UPDATE usuarios SET trabajo = ? WHERE id = ?";
+  pool.query(query, [ganancia, id], (err, result) => {
+    if (err) {
+      console.error("Error al modificar ganancia:", err);
+      return res.status(500).json({ error: "Error al modificar ganancia" });
+    }
+
+    res.json("Ganancia actualizada correctamente");
+  });
+});
 module.exports = router
