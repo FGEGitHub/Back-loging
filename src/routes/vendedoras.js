@@ -175,13 +175,70 @@ router.get('/traermovimientos/:id', async (req, res) => {
 res.json(productosdeunapersona)
 
 })
-router.get('/traerproductos/:id', async (req, res) => {
+/*router.get('/traerproductos/:id', async (req, res) => {
   const id = req.params.id
   console.log(id)
   const productosdeunapersona = await pool.query('select * from esme_productos where id_usuario=?', [id])
+  const [costosfijos] = await pool.query(
+    'SELECT SUM(CAST(precio AS DECIMAL(10,2))) AS total FROM esme_costos_fijos WHERE id_usuario = ?',
+    [id]
+  );
+
+
 res.json(productosdeunapersona)
 
 })
+*/
+router.get('/traerproductos/:id', async (req, res) => {
+  const id = req.params.id;
+  console.log(id);
+
+  try {
+    const productos = await pool.query('SELECT * FROM esme_productos WHERE id_usuario=?', [id]);
+    const [trabajo] = await pool.query('SELECT trabajo FROM usuarios WHERE id=?', [id]);
+    const [costosfijos] = await pool.query(
+      'SELECT SUM(CAST(precio AS DECIMAL(10,2))) AS total FROM esme_costos_fijos WHERE id_vendedora = ?',
+      [id]
+    );
+    // Procesar productos: convertir strings y calcular valor total de cada producto
+    const productosConValor = productos.map((producto) => {
+      const costo = parseFloat(producto.costo) || 0;
+      const costovariable1 = parseFloat(producto.costovariable1) || 0;
+      const costovariable2 = parseFloat(producto.costovariable2) || 0;
+
+      const valorTotal = costo + costovariable1 + costovariable2;
+      console.log(costosfijos)
+      console.log(parseFloat(costosfijos))
+      console.log(parseFloat(trabajo))
+
+      console.log((parseFloat(costosfijos)*parseFloat(trabajo)))
+
+const adicional = (parseFloat(costosfijos)*parseFloat(trabajo))/100
+const valortotal2 =parseFloat(adicional)+valorTotal
+      return {
+        ...producto,
+        valorTotal,
+        adicional,
+        valortotal2
+      };
+    });
+
+    // Calcular total de todos los valores
+    const totalGeneral = productosConValor.reduce((sum, prod) => sum + prod.valorTotal, 0);
+
+    // Agregar el porcentaje a cada producto
+    const productosFinal = productosConValor.map((prod) => ({
+      ...prod,
+      porcentaje: totalGeneral > 0 ? ((prod.valorTotal / totalGeneral) * 100).toFixed(2) : "0.00"
+    }));
+console.log(productosFinal)
+    res.json(productosFinal);
+  } catch (error) {
+    console.error("Error al traer productos:", error);
+    res.status(500).json({ error: "Error al procesar los productos." });
+  }
+});
+
 
 router.get('/traercostosfijos/:id', async (req, res) => {
   const id = req.params.id
