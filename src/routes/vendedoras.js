@@ -202,6 +202,7 @@ router.get('/traerstock/:id', async (req, res) => {
     const productosConStock = await pool.query(`
       SELECT 
         p.producto,
+        p.categoria,
         p.id,
         COALESCE(SUM(CASE WHEN m.tipo = 'Compra' THEN m.cantidad ELSE 0 END), 0) AS total_compras,
         COALESCE(SUM(CASE WHEN m.tipo = 'Venta' THEN m.cantidad ELSE 0 END), 0) AS total_ventas,
@@ -220,7 +221,74 @@ router.get('/traerstock/:id', async (req, res) => {
   }
 });
 
+router.get('/traercaja/:id', async (req, res) => {
+  const id = req.params.id;
 
+  try {
+    // Obtener productos con sus categorías
+    const productos = await pool.query(
+      `SELECT id, producto, categoria FROM esme_productos WHERE id_usuario = ?`,
+      [id]
+    );
+
+    // Obtener todos los movimientos de esos productos
+    const movimientos = await pool.query(
+      `SELECT 
+        m.id_producto, 
+        m.tipo, 
+        m.cantidad, 
+        m.precio, 
+        m.nuevo_precio
+      FROM esme_movimientos m
+      INNER JOIN esme_productos p ON p.id = m.id_producto
+      WHERE p.id_usuario = ?`,
+      [id]
+    );
+    console.log(movimientos)
+    // Organizar por categoría
+    const resultado = {};
+
+    productos.forEach((producto) => {
+      const { id: productoId, producto: nombreProducto, categoria } = producto;
+
+      const movimientosProducto = movimientos
+        .filter(mov => mov.id_producto == productoId)
+        .map(mov => {
+          const monto =
+            mov.tipo === "Compra"
+              ? mov.precio
+              : mov.nuevo_precio !== "No"
+              ? mov.nuevo_precio
+              : mov.precio;
+
+          return {
+            producto: nombreProducto,
+            tipo: mov.tipo,
+            monto: parseFloat(monto), // Convertir si viene como string
+            cantidad: mov.cantidad
+          };
+        });
+
+      // Si no hay movimientos, no lo agregamos
+      if (!resultado[categoria]) {
+        resultado[categoria] = [];
+      }
+
+      resultado[categoria].push(...movimientosProducto);
+    });
+
+    // Convertimos el objeto a array para el frontend
+    const respuesta = Object.entries(resultado).map(([categoria, detalles]) => ({
+      categoria,
+      detalles,
+    }));
+console.log(respuesta)
+    res.json(respuesta);
+  } catch (error) {
+    console.error("Error al traer caja:", error);
+    res.status(500).json({ error: "Error al procesar la caja" });
+  }
+});
 
 
 /*rout
