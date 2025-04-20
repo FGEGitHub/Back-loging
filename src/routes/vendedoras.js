@@ -189,7 +189,7 @@ enviar.push(nuevo)
 router.get('/traermovimientos/:id', async (req, res) => {
   const id = req.params.id
   console.log(id)
-  const productosdeunapersona = await pool.query('select * from esme_movimientos join(select id as idp, id_usuario as idusuario from esme_productos) as sel on esme_movimientos.id_producto=sel.idp where idusuario=? order by id desc', [id])
+  const productosdeunapersona = await pool.query('select * from esme_movimientos join(select id as idp, id_usuario as idusuario,producto from esme_productos) as sel on esme_movimientos.id_producto=sel.idp where idusuario=? order by id desc', [id])
 res.json(productosdeunapersona)
 
 })
