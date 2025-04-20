@@ -189,7 +189,7 @@ enviar.push(nuevo)
 router.get('/traermovimientos/:id', async (req, res) => {
   const id = req.params.id
   console.log(id)
-  const productosdeunapersona = await pool.query('select * from esme_movimientos join(select id as idp, id_usuario as idusuario from esme_productos) as sel on esme_movimientos.id_producto=sel.idp where idusuario=?', [id])
+  const productosdeunapersona = await pool.query('select * from esme_movimientos join(select id as idp, id_usuario as idusuario from esme_productos) as sel on esme_movimientos.id_producto=sel.idp where idusuario=? order by id desc', [id])
 res.json(productosdeunapersona)
 
 })
@@ -244,7 +244,7 @@ router.get('/traerproductos/:id', async (req, res) => {
 
 
   try {
-    const productos = await pool.query('SELECT * FROM esme_productos WHERE id_usuario=?', [id]);
+    const productos = await pool.query('SELECT * FROM esme_productos WHERE id_usuario=? order by id desc', [id]);
     const trabajo = await pool.query('SELECT trabajo FROM usuarios WHERE id=?', [id]);
     const costosfijos= await pool.query(
       'SELECT SUM(CAST(precio AS DECIMAL(10,2))) AS total FROM esme_costos_fijos WHERE id_vendedora = ?',
@@ -257,7 +257,6 @@ router.get('/traerproductos/:id', async (req, res) => {
       FROM esme_movimientos
     
     `);
-    console.log('totalinvertido',totalinvertido[0].total)
     // Procesar productos: convertir strings y calcular valor total de cada producto
     const productosConValor = await Promise.all(productos.map(async (producto) => {
       const costo = parseFloat(producto.costo) || 0;
@@ -324,7 +323,6 @@ router.get('/traerproductos/:id', async (req, res) => {
       porcentaje: totalGeneral > 0 ? ((prod.valorTotal / totalGeneral) * 100).toFixed(2) : "0.00"
     }));
 console.log(productosFinal) */
-console.log(productosConValor)
     res.json(productosConValor);
   } catch (error) {
     console.error("Error al traer productos:", error);
@@ -404,43 +402,60 @@ router.post("/enviarmovimiento", async (req, res) => {
     productoId,
     fecha,
     tipo_movimiento,
-    facturaCompra = 0,
-    facturaVenta = 0,
-    proveedor = 0,
-    cliente = 0, // no se guarda en la tabla, pero lo recibís
-    id_usuario = 1, // ajustar según tu lógica de usuario logueado
+    tipo,
+    nuevovalor,
+    descuento,
+    facturaCompra,
+    facturaVenta,
+    proveedor,
+    
+    
     cantidad,
     precio,
     variedad = 0
   } = req.body;
 
+
   try {
+    const produc =await pool.query('select * from esme_productos where id=?',[productoId])
+    // Normalizamos valores opcionales
+    id_usuario=produc[0]['id_usuario']
+    const facturaVentaFinal = isNaN(parseFloat(facturaVenta)) ? 0 : parseFloat(facturaVenta);
+    const facturaCompraFinal = isNaN(parseFloat(facturaCompra)) ? 0 : parseFloat(facturaCompra);
+    const proveedorFinal = isNaN(parseFloat(proveedor)) ? 0 : parseFloat(proveedor);
+
+    const tieneDescuento = nuevovalor && !isNaN(parseFloat(nuevovalor));
+
     const query = `
       INSERT INTO esme_movimientos 
-        (id_producto, fecha, tipo, factura_compra, factura_venta, proveedor, id_usuario, variedad, cantidad, precio)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (id_producto, fecha, tipo,tipo_movimiento, factura_compra, factura_venta, proveedor, id_usuario, variedad, cantidad, precio, nuevo_precio, descuento)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
     `;
 
     const values = [
       productoId,
       fecha,
+      tipo,
       tipo_movimiento,
-      facturaCompra,
-      facturaVenta,
-      proveedor,
+      facturaCompraFinal,
+      facturaVentaFinal,
+      proveedorFinal,
       id_usuario,
       variedad,
       cantidad,
-      precio
+      precio,
+      tieneDescuento ? parseFloat(nuevovalor) : "No",
+      tieneDescuento ? parseFloat(descuento) :  "No"
     ];
 
     await pool.query(query, values);
-    res.status(200).json({ message: "Movimiento guardado correctamente" });
+    res.json( "Movimiento guardado correctamente" );
   } catch (error) {
     console.error("Error al guardar movimiento:", error);
     res.status(500).json({ error: "Error al guardar el movimiento" });
   }
 });
+
 
 
 router.post("/crearnuevoproducto", async (req, res) => {
