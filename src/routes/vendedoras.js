@@ -415,7 +415,8 @@ router.post("/enviarmovimiento", async (req, res) => {
     variedad = 0
   } = req.body;
 
-
+console.log(    tipo_movimiento,
+  tipo)
   try {
     const produc =await pool.query('select * from esme_productos where id=?',[productoId])
     // Normalizamos valores opcionales
