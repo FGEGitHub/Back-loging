@@ -282,7 +282,6 @@ router.get('/traercaja/:id', async (req, res) => {
       categoria,
       detalles,
     }));
-console.log(respuesta)
     res.json(respuesta);
   } catch (error) {
     console.error("Error al traer caja:", error);
@@ -290,6 +289,43 @@ console.log(respuesta)
   }
 });
 
+router.get('/traercaja2/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const movimientoss = await pool.query('select * from esme_movimientos join (select id as idp, producto, categoria from esme_productos) as sel on esme_movimientos.id_producto=sel.idp where id_usuario=?', [id])
+
+    const movimientos = await pool.query(`
+      SELECT 
+        esme_movimientos.*, 
+        esme_productos.producto, 
+        esme_productos.categoria 
+      FROM esme_movimientos 
+      JOIN esme_productos 
+        ON esme_movimientos.id_producto = esme_productos.id 
+      WHERE esme_movimientos.id_usuario = ?
+    `, [id]);
+
+    let totalVentas = 0;
+
+    movimientos.forEach(mov => {
+      let precio = mov.nuevo_precio !== "No" ? mov.nuevo_precio : mov.precio;
+      const precioNum = parseFloat(precio) || 0;
+
+      if (mov.tipo_movimiento === "Venta") {
+        totalVentas += precioNum;
+      }
+    });
+//console.log(movimientoss)
+    res.json({
+      totalVentas,
+      movimientos
+    });
+  } catch (error) {
+    console.error("Error en /traercaja2/:id", error);
+    res.status(500).json({ error: "Error al obtener datos de la caja" });
+  }
+});
 
 /*rout
 
