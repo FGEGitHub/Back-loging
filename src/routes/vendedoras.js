@@ -504,6 +504,14 @@ res.json(productosdeunapersona)
 
 })
 
+
+router.get('/getResumenNegocio/:id', async (req, res) => {
+  const id = req.params.id
+  console.log(id)
+  const productosdeunapersona = await pool.query('select * from usuarios where id=?', [id])
+res.json(productosdeunapersona)
+
+})
 router.get('/traerganancia/:id', async (req, res) => {
   const id = req.params.id
   console.log(id)
