@@ -289,6 +289,60 @@ router.get('/traercaja/:id', async (req, res) => {
   }
 });
 
+
+
+router.get('/traerinformes/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+
+
+    const totales = await pool.query(
+      `SELECT
+        SUM(CASE 
+              WHEN tipo = 'Venta' 
+                THEN CASE 
+                       WHEN nuevo_precio != 'No' THEN CAST(nuevo_precio AS DECIMAL(10,2)) 
+                       ELSE precio 
+                     END
+              ELSE 0 
+            END) AS total_ingresos,
+        SUM(CASE 
+              WHEN tipo = 'Compra' 
+                THEN CASE 
+                       WHEN nuevo_precio != 'No' THEN CAST(nuevo_precio AS DECIMAL(10,2)) 
+                       ELSE precio 
+                     END
+              ELSE 0 
+            END) AS total_egresos
+       FROM esme_movimientos
+       WHERE id_usuario = ?`,
+      [id]
+    );
+    
+      
+    const movimientos = await pool.query(`
+      SELECT 
+        m.*, 
+        p.producto, 
+        p.categoria 
+      FROM esme_movimientos m
+      JOIN esme_productos p ON m.id_producto = p.id
+      WHERE m.id_usuario = ? order by id desc
+    `, [id]);
+
+   console.log(totales)
+    res.json(
+    [  totales,
+      movimientos]
+    );
+  } catch (error) {
+    console.error("Error en /traercaja2/:id", error);
+    res.status(500).json({ error: "Error al obtener datos de la caja" });
+  }
+});
+
+
 router.get('/traercaja2/:id', async (req, res) => {
   const id = req.params.id;
 
