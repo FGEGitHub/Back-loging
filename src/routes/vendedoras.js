@@ -680,6 +680,18 @@ router.post("/crearnuevoproducto", async (req, res) => {
     res.status(500).json({ message: "Error en el servidor" });
   }
 });
+router.post("/modificarmovimiento", async (req, res) => {
+
+    const {
+      fecha, cantidad, id
+    } = req.body;
+console.log(fecha, cantidad, id)
+    
+  await connection.query(
+    "UPDATE movimientos SET fecha = ?, cantidad = ? WHERE id = ?",
+    [fecha, cantidad, id]
+  )
+});
 router.post("/modificarproductoesme", async (req, res) => {
   try {
     const {
@@ -692,9 +704,9 @@ router.post("/modificarproductoesme", async (req, res) => {
       precioVenta,
       usuarioId,
       variable1,
-      costovariable1,
+      costevariable1,
       variable2,
-      costovariable2,
+      costevariable2,
     } = req.body;
 
     if (!id) {
@@ -723,19 +735,19 @@ router.post("/modificarproductoesme", async (req, res) => {
     }
     if (variable1 !== undefined) {
       campos.push("variable1 = ?");
-      valores.push(toNumber(variable1));
+      valores.push(variable1); // No convertir a número
     }
-    if (costovariable1 !== undefined) {
+    if (costevariable1 !== undefined) {
       campos.push("costovariable1 = ?");
-      valores.push(toNumber(costovariable1));
+      valores.push(toNumber(costevariable1));
     }
     if (variable2 !== undefined) {
       campos.push("variable2 = ?");
-      valores.push(toNumber(variable2));
+      valores.push(variable2); // No convertir a número
     }
-    if (costovariable2 !== undefined) {
+    if (costevariable2 !== undefined) {
       campos.push("costovariable2 = ?");
-      valores.push(toNumber(costovariable2));
+      valores.push(toNumber(costevariable2));
     }
     if (precioVenta !== undefined) {
       campos.push("precio_venta = ?");
@@ -762,6 +774,7 @@ router.post("/modificarproductoesme", async (req, res) => {
     res.status(500).json({ message: "Error en el servidor" });
   }
 });
+
 
 router.post("/modificarganancia", (req, res) => {
   const { id, ganancia } = req.body;
