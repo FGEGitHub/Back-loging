@@ -435,6 +435,12 @@ router.get('/traerproductos/:id', async (req, res) => {
         FROM esme_movimientos
         WHERE id_producto = ?
       `, [producto.id]);
+      const stockvendido = await pool.query(`
+        SELECT 
+          SUM(CASE WHEN tipo = 'Venta' THEN CAST(cantidad AS DECIMAL(10,2)) ELSE 0 END) AS total
+        FROM esme_movimientos
+        WHERE id_producto = ?
+      `, [producto.id]);
        porcentajedeinvercion = 0
     
        adicional =  0
@@ -468,6 +474,7 @@ router.get('/traerproductos/:id', async (req, res) => {
         adicional,
         valortotal2,
         stockcomprado:parseInt(stock[0].total),
+        stockvendido:parseInt(stockvendido[0].total),
         porcentajedeinvercion,
         precioventa
       };
