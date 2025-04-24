@@ -347,8 +347,7 @@ router.get('/traercaja2/:id', async (req, res) => {
   const id = req.params.id;
 
   try {
-    const movimientoss = await pool.query('select * from esme_movimientos join (select id as idp, producto, categoria from esme_productos) as sel on esme_movimientos.id_producto=sel.idp where id_usuario=?', [id])
-
+    // Consulta de movimientos
     const movimientos = await pool.query(`
       SELECT 
         esme_movimientos.*, 
@@ -360,8 +359,23 @@ router.get('/traercaja2/:id', async (req, res) => {
       WHERE esme_movimientos.id_usuario = ?
     `, [id]);
 
-    let totalVentas = 0;
+    // Consulta de inversiones
+    const inversiones = await pool.query(`
+      SELECT * FROM esme_inversiones WHERE id_usuario = ?
+    `, [id]);
 
+    // Formateamos las inversiones para que coincidan con la estructura del array movimientos
+    const inversionesFormateadas = inversiones.map(inv => ({
+      ...inv,
+      tipo_movimiento: inv.formaPago,
+      producto:inv.detalle,
+      categoria: inv.tipo || "N/A", // si tiene un campo tipo
+      precio: inv.monto,            // para que coincida con lógica de precios
+      nuevo_precio: "No"
+    }));
+
+    // Sumamos al total de ventas solo los movimientos de venta
+    let totalVentas = 0;
     movimientos.forEach(mov => {
       let precio = mov.nuevo_precio !== "No" ? mov.nuevo_precio : mov.precio;
       const precioNum = parseFloat(precio) || 0;
@@ -370,16 +384,21 @@ router.get('/traercaja2/:id', async (req, res) => {
         totalVentas += precioNum;
       }
     });
-//console.log(movimientoss)
+
+    // Unimos los movimientos e inversiones en un solo array
+    const movimientosCompletos = [...movimientos, ...inversionesFormateadas];
+console.log(movimientos)
+console.log(movimientosCompletos)
     res.json({
       totalVentas,
-      movimientos
+      movimientos: movimientosCompletos
     });
   } catch (error) {
     console.error("Error en /traercaja2/:id", error);
     res.status(500).json({ error: "Error al obtener datos de la caja" });
   }
 });
+
 
 /*rout
 
@@ -610,31 +629,34 @@ router.post("/enviarmovimientoingreso", async (req, res) => {
     id_usuario,
     tipo,
     formaPago,
+    detalle,
     monto
   } = req.body;
 
 console.log(    id_usuario,
   tipo,
   formaPago,
+  detalle,
   monto)
   try {
-    const produc =await pool.query('select * from esme_productos where id=?',[productoId])
   
 
     const query = `
-      INSERT INTO esme_movimientos 
-        (id_producto, fecha, tipo,tipo_movimiento, factura_compra, factura_venta, proveedor, id_usuario, variedad, cantidad, precio, nuevo_precio, descuento)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
+      INSERT INTO esme_inversiones 
+        (tipo, formapago, detalle,monto, id_usuario)
+      VALUES (?, ?, ?, ?, ?)
     `;
 
     const values = [
-      id_usuario,
+      
       tipo,
       formaPago,
-      monto
+      detalle,
+      monto,
+      id_usuario
     ];
 
-    //await pool.query(query, values);
+    await pool.query(query, values);
     res.json( "Movimiento guardado correctamente" );
   } catch (error) {
     console.error("Error al guardar movimiento:", error);
