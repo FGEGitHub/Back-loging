@@ -570,6 +570,47 @@ enviar.push(nuevo)
 })
 
 
+
+
+router.post("/enviarmovimientoingreso", async (req, res) => {
+  const {
+    id_usuario,
+    tipo,
+    formaPago,
+    monto
+  } = req.body;
+
+console.log(    id_usuario,
+  tipo,
+  formaPago,
+  monto)
+  try {
+    const produc =await pool.query('select * from esme_productos where id=?',[productoId])
+  
+
+    const query = `
+      INSERT INTO esme_movimientos 
+        (id_producto, fecha, tipo,tipo_movimiento, factura_compra, factura_venta, proveedor, id_usuario, variedad, cantidad, precio, nuevo_precio, descuento)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
+    `;
+
+    const values = [
+      id_usuario,
+      tipo,
+      formaPago,
+      monto
+    ];
+
+    //await pool.query(query, values);
+    res.json( "Movimiento guardado correctamente" );
+  } catch (error) {
+    console.error("Error al guardar movimiento:", error);
+    res.status(500).json({ error: "Error al guardar el movimiento" });
+  }
+});
+
+
+
 router.post("/enviarmovimiento", async (req, res) => {
   const {
     productoId,
