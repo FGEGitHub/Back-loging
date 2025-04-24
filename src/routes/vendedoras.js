@@ -630,6 +630,7 @@ router.post("/enviarmovimientoingreso", async (req, res) => {
     tipo,
     formaPago,
     detalle,
+    fecha,
     monto
   } = req.body;
 
@@ -644,7 +645,7 @@ console.log(    id_usuario,
     const query = `
       INSERT INTO esme_inversiones 
         (tipo, formapago, detalle,monto, id_usuario)
-      VALUES (?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?,?)
     `;
 
     const values = [
@@ -653,7 +654,8 @@ console.log(    id_usuario,
       formaPago,
       detalle,
       monto,
-      id_usuario
+      id_usuario,
+      fecha
     ];
 
     await pool.query(query, values);
