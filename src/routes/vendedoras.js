@@ -644,8 +644,8 @@ console.log(    id_usuario,
 
     const query = `
       INSERT INTO esme_inversiones 
-        (tipo, formapago, detalle,monto, id_usuario)
-      VALUES (?, ?, ?, ?, ?,?)
+        (tipo, formapago, detalle,monto, id_usuario,fecha)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
 
     const values = [
