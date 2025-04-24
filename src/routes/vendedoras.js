@@ -571,6 +571,39 @@ enviar.push(nuevo)
 
 
 
+router.post("/updateResumenNegocio", async (req, res) => {
+  const {
+    id,
+    materia,     // nombre del negocio
+    direccion,
+    nombre,
+    estado,
+    anios        // actividad
+  } = req.body;
+console.log(    id,
+  materia,     // nombre del negocio
+  direccion,
+  nombre,
+  
+  anios )
+  try {
+    const query = `
+      UPDATE usuarios
+      SET materia = ?, direccion = ?, nombre = ?, anios = ?
+      WHERE id = ?
+    `;
+
+    const values = [materia, direccion, nombre, anios, id];
+
+    await pool.query(query, values);
+
+    res.json({ message: "Negocio actualizado correctamente" });
+  } catch (error) {
+    console.error("Error al actualizar negocio:", error);
+    res.status(500).json({ error: "Error al actualizar el negocio" });
+  }
+});
+
 
 router.post("/enviarmovimientoingreso", async (req, res) => {
   const {
@@ -672,24 +705,36 @@ console.log(    tipo_movimiento,
 });
 
 
-
 router.post("/crearnuevoproducto", async (req, res) => {
-  try {
-    const {
+
+    let {
       nombre,
       categoria,
       costo,
-      transporte,
-      packaging,
+      transporte, // ⚠️ No se usa en el INSERT, ¿debería guardarse?
+      packaging,  // ⚠️ No se usa en el INSERT, ¿debería guardarse?
       precioVenta,
       usuarioId,
-      variable1,
-      costovariable1,
-      variable2,
-      costovariable2,
+      variable1 ,
+      costevariable1 ,
+      variable2 ,
+      costevariable2,
+      costovariable1 ,
     } = req.body;
+console.log(  variable1 ,
+  costevariable1 ,
+  costovariable1 ,
+  costovariable1,)
+if(variable1==undefined){
+  variable1=0
+  costevariable1=0
 
-    // Validar numéricos, asegurándonos que sean número válidos
+}
+
+if(variable2==undefined){
+  variable2=0
+  costevariable2=0
+}
     const toNumber = (val) => {
       const num = Number(val);
       return isNaN(num) ? 0 : num;
@@ -699,17 +744,18 @@ router.post("/crearnuevoproducto", async (req, res) => {
       nombre,
       categoria,
       costo: toNumber(costo),
-      variable1: toNumber(variable1),
-      costovariable1: toNumber(costovariable1),
-      variable2: toNumber(variable2),
-      costovariable2: toNumber(costovariable2),
+      variable1,
+      costovariable1: toNumber(costevariable1),
+      variable2,
+      costovariable2: toNumber(costevariable2),
       precio_venta: toNumber(precioVenta),
       id_usuario: usuarioId,
     };
 
-    // Ejecutar query usando los campos definidos arriba
     await pool.query(
-      "INSERT INTO esme_productos (producto, categoria, costo, variable1, variable2, costovariable1, costovariable2, precio_venta, id_usuario) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      `INSERT INTO esme_productos 
+       (producto, categoria, costo, variable1, variable2, costovariable1, costovariable2, precio_venta, id_usuario)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         nuevoProducto.nombre,
         nuevoProducto.categoria,
@@ -724,11 +770,9 @@ router.post("/crearnuevoproducto", async (req, res) => {
     );
 
     res.json("Producto creado con éxito");
-  } catch (error) {
-    console.error("Error al crear el producto", error);
-    res.status(500).json({ message: "Error en el servidor" });
-  }
+
 });
+
 router.post("/modificarmovimiento", async (req, res) => {
 
     const {
