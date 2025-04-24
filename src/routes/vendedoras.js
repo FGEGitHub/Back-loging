@@ -342,12 +342,11 @@ router.get('/traerinformes/:id', async (req, res) => {
   }
 });
 
-
 router.get('/traercaja2/:id', async (req, res) => {
   const id = req.params.id;
 
   try {
-    // Consulta de movimientos
+    // Consulta de movimientos ordenados por fecha descendente
     const movimientos = await pool.query(`
       SELECT 
         esme_movimientos.*, 
@@ -357,6 +356,7 @@ router.get('/traercaja2/:id', async (req, res) => {
       JOIN esme_productos 
         ON esme_movimientos.id_producto = esme_productos.id 
       WHERE esme_movimientos.id_usuario = ?
+      ORDER BY esme_movimientos.fecha DESC
     `, [id]);
 
     // Consulta de inversiones
@@ -368,10 +368,11 @@ router.get('/traercaja2/:id', async (req, res) => {
     const inversionesFormateadas = inversiones.map(inv => ({
       ...inv,
       tipo_movimiento: inv.formaPago,
-      producto:inv.detalle,
-      categoria: inv.tipo || "N/A", // si tiene un campo tipo
-      precio: inv.monto,            // para que coincida con lógica de precios
-      nuevo_precio: "No"
+      producto: inv.detalle,
+      categoria: inv.tipo || "N/A",
+      precio: inv.monto,
+      nuevo_precio: "No",
+      fecha: inv.fecha || inv.created_at || "1970-01-01" // aseguramos que tenga fecha
     }));
 
     // Sumamos al total de ventas solo los movimientos de venta
@@ -385,10 +386,11 @@ router.get('/traercaja2/:id', async (req, res) => {
       }
     });
 
-    // Unimos los movimientos e inversiones en un solo array
-    const movimientosCompletos = [...movimientos, ...inversionesFormateadas];
-console.log(movimientos)
-console.log(movimientosCompletos)
+    // Unimos y ordenamos los movimientos completos por fecha descendente
+    const movimientosCompletos = [...movimientos, ...inversionesFormateadas].sort((a, b) => {
+      return new Date(b.fecha) - new Date(a.fecha);
+    });
+
     res.json({
       totalVentas,
       movimientos: movimientosCompletos
