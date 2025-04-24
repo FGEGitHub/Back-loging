@@ -88,15 +88,15 @@ router.post("/borrarmovimiento",  async (req, res) => {
 
 })
 router.post("/agregarcostofijo", async (req, res) => {
-  const { titulo, monto, usuarioId } = req.body;
-console.log( titulo, monto, usuarioId)
+  const { titulo, monto, usuarioId,fecha } = req.body;
+console.log( titulo, monto, usuarioId,fecha)
   if (!titulo || !monto || !usuarioId) {
     return res.status(400).json({ error: "Faltan campos obligatorios" });
   }
 
   try {
-    const sql = "INSERT INTO esme_costos_fijos (titulo, precio, id_vendedora) VALUES (?, ?, ?)";
-    await pool.query(sql, [titulo, monto, usuarioId]);
+    const sql = "INSERT INTO esme_costos_fijos (titulo, precio, id_vendedora,fecha) VALUES (?, ?, ?,?)";
+    await pool.query(sql, [titulo, monto, usuarioId,fecha]);
     res.json("Costo fijo agregado correctamente" );
   } catch (error) {
     console.error("Error al guardar costo fijo:", error);
