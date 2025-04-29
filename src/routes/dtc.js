@@ -54,7 +54,7 @@ const client = new Client({
  
  // 
  // 
-client.initialize();
+//client.initialize();
     ////////////whatapweb
 const storage = multer.diskStorage({
   destination: path.join(__dirname, '../imagenesvendedoras'),
@@ -2988,8 +2988,7 @@ router.get('/traerpresentesdeclase/:id', async (req, res) => {
   const id = req.params.id
   const clase =await pool.query('select * from dtc_clases_taller where id=?',[id])
   const cursado =await pool.query('select * from dtc_cursado where id_curso=? and dia=? and hora=?',[clase[0]['id_tallerista'],clase[0]['dia'],clase[0]['hora']])
-  const existe = await pool.query('select * from dtc_asistencia_clase join (select id as idc,nombre from dtc_chicos) as sel on dtc_asistencia_clase.id_usuario=sel.idc  where id_clase=?', [id])//presentes
-  console.log(existe)
+  const existe = await pool.query('select * from dtc_asistencia_clase join (select id as idc,nombre, apellido from dtc_chicos) as sel on dtc_asistencia_clase.id_usuario=sel.idc  where id_clase=?', [id])//presentes
  //// funcion para traer todos los usuarios con su presente en el taller 
  usuarios = await pool.query("select * from dtc_chicos left join (select id as ida  from dtc_asistencia_clase where id=? ) as sel on dtc_chicos.id=sel.ida ", [id])
   //nueva consulta para solo los incriptosdias etc
@@ -4237,8 +4236,8 @@ router.post("/agregarturnocadia", async (req, res) => {
 
 }) */
   router.post("/agendarturno", async (req, res) => {
-    let { id, id_persona, nuevoUsuario, nombre, apellido,usuariodispositivo,agendadopor } = req.body;
-    console.log(id, id_persona, nuevoUsuario, nombre, apellido,usuariodispositivo,agendadopor)
+    let { id, id_persona, nuevoUsuario, nombre, apellido,usuariodispositivo,agendadopor , observaciones} = req.body;
+    console.log(id, id_persona, nuevoUsuario, nombre, apellido,usuariodispositivo,agendadopor,observaciones)
 if(usuariodispositivo == undefined){
   usuariodispositivo="No"
 }
@@ -4272,8 +4271,8 @@ if(usuariodispositivo == undefined){
         const telefono = profesionall[0]?.telefono + '@c.us';
 
         await pool.query(
-            'UPDATE dtc_turnos SET id_persona = ?, estado = "Agendado", hora = ?,usuariodispositivo=?,agendadopor=? WHERE id = ?',
-            [id_persona, `${horaBuenosAires}-${fecha}`, usuariodispositivo,agendadopor,id]
+            'UPDATE dtc_turnos SET id_persona = ?, estado = "Agendado", hora = ?,usuariodispositivo=?,agendadopor=?,observaciones=? WHERE id = ?',
+            [id_persona, `${horaBuenosAires}-${fecha}`, usuariodispositivo,agendadopor,observaciones,id]
         );
 
         // Obtener turnos agendados y disponibles
@@ -4287,7 +4286,7 @@ if(usuariodispositivo == undefined){
         );
 
         // Construcción del mensaje con los turnos ocupados y disponibles
-        let mensaje = `Hola ${profesionall[0]?.nombre}, de parte del DTC te notificamos que tenés un nuevo turno para el día ${profesionall[0]?.fecha} a las ${profesionall[0]?.detalle} del paciente ${personapsiq[0]?.nombre} ${personapsiq[0]?.apellido}.`;
+        let mensaje = `Hola ${profesionall[0]?.nombre}, de parte del DTC te notificamos que tenés un nuevo turno para el día ${profesionall[0]?.fecha} a las ${profesionall[0]?.detalle} del paciente ${personapsiq[0]?.nombre} ${personapsiq[0]?.apellido} con las siguientes observaciones: ${observaciones}`;
         
         if (turnosOcupados.length > 0) {
             mensaje += '\n\nL los siguientes horarios tienes ocupados ese dia:';
@@ -4427,6 +4426,19 @@ router.post("/ponerpresente", async (req, res) => {
 
 
 })
+
+
+
+router.post("/ponerpresenteclase2", async (req, res) => {
+  let { id_clase, id_usuario } = req.body;
+
+  // Obtener la fecha de hoy en formato 'YYYY-MM-DD'
+  const fechaHoy = new Date().toISOString().split('T')[0];
+
+  await pool.query('INSERT INTO dtc_asistencia_clase SET fecha=?, id_usuario=?, id_clase=?', [fechaHoy, id_usuario, id_clase]);
+
+  res.json( 'Asistencia registrada');
+});
 
 
 router.post("/ponerpresenteclaseprofs", async (req, res) => {
