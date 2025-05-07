@@ -330,6 +330,19 @@ router.get('/tablaprestacionesa/:id', async (req, res) => {
 
 })
 
+router.get('/traerturnosdepsico/:id', async (req, res) => {
+  let id = req.params.id
+  try {
+    const clas = await pool.query(' select * from  dtc_turnos left  join (select id as ida, nombre, apellido from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.ida where id_psico=? ', [id])
+    res.json(clas)
+  } catch (error) {
+    console.log(error)
+    res.json('Error')
+  }
+
+
+})
+
 router.get('/traerclasesprof/:id', async (req, res) => {
   let id = req.params.id
   try {
@@ -3610,6 +3623,69 @@ router.get('/traertalleres/', async (req, res) => {
         cantidadMes: clasesMesActual.length,
         cantidadHoy: clasesHoy.length,
         usuario: usuario.usuario,
+      };
+
+      enviar.push(nue);
+    }
+
+    res.json([enviar]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Ocurrió un error al obtener los talleres' });
+  }
+});
+router.get('/traterpsicologos2/', async (req, res) => {
+  try {
+    // Obtiene todos los usuarios con nivel 26
+    const existe = await pool.query('SELECT * FROM usuarios WHERE nivel = 24');
+    enviar = [];
+
+    // Obtiene la fecha actual
+    const fechaActual = new Date();
+    const mesActual = fechaActual.getMonth() + 1; // Los meses en JavaScript son de 0 a 11
+    const añoActual = fechaActual.getFullYear();
+    const diaActual = fechaActual.getDate();
+
+    // Formatea el primer y último día del mes actual
+    const primerDiaMes = `${añoActual}-${mesActual.toString().padStart(2, '0')}-01`;
+    const ultimoDiaMes = `${añoActual}-${mesActual.toString().padStart(2, '0')}-31`;
+
+    // Formatea el día actual
+    const fechaHoy = `${añoActual}-${mesActual.toString().padStart(2, '0')}-${diaActual.toString().padStart(2, '0')}`;
+
+    // Función para convertir fechas al formato DD/MM/YYYY
+    const formatoFecha = (fecha) => {
+      const [year, month, day] = fecha.split('-');
+      return `${day}/${month}/${year}`;
+    };
+
+    for (const usuario of existe) {
+      // Cuenta todas las clases del tallerista
+      const totalClases = await pool.query('SELECT * FROM dtc_turnos WHERE id_psico = ?', [usuario.id]);
+
+      // Cuenta las clases del tallerista en el mes actual
+    // Cuenta las clases del tallerista en el mes actual
+    const clasesMesActual = await pool.query(
+      'SELECT * FROM dtc_turnos WHERE id_psico = ? AND fecha BETWEEN ? AND ?',
+      [usuario.id, primerDiaMes, ultimoDiaMes]
+    );
+
+      // Cuenta las clases del tallerista hoy
+      const clasesHoy = await pool.query(
+        'SELECT * FROM dtc_turnos WHERE id_psico = ? AND fecha = ?',
+        [usuario.id, fechaHoy]
+      );
+
+      const nue = {
+        id: usuario.id,
+        nombre: usuario.nombre,
+        cantidad: totalClases.length,
+        cantidadMes: clasesMesActual.length,
+        cantidadHoy: clasesHoy.length,
+        usuario: usuario.usuario,
+        fechaHoy: formatoFecha(fechaHoy),
+        primerDiaMes: formatoFecha(primerDiaMes),
+        ultimoDiaMes: formatoFecha(ultimoDiaMes)
       };
 
       enviar.push(nue);
