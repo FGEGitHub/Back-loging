@@ -333,7 +333,8 @@ router.get('/tablaprestacionesa/:id', async (req, res) => {
 router.get('/traerturnosdepsico/:id', async (req, res) => {
   let id = req.params.id
   try {
-    const clas = await pool.query(' select * from  dtc_turnos left  join (select id as ida, nombre, apellido from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.ida where id_psico=? ', [id])
+    const clas = await pool.query(' select * from  dtc_turnos left  join (select id as ida, nombre, apellido from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.ida where id_psico= ?  order by id desc', [id])
+    console.log(clas)
     res.json(clas)
   } catch (error) {
     console.log(error)
