@@ -114,6 +114,7 @@ app.use(`/fiscalizacion`, require('./routes/fiscalizacion'))
 app.use(`/carnavales`, require('./routes/carnavales'))
 app.use(`/vendedoras`, require('./routes/vendedoras'))
 app.use(`/doneu`, require('./routes/doneu'))
+app.use(`/f1`, require('./routes/f1'))
 //app.use(`/links`, require('./routes/links'))
 
 
