@@ -2,7 +2,7 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 const pool = require('../database')
 const helpers = require('../lib/helpers')
-
+const pool4 = require('../database4')
 
 
 
@@ -115,6 +115,49 @@ passport.use('local.signup', new LocalStrategy({
 
 
 
+
+passport.use('local.registroemprendedora', new LocalStrategy({
+    usernameField: 'usuario',
+    passwordField: 'password',
+    passReqToCallback: true // Debe ser un booleano, no una cadena
+}, async (req, usuario, password, done) => {
+
+    let { nombre, mail,tipo_negocio } = req.body;
+    
+    if (!mail) {
+        mail = 'Sin definir';
+    } 
+console.log(nombre, mail,tipo_negocio )
+    const newUser = {
+        password,
+        usuario,
+        nombre,
+        nivel:1,
+        mail,
+    };
+
+    try {
+        const rows = await pool.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario]);
+        if (rows.length === 0) {
+            newUser.password = await helpers.encryptPassword(password);
+            try {
+                const result = await pool.query('INSERT INTO usuarios SET usuario=?,nombre=?,mail=?,nivel=?,password=?', 
+                                                [usuario, nombre, mail, 1, newUser.password]);
+                newUser.id = result.insertId;
+                console.log('id',newUser.id )
+                return done(null, newUser); // Éxito, continuar
+            } catch (error) {
+                console.log(error);
+                return done(error); // Error en la inserción
+            }
+        } else {
+            return done(null, false, req.flash('message', 'Error, ese usuario ya existe'));
+        }
+    } catch (error) {
+        console.log(error);
+        return done(error); // Error en la consulta
+    }
+}));
 
 passport.use('local.registroadmin', new LocalStrategy({
     usernameField: 'usuario',
@@ -247,6 +290,64 @@ passport.deserializeUser(async (id, done) => {
 })
 
 
+passport.use('local.signupf1', new LocalStrategy({
+  usernameField: 'usuario',
+  passwordField: 'password',
+  passReqToCallback: true
+}, async (req, usuario, password, done) => {
+
+  let { nombre, email, tel, nivel, posicion, apodo, barrio } = req.body;
+
+  console.log(nombre, email, tel, nivel, posicion, apodo, barrio);
+
+  if (!nivel) nivel = 1;
+
+  const newUser = {
+    usuario,
+    password,
+    nombre,
+    email,
+    tel,
+    nivel,
+    posicion,
+    apodo,
+    barrio
+  };
+
+  try {
+    const verif = await pool4.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario]);
+    
+    if (verif.length > 0) {
+      return done(null, false, { message: 'El usuario ya existe.' });
+    }
+
+    newUser.password = await helpers.encryptPassword(password);
+
+   const result = await pool4.query(
+  'INSERT INTO usuarios SET password=?, usuario=?, nivel=?, nombre=?, email=?, tel=?, posicion=?, apodo=?, barrio=?',
+  [
+    newUser.password,
+    usuario,
+    nivel,
+    nombre,
+    email,
+    tel,
+    posicion,
+    apodo,
+    barrio
+  ]
+);
+
+// Evitar error de BigInt
+newUser.id = Number(result.insertId);
+
+return done(null, newUser);
+
+  } catch (error) {
+    console.error(error);
+    return done(error); // error del servidor
+  }
+}));
 
 passport.use('local.signupde', new LocalStrategy({
     usernameField: 'usuario',
@@ -312,6 +413,39 @@ passport.use('local.signupde', new LocalStrategy({
 
 
 ))
+
+passport.use('local.signinf1', new LocalStrategy({
+    usernameField: 'usuario', // usuario es el nombre que recibe del hbs
+    passwordField: 'password',
+    passReqToCallback: 'true' // para recibir mas datos 
+
+}, async (req, usuario, password, done) => {  // que es lo que va a hacer 
+    console.log('entra')
+    const rows = await pool4.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario])
+    console.log(rows)
+    if (rows.length > 0) {
+        const usuario = rows[0]
+       
+        const validPassword = await helpers.matchPassword(password, usuario.password)
+       
+        if (validPassword) {
+           
+  /*      const userFoRToken = {
+                id: usuario.id,
+                usuario: usuario.cuil_cuit,
+                nivel: usuario.nivel
+            }
+            const token = jwt.sign(userFoRToken, 'fideicomisocs121', { expiresIn: 60 * 60 * 24 * 7 })
+            res.send({ id: req.usuario.id,cuil_cuit: req.usuario.cuil_cuit,token, nivel: req.usuario.nivel})  */
+            done(null, usuario, req.flash('success', 'Welcome' )) // done termina, null el error, user lo pasa para serializar
+          
+        } else {
+            done(null, false, req.flash('message', 'Pass incorrecta')) // false para no avanzar
+        }
+    } else {
+        return done(null, false, req.flash('message', 'EL nombre de cuil/cuit no existe'))
+    }
+}))
 
 
 passport.use('local.signinde', new LocalStrategy({

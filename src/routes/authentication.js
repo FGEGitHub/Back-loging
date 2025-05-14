@@ -32,6 +32,91 @@ router.post('/signupde', passport.authenticate('local.signupde', {
 
 }))
 
+///////////
+router.post('/signupf1', (req, res, next) => {
+  passport.authenticate('local.signupf1', (err, user, info) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error del servidor.' });
+    }
+    if (!user) {
+      return res.status(400).json({ message: info.message || 'Registro fallido.' });
+    }
+    // Si se quiere iniciar sesión automáticamente después de registrar
+    req.logIn(user, (err) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error al iniciar sesión después del registro.' });
+      }
+      return res.status(200).json({ message: 'Registrado exitosamente.', user });
+    });
+  })(req, res, next);
+});
+
+router.post('/signupcv', passport.authenticate('local.signup', {
+    successRedirect: '/exitosignup',
+    failureRedirect:'/noexito',
+    failureFlash:true
+
+}))
+router.post('/signinf1', passport.authenticate('local.signinf1', { failureRedirect: '/noexito' }),
+  function(req, res) {
+    console.log(req.user)
+    const userFoRToken ={
+        id :req.user.id,
+        usuario: req.user.usuario,
+        nivel:req.user.nivel,
+       
+     
+    }
+ 
+    const token = jwt.sign(userFoRToken, 'fideicomisocs121',{ expiresIn: 60*60*24*7})
+    console.log(req.user)
+    res.send({
+        id :req.user.id,
+        usuario: req.user.usuario,
+        nivel: req.user.nivel,
+       
+        token,
+      
+        
+    } )
+}
+  
+  );
+
+router.post('/signupcv', passport.authenticate('local.signup', {
+    successRedirect: '/exitosignup',
+    failureRedirect:'/noexito',
+    failureFlash:true
+
+}))
+router.post('/signincv', passport.authenticate('local.signincv', { failureRedirect: '/noexito' }),
+  function(req, res) {
+    console.log(req.user)
+    const userFoRToken ={
+        id :req.user.id,
+        usuario: req.user.usuario,
+        nivel:req.user.nivel,
+       
+     
+    }
+ 
+    const token = jwt.sign(userFoRToken, 'fideicomisocs121',{ expiresIn: 60*60*24*7})
+    console.log(req.user)
+    res.send({
+        id :req.user.id,
+        usuario: req.user.usuario,
+        nivel: req.user.nivel,
+       
+        token,
+      
+        
+    } )
+}
+  
+  );
+///////////
+
 router.get('/traerusuario/:cuil_cuit', async(req,res)=>{
     cuil_cuit = req.params.cuil_cuit
     const usuario = await pool.query('select * from users where cuil_cuit= ? ',[cuil_cuit])
