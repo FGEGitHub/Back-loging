@@ -19,38 +19,63 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 
-
-
-
-
-router.post("/borrararticulo",  async (req, res) => {
-  const {id} = req.body
-  console.log(id)
+router.post("/crearpartido", async (req, res) => {
   try {
-    const  prod = await pool.query("select * from producto_venta where id=?",[id])
-    console.log(prod[0]['ubicacion'])
-    rutaImagen = path.join(__dirname, '../imagenesvendedoras', prod[0]['ubicacion']);
-    console.log('rutaImagen')
-    console.log(rutaImagen)
-    try {
-       await fse.unlink(rutaImagen);
-    } catch (error) {
-      console.log(error)
+    const {
+      usuario_id,
+      cancha,
+      barrio,
+      ciudad,
+      fecha,
+      hora,
+      tipo,
+      cupo,
+      nivel,
+      tipofutbol,
+      sebusca
+    } = req.body;
+console.log(   usuario_id,
+      cancha,
+      barrio,
+      ciudad,
+      fecha,
+      hora,
+      tipo,
+      cupo,
+      nivel,
+      tipofutbol,
+      sebusca)
+    let cancha_id = cancha;
+
+    if (barrio && ciudad) {
+      // Es una nueva cancha
+      const insertCancha = await pool.query(
+        "INSERT INTO canchas (nombre, barrio, ciudad) VALUES (?, ?, ?)",
+        [cancha, barrio, ciudad]
+      );
+      cancha_id = insertCancha.insertId;
     }
-  try {
-    await pool.query('delete  from  producto_venta where id = ?', [id])
-  
-  } catch (error) {
-    console.log(error)
-  }
-  
-    res.json('Borrado')
-  } catch (error) {
-    console.log(error)
-    res.json('No Borrado')
-  }
 
-})
+    // Valores por defecto si no están definidos
+    const nivelDef = nivel ?? "Sin especificar";
+    const tipofutbolDef = tipofutbol ?? "Futbol 5";
+    const sebuscaDef = sebusca ?? "Jugadores";
+
+    // Crear partido
+    await pool.query(
+      `INSERT INTO partidos 
+      (id_creador, cancha, fecha, hora, tipo, cupo, nivel, tipofutbol, sebusca) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [usuario_id, cancha_id, fecha, hora, tipo, cupo, nivelDef, tipofutbolDef, sebuscaDef]
+    );
+
+    res.status(200).json({ message: "Partido creado con éxito" });
+
+  } catch (error) {
+    console.error("Error al crear partido:", error);
+    res.status(500).json({ error: "Error interno al crear el partido" });
+  }
+});
 
 
 
@@ -69,7 +94,13 @@ router.get('/traercanchas', async (req, res) => {
 res.json(productosdeunapersona)
 
 })
+router.get('/traerpartidos', async (req, res) => {
+ 
 
+  const productosdeunapersona = await pool.query('select * from partidos join (select id as idc, nombre as nombrecancha, barrio from canchas) as sel on partidos.cancha=sel.idc order by id desc')
+res.json(productosdeunapersona)
+
+})
 
 router.post("/modificarganancia", (req, res) => {
   const { id, ganancia } = req.body;
