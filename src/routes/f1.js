@@ -37,7 +37,7 @@ router.post("/crearpartido", async (req, res) => {
 console.log(   usuario_id,
       cancha,
       barrio,
-      ciudad,
+      ciudad,     
       fecha,
       hora,
       tipo,
