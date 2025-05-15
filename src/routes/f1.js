@@ -94,15 +94,63 @@ router.get('/traercanchas', async (req, res) => {
 res.json(productosdeunapersona)
 
 })
-router.get('/traerpartidos', async (req, res) => {
- 
+router.post('/traerpartidos', async (req, res) => {
+  const { id_usuario } = req.body;
+console.log(id_usuario)
+  try {
+    // Traer todos los partidos con datos de cancha y usuario creador
+    const partidos = await pool.query(`
+      SELECT 
+        p.*, 
+        c.nombre AS nombrecancha, 
+        c.barrio,
+        u.usuario,
+        s.estado AS estado_sumada
+      FROM partidos p
+      JOIN canchas c ON p.cancha = c.id
+      JOIN usuarios u ON p.id_creador = u.id
+      LEFT JOIN sumadas s ON s.id_partido = p.id AND s.id_solicitante = ?
+      ORDER BY p.id DESC
+    `, [id_usuario || 0]); // si no hay usuario, pone 0 que no va a coincidir
+console.log(partidos)
+    res.json(partidos);
+  } catch (error) {
+    console.error("Error al traer partidos:", error);
+    res.status(500).json({ error: 'Error al traer partidos' });
+  }
+});
+router.post("/sumarsepartido", async (req, res) => {
+  const { id_partido, id_usuario } = req.body;
 
-  const productosdeunapersona = await pool.query('select * from partidos join (select id as idc, nombre as nombrecancha, barrio from canchas) as sel on partidos.cancha=sel.idc order by id desc')
-res.json(productosdeunapersona)
+  try {
+    console.log("Recibido:", id_partido, id_usuario);
 
-})
+    // Verificar si ya existe
+    const [existe] = await pool.query(
+      "SELECT * FROM sumadas WHERE id_partido = ? AND id_solicitante = ?",
+      [id_partido, id_usuario]
+    );
 
-router.post("/modificarganancia", (req, res) => {
+    if (existe.length > 0) {
+      return res.status(400).json({ mensaje: "Ya te has unido a este partido" });
+    }
+
+    // Si no existe, insertamos
+    await pool.query(
+      "INSERT INTO sumadas (id_partido, id_solicitante) VALUES (?, ?)",
+      [id_partido, id_usuario]
+    );
+
+    res.status(200).json({ mensaje: "Solicitud enviada correctamente" });
+  } catch (error) {
+    console.error("Error al insertar en sumadas:", error);
+    res.status(500).json({ error: "Error al enviar la solicitud" });
+  }
+});
+
+
+
+router.post("/modificarganancia",async (req, res) => {
   const { id, ganancia } = req.body;
 
   if (!id || ganancia === undefined) {
