@@ -96,7 +96,6 @@ res.json(productosdeunapersona)
 })
 router.post('/traerpartidos', async (req, res) => {
   const { id_usuario } = req.body;
-console.log(id_usuario)
   try {
     // Traer todos los partidos con datos de cancha y usuario creador
     const partidos = await pool.query(`
@@ -112,7 +111,6 @@ console.log(id_usuario)
       LEFT JOIN sumadas s ON s.id_partido = p.id AND s.id_solicitante = ?
       ORDER BY p.id DESC
     `, [id_usuario || 0]); // si no hay usuario, pone 0 que no va a coincidir
-console.log(partidos)
     res.json(partidos);
   } catch (error) {
     console.error("Error al traer partidos:", error);
@@ -149,22 +147,84 @@ router.post("/sumarsepartido", async (req, res) => {
 });
 
 
+router.post("/traernotificaciones", async (req, res) => {
+  const { id} = req.body;
 
-router.post("/modificarganancia",async (req, res) => {
-  const { id, ganancia } = req.body;
+  try {
+    console.log("Recibido:", id);
 
-  if (!id || ganancia === undefined) {
-    return res.status(400).json({ error: "Faltan datos" });
+    // Verificar si ya existe
+    const existe = await pool.query(
+      "SELECT * FROM sumadas  join ( select id as idp, id_creador  from partidos) as sel on sumadas.id_partido=idp WHERE id_creador = ? AND estado = ?",
+      [id, "solicitado"]
+    );
+
+
+  
+    res.status(200).json([existe]);
+  } catch (error) {
+    console.error("Error al insertar en sumadas:", error);
+    res.status(500).json({ error: "Error al enviar la solicitud" });
   }
+});
 
-  const query = "UPDATE usuarios SET trabajo = ? WHERE id = ?";
-  pool.query(query, [ganancia, id], (err, result) => {
-    if (err) {
-      console.error("Error al modificar ganancia:", err);
-      return res.status(500).json({ error: "Error al modificar ganancia" });
-    }
 
-    res.json("Ganancia actualizada correctamente");
-  });
+router.post("/traersolicitudes", async (req, res) => {
+  const { id} = req.body;
+
+  try {
+  
+
+    // Verificar si ya existe
+    const existe = await pool.query(
+      "SELECT * FROM sumadas  join ( select id as idp, id_creador  from partidos) as sel on sumadas.id_partido=idp join (select id as idu, nombre as nombresol, posicion, apodo from usuarios )as sel2 on sumadas.id_solicitante=sel2.idu WHERE id_creador = ? ",
+      [id]
+    );
+
+
+  
+    res.status(200).json([existe]);
+  } catch (error) {
+    console.error("Error al insertar en sumadas:", error);
+    res.status(500).json({ error: "Error al enviar la solicitud" });
+  }
+});
+// Confirmar solicitud
+router.post('/confirmar', async (req, res) => {
+  const { id_solicitud } = req.body;
+  try {
+    await pool.query('UPDATE sumadas SET estado = ? WHERE id = ?', ['confirmado', id_solicitud]);
+    res.status(200).json({ message: 'Solicitud confirmada' });
+  } catch (error) {
+    console.error('Error al confirmar:', error);
+    res.status(500).json({ error: 'Error al confirmar solicitud' });
+  }
+});
+
+// Rechazar solicitud
+router.post('/rechazar', async (req, res) => {
+  const { id_solicitud } = req.body;
+  try {
+    await pool.query('UPDATE sumadas SET estado = ? WHERE id = ?', ['rechazado', id_solicitud]);
+    res.status(200).json({ message: 'Solicitud rechazada' });
+  } catch (error) {
+    console.error('Error al rechazar:', error);
+    res.status(500).json({ error: 'Error al rechazar solicitud' });
+  }
+});
+
+// Reestablecer estado (pendiente o solicitado)
+router.post('/marcarPendiente', async (req, res) => {
+  const { id_solicitud, nuevo_estado } = req.body;
+
+  
+
+  try {
+    await pool.query('UPDATE sumadas SET estado = ? WHERE id = ?', ["solicitado", id_solicitud]);
+    res.status(200).json({ message: `Solicitud restablecida a ${nuevo_estado}` });
+  } catch (error) {
+    console.error('Error al restablecer:', error);
+    res.status(500).json({ error: 'Error al restablecer solicitud' });
+  }
 });
 module.exports = router
