@@ -344,6 +344,21 @@ router.get('/traerturnosdepsico/:id', async (req, res) => {
 
 })
 
+router.get('/traeralumnosfines', async (req, res) => {
+  let id = req.params.id
+  try {
+    const clas = await pool.query(' select * from  dtc_chicos_fines')
+    console.log(clas)
+    res.json(clas)
+  } catch (error) {
+    console.log(error)
+    res.json('Error')
+  }
+
+
+})
+
+
 router.get('/traerclasesprof/:id', async (req, res) => {
   let id = req.params.id
   try {
@@ -455,6 +470,22 @@ router.get('/traerclasestaller2/:id', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener las clases' });
   }
 });
+router.post('/agregarAlumnoFines/', async (req, res) => {
+  const { nombre, apellido, dni, fecha_nacimiento } = req.body;
+  console.log(nombre, apellido, dni, fecha_nacimiento);
+
+  try {
+    await pool.query(
+      'INSERT INTO dtc_chicos_fines (nombre, apellido, dni,fecha_nacimiento) VALUES (?, ?, ?,?)',
+      [nombre, apellido, dni,fecha_nacimiento]
+    );
+    res.json('Alumno agregado con éxito');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json('No se pudo agregar el alumno');
+  }
+});
+
 
 router.post('/clasificarturno/', async (req, res) => {
   let {id , estado} = req.body
@@ -1898,6 +1929,7 @@ router.post("/borrarturnocadia", async (req, res) => {
 })
 router.post("/borrarturno", async (req, res) => {
   let { id } = req.body
+  console.log(id)
  const turrnoo = await pool.query( ' select * from dtc_turnos   where id=?',[id])
   try {
      
@@ -3012,6 +3044,18 @@ router.get('/traerpresentesdeclase/:id', async (req, res) => {
 
 })
 
+router.get('/traerpresentesfines/:id', async (req, res) => {
+  const id = req.params.id
+  const clase =await pool.query('select * from dtc_clases_taller where id=?',[id])
+  const existe = await pool.query('select * from dtc_asistencia_clase join (select id as idc,nombre, apellido from dtc_chicos_fines) as sel on dtc_asistencia_clase.id_usuario=sel.idc  where id_clase=?', [id])//presentes
+ //// funcion para traer todos los usuarios con su presente en el taller 
+ usuarios = await pool.query("select * from dtc_chicos_fines left join (select id as ida  from dtc_asistencia_clase where id=? ) as sel on dtc_chicos_fines.id=sel.ida ", [id])
+  //nueva consulta para solo los incriptosdias etc
+//usuarios = await pool.query("select * from dtc_chicos left join (select id as ida  from dtc_asistencia_clase where id=? ) as sel on dtc_chicos.id=sel.ida join(select id as idcursado,id_chico from dtc_cursado where id=?) as sel2 on dtc_chicos.id=sel2.id_chico ", [id,cursado[0]['id']])
+  res.json([existe, usuarios])
+
+
+})
 router.get('/traerpresentesdeclaseprof/:id', async (req, res) => {
   const id = req.params.id
   const id_profesional = await pool.query('select * from cadia_clases_prof  where id_clase=?',[id])
