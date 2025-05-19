@@ -227,4 +227,100 @@ router.post('/marcarPendiente', async (req, res) => {
     res.status(500).json({ error: 'Error al restablecer solicitud' });
   }
 });
+
+
+
+router.post('/traerJugadores', async (req, res) => {
+  const { id } = req.body;
+  try {
+   respuesta =  await pool.query('select * from usuarios')
+    res.status(200).json(respuesta);
+  } catch (error) {
+    console.error('Error al confirmar:', error);
+    res.status(500).json({ error: 'Error al confirmar solicitud' });
+  }
+});
+
+
+
+router.post('/traerJugador', async (req, res) => {
+  const { id_usuario } = req.body;
+  try {
+   respuesta =  await pool.query('select * from usuarios where id=?',[id_usuario])
+    res.status(200).json(respuesta);
+  } catch (error) {
+    console.error('Error al confirmar:', error);
+    res.status(500).json({ error: 'Error al confirmar solicitud' });
+  }
+});
+
+
+
+router.post('/modificarJugador', async (req, res) => {
+  const {
+    id,
+    nombre,
+    apellido,
+    dni,
+    telefono,
+    dias_disponibles,
+    horarios_disponibles,
+    es_pago,
+  } = req.body;
+
+  console.log(id, nombre, apellido, dni, telefono, dias_disponibles, horarios_disponibles, es_pago);
+
+  try {
+    // Obtener datos actuales del usuario
+    const [usuarioActual] = await pool.query(
+      'SELECT * FROM usuarios WHERE id = ?',
+      [id]
+    );
+
+    if (!usuarioActual.length) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    const usuario = usuarioActual[0];
+
+    // Usar valores nuevos si están en req.body, si no usar los existentes
+    const nuevoNombre = nombre ?? usuario.nombre;
+    const nuevoApellido = apellido ?? usuario.apellido;
+    const nuevoDni = dni ?? usuario.dni;
+    const nuevoTelefono = telefono ?? usuario.telefono;
+    const nuevosDias = dias_disponibles ?? usuario.dias;
+    const nuevoHorario = horarios_disponibles ?? usuario.horario;
+    const nuevoPago = es_pago !== undefined
+      ? es_pago === true || es_pago === "true"
+        ? "Sí"
+        : "No"
+      : usuario.es_pago;
+
+    await pool.query(
+      `UPDATE usuarios 
+       SET nombre = ?, apellido = ?, dni = ?, telefono = ?, dias_disponibles = ?, horarios_disponibles = ?, es_pago = ?
+       WHERE id = ?`,
+      [
+        nuevoNombre,
+        nuevoApellido,
+        nuevoDni,
+        nuevoTelefono,
+        JSON.stringify(nuevosDias),
+        nuevoHorario,
+        nuevoPago,
+        id
+      ]
+    );
+
+    res.json({ message: 'Usuario actualizado correctamente' });
+
+  } catch (error) {
+    console.error('Error al actualizar el usuario:', error);
+    res.status(500).json({ message: 'Error al actualizar el usuario' });
+  }
+});
+
+
+
+
 module.exports = router
