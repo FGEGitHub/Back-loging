@@ -85,6 +85,36 @@ const upload2 = multer({ storage2 });
 /////////
 const upload = multer({ storage });
 
+router.post('/modificar_alumno_fines', async (req, res) => {
+  const { id, nombre, apellido, dni, fecha_nacimiento } = req.body;
+
+  if (!nombre || !apellido || !dni || !fecha_nacimiento) {
+    return res.status(400).json({ error: 'Faltan datos obligatorios' });
+  }
+
+  try {
+    if (id) {
+      // Actualizar alumno existente
+      await pool.query(
+        'UPDATE dtc_chicos_fines SET nombre = ?, apellido = ?, dni = ?, fecha_nacimiento = ? WHERE id = ?',
+        [nombre, apellido, dni, fecha_nacimiento, id]
+      );
+      res.json({ message: 'Alumno actualizado correctamente' });
+    } else {
+      // Insertar nuevo alumno
+      await pool.query(
+        'INSERT INTO dtc_chicos_fines (nombre, apellido, dni, fecha_nacimiento) VALUES (?, ?, ?, ?)',
+        [nombre, apellido, dni, fecha_nacimiento]
+      );
+      res.json({ message: 'Alumno agregado correctamente' });
+    }
+  } catch (error) {
+    console.error('Error en la operación de alumno_fines:', error);
+    res.status(500).json({ error: 'Error en la base de datos' });
+  }
+});
+
+
 
 // Función para convertir un número serial de Excel en una fecha legible
 function convertirFechaExcel(fechaExcel) {
