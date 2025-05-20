@@ -155,7 +155,7 @@ router.post("/enviarConvocatoria", async (req, res) => {
     console.log("Recibido:", id_partido, id_usuario);
 
     // Verificar si ya existe
-    const [existe] = await pool.query(
+    const existe = await pool.query(
       "SELECT * FROM sumadas WHERE id_partido = ? AND id_solicitante = ?",
       [id_partido, id_usuario]
     );
@@ -208,7 +208,7 @@ router.post("/traersolicitudes", async (req, res) => {
 
     // Verificar si ya existe
     const existe = await pool.query(
-      "SELECT * FROM sumadas  join ( select id as idp, id_creador  from partidos) as sel on sumadas.id_partido=idp join (select id as idu, nombre as nombresol, posicion, apodo, fecha_nacimiento from usuarios )as sel2 on sumadas.id_solicitante=sel2.idu WHERE id_creador = ? ",
+      "SELECT * FROM sumadas  join ( select id as idp, id_creador  from partidos) as sel on sumadas.id_partido=idp join (select id as idu, nombre as nombresol, posicion, apodo, fecha_nacimiento, no_pago_cancha,me_sumo_disponible,es_pago  from usuarios )as sel2 on sumadas.id_solicitante=sel2.idu WHERE id_creador = ? ",
       [id]
     );
 
