@@ -288,19 +288,34 @@ passport.deserializeUser(async (id, done) => {
     const rows = await pool.query('SELECT * FROM usuarios Where id = ?', [id])
     done(null, rows[0])
 })
-
-
 passport.use('local.signupf1', new LocalStrategy({
   usernameField: 'usuario',
   passwordField: 'password',
   passReqToCallback: true
 }, async (req, usuario, password, done) => {
 
-  let { nombre, email, tel, nivel, posicion, apodo, barrio } = req.body;
-
-  console.log(nombre, email, tel, nivel, posicion, apodo, barrio);
+  let {
+    nombre,
+    email,
+    tel,
+    nivel,
+    posicion,
+    apodo,
+    barrio,
+    fecha_nacimiento,
+    es_pago,
+    no_pago_cancha,
+    me_sumo_disponible
+  } = req.body;
 
   if (!nivel) nivel = 1;
+console.log(    es_pago,
+    no_pago_cancha,
+    me_sumo_disponible)
+  // Convertir checkboxes a "Sí" o "No"
+  es_pago = es_pago == "Si" ? "Si" : "No";
+  no_pago_cancha = no_pago_cancha == "Si" ? "Si" : "No";
+  me_sumo_disponible = me_sumo_disponible == "Si" ? "Si" : "No";
 
   const newUser = {
     usuario,
@@ -311,43 +326,53 @@ passport.use('local.signupf1', new LocalStrategy({
     nivel,
     posicion,
     apodo,
-    barrio
+    barrio,
+    fecha_nacimiento,
+    es_pago,
+    no_pago_cancha,
+    me_sumo_disponible
   };
 
   try {
     const verif = await pool4.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario]);
-    
+
     if (verif.length > 0) {
       return done(null, false, { message: 'El usuario ya existe.' });
     }
 
     newUser.password = await helpers.encryptPassword(password);
 
-   const result = await pool4.query(
-  'INSERT INTO usuarios SET password=?, usuario=?, nivel=?, nombre=?, email=?, tel=?, posicion=?, apodo=?, barrio=?',
-  [
-    newUser.password,
-    usuario,
-    nivel,
-    nombre,
-    email,
-    tel,
-    posicion,
-    apodo,
-    barrio
-  ]
-);
+    const result = await pool4.query(
+      `INSERT INTO usuarios 
+        (password, usuario, nivel, nombre, email, telefono, posicion, apodo, barrio, fecha_nacimiento, 
+         es_pago, no_pago_cancha, me_sumo_disponible) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        newUser.password,
+        usuario,
+        nivel,
+        nombre,
+        email,
+        tel,
+        posicion,
+        apodo,
+        barrio,
+        fecha_nacimiento,
+        es_pago,
+        no_pago_cancha,
+        me_sumo_disponible
+      ]
+    );
 
-// Evitar error de BigInt
-newUser.id = Number(result.insertId);
-
-return done(null, newUser);
+    newUser.id = Number(result.insertId); // Evitar error BigInt
+    return done(null, newUser);
 
   } catch (error) {
     console.error(error);
-    return done(error); // error del servidor
+    return done(error);
   }
 }));
+
 
 passport.use('local.signupde', new LocalStrategy({
     usernameField: 'usuario',
@@ -420,9 +445,7 @@ passport.use('local.signinf1', new LocalStrategy({
     passReqToCallback: 'true' // para recibir mas datos 
 
 }, async (req, usuario, password, done) => {  // que es lo que va a hacer 
-    console.log('entra')
     const rows = await pool4.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario])
-    console.log(rows)
     if (rows.length > 0) {
         const usuario = rows[0]
        

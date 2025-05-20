@@ -124,7 +124,7 @@ router.post("/sumarsepartido", async (req, res) => {
     console.log("Recibido:", id_partido, id_usuario);
 
     // Verificar si ya existe
-    const [existe] = await pool.query(
+    const existe = await pool.query(
       "SELECT * FROM sumadas WHERE id_partido = ? AND id_solicitante = ?",
       [id_partido, id_usuario]
     );
@@ -137,6 +137,37 @@ router.post("/sumarsepartido", async (req, res) => {
     await pool.query(
       "INSERT INTO sumadas (id_partido, id_solicitante) VALUES (?, ?)",
       [id_partido, id_usuario]
+    );
+
+    res.status(200).json({ mensaje: "Solicitud enviada correctamente" });
+  } catch (error) {
+    console.error("Error al insertar en sumadas:", error);
+    res.status(500).json({ error: "Error al enviar la solicitud" });
+  }
+});
+
+
+
+router.post("/enviarConvocatoria", async (req, res) => {
+  const { id_partido, id_usuario } = req.body;
+
+  try {
+    console.log("Recibido:", id_partido, id_usuario);
+
+    // Verificar si ya existe
+    const [existe] = await pool.query(
+      "SELECT * FROM sumadas WHERE id_partido = ? AND id_solicitante = ?",
+      [id_partido, id_usuario]
+    );
+
+    if (existe.length > 0) {
+      return res.status(400).json({ mensaje: "Ya te has unido a este partido" });
+    }
+
+    // Si no existe, insertamos
+    await pool.query(
+      "INSERT INTO sumadas (id_partido, id_solicitante, estado) VALUES (?, ?, ? )",
+      [id_partido, id_usuario,"Invitado"]
     );
 
     res.status(200).json({ mensaje: "Solicitud enviada correctamente" });
@@ -177,7 +208,7 @@ router.post("/traersolicitudes", async (req, res) => {
 
     // Verificar si ya existe
     const existe = await pool.query(
-      "SELECT * FROM sumadas  join ( select id as idp, id_creador  from partidos) as sel on sumadas.id_partido=idp join (select id as idu, nombre as nombresol, posicion, apodo from usuarios )as sel2 on sumadas.id_solicitante=sel2.idu WHERE id_creador = ? ",
+      "SELECT * FROM sumadas  join ( select id as idp, id_creador  from partidos) as sel on sumadas.id_partido=idp join (select id as idu, nombre as nombresol, posicion, apodo, fecha_nacimiento from usuarios )as sel2 on sumadas.id_solicitante=sel2.idu WHERE id_creador = ? ",
       [id]
     );
 
@@ -260,19 +291,19 @@ router.post('/modificarJugador', async (req, res) => {
   const {
     id,
     nombre,
-    apellido,
-    dni,
+    apodo,
+    
     telefono,
     dias_disponibles,
     horarios_disponibles,
     es_pago,
   } = req.body;
 
-  console.log(id, nombre, apellido, dni, telefono, dias_disponibles, horarios_disponibles, es_pago);
+  console.log(id, nombre, apodo,  telefono, dias_disponibles, horarios_disponibles, es_pago);
 
   try {
     // Obtener datos actuales del usuario
-    const [usuarioActual] = await pool.query(
+    const usuarioActual = await pool.query(
       'SELECT * FROM usuarios WHERE id = ?',
       [id]
     );
@@ -285,8 +316,8 @@ router.post('/modificarJugador', async (req, res) => {
 
     // Usar valores nuevos si están en req.body, si no usar los existentes
     const nuevoNombre = nombre ?? usuario.nombre;
-    const nuevoApellido = apellido ?? usuario.apellido;
-    const nuevoDni = dni ?? usuario.dni;
+    const nuevoApodo = apodo ?? usuario.apodo;
+
     const nuevoTelefono = telefono ?? usuario.telefono;
     const nuevosDias = dias_disponibles ?? usuario.dias;
     const nuevoHorario = horarios_disponibles ?? usuario.horario;
@@ -295,15 +326,15 @@ router.post('/modificarJugador', async (req, res) => {
         ? "Sí"
         : "No"
       : usuario.es_pago;
-
+console.log(1)
     await pool.query(
       `UPDATE usuarios 
-       SET nombre = ?, apellido = ?, dni = ?, telefono = ?, dias_disponibles = ?, horarios_disponibles = ?, es_pago = ?
+       SET nombre = ?, apodo = ?,  telefono = ?, dias_disponibles = ?, horarios_disponibles = ?, es_pago = ?
        WHERE id = ?`,
       [
         nuevoNombre,
-        nuevoApellido,
-        nuevoDni,
+        nuevoApodo,
+       
         nuevoTelefono,
         JSON.stringify(nuevosDias),
         nuevoHorario,
@@ -311,12 +342,12 @@ router.post('/modificarJugador', async (req, res) => {
         id
       ]
     );
-
-    res.json({ message: 'Usuario actualizado correctamente' });
+console.log(2)
+    res.json( 'Usuario actualizado correctamente' );
 
   } catch (error) {
     console.error('Error al actualizar el usuario:', error);
-    res.status(500).json({ message: 'Error al actualizar el usuario' });
+    res.json('Error al actualizar el usuario');
   }
 });
 
