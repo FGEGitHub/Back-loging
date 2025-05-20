@@ -4564,7 +4564,16 @@ router.post("/ponerpresenteclase2", async (req, res) => {
   res.json( 'Asistencia registrada');
 });
 
+router.post("/ponerpresenteclase3", async (req, res) => {
+  let { id_clase, id_usuario } = req.body;
 
+  // Obtener la fecha de hoy en formato 'YYYY-MM-DD'
+  const fechaHoy = new Date().toISOString().split('T')[0];
+
+  await pool.query('INSERT INTO dtc_asistencia_clase SET fecha=?, id_usuario=?, id_clase=? , fines=?', [fechaHoy, id_usuario, id_clase,"Si"]);
+
+  res.json( 'Asistencia registrada');
+});
 router.post("/ponerpresenteclaseprofs", async (req, res) => {
   let { id_clase, id_usuario } = req.body
   const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
