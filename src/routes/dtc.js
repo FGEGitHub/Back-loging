@@ -2429,10 +2429,17 @@ router.post("/nuevaclaseprof", async (req, res) => {
 })
 
 router.post("/nuevaclasetaller", async (req, res) => {
-  let { id_tallerista, fecha, titulo } = req.body
+  let { id_tallerista, fecha, titulo, detalle } = req.body
   console.log(id_tallerista, fecha, titulo)
+
   try {
-    await pool.query('insert dtc_clases_taller  set id_tallerista=?, fecha=?,titulo=?', [id_tallerista, fecha, titulo])
+      if (detalle == undefined) {
+      detalle = "Sin observaciones"
+    }
+    if (titulo == undefined) {
+      titulo = "Sin asignar"
+    }
+    await pool.query('insert dtc_clases_taller  set id_tallerista=?, fecha=?,titulo=?, detalle=?', [id_tallerista, fecha, titulo, detalle])
 
     res.json("realizado")
   } catch (error) {
