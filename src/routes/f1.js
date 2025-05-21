@@ -285,21 +285,27 @@ router.post('/traerJugador', async (req, res) => {
   }
 });
 
-
-
 router.post('/modificarJugador', async (req, res) => {
   const {
     id,
     nombre,
     apodo,
-    
     telefono,
     dias_disponibles,
     horarios_disponibles,
     es_pago,
+    no_pago_cancha,
+    me_sumo_disponible
   } = req.body;
+console.log(id)
+  // Validar ID
 
-  console.log(id, nombre, apodo,  telefono, dias_disponibles, horarios_disponibles, es_pago);
+
+  // Función utilitaria para convertir booleanos a "Si"/"No"
+  const toSiNo = (valor, actual) => {
+    if (valor === undefined) return actual;
+    return valor === true || valor === "true" ? "Si" : "No";
+  };
 
   try {
     // Obtener datos actuales del usuario
@@ -314,42 +320,50 @@ router.post('/modificarJugador', async (req, res) => {
 
     const usuario = usuarioActual[0];
 
-    // Usar valores nuevos si están en req.body, si no usar los existentes
+    // Nuevos valores (manteniendo los existentes si no se envían)
     const nuevoNombre = nombre ?? usuario.nombre;
     const nuevoApodo = apodo ?? usuario.apodo;
-
     const nuevoTelefono = telefono ?? usuario.telefono;
-    const nuevosDias = dias_disponibles ?? usuario.dias;
-    const nuevoHorario = horarios_disponibles ?? usuario.horario;
-    const nuevoPago = es_pago !== undefined
-      ? es_pago === true || es_pago === "true"
-        ? "Sí"
-        : "No"
-      : usuario.es_pago;
-console.log(1)
+    const nuevosDias = dias_disponibles ?? usuario.dias_disponibles;
+    const nuevoHorario = horarios_disponibles ?? usuario.horarios_disponibles;
+
+    const nuevoPago = toSiNo(es_pago, usuario.es_pago);
+    const nuevoNoPagoCancha = toSiNo(no_pago_cancha, usuario.no_pago_cancha);
+    const nuevoMeSumoDisponible = toSiNo(me_sumo_disponible, usuario.me_sumo_disponible);
+
+    // Asegurar que `dias_disponibles` esté en formato JSON
+    const diasParaGuardar = Array.isArray(nuevosDias)
+      ? JSON.stringify(nuevosDias)
+      : JSON.stringify([]);
+
+    // Ejecutar actualización
     await pool.query(
       `UPDATE usuarios 
-       SET nombre = ?, apodo = ?,  telefono = ?, dias_disponibles = ?, horarios_disponibles = ?, es_pago = ?
+       SET nombre = ?, apodo = ?, telefono = ?, dias_disponibles = ?, horarios_disponibles = ?, 
+           es_pago = ?, no_pago_cancha = ?,  me_sumo_disponible = ?
        WHERE id = ?`,
       [
         nuevoNombre,
         nuevoApodo,
-       
         nuevoTelefono,
-        JSON.stringify(nuevosDias),
+        diasParaGuardar,
         nuevoHorario,
         nuevoPago,
+        nuevoNoPagoCancha,
+      
+        nuevoMeSumoDisponible,
         id
       ]
     );
-console.log(2)
-    res.json( 'Usuario actualizado correctamente' );
+
+    res.json({ message: 'Usuario actualizado correctamente', id });
 
   } catch (error) {
     console.error('Error al actualizar el usuario:', error);
-    res.json('Error al actualizar el usuario');
+    res.status(500).json({ message: 'Error al actualizar el usuario' });
   }
 });
+
 
 
 
