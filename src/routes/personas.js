@@ -1230,47 +1230,14 @@ router.post("/agregarobservacion", async (req, res) => {
 
 
 router.post("/enviarinscripcioncarnaval", async (req, res) => {
-  let { option1, option2, option3, option4, comparsa, comparsa_cual, nombre, apellido, dni, tel, tel2, fecha_nac, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo } = req.body
-  if (comparsa_cual === undefined) {
-    comparsa_cual = 'Sin determinar'
-  }
-
-  if (option1) {
-    maquillaje = 'Si'
-  } else {
-    maquillaje = 'No'
-  }
-  if (option2) {
-    peinado = 'Si'
-  } else {
-    peinado = 'No'
-  }
-  if (option3) {
-    confeccion = 'Si'
-  } else {
-    confeccion = 'No'
-  }
-  if (option4) {
-    baile = 'Si'
-  } else {
-    baile = 'No'
-  }
-
-  ///fecha
-  if (tipo_empleo === undefined) {
-    tipo_empleo = 'Sin determinar'
-  }
-  if (tipo_trabajo === undefined) {
-    tipo_trabajo = 'Sin determinar'
-  }
-  console.log(option1, option2, option3, option4, comparsa, comparsa_cual, nombre, apellido, dni, tel, tel2, fecha_nac, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo)
-
+  let {   nombre, apellido, dni, tel, localidad, fecha_nac,  direccion, barrio } = req.body
+  
   try {
     let pers = await pool.query('select * from personas where dni =?', [dni])
     if (pers.length > 0) {
-      await pool.query('update personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?where dni=? ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, dni])
+      await pool.query('update personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, direccion=?,barrio=?,localidad=? where dni=? ', [fecha_nac, nombre, apellido, dni, tel, direccion, barrio,localidad,  dni])
     } else {
-      await pool.query('insert into personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=? ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo])
+      await pool.query('insert into personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?,direccion=?,barrio=?,localidad=? ', [fecha_nac, nombre, apellido, dni, tel, direccion, barrio, localidad])
 
     }
     pers = await pool.query('select * from personas where dni =?', [dni])
@@ -1281,7 +1248,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
     }
     else {
       fecha = (new Date(Date.now()))
-      await pool.query('insert into inscripciones_carnaval set fecha=?,dni_persona=?,id_persona=?,maquillaje=?,peinado=?,confeccion=?,baile=?,comparsa=?,comparsa_cual=?', [fecha, dni, pers[0]['id'], maquillaje, peinado, confeccion, baile, comparsa, comparsa_cual])
+      await pool.query('insert into inscripciones_carnaval set fecha=?,dni_persona=?,id_persona=?', [fecha, dni, pers[0]['id']])
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto'
     }
 

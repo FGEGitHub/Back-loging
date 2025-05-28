@@ -2565,6 +2565,50 @@ router.post("/borrarracion", async (req, res) => {
     res.json('No realizado');
   }
 });
+
+
+router.post("/borrarcolacion", async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    // Obtener la ubicación del archivo desde la base de datos
+    const result = await pool.query('SELECT ubicacion FROM dtc_colacion WHERE id = ?', [id]);
+
+    if (result.length > 0) {
+      const archivoUbicacion = result[0].ubicacion;
+
+      // Construir la ruta completa del archivo
+      let filePath = ''
+
+      try {
+         filePath = path.join(__dirname, '../imagenesvendedoras', archivoUbicacion);
+
+      } catch (error) {
+        
+      }
+
+      // Intentar eliminar el archivo del sistema de archivos si existe
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+        console.log('Archivo eliminado:', filePath);
+      } else {
+        console.log('El archivo no existe:', filePath);
+      }
+
+      // Eliminar la entrada de la base de datos
+      await pool.query('DELETE FROM dtc_colacion WHERE id = ?', [id]);
+
+      res.json('Realizado');
+    } else {
+      res.json('No se encontró la entrada para el ID proporcionado');
+    }
+  } catch (error) {
+    console.error('Error al borrar la actividad social:', error);
+    res.json('No realizado');
+  }
+});
+
+
 router.post("/borrarinformeps", async (req, res) => {
   const { id } = req.body;
 
