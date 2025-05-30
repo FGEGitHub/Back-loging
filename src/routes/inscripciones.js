@@ -836,7 +836,7 @@ router.get('/incriptas2da/', async (req, res) => {
   }
 
   res.json([inscriptos, deuda_exigible, datos33]) */
-  inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria,id as idp,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join(select id as idt,descripcion from turnos) as sel2 on inscripciones.uno=sel2.idt join(select id as idt2,descripcion as descripcion2 from turnos) as sel3 on inscripciones.dos=sel3.idt2 left join(select id_inscripcion, id_turno from cursado) as sel8 on inscripciones.id=sel8.id_inscripcion left join(select id as idttt,descripcion as descripcursado from turnos) as sel9 on sel8.id_turno=sel9.idttt where edicion=6')
+  inscriptos = await pool.query('select * from inscripciones_carnaval join (select dni, nombre, apellido,categoria,id as idp,tel,tel2 from personas) as sel on inscripciones_carnaval.id_persona=sel.idp where id>590')
   
   deuda_exigible = []
   datos33={}
@@ -948,7 +948,7 @@ const {id} = req.body
 
 
 
-  await pool.query('delete from inscripciones where id= ?',[id])
+  await pool.query('delete from inscripciones_carnaval where id= ?',[id])
 
   res.json('Realizado')
 
