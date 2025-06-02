@@ -315,6 +315,17 @@ router.get('/act-excel', async (req, res) => {
 });
 
 
+router.get('/traerestadisticastaller/:id', async (req, res) => {
+  const id = req.params.id;
+
+
+  const enviar = await pool.query('select * from dtc_clases_taller join (select id_clase from dtc_asistencia_clase) as sel on dtc_clases_taller.id=sel.id_clase where id_tallerista=?',[id])
+
+
+  res.json(enviar)
+
+})
+
 
 router.get('/eliminartodosloshorariosdeusuario/:id', async (req, res) => {
   let id = req.params.id;
