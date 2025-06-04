@@ -240,7 +240,7 @@ router.get('/todasincripciones', async (req, res,) => {
     //  let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco, telefono,telefono2 from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona left join (select id as id_aliado, nombre as nombre_aliado from usuarios)  as selec2 on inscripciones_fiscales.cargadopor=selec2.id_aliado  where inscripciones_fiscales.estado="Pendiente" ')
 
     //
-    let inscri2 = await pool.query('select * from inscripciones_fiscales ')
+    let inscri2 = await pool.query('select * from inscripciones_fiscales  where edicion=2025')
 
     //
 
@@ -1930,8 +1930,8 @@ router.post("/enviarinscripcionadmin", async (req, res) => {
             apellido_referido = 'Sin definir'
         }
 
-        existe = await pool.query('select * from personas_fiscalizacion where dni = ?', [dni])
-        let nombre_aliado = ''
+        existe = await pool.query('select * from personas_fiscalizacion where dni = ? ', [dni])
+     
         if (id_aliado == undefined) {
             id_aliado = 'Autoinscripcion'
         }
@@ -1968,19 +1968,19 @@ router.post("/enviarinscripcionadmin", async (req, res) => {
         /////////////Tipo de empleo
 
 
-        let telefonoregistrado = await pool.query('select * from inscripciones_fiscales2 join (select dni as dni_pers, telefono, telefono2 from personas_fiscalizacion) as selec on inscripciones_fiscales2.dni = selec.dni_pers where  telefono=? ', [telefono])
+        let telefonoregistrado = await pool.query('select * from inscripciones_fiscales join (select dni as dni_pers, telefono, telefono2 from personas_fiscalizacion) as selec on inscripciones_fiscales.dni = selec.dni_pers where  telefono=? ', [telefono])
         if (telefonoregistrado.length > 0 && dni != "Sin definir") {
             let dnicodif = telefonoregistrado[0]['dni']
             dnicodif = '****' + dnicodif[dnicodif.length - 3] + dnicodif[dnicodif.length - 2] + dnicodif[dnicodif.length - 1]
             res.json('Error ya se posee ese numero de telefono, pertenece a ' + dnicodif)
         } else {
-            let exisinscrip = await pool.query('select * from inscripciones_fiscales2 where  dni=? ', [dni])
-
+            let exisinscrip = await pool.query('select * from inscripciones_fiscales where  dni=? and edicion=2025 ', [dni])
+console.log(exisinscrip)
             if (exisinscrip.length > 0 && dni != "Sin definir") {
                 res.json('Error fiscal ya inscripto')
             } else {
 
-                await pool.query('INSERT INTO inscripciones_fiscales2 set  nombre=?,apellido=?, dni=?, cargadopor=?, fecha_carga=?,como_se_entero=?,apellido_referido=?,nombre_referido=?', [nombre, apellido, dni, id_aliado, (new Date(Date.now())).toLocaleDateString(), como_se_entero, apellido_referido, nombre_referido])
+                await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?, cargadopor=?, fecha_carga=?,como_se_entero=?,apellido_referido=?,nombre_referido=?,edicion=2025', [nombre, apellido, dni, id_aliado, (new Date(Date.now())).toLocaleDateString(), como_se_entero, apellido_referido, nombre_referido])
                 res.json('inscripto correctamente, muchas gracias por completar, por favor aguarda en unos dias nos comunicaremos al numero de telefono registrado')
             }
         }
@@ -2104,13 +2104,13 @@ router.post("/enviarinscripcion", async (req, res) => {
         /////////////Tipo de empleo
 
 
-        let telefonoregistrado = await pool.query('select * from inscripciones_fiscales2 join (select dni as dni_pers, telefono, telefono2 from personas_fiscalizacion) as selec on inscripciones_fiscales2.dni = selec.dni_pers where  telefono = ? ', [telefono])
+        let telefonoregistrado = await pool.query('select * from inscripciones_fiscales join (select dni as dni_pers, telefono, telefono2 from personas_fiscalizacion) as selec on inscripciones_fiscales.dni = selec.dni_pers where  telefono = ? and edicion=2025 ', [telefono])
         if (telefonoregistrado.length > 0) {
             let dnicodif = telefonoregistrado[0]['dni']
             dnicodif = '****' + dnicodif[dnicodif.length - 3] + dnicodif[dnicodif.length - 2] + dnicodif[dnicodif.length - 1]
             res.json('Error ya se posee ese numero de telefono, pertenece a ' + dnicodif)
         } else {
-            let exisinscrip = await pool.query('select * from inscripciones_fiscales2 where  dni=? ', [dni])
+            let exisinscrip = await pool.query('select * from inscripciones_fiscales where  dni=? and edicion=2025 ', [dni])
 
             if (exisinscrip.length > 0) {
                 res.json('Error fiscal ya inscripto')
@@ -2138,7 +2138,7 @@ router.post("/enviarinscripcion", async (req, res) => {
 
                 }
 
-                await pool.query('INSERT INTO inscripciones_fiscales2 set  nombre=?,apellido=?, dni=?, cargadopor=?, fecha_carga=?,como_se_entero=?,apellido_referido=?,nombre_referido=?,asignado_ant=?,pres_ant=?', [nombre, apellido, dni, id_aliado, (new Date(Date.now())).toLocaleDateString(), como_se_entero, apellido_referido, nombre_referido, asignado_ant, press])
+                await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?, cargadopor=?, fecha_carga=?,como_se_entero=?,apellido_referido=?,nombre_referido=?,edicion=2025', [nombre, apellido, dni, id_aliado, (new Date(Date.now())).toLocaleDateString(), como_se_entero, apellido_referido, nombre_referido])
                 res.json('inscripto correctamente, muchas gracias por completar, por favor aguarda en unos dias nos comunicaremos al numero de telefono registrado')
             }
         }
