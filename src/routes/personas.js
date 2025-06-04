@@ -1241,14 +1241,14 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
 
     }
     pers = await pool.query('select * from personas where dni =?', [dni])
-    const yainsc = await pool.query('select * from inscripciones_carnaval where id_persona =? and id>590 and detalle=?', [pers[0]['id'],"JUEVES  05/06 Barrio Sur Lamadrid1528"])
+    const yainsc = await pool.query('select * from inscripciones_carnaval where id_persona =? and id>590 and detalle=?', [pers[0]['id'],"BARRIO: SANTA TERESITA"])
     let mensaje = ''
     if (yainsc.length > 0) {
       mensaje = 'Con estos datos ya tenemos una inscripción, no hace falta que te vuelvas a anotar. Por favor aguarda nuestro contacto.'
     }
     else {
       fecha = (new Date(Date.now()))
-      await pool.query('insert into inscripciones_carnaval set fecha=?,dni_persona=?,id_persona=?', [fecha, dni, pers[0]['id']])
+      await pool.query('insert into inscripciones_carnaval set fecha=?,dni_persona=?,id_persona=?, detalle=?', [fecha, dni, pers[0]['id'],"BARRIO: SANTA TERESITA"])
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto'
     }
 
