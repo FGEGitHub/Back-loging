@@ -3415,7 +3415,7 @@ router.post("/traerdatosdeclasehorausuario/", async (req, res) => {
         AND dtc_asistencia_clase.id_clase = ? 
       WHERE dtc_cursado.dia = ? 
         AND dtc_cursado.hora = ? 
-        AND dtc_cursado.id_curso = ?`,
+        AND dtc_cursado.id_curso = ? order by apellido`,
       [id_clase, dia, hora, id_taller]
     );
 try {   
@@ -4619,7 +4619,7 @@ router.post("/sacarturno", async (req, res) => {
 router.post("/ponerpresente", async (req, res) => {
   let { fecha, id, id_tallerista } = req.body
   const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
-
+console.log(123)
   console.log("La hora actual en Buenos Aires es:", horaBuenosAires);
   
   id_tallerista = 238
