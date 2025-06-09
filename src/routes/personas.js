@@ -1227,39 +1227,59 @@ router.post("/agregarobservacion", async (req, res) => {
 
 
 })
-
-
 router.post("/enviarinscripcioncarnaval", async (req, res) => {
-  let {   nombre, apellido, dni, tel, localidad, fecha_nac,  direccion, barrio } = req.body
-  
+  let {
+    nombre, apellido, dni, tel, localidad, fecha_nac,
+    direccion, barrio, alumna_anterior, enseniar = '', tiene_espacio, curso_adic, profesion
+  } = req.body;
+
   try {
-    let pers = await pool.query('select * from personas where dni =?', [dni])
+    let pers = await pool.query('SELECT * FROM personas WHERE dni = ?', [dni]);
+
     if (pers.length > 0) {
-      await pool.query('update personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, direccion=?,barrio=?,localidad=? where dni=? ', [fecha_nac, nombre, apellido, dni, tel, direccion, barrio,localidad,  dni])
+      await pool.query(
+        'UPDATE personas SET fecha_nac = ?, nombre = ?, apellido = ?, dni = ?, tel = ?, direccion = ?, barrio = ?, localidad = ? WHERE dni = ?',
+        [fecha_nac, nombre, apellido, dni, tel, direccion, barrio, localidad, dni]
+      );
     } else {
-      await pool.query('insert into personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?,direccion=?,barrio=?,localidad=? ', [fecha_nac, nombre, apellido, dni, tel, direccion, barrio, localidad])
-
+      await pool.query(
+        'INSERT INTO personas SET fecha_nac = ?, nombre = ?, apellido = ?, dni = ?, tel = ?, direccion = ?, barrio = ?, localidad = ?',
+        [fecha_nac, nombre, apellido, dni, tel, direccion, barrio, localidad]
+      );
     }
-    pers = await pool.query('select * from personas where dni =?', [dni])
-    const yainsc = await pool.query('select * from inscripciones_carnaval where id_persona =? and id>590 and detalle=?', [pers[0]['id'],"MIERCOLES 11 de junio Juan de Vera"])
-    let mensaje = ''
+
+    pers = await pool.query('SELECT * FROM personas WHERE dni = ?', [dni]);
+
+    const yainsc = await pool.query(
+      'SELECT * FROM inscripciones_carnaval WHERE id_persona = ? AND id > 590 AND detalle = ?',
+      [pers[0]['id'], "Express dia del padre"]
+    );
+
+    let mensaje = '';
+
     if (yainsc.length > 0) {
-      mensaje = 'Con estos datos ya tenemos una inscripción, no hace falta que te vuelvas a anotar. Por favor aguarda nuestro contacto.'
-    }
-    else {
-      fecha = (new Date(Date.now()))
-      await pool.query('insert into inscripciones_carnaval set fecha=?,dni_persona=?,id_persona=?, detalle=?', [fecha, dni, pers[0]['id'],"MIERCOLES 11 de junio Juan de Vera"])
-      mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto'
+      mensaje = 'Con estos datos ya tenemos una inscripción, no hace falta que te vuelvas a anotar. Por favor aguarda nuestro contacto.';
+    } else {
+      const fecha = new Date();
+
+      await pool.query(
+        `INSERT INTO inscripciones_carnaval 
+         SET fecha = ?, dni_persona = ?, id_persona = ?, detalle = ?, 
+             alumna_anterior = ?, enseniar = ?, tiene_espacio = ?, curso_adic = ?, profesion = ?`,
+        [fecha, dni, pers[0]['id'], "Express dia del padre", alumna_anterior, enseniar, tiene_espacio, curso_adic,profesion]
+      );
+
+      mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto';
     }
 
-
-    res.json(mensaje)
+    res.json(mensaje);
 
   } catch (error) {
-    console.log(error)
-    res.json('Error algo sucedio, verifica que hayas completado todos los campos')
+    console.log(error);
+    res.json('Error: algo sucedió, verificá que hayas completado todos los campos');
   }
-})
+});
+
 
 router.post("/enviarinscripcion", async (req, res) => {
   let { nombre, apellido, dni, tel, tel2, fecha_nac, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, participante_feria, motivacion } = req.body
