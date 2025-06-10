@@ -1230,7 +1230,7 @@ router.post("/agregarobservacion", async (req, res) => {
 router.post("/enviarinscripcioncarnaval", async (req, res) => {
   let {
     nombre, apellido, dni, tel, localidad, fecha_nac,
-    direccion, barrio, alumna_anterior, enseniar = '', tiene_espacio, curso_adic, profesion
+    direccion, barrio, alumna_anterior, enseniar = '', tiene_espacio, curso_adic, profesion, curso
   } = req.body;
 
   try {
@@ -1265,8 +1265,8 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
       await pool.query(
         `INSERT INTO inscripciones_carnaval 
          SET fecha = ?, dni_persona = ?, id_persona = ?, detalle = ?, 
-             alumna_anterior = ?, enseniar = ?, tiene_espacio = ?, curso_adic = ?, profesion = ?`,
-        [fecha, dni, pers[0]['id'], "Express dia del padre", alumna_anterior, enseniar, tiene_espacio, curso_adic,profesion]
+             alumna_anterior = ?, enseniar = ?, tiene_espacio = ?, curso_adic = ?, profesion = ?, curso = ?`,
+        [fecha, dni, pers[0]['id'], "Express dia del padre", alumna_anterior, enseniar, tiene_espacio, curso_adic,profesion,curso]
       );
 
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto';
