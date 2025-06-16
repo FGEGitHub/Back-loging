@@ -1252,7 +1252,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
 
     const yainsc = await pool.query(
       'SELECT * FROM inscripciones_carnaval WHERE id_persona = ? AND id > 590 AND detalle = ?',
-      [pers[0]['id'], "Express dia del padre"]
+      [pers[0]['id'], "Comidas tipicas//pastas"]
     );
 
     let mensaje = '';
@@ -1266,7 +1266,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
         `INSERT INTO inscripciones_carnaval 
          SET fecha = ?, dni_persona = ?, id_persona = ?, detalle = ?, 
              alumna_anterior = ?, enseniar = ?, tiene_espacio = ?, curso_adic = ?, profesion = ?, curso = ?`,
-        [fecha, dni, pers[0]['id'], "Express dia del padre", alumna_anterior, enseniar, tiene_espacio, curso_adic,profesion,curso]
+        [fecha, dni, pers[0]['id'], "Comidas tipicas//pastas", alumna_anterior, enseniar, tiene_espacio, curso_adic,profesion,curso]
       );
 
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto';
