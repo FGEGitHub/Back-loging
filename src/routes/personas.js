@@ -1230,7 +1230,7 @@ router.post("/agregarobservacion", async (req, res) => {
 router.post("/enviarinscripcioncarnaval", async (req, res) => {
   let {
     nombre, apellido, dni, tel, localidad, fecha_nac,
-    direccion, barrio, alumna_anterior, enseniar = '', tiene_espacio, curso_adic, profesion, curso
+    direccion, barrio, curso
   } = req.body;
 
   try {
@@ -1252,7 +1252,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
 
     const yainsc = await pool.query(
       'SELECT * FROM inscripciones_carnaval WHERE id_persona = ? AND id > 590 AND detalle = ?',
-      [pers[0]['id'], "Comidas tipicas//pastas"]
+      [pers[0]['id'], "Operativo Oftalmologico"]
     );
 
     let mensaje = '';
@@ -1265,8 +1265,8 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
       await pool.query(
         `INSERT INTO inscripciones_carnaval 
          SET fecha = ?, dni_persona = ?, id_persona = ?, detalle = ?, 
-             alumna_anterior = ?, enseniar = ?, tiene_espacio = ?, curso_adic = ?, profesion = ?, curso = ?`,
-        [fecha, dni, pers[0]['id'], "Comidas tipicas//pastas", alumna_anterior, enseniar, tiene_espacio, curso_adic,profesion,curso]
+              curso = ?`,
+        [fecha, dni, pers[0]['id'], "Operativo Oftalmologico", curso]
       );
 
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto';
