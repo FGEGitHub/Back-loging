@@ -1235,7 +1235,8 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
     tiene_espacio = "No",
     enseniar = "No",
     curso_adic = "No",
-    profesion = "No"
+    profesion = "No",
+    agregar_whatsap= "No"
   } = req.body;
 
   // Normalizar campos vacíos
@@ -1244,6 +1245,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
   enseniar = enseniar || "No";
   curso_adic = curso_adic || "No";
   profesion = profesion || "No";
+  agregar_whatsap= agregar_whatsap|| "No";
 
   try {
     // Verificar si ya existe la persona
@@ -1283,9 +1285,9 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
 
       await pool.query(
         `INSERT INTO inscripciones_carnaval 
-         (fecha, dni_persona, id_persona, detalle,  alumna_anterior, tiene_espacio, enseniar, curso_adic, profesion)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [fecha, dni, pers[0]['id'], "Botox capilar( alisado)", alumna_anterior, tiene_espacio, enseniar, curso_adic, profesion]
+         (fecha, dni_persona, id_persona, detalle,  alumna_anterior, tiene_espacio, enseniar, curso_adic, profesion, agregar_whatsap)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [fecha, dni, pers[0]['id'], "Botox capilar( alisado)", alumna_anterior, tiene_espacio, enseniar, curso_adic, profesion,agregar_whatsap]
       );
 
       mensaje = 'Inscripción realizada, te pedimos que aguardes contacto';
