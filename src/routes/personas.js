@@ -1230,29 +1230,48 @@ router.post("/agregarobservacion", async (req, res) => {
 router.post("/enviarinscripcioncarnaval", async (req, res) => {
   let {
     nombre, apellido, dni, tel, localidad, fecha_nac,
-    direccion, barrio, curso
+    direccion, barrio, curso,
+    alumna_anterior = "No",
+    tiene_espacio = "No",
+    enseniar = "No",
+    curso_adic = "No",
+    profesion = "No"
   } = req.body;
 
+  // Normalizar campos vacíos
+  alumna_anterior = alumna_anterior || "No";
+  tiene_espacio = tiene_espacio || "No";
+  enseniar = enseniar || "No";
+  curso_adic = curso_adic || "No";
+  profesion = profesion || "No";
+
   try {
+    // Verificar si ya existe la persona
     let pers = await pool.query('SELECT * FROM personas WHERE dni = ?', [dni]);
 
     if (pers.length > 0) {
       await pool.query(
-        'UPDATE personas SET fecha_nac = ?, nombre = ?, apellido = ?, dni = ?, tel = ?, direccion = ?, barrio = ?, localidad = ? WHERE dni = ?',
+        `UPDATE personas 
+         SET fecha_nac = ?, nombre = ?, apellido = ?, dni = ?, tel = ?, direccion = ?, barrio = ?, localidad = ? 
+         WHERE dni = ?`,
         [fecha_nac, nombre, apellido, dni, tel, direccion, barrio, localidad, dni]
       );
     } else {
       await pool.query(
-        'INSERT INTO personas SET fecha_nac = ?, nombre = ?, apellido = ?, dni = ?, tel = ?, direccion = ?, barrio = ?, localidad = ?',
+        `INSERT INTO personas 
+         (fecha_nac, nombre, apellido, dni, tel, direccion, barrio, localidad) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [fecha_nac, nombre, apellido, dni, tel, direccion, barrio, localidad]
       );
     }
 
+    // Obtener persona actualizada o creada
     pers = await pool.query('SELECT * FROM personas WHERE dni = ?', [dni]);
 
+    // Verificar si ya está inscripta
     const yainsc = await pool.query(
       'SELECT * FROM inscripciones_carnaval WHERE id_persona = ? AND id > 590 AND detalle = ?',
-      [pers[0]['id'], "Operativo Oftalmologico"]
+      [pers[0]['id'], "Botox capilar( alisado)"]
     );
 
     let mensaje = '';
@@ -1264,12 +1283,12 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
 
       await pool.query(
         `INSERT INTO inscripciones_carnaval 
-         SET fecha = ?, dni_persona = ?, id_persona = ?, detalle = ?, 
-              curso = ?`,
-        [fecha, dni, pers[0]['id'], "Operativo Oftalmologico", curso]
+         (fecha, dni_persona, id_persona, detalle,  alumna_anterior, tiene_espacio, enseniar, curso_adic, profesion)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [fecha, dni, pers[0]['id'], "Botox capilar( alisado)", alumna_anterior, tiene_espacio, enseniar, curso_adic, profesion]
       );
 
-      mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto';
+      mensaje = 'Inscripción realizada, te pedimos que aguardes contacto';
     }
 
     res.json(mensaje);
@@ -1279,6 +1298,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
     res.json('Error: algo sucedió, verificá que hayas completado todos los campos');
   }
 });
+
 
 
 router.post("/enviarinscripcion", async (req, res) => {
