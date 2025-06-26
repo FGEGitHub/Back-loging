@@ -639,25 +639,46 @@ router.get('/listaexpedientes/', async (req, res) => {
 
 router.get('/listadepersonaspsiq/', async (req, res) => {
   try {
-    const chiques = await pool.query(`
-      SELECT 
-        dtc_personas_psicologa.*, 
-        COALESCE(sel.cantidadturnos, 0) AS cantidadturnos 
-      FROM 
-        dtc_personas_psicologa 
-      LEFT JOIN (
-        SELECT 
-          id_persona, 
-          COUNT(id_persona) AS cantidadturnos 
-        FROM 
-          dtc_turnos 
-        GROUP BY 
-          id_persona
-      ) AS sel 
-      ON dtc_personas_psicologa.id = sel.id_persona 
-      ORDER BY 
-        cantidadturnos desc, apellido 
-    `);
+const chiques = await pool.query(`
+  SELECT 
+    dp.id,
+    dp.nombre,
+    dp.apellido,
+    'psicologa' AS tipo,
+    COALESCE(sel.cantidadturnos, 0) AS cantidadturnos
+  FROM dtc_personas_psicologa dp
+  LEFT JOIN (
+    SELECT 
+      id_persona, 
+      COUNT(*) AS cantidadturnos
+    FROM dtc_turnos
+    WHERE usuariodispositivo = 'No'
+    GROUP BY id_persona
+  ) AS sel
+  ON dp.id = sel.id_persona
+
+  UNION ALL
+
+  SELECT 
+    dc.id,
+    dc.nombre,
+    dc.apellido,
+    'chico' AS tipo,
+    COALESCE(sel2.cantidadturnos, 0) AS cantidadturnos
+  FROM dtc_chicos dc
+ JOIN (
+    SELECT 
+      id_persona, 
+      COUNT(*) AS cantidadturnos
+    FROM dtc_turnos
+    WHERE usuariodispositivo = 'Si'
+    GROUP BY id_persona
+  ) AS sel2
+  ON dc.id = sel2.id_persona
+
+  ORDER BY cantidadturnos DESC, apellido
+`);
+
 
     // Convierte BigInt a número o cadena
     const chiquesFormatted = chiques.map(row => {
@@ -4920,71 +4941,84 @@ router.post("/ponerausenteclase", async (req, res) => {
     //usuarios2 = await pool.query("select * from dtc_chicos left join (select fecha, id_persona , id_psico from dtc_turnos  where fecha=? and  (usuariodispositivo='Si') ) as sel on dtc_chicos.id=sel.id_persona l ", [fecha])
    
     const usuarios = await pool.query(`
-      SELECT 
-          p.*, 
-          t_max.fecha, 
-          u.nombrepsic
-      FROM dtc_personas_psicologa p
-      LEFT JOIN (
-          SELECT id_persona, id_psico, MAX(fecha) as fecha
-          FROM dtc_turnos
-          GROUP BY id_persona, id_psico
-      ) t_max ON p.id = t_max.id_persona
-      LEFT JOIN (
-          SELECT id as idu, nombre as nombrepsic
-          FROM usuarios
-      ) u ON t_max.id_psico = u.idu
-      WHERE NOT EXISTS (
-          SELECT 1 FROM (
-              SELECT id_persona, id_psico, COUNT(*) as cantidad
-              FROM dtc_turnos
-              GROUP BY id_persona, id_psico
-          ) t2
-          WHERE t2.id_persona = t_max.id_persona
-            AND t2.id_psico != t_max.id_psico
-            AND t2.cantidad > (
-                SELECT COUNT(*) FROM dtc_turnos t3
-                WHERE t3.id_persona = t_max.id_persona
-                  AND t3.id_psico = t_max.id_psico
-            )
+SELECT 
+  p.id,
+  p.nombre,
+  p.apellido,
+  t_max.fecha,
+  u.nombrepsic,
+  'No' AS usuariodispositivo
+FROM dtc_personas_psicologa p
+LEFT JOIN (
+    SELECT id_persona, id_psico, MAX(fecha) as fecha
+    FROM dtc_turnos
+    WHERE usuariodispositivo = 'No'
+    GROUP BY id_persona, id_psico
+) t_max ON p.id = t_max.id_persona
+LEFT JOIN (
+    SELECT id as idu, nombre as nombrepsic
+    FROM usuarios
+) u ON t_max.id_psico = u.idu
+WHERE NOT EXISTS (
+    SELECT 1 FROM (
+        SELECT id_persona, id_psico, COUNT(*) as cantidad
+        FROM dtc_turnos
+        WHERE usuariodispositivo = 'No'
+        GROUP BY id_persona, id_psico
+    ) t2
+    WHERE t2.id_persona = t_max.id_persona
+      AND t2.id_psico != t_max.id_psico
+      AND t2.cantidad > (
+          SELECT COUNT(*) FROM dtc_turnos t3
+          WHERE t3.id_persona = t_max.id_persona
+            AND t3.id_psico = t_max.id_psico
+            AND t3.usuariodispositivo = 'No'
       )
-      ORDER BY p.apellido;
-      `);
-      const usuarios2 = await pool.query(`
-        SELECT 
-            c.*, 
-            t_max.fecha, 
-            u.nombrepsic
-        FROM dtc_chicos c
-        LEFT JOIN (
-            SELECT id_persona, id_psico, MAX(fecha) as fecha
-            FROM dtc_turnos
-            WHERE usuariodispositivo = 'Si'
-            GROUP BY id_persona, id_psico
-        ) t_max ON c.id = t_max.id_persona
-        LEFT JOIN (
-            SELECT id as idu, nombre as nombrepsic
-            FROM usuarios
-        ) u ON t_max.id_psico = u.idu
-        WHERE NOT EXISTS (
-            SELECT 1 FROM (
-                SELECT id_persona, id_psico, COUNT(*) as cantidad
-                FROM dtc_turnos
-                WHERE usuariodispositivo = 'Si'
-                GROUP BY id_persona, id_psico
-            ) t2
-            WHERE t2.id_persona = t_max.id_persona
-              AND t2.id_psico != t_max.id_psico
-              AND t2.cantidad > (
-                  SELECT COUNT(*) FROM dtc_turnos t3
-                  WHERE t3.id_persona = t_max.id_persona
-                    AND t3.id_psico = t_max.id_psico
-                    AND t3.usuariodispositivo = 'Si'
-              )
-        );
-        `);
+)
+
+UNION ALL
+
+SELECT 
+  c.id,
+  c.nombre,
+  c.apellido,
+  t_max.fecha,
+  u.nombrepsic,
+  'Si' AS usuariodispositivo
+FROM dtc_chicos c
+LEFT JOIN (
+    SELECT id_persona, id_psico, MAX(fecha) as fecha
+    FROM dtc_turnos
+    WHERE usuariodispositivo = 'Si'
+    GROUP BY id_persona, id_psico
+) t_max ON c.id = t_max.id_persona
+LEFT JOIN (
+    SELECT id as idu, nombre as nombrepsic
+    FROM usuarios
+) u ON t_max.id_psico = u.idu
+WHERE NOT EXISTS (
+    SELECT 1 FROM (
+        SELECT id_persona, id_psico, COUNT(*) as cantidad
+        FROM dtc_turnos
+        WHERE usuariodispositivo = 'Si'
+        GROUP BY id_persona, id_psico
+    ) t2
+    WHERE t2.id_persona = t_max.id_persona
+      AND t2.id_psico != t_max.id_psico
+      AND t2.cantidad > (
+          SELECT COUNT(*) FROM dtc_turnos t3
+          WHERE t3.id_persona = t_max.id_persona
+            AND t3.id_psico = t_max.id_psico
+            AND t3.usuariodispositivo = 'Si'
+      )
+)
+
+ORDER BY apellido;
+
+`);
+
        
-    res.json([resultado, usuarios,usuarios2])
+    res.json([resultado, usuarios,usuarios])
   } catch (error) {
     console.log(error)
     res.json(['Error', 'error'])
