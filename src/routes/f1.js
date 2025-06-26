@@ -34,17 +34,7 @@ router.post("/crearpartido", async (req, res) => {
       tipofutbol,
       sebusca
     } = req.body;
-console.log(   usuario_id,
-      cancha,
-      barrio,
-      ciudad,     
-      fecha,
-      hora,
-      tipo,
-      cupo,
-      nivel,
-      tipofutbol,
-      sebusca)
+
     let cancha_id = cancha;
 
     if (barrio && ciudad) {
@@ -147,7 +137,7 @@ router.post("/sumarsepartido", async (req, res) => {
 });
 
 
-
+/////postularse a un equipo
 router.post("/enviarConvocatoria", async (req, res) => {
   const { id_partido, id_usuario } = req.body;
 
@@ -176,6 +166,13 @@ router.post("/enviarConvocatoria", async (req, res) => {
     res.status(500).json({ error: "Error al enviar la solicitud" });
   }
 });
+
+
+router.post("/convocarajugador", async (req, res) => {
+  const { id_partido, id_usuario } = req.body;
+
+})
+
 
 
 router.post("/traernotificaciones", async (req, res) => {
@@ -262,7 +259,7 @@ router.post('/marcarPendiente', async (req, res) => {
 
 
 router.post('/traerJugadores', async (req, res) => {
-  const { id } = req.body;
+ 
   try {
    respuesta =  await pool.query('select * from usuarios')
     res.status(200).json(respuesta);

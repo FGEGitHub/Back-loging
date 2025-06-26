@@ -3190,6 +3190,7 @@ router.get('/traerasitenciasociales', async (req, res) => {
       LEFT JOIN dtc_personas_psicologa AS dpp 
         ON das.id_usuario = dpp.id 
         AND das.usuariodispositivo = 'No'
+      ORDER BY das.fecha_referencia DESC
     `;
 
     const existe = await pool.query(consulta);
@@ -3199,6 +3200,7 @@ router.get('/traerasitenciasociales', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener las asistencias sociales' });
   }
 });
+
 
 
 /*
