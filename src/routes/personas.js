@@ -1227,7 +1227,7 @@ router.post("/agregarobservacion", async (req, res) => {
 
 
 })
-router.post("/enviarinscripcioncarnaval", async (req, res) => {
+/* router.post("/enviarinscripcioncarnaval", async (req, res) => {
   let {
     nombre, apellido, dni, tel, localidad, fecha_nac,
     direccion, barrio, curso,
@@ -1299,9 +1299,81 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
     console.log(error);
     res.json('Error: algo sucedió, verificá que hayas completado todos los campos');
   }
+}); */
+
+router.post("/enviarinscripcioncarnaval", async (req, res) => {
+  let {
+    nombre, apellido, dni, tel, localidad, fecha_nac,
+    direccion, barrio, curso,
+    alumna_anterior = "No",
+    tiene_espacio = "No",
+    enseniar = "No",
+    curso_adic = "No",
+    profesion = "No",
+    agregar_whatsap= "No"
+  } = req.body;
+
+  // Normalizar campos vacíos
+  alumna_anterior = alumna_anterior || "No";
+  tiene_espacio = tiene_espacio || "No";
+  enseniar = enseniar || "No";
+  curso_adic = curso_adic || "No";
+  profesion = profesion || "No";
+  agregar_whatsap= agregar_whatsap|| "No";
+
+  try {
+    // Verificar si ya existe la persona
+    let pers = await pool.query('SELECT * FROM personas WHERE dni = ?', [dni]);
+
+    if (pers.length > 0) {
+      await pool.query(
+        `UPDATE personas 
+         SET fecha_nac = ?, nombre = ?, apellido = ?, dni = ?, tel = ?, direccion = ?, barrio = ?, localidad = ? 
+         WHERE dni = ?`,
+        [fecha_nac, nombre, apellido, dni, tel, direccion, barrio, localidad, dni]
+      );
+    } else {
+      await pool.query(
+        `INSERT INTO personas 
+         (fecha_nac, nombre, apellido, dni, tel, direccion, barrio, localidad) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [fecha_nac, nombre, apellido, dni, tel, direccion, barrio, localidad]
+      );
+    }
+
+    // Obtener persona actualizada o creada
+    pers = await pool.query('SELECT * FROM personas WHERE dni = ?', [dni]);
+
+    // Verificar si ya está inscripta
+    const yainsc = await pool.query(
+      'SELECT * FROM inscripciones_carnaval WHERE id_persona = ? AND id > 590 AND detalle = ?',
+      [pers[0]['id'], "Operativo oftalmologico julio"]
+    );
+
+    let mensaje = '';
+
+    if (yainsc.length > 0) {
+      mensaje = 'Con estos datos ya tenemos una inscripción, no hace falta que te vuelvas a anotar. Por favor aguarda nuestro contacto.';
+    } else {
+      const fecha = new Date();
+
+      await pool.query(
+        `INSERT INTO inscripciones_carnaval 
+         (fecha, dni_persona, id_persona, detalle,  curso)
+         VALUES (?, ?, ?, ?, ?)`,
+        [fecha, dni, pers[0]['id'], "Operativo oftalmologico julio", curso]
+      );
+
+      mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto';
+    }
+
+    res.json(mensaje);
+
+  } catch (error) {
+    console.log(error);
+    res.json('Error: algo sucedió, verificá que hayas completado todos los campos');
+  }
 });
-
-
 
 router.post("/enviarinscripcion", async (req, res) => {
   let { nombre, apellido, dni, tel, tel2, fecha_nac, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, participante_feria, motivacion } = req.body
