@@ -327,6 +327,35 @@ router.get('/traerestadisticastaller/:id', async (req, res) => {
 })
 
 
+router.get('/traerestadisticastodas/', async (req, res) => {
+
+  
+///cantidad de usuarios del dispositovo
+  const chicos = await pool.query('select * from dtc_chicos')
+///cantidad de asistencias 
+const asistencias2025 = await pool.query(`
+  SELECT fecha
+  FROM dtc_asistencia 
+  WHERE fecha LIKE '2025-%'
+`);
+
+
+// cantidad de pacientes
+  const pacientes = await pool.query('select * from dtc_chicos')
+// cantidadde  turnos
+const turnos = await pool.query(`
+  SELECT fecha
+  FROM dtc_turnos 
+  WHERE fecha LIKE '2025-%'
+`);
+
+
+
+
+  res.json([chicos,asistencias2025,pacientes,turnos])
+
+})
+
 router.get('/eliminartodosloshorariosdeusuario/:id', async (req, res) => {
   let id = req.params.id;
   try {
@@ -5017,7 +5046,7 @@ ORDER BY apellido;
 
 `);
 
-       
+       console.log(usuarios)
     res.json([resultado, usuarios,usuarios])
   } catch (error) {
     console.log(error)
