@@ -7,7 +7,8 @@ const path = require('path')
 const fse = require('fs').promises;
 const fs = require('fs');
 
-
+////solicitado== se suma al partido
+////convocado,= s enevia a un juagdor la invitacion
 const storage = multer.diskStorage({
   destination: path.join(__dirname, '../imagenesvendedoras'),
   filename: (req, file, cb) => {
@@ -84,6 +85,19 @@ router.get('/traercanchas', async (req, res) => {
 res.json(productosdeunapersona)
 
 })
+
+router.get('/traerligas', async (req, res) => {
+ 
+
+  const productosdeunapersona = await pool.query('select * from ligas order by nombre')
+ 
+res.json(productosdeunapersona)
+
+})
+
+
+
+
 router.post('/traerpartidos', async (req, res) => {
   const { id_usuario } = req.body;
   try {
@@ -138,40 +152,150 @@ router.post("/sumarsepartido", async (req, res) => {
 
 
 /////postularse a un equipo
-router.post("/enviarConvocatoria", async (req, res) => {
-  const { id_partido, id_usuario } = req.body;
+router.post("/convocarajugador", async (req, res) => {
+  const {
+    jugador_id,
+    convocador_id,
+    fecha,
+    hora,
+    mensaje,
+    pagar,
+    gratis,
+    cancha,
+    nueva_cancha_info
+  } = req.body;
 
   try {
-    console.log("Recibido:", id_partido, id_usuario);
+    let cancha_id = cancha;
 
-    // Verificar si ya existe
-    const existe = await pool.query(
-      "SELECT * FROM sumadas WHERE id_partido = ? AND id_solicitante = ?",
-      [id_partido, id_usuario]
-    );
-
-    if (existe.length > 0) {
-      return res.status(400).json({ mensaje: "Ya te has unido a este partido" });
+    if (
+      nueva_cancha_info &&
+      nueva_cancha_info.nombre &&
+      nueva_cancha_info.barrio &&
+      nueva_cancha_info.ciudad
+    ) {
+      const insertCancha = await pool.query(
+        "INSERT INTO canchas (nombre, barrio, ciudad) VALUES (?, ?, ?)",
+        [
+          nueva_cancha_info.nombre,
+          nueva_cancha_info.barrio,
+          nueva_cancha_info.ciudad
+        ]
+      );
+      cancha_id = insertCancha.insertId;
     }
 
-    // Si no existe, insertamos
+   
+
+    const id_partido = insertPartido.insertId;
+
+    // INSERT en sumadas
     await pool.query(
-      "INSERT INTO sumadas (id_partido, id_solicitante, estado) VALUES (?, ?, ? )",
-      [id_partido, id_usuario,"Invitado"]
+      `INSERT INTO sumadas 
+      (id_partido, id_solicitante, estado, fecha_solicitud) 
+      VALUES (?, ?, ?, NOW())`,
+      [
+        id_partido,
+        jugador_id,
+        'convocado'
+      ]
     );
 
-    res.status(200).json({ mensaje: "Solicitud enviada correctamente" });
+    console.log("Datos registrados:", {
+      id_partido,
+      jugador_id,
+      convocador_id,
+      fecha,
+      hora,
+      mensaje,
+      pagar,
+      gratis,
+      cancha_id,
+      nueva_cancha_info
+    });
+
+    res.json({ status: "ok", id_partido });
+
   } catch (error) {
-    console.error("Error al insertar en sumadas:", error);
-    res.status(500).json({ error: "Error al enviar la solicitud" });
+    console.error("Error al convocar jugador:", error);
+    res.status(500).json({ error: "Error interno" });
   }
 });
 
 
-router.post("/convocarajugador", async (req, res) => {
-  const { id_partido, id_usuario } = req.body;
 
-})
+router.post("/convocarajugadordirecto", async (req, res) => {
+  const {
+    jugador_id,
+    convocador_id,
+    fecha,
+    hora,
+    mensaje,
+    pagar,
+    gratis,
+    cancha,
+    nueva_cancha_info
+  } = req.body;
+
+  try {
+        console.log('convocado')
+    let cancha_id = cancha;
+    console.log('a')
+    // Si envían nueva cancha => insertarla
+    if (
+      nueva_cancha_info &&
+      nueva_cancha_info.nombre &&
+      nueva_cancha_info.barrio &&
+      nueva_cancha_info.ciudad
+    ) {
+      const insertCancha = await pool.query(
+        "INSERT INTO canchas (nombre, barrio, ciudad) VALUES (?, ?, ?)",
+        [
+          nueva_cancha_info.nombre,
+          nueva_cancha_info.barrio,
+          nueva_cancha_info.ciudad
+        ]
+      );
+      cancha_id = insertCancha.insertId;
+    }
+
+    // Insertar convocatoria directa
+
+    await pool.query(
+      `INSERT INTO convocatoria_directa 
+      (estado, jugador_id, convocador_id, mensaje, fecha, hora, fecha_solicitud) 
+      VALUES (?, ?, ?, ?, ?, ?, NOW())`,
+      [
+        'convocado', // valor para columna 'convocatoria_directacol'
+        jugador_id,
+        convocador_id,
+        mensaje || '',
+        fecha || '',
+        hora || ''
+      ]
+    );
+
+    console.log("Datos registrados en convocatoria_directa:", {
+      jugador_id,
+      convocador_id,
+      fecha,
+      hora,
+      mensaje,
+      pagar,
+      gratis,
+      cancha_id,
+      nueva_cancha_info
+    });
+
+    res.json({ status: "ok" });
+
+  } catch (error) {
+    console.error("Error al registrar convocatoria directa:", error);
+    res.status(500).json({ error: "Error interno" });
+  }
+});
+
+
 
 
 
@@ -204,14 +328,20 @@ router.post("/traersolicitudes", async (req, res) => {
   
 
     // Verificar si ya existe
-    const existe = await pool.query(
+  const existe = await pool.query(
       "SELECT * FROM sumadas  join ( select id as idp, id_creador  from partidos) as sel on sumadas.id_partido=idp join (select id as idu, nombre as nombresol, posicion, apodo, fecha_nacimiento, no_pago_cancha,me_sumo_disponible,es_pago  from usuarios )as sel2 on sumadas.id_solicitante=sel2.idu WHERE id_creador = ? ",
       [id]
+
+      
     );
 
+const existedirectas = await pool.query(
+      "SELECT * FROM convocatoria_directa join (select id as idconcovado, nombre as nombreconvocado, apodo from usuarios)as sel on convocatoria_directa.jugador_id=sel.idconcovado WHERE jugador_id = ? or convocador_id = ? ",[id,id]
 
+      
+    );
   
-    res.status(200).json([existe]);
+    res.status(200).json([existe,existedirectas]);
   } catch (error) {
     console.error("Error al insertar en sumadas:", error);
     res.status(500).json({ error: "Error al enviar la solicitud" });
@@ -240,6 +370,19 @@ router.post('/rechazar', async (req, res) => {
     res.status(500).json({ error: 'Error al rechazar solicitud' });
   }
 });
+
+////
+router.post("/cancelarconvocatoria", async (req, res) => {
+  const { id } = req.body;
+  try {
+    await pool.query("DELETE FROM convocatoria_directa WHERE id = ?", [id]);
+    res.json({ status: "ok" });
+  } catch (error) {
+    console.error("Error al cancelar convocatoria:", error);
+    res.status(500).json({ error: "Error al cancelar convocatoria" });
+  }
+});
+
 
 // Reestablecer estado (pendiente o solicitado)
 router.post('/marcarPendiente', async (req, res) => {
