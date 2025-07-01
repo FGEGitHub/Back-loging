@@ -341,7 +341,21 @@ const asistencias2025 = await pool.query(`
 
 
 // cantidad de pacientes
-  const pacientes = await pool.query('select * from dtc_personas_psicologa')
+ const pacientes = await pool.query('select * from dtc_personas_psicologa')
+/* const pacientes = await pool.query(`
+  SELECT id
+
+  UNION
+
+  SELECT id
+  FROM dtc_chicos c
+  WHERE EXISTS (
+    SELECT 1
+    FROM dtc_turnos t
+    WHERE t.id_persona = c.id AND t.usuariodispositivo = 'Si'
+  )
+`); */
+
 // cantidadde  turnos
 const turnos = await pool.query(`
   SELECT fecha
@@ -362,7 +376,12 @@ const merienda = await pool.query(`
   FROM dtc_meriendas 
   WHERE fecha LIKE '2025-%'
 `);
-  res.json([chicos,asistencias2025,pacientes,turnos,gimnasio,colacion,merienda])         
+
+const asistenciatalleress = await pool.query(`
+  SELECT sel.fecha FROM dtc_asistencia_clase join (select id as idc, fecha from dtc_clases_taller) as sel on dtc_asistencia_clase.id_clase=sel.idc WHERE sel.fecha LIKE '2025-%'
+`);
+
+  res.json([chicos,asistencias2025,pacientes,turnos,gimnasio,colacion,merienda,asistenciatalleress])         
 
 })
 
