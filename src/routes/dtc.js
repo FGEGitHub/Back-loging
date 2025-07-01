@@ -341,7 +341,7 @@ const asistencias2025 = await pool.query(`
 
 
 // cantidad de pacientes
-  const pacientes = await pool.query('select * from dtc_chicos')
+  const pacientes = await pool.query('select * from dtc_personas_psicologa')
 // cantidadde  turnos
 const turnos = await pool.query(`
   SELECT fecha
