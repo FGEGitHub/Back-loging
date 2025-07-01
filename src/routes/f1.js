@@ -311,12 +311,43 @@ router.post("/traernotificaciones", async (req, res) => {
       [id, "solicitado"]
     );
 
-
+const directas = await pool.query(
+      "SELECT * FROM convocatoria_directa  join (select id as idp, nombre, apodo from usuarios) as sel on convocatoria_directa.convocador_id=sel.idp WHERE jugador_id = ? AND estado = ?",
+      [id, "convocado"]
+    );
   
-    res.status(200).json([existe]);
+    res.status(200).json([existe,directas]);
   } catch (error) {
     console.error("Error al insertar en sumadas:", error);
     res.status(500).json({ error: "Error al enviar la solicitud" });
+  }
+});
+
+
+
+
+router.post("/responderconvocatoriadirecta", async (req, res) => {
+  const { id, respuesta } = req.body;
+
+  // Validar la respuesta
+  const nuevoEstado = respuesta === 'aceptar' ? 'Aceptado' :
+                      respuesta === 'rechazar' ? 'Rechazado' :
+                      null;
+
+  if (!nuevoEstado) {
+    return res.status(400).json({ error: "Respuesta inválida" });
+  }
+
+  try {
+    await pool.query(
+      "UPDATE convocatoria_directa SET estado = ? WHERE id = ?",
+      [nuevoEstado, id]
+    );
+
+    res.json({ mensaje: `Convocatoria actualizada como ${nuevoEstado}` });
+  } catch (error) {
+    console.error('Error al actualizar convocatoria directa:', error);
+    res.status(500).json({ error: "Error al actualizar convocatoria directa" });
   }
 });
 

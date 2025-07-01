@@ -350,9 +350,9 @@ const turnos = await pool.query(`
 `);
 
 
+ const gimnasio = await pool.query('select * from dtc_usuario_gimnasio')
 
-
-  res.json([chicos,asistencias2025,pacientes,turnos])
+  res.json([chicos,asistencias2025,pacientes,turnos,gimnasio])
 
 })
 
