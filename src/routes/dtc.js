@@ -352,7 +352,17 @@ const turnos = await pool.query(`
 
  const gimnasio = await pool.query('select * from dtc_usuario_gimnasio')
 
-  res.json([chicos,asistencias2025,pacientes,turnos,gimnasio])         
+const colacion = await pool.query(`
+  SELECT fecha, cantidad
+  FROM dtc_colacion 
+  WHERE fecha LIKE '2025-%'
+`);
+const merienda = await pool.query(`
+  SELECT fecha, cantidad
+  FROM dtc_meriendas 
+  WHERE fecha LIKE '2025-%'
+`);
+  res.json([chicos,asistencias2025,pacientes,turnos,gimnasio,colacion,merienda])         
 
 })
 
