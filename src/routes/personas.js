@@ -1302,7 +1302,7 @@ router.post("/agregarobservacion", async (req, res) => {
 }); */
 
 router.post("/enviarinscripcioncarnaval", async (req, res) => {
-  let {
+/*   let {
     nombre, apellido, dni, tel, localidad, fecha_nac,
     direccion, barrio, curso,
     alumna_anterior = "No",
@@ -1311,7 +1311,20 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
     curso_adic = "No",
     profesion = "No",
     agregar_whatsap= "No"
+  } = req.body; */
+
+
+    let {
+    nombre, apellido, dni, tel, localidad, fecha_nac,
+    direccion, barrio, curso,
+    alumna_anterior ,
+    tiene_espacio ,
+    enseniar ,
+    curso_adic ,
+    profesion ,
+    agregar_whatsap
   } = req.body;
+
 
   // Normalizar campos vacíos
   alumna_anterior = alumna_anterior || "No";
@@ -1347,7 +1360,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
     // Verificar si ya está inscripta
     const yainsc = await pool.query(
       'SELECT * FROM inscripciones_carnaval WHERE id_persona = ? AND id > 590 AND detalle = ?',
-      [pers[0]['id'], "Operativo oftalmologico julio"]
+      [pers[0]['id'], "COCINA EXPRESS:alimentos congelados"]
     );
 
     let mensaje = '';
@@ -1359,9 +1372,9 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
 
       await pool.query(
         `INSERT INTO inscripciones_carnaval 
-         (fecha, dni_persona, id_persona, detalle,  curso)
-         VALUES (?, ?, ?, ?, ?)`,
-        [fecha, dni, pers[0]['id'], "Operativo oftalmologico julio", curso]
+         (fecha, dni_persona, id_persona, detalle,  curso,profesion,alumna_anterior,tiene_espacio,enseniar,curso_adic,agregar_whatsap)
+         VALUES (?, ?, ?, ?, ?,?,?,?,?,?,?)`,
+        [fecha, dni, pers[0]['id'], "COCINA EXPRESS:alimentos congelados", "Express",profesion,alumna_anterior,tiene_espacio,enseniar,curso_adic,agregar_whatsap]
       );
 
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto';

@@ -466,20 +466,18 @@ router.post('/modificarJugador', async (req, res) => {
     horarios_disponibles,
     es_pago,
     no_pago_cancha,
-    me_sumo_disponible
+    me_sumo_disponible,
+    monto_a_cobrar // ✅ nuevo campo
   } = req.body;
-console.log(id)
-  // Validar ID
 
+  console.log("ID del jugador:", id);
 
-  // Función utilitaria para convertir booleanos a "Si"/"No"
   const toSiNo = (valor, actual) => {
     if (valor === undefined) return actual;
     return valor === true || valor === "true" ? "Si" : "No";
   };
 
   try {
-    // Obtener datos actuales del usuario
     const usuarioActual = await pool.query(
       'SELECT * FROM usuarios WHERE id = ?',
       [id]
@@ -491,7 +489,6 @@ console.log(id)
 
     const usuario = usuarioActual[0];
 
-    // Nuevos valores (manteniendo los existentes si no se envían)
     const nuevoNombre = nombre ?? usuario.nombre;
     const nuevoApodo = apodo ?? usuario.apodo;
     const nuevoTelefono = telefono ?? usuario.telefono;
@@ -502,16 +499,18 @@ console.log(id)
     const nuevoNoPagoCancha = toSiNo(no_pago_cancha, usuario.no_pago_cancha);
     const nuevoMeSumoDisponible = toSiNo(me_sumo_disponible, usuario.me_sumo_disponible);
 
-    // Asegurar que `dias_disponibles` esté en formato JSON
+    const nuevoMontoACobrar = monto_a_cobrar !== undefined
+      ? monto_a_cobrar
+      : usuario.monto_a_cobrar;
+
     const diasParaGuardar = Array.isArray(nuevosDias)
       ? JSON.stringify(nuevosDias)
       : JSON.stringify([]);
 
-    // Ejecutar actualización
     await pool.query(
       `UPDATE usuarios 
        SET nombre = ?, apodo = ?, telefono = ?, dias_disponibles = ?, horarios_disponibles = ?, 
-           es_pago = ?, no_pago_cancha = ?,  me_sumo_disponible = ?
+           es_pago = ?, no_pago_cancha = ?, me_sumo_disponible = ?, monto_a_cobrar = ?
        WHERE id = ?`,
       [
         nuevoNombre,
@@ -521,8 +520,8 @@ console.log(id)
         nuevoHorario,
         nuevoPago,
         nuevoNoPagoCancha,
-      
         nuevoMeSumoDisponible,
+        nuevoMontoACobrar,
         id
       ]
     );
@@ -534,6 +533,7 @@ console.log(id)
     res.status(500).json({ message: 'Error al actualizar el usuario' });
   }
 });
+
 
 
 
