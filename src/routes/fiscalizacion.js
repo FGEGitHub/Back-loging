@@ -955,20 +955,20 @@ router.get('/datosdemesas', async (req, res) => {
     //////  traer cantidad de mesas, mesas libres mesas ocupadas, 
 
     try {
-        let cant = await pool.query('select * from mesas_fiscales join (select id as ides, etapa2 from escuelas) as selec on mesas_fiscales.id_escuela=selec.ides where numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6" and numero != "Suplente 7" and etapa2="Si"')
+        let cant = await pool.query('select * from mesas_fiscales join (select id as ides, etapa2 from escuelas) as selec on mesas_fiscales.id_escuela=selec.ides where numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6" and numero != "Suplente 7"')
         console.log(cant.length)
-        let asig = await pool.query('select * from asignaciones_fiscales2 left join (select id as idmesa, numero, id_escuela from mesas_fiscales) as selec on asignaciones_fiscales2.mesa=selec.idmesa left join (select id as idescuela, etapa2 from escuelas) as selec2 on selec.id_escuela=selec2.idescuela where (numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6"  and numero != "Suplente 7") and etapa2="Si"')
-        let esc = await pool.query('select * from escuelas where etapa2="Si"')
+        let asig = await pool.query('select * from asignaciones_fiscales left join (select id as idmesa, numero, id_escuela from mesas_fiscales) as selec on asignaciones_fiscales.mesa=selec.idmesa left join (select id as idescuela, etapa2 from escuelas) as selec2 on selec.id_escuela=selec2.idescuela where (numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6"  and numero != "Suplente 7") and edicion=2025')
+        let esc = await pool.query('select * from escuelas ')
        // let yassig = await pool.query('select * from mesas_fiscales join (select id as ide, circuito, nombre from escuelas) as sele on mesas_fiscales.id_escuela=sele.ide where circuito ="2" or nombre=? or nombre=? or nombre=? ', ['COLEGIO "MANUEL VICENTE FIGUERERO"', 'ESC. Nº 34 "EL SANTO DE LA ESPADA"', "ESCUELA TECNICA U.O.C.R.A."])
         console.log("yasig")
         let yassig = await pool.query('select * from mesas_fiscales join (select id as ide, circuito, nombre from escuelas) as sele on mesas_fiscales.id_escuela=sele.ide ')
-        let capaacitados = await pool.query('select * from asignaciones_fiscales2 where capacitado="Si"')
+        let capaacitados = await pool.query('select * from asignaciones_fiscales where capacitado="Si"and edicion=2025')
 
         console.log(yassig.length)
         let mesas_sin_asignar = []
 
         for (const index_mesas in cant) {
-            let existe_aux = await pool.query('select * from inscripciones_fiscales where id_escuela =? ', [cant[index_mesas]['id']])
+            let existe_aux = await pool.query('select * from inscripciones_fiscales where id_escuela =? and edicion=2025', [cant[index_mesas]['id']])
             if (existe_aux.length === 0) {
                 mesas_sin_asignar.push(cant[index_mesas])
             }
@@ -1050,7 +1050,7 @@ router.get('/estadisticasescuelas', async (req, res,) => {
 
 
 router.get('/estadisticas1', async (req, res,) => {
-    const insc = await pool.query('select * from inscripciones_fiscales2')
+    const insc = await pool.query('select * from inscripciones_fiscales where edicion=2025')
 
     let Pagw = 0
     let Fly = 0
@@ -1058,16 +1058,16 @@ router.get('/estadisticas1', async (req, res,) => {
     let Autoin = 0
     let aliado = 0
 
-    let celiaco = await pool.query('select * from asignaciones_fiscales2 join (select dni as dnip,celiaco from personas_fiscalizacion) as selec on asignaciones_fiscales2.dni=selec.dnip where celiaco="Si"')
-    let vegano = await pool.query('select * from asignaciones_fiscales2 join (select dni as dnip,vegano from personas_fiscalizacion) as selec on asignaciones_fiscales2.dni=selec.dnip where vegano="Si"')
+    let celiaco = await pool.query('select * from asignaciones_fiscales join (select dni as dnip,celiaco from personas_fiscalizacion) as selec on asignaciones_fiscales.dni=selec.dnip where celiaco="Si"and edicion=2025')
+    let vegano = await pool.query('select * from asignaciones_fiscales join (select dni as dnip,vegano from personas_fiscalizacion) as selec on asignaciones_fiscales.dni=selec.dnip where vegano="Si"and edicion=2025')
 
-    let contactado = await pool.query('select * from inscripciones_fiscales2 where estado !="Pendiente"')
-    let asigna = await pool.query('select * from asignaciones_fiscales2 join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales2.mesa=selec.idmesa where numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5"and numero != "Suplente 6"  and numero != "Suplente 7"')
-    let asigna2 = await pool.query('select * from asignaciones_fiscales2 join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales2.mesa=selec.idmesa where numero = "Suplente 1" or numero = "Suplente 2" or numero = "Suplente 3" or numero = "Suplente 4" or numero = "Suplente 5" or numero = "Suplente 6" or numero = "Suplente 7"')
+    let contactado = await pool.query('select * from inscripciones_fiscales where estado !="Pendiente"and edicion=2025')
+    let asigna = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales.mesa=selec.idmesa where numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5"and numero != "Suplente 6"  and numero != "Suplente 7" and edicion=2025')
+    let asigna2 = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales.mesa=selec.idmesa where numero = "Suplente 1" or numero = "Suplente 2" or numero = "Suplente 3" or numero = "Suplente 4" or numero = "Suplente 5" or numero = "Suplente 6" or numero = "Suplente 7" and edicion=2025')
 
-    let recha = await pool.query('select * from inscripciones_fiscales2 where estado ="Rechazado"')
-    let nocont = await pool.query('select * from inscripciones_fiscales2 where estado ="No contestado"')
-    let pend = await pool.query('select * from inscripciones_fiscales2 where estado ="Pendiente"')
+    let recha = await pool.query('select * from inscripciones_fiscales where estado ="Rechazado" and edicion=2025')
+    let nocont = await pool.query('select * from inscripciones_fiscales where estado ="No contestado" and edicion=2025')
+    let pend = await pool.query('select * from inscripciones_fiscales where estado ="Pendiente" and edicion=2025')
     for (indexx in insc) {
 
         switch (insc[indexx]['como_se_entero']) {
@@ -1245,8 +1245,7 @@ router.get('/verfaltantesescuelas/', async (req, res,) => {
 
     try {
 
-        let estr = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa from asignaciones_fiscales2) as selec2 on mesas_fiscales.id=selec2.mesaa join (select id as idescuela, nombre as nombre_escuela, etapa2 from escuelas) as selec4 on mesas_fiscales.id_escuela=selec4.idescuela  where selec2.mesaa IS NULL and numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6"  and numero != "Suplente 7" and etapa2="Si"')
-        console.log(estr)
+        let estr = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa from asignaciones_fiscales where edicion=2025) as selec2 on mesas_fiscales.id=selec2.mesaa join (select id as idescuela, nombre as nombre_escuela, etapa2 from escuelas) as selec4 on mesas_fiscales.id_escuela=selec4.idescuela  where selec2.mesaa IS NULL and numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6"  and numero != "Suplente 7" and etapa2="Si"')
         res.json(estr)
     } catch (error) {
         console.log(error)
