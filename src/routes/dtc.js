@@ -54,7 +54,7 @@ const client = new Client({
  
  // 
  // 
-client.initialize();
+//client.initialize();
     ////////////whatapweb
 const storage = multer.diskStorage({
   destination: path.join(__dirname, '../imagenesvendedoras'),
@@ -380,7 +380,15 @@ const merienda = await pool.query(`
 const asistenciatalleress = await pool.query(`
   SELECT sel.fecha FROM dtc_asistencia_clase join (select id as idc, fecha from dtc_clases_taller) as sel on dtc_asistencia_clase.id_clase=sel.idc WHERE sel.fecha LIKE '2025-%'
 `);
+const fines = await pool.query(`
+  SELECT fecha
+  FROM dtc_turnos 
+  WHERE fecha LIKE '2025-%'
+`);
 
+console.log("asistencias",asistencias2025.length)
+console.log("turnos",turnos.length)
+console.log("gimnasio",gimnasio.length)
   res.json([chicos,asistencias2025,pacientes,turnos,gimnasio,colacion,merienda,asistenciatalleress])         
 
 })
@@ -391,7 +399,6 @@ router.get('/eliminartodosloshorariosdeusuario/:id', async (req, res) => {
     await pool.query('delete from dtc_cursado  where id_chico=?', [id])
     res.json('Borrado')
   } catch (error) {
-    console.log()
     res.json('No Borrado')
   }
 
@@ -433,7 +440,7 @@ router.get('/traerturnosdepsico/:id', async (req, res) => {
   let id = req.params.id
   try {
     const clas = await pool.query(' select * from  dtc_turnos left  join (select id as ida, nombre, apellido from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.ida where id_psico= ?  order by id desc', [id])
-    console.log(clas)
+   
     res.json(clas)
   } catch (error) {
     console.log(error)
@@ -447,7 +454,7 @@ router.get('/traeralumnosfines', async (req, res) => {
   let id = req.params.id
   try {
     const clas = await pool.query(' select * from  dtc_chicos_fines')
-    console.log(clas)
+    
     res.json(clas)
   } catch (error) {
     console.log(error)
@@ -476,7 +483,7 @@ router.get('/traerclasesprof/:id', async (req, res) => {
       env.push(nuev)
     }
 
-    console.log(env)
+   
     res.json(env)
   } catch (error) {
     console.log(error)
@@ -546,7 +553,7 @@ router.get('/traerclasestaller/:id', async (req, res) => {
         env.push(nuev);
       }
     }
-console.log(env)
+
     res.json(env);
   } catch (error) {
     console.log(error);
@@ -571,7 +578,7 @@ router.get('/traerclasestaller2/:id', async (req, res) => {
 });
 router.post('/agregarAlumnoFines/', async (req, res) => {
   const { nombre, apellido, dni, fecha_nacimiento } = req.body;
-  console.log(nombre, apellido, dni, fecha_nacimiento);
+  
 
   try {
     await pool.query(
@@ -588,7 +595,7 @@ router.post('/agregarAlumnoFines/', async (req, res) => {
 
 router.post('/clasificarturno/', async (req, res) => {
   let {id , estado} = req.body
-  console.log(id , estado)
+
    try {
      await pool.query(' UPDATE dtc_turnos SET presente=? where id=?', [estado,id])
  
@@ -602,7 +609,7 @@ router.post('/clasificarturno/', async (req, res) => {
  })
  router.post('/clasificarturnocadia/', async (req, res) => {
   let {id , estado} = req.body
-  console.log(id , estado)
+
    try {
      await pool.query(' UPDATE cadia_turnos SET presente=? where id=?', [estado,id])
  
@@ -672,7 +679,7 @@ router.get('/restar1p/:id', async (req, res) => {
 })
 router.get('/clasesdetaller/:id', async (req, res) => {
   id = req.params.id
-  console.log(id)
+  
   const clases = await pool.query('select fecha,id_tallerista, count(fecha) from dtc_asistencia where id_tallerista=? group by fecha,id_tallerista', [id])
 
   const resultadosConvertidos = clases.map(resultado => ({
@@ -680,7 +687,7 @@ router.get('/clasesdetaller/:id', async (req, res) => {
     count: Number(resultado['count(fecha)']) // Convertir BigInt a Number
   }));
 
-  console.log(resultadosConvertidos)
+
 
   res.json(resultadosConvertidos)
 })
@@ -929,7 +936,6 @@ router.get('/listachiques/', async (req, res) => {
 
 router.post('/listachiquesparainscribir/', async (req, res) => {
   const { id, dia, hora } = req.body;
-  console.log("Datos recibidos:", { id, dia, hora });
 
   try {
     const chiques = await pool.query(
@@ -963,7 +969,6 @@ router.post('/listachiquesparainscribir/', async (req, res) => {
     }));
 
     // Mostrar en consola solo los inscritos
-    console.log("Chiques ya inscritos:", resultado.filter(ch => ch.yainscripto));
 
     res.json([chiques]);
   } catch (error) {
@@ -1141,7 +1146,6 @@ router.post('/actualizarmapa', async (req, res) => {
 
 router.post('/borrarpuntoenmapa',async (req, res) => {
   const { lat, lng } = req.body;
-  console.log(req.body)
 
   // Leer el archivo KML
   fs.readFile(kmlFilePath, 'utf8', (err, data) => {
@@ -1249,7 +1253,6 @@ router.post('/actualizarmapaentregas', async (req, res) => {
 
 router.post('/borrarpuntoenmapentregas', async (req, res) => {
   const { lat, lng } = req.body;
-  console.log('Coordenadas recibidas:', lat, lng);
 
   if (!lat || !lng) {
     return res.status(400).json({ message: 'Latitud y longitud son requeridas' });
@@ -1632,7 +1635,6 @@ router.get('/datosdechique/:id', async (req, res) => {
   const id = req.params.id
   const chiques = await pool.query('select * from dtc_chicos where id =?', [id])
   try {
-    console.log(chiques[0]['foto'])
     if (chiques[0]['foto'] === null) {
       imagenBase64 = null
 
@@ -1672,7 +1674,6 @@ router.get('/traerproximosturnos/:id', async (req, res) => {
       [id]
     );
 
-    console.log(turnosss);
     res.json(turnosss);
   } catch (error) {
     console.error(error);
@@ -1732,15 +1733,12 @@ router.get('/traerfoto/:id', async (req, res) => {
   const productosdeunapersona = await pool.query('select * from dtc_legajos where id =?', [id])
   rutaImagen = path.join(__dirname, '../imagenesvendedoras', productosdeunapersona[0]['ubicacion']);
   imagenBase64 = ""
-  console.log(productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 3] + productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 2] + productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 1])
   if (productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 3] + productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 2] + productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 1] === "pdf") {
-    console.log('pdf')
     imagenBase64 = rutaImagen
     res.sendFile(rutaImagen)
 
 
   } else {
-    console.log('otro')
     imagenBuffer = fs.readFileSync(rutaImagen);
     imagenBase64 = imagenBuffer.toString('base64');
     res.json([imagenBase64, productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 3] + productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 2] + productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 1]])
@@ -1778,7 +1776,6 @@ router.get('/listadelegajos/:id', async (req, res) => {
      console.log(nuevo)
  enviar.push(nuevo)
    } */
-  console.log(enviar)
   res.json(productosdeunapersona);
 
 
@@ -2301,14 +2298,16 @@ router.post("/nuevaprestacioninv", async (req, res) => {
 
 router.post("/nuevooficio", async (req, res) => {
   try {
-    const campos = req.body; // Captura todos los valores enviados en la petición
+    const campos = req.body;
     console.log("Datos recibidos:", campos);
 
     if (Object.keys(campos).length === 0) {
-      return res.status(400).json({ error: "No se enviaron datos" });
+      return res.status(400).json({ 
+        error: "No se enviaron datos", 
+        tipo: "DatosVacíos" 
+      });
     }
 
-    // Construcción dinámica de la consulta SQL
     const columnas = Object.keys(campos).join(", ");
     const valores = Object.values(campos);
     const placeholders = valores.map(() => "?").join(", ");
@@ -2318,9 +2317,28 @@ router.post("/nuevooficio", async (req, res) => {
     await pool.query(sql, valores);
 
     res.json({ mensaje: "Oficio guardado correctamente" });
+
   } catch (error) {
     console.error("Error al guardar el oficio:", error);
-    res.status(500).json({ error: "No se pudo guardar el oficio" });
+
+    // Puedes diferenciar tipos de errores según sus propiedades
+    let tipoError = "ErrorDesconocido";
+
+    if (error.code === 'ER_BAD_FIELD_ERROR') {
+      tipoError = "CampoInexistente";
+    } else if (error.code === 'ER_DUP_ENTRY') {
+      tipoError = "ValorDuplicado";
+    } else if (error.code === 'ER_NO_SUCH_TABLE') {
+      tipoError = "TablaInexistente";
+    } else if (error.code === 'PROTOCOL_CONNECTION_LOST' || error.code === 'ECONNREFUSED') {
+      tipoError = "ConexionBD";
+    }
+
+    res.status(500).json({
+      error: "No se pudo guardar el oficio",
+      tipo: tipoError,
+      detalle: error.message // Esto ayuda a debuggear en desarrollo
+    });
   }
 });
 
@@ -5075,7 +5093,7 @@ ORDER BY apellido;
 
 `);
 
-       console.log(usuarios)
+      
     res.json([resultado, usuarios,usuarios])
   } catch (error) {
     console.log(error)
