@@ -1602,6 +1602,23 @@ try {
  
 })
 
+router.post("/guardarmapa", async (req, res) => {
+    const { seleccion,id } = req.body
+try {
+
+
+ await pool.query('update escuelas set mapa1=? where id=?  ', [seleccion, id])
+    res.json('realizado')
+} catch (error) {
+    console.log(error)
+    res.json('error')
+}
+
+ 
+})
+
+
+
 router.post("/enviarobservacionnueva", async (req, res) => {
     const { id,detalle } = req.body
 try {
