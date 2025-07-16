@@ -600,10 +600,10 @@ router.get('/traerescuelas2', async (req, res) => {
 
 
     const etc = await pool.query('select * from escuelas  order by nombre ')
-    const etc2 = await pool.query('select * from escuelas   where etapa2="Si" order by nombre')
+    const etc2 = await pool.query('select * from escuelas   order by nombre')
     res.json([etc,etc2]);
 
-})
+}) 
 
 
 router.get('/traerescuelas3', async (req, res) => {
@@ -628,7 +628,7 @@ router.get('/traerescuelasfalt', async (req, res) => {
     let envioo = []
     for (axilliarmesas in etc) {
 
-        let mesass = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa from asignaciones_fiscales) as selec2 on mesas_fiscales.id=selec2.mesaa where selec2.mesaa IS NULL and id_escuela=?', [etc[axilliarmesas]['id']])
+        let mesass = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa, edicion from asignaciones_fiscales) as selec2 on mesas_fiscales.id=selec2.mesaa where selec2.mesaa IS NULL and id_escuela=? and edicion=2025', [etc[axilliarmesas]['id']])
 
         if (mesass.length > 0) {
             envioo.push(etc[axilliarmesas])
@@ -1561,8 +1561,7 @@ res.json('ok')
 router.get('/todaspaso42/:id', async (req, res,) => {
 const id = req.params.id
     //  estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono, nombre, apellido,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela join (select id as idmesa, numero from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa join (select id as id_auxesc,nombre as nombredondevota from escuelas ) as selec3 on selec1.id_donde_vota=selec3.id_auxesc ')
-  console.log(id)
-     // res.json([estr])
+
    //  estr = await pool.query('select * from inscripciones_fiscales2 left join (select dni as dniper,telefono,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on inscripciones_fiscales2.dni=selec1.dniper   left join (select id_ref, detalle from observaciones) as selec4 on inscripciones_fiscales2.dni = id_ref left join (select id as  id_es, nombre as donde_vota from escuelas) as selec5 on selec1.id_donde_vota = selec5.id_es  left join (select id as idant,escuela as id_don from asignaciones_fiscales) as selec6 on inscripciones_fiscales2.dni=selec6.idant left join (select id as idescant, nombre as dondefiscal from escuelas) as selec7 on selec6.id_don=selec7.idescant where id_encargado=?',[id])
      estr = await pool.query('select * from inscripciones_fiscales left join (select id as idper, dni as dniper,telefono,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on inscripciones_fiscales.dni=selec1.dniper   left join (select id as  id_es, nombre as donde_vota, etapa2 from escuelas) as selec5 on selec1.id_donde_vota = selec5.id_es  left join (select id as idant,escuela as id_don from asignaciones_fiscales) as selec6 on inscripciones_fiscales.dni=selec6.idant left join (select id as idescant, nombre as dondefiscal from escuelas) as selec7 on selec6.id_don=selec7.idescant where id_encargado=? and edicion=2025',[id])
 
@@ -1570,7 +1569,7 @@ const id = req.params.id
      //const tod = await pool.query('select * from inscripciones_fiscales2 join (select id as idp from personas )as selec on ')
   res.json([estr])
   
-  })
+  })     
 
   
 router.get('/todaspaso4', async (req, res,) => {
@@ -1601,6 +1600,23 @@ try {
 
  
 })
+
+router.post("/guardarmapa", async (req, res) => {
+    const { seleccion,id } = req.body
+try {
+
+
+ await pool.query('update escuelas set mapa1=? where id=?  ', [seleccion, id])
+    res.json('realizado')
+} catch (error) {
+    console.log(error)
+    res.json('error')
+}
+
+ 
+})
+
+
 
 router.post("/enviarobservacionnueva", async (req, res) => {
     const { id,detalle } = req.body
