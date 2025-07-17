@@ -199,6 +199,19 @@ router.get('/traerpersonas', async (req, res,) => {
 })
 
 
+router.get('/traerroles', async (req, res,) => {
+    try {
+        let personas = await pool.query('select * from roles_fisca order by nombre')
+        res.json(personas)
+    } catch (error) {
+        console.log(error)
+    }
+
+
+})
+
+
+
 router.get('/traerpersonasdeunenc/:id', async (req, res,) => {
     const id = req.params.id
     try {
