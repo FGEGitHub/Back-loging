@@ -2,11 +2,11 @@ const express = require('express')
 const router = express.Router()
 const { isLoggedIn, isLoggedInn, isLoggedInn2, isLoggedInn4 } = require('../lib/auth') //proteger profile
 const pool = require('../database2')
-const pool2 = require('../database')
+//const pool2 = require('../database')
 const nodemailer = require('nodemailer');
-const bodyParser = require('body-parser');
-const xlsx = require("xlsx");
-const path = require("path");
+//const bodyParser = require('body-parser');
+//const xlsx = require("xlsx");
+//const path = require("path");
 router.get("/traerlotes", async (req, res) => {
 
     try {
@@ -468,7 +468,7 @@ router.post("/determinarmapa1bosques", async (req, res) => {
 
     res.json(mensaje)
 })
-router.get("/cargar-excel", async (req, res) => {
+/* router.get("/cargar-excel", async (req, res) => {
   try {
     // 1️⃣ Leer el archivo
     const workbook = xlsx.readFile(path.join(__dirname, "ROLES ELECCIONES 2025.xlsx"));
@@ -522,7 +522,7 @@ router.get("/cargar-excel", async (req, res) => {
     console.error(error);
     res.status(500).send("Error al procesar el archivo.");
   }
-});
+}); */
 
 module.exports = router
 
