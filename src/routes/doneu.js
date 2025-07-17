@@ -2,10 +2,11 @@ const express = require('express')
 const router = express.Router()
 const { isLoggedIn, isLoggedInn, isLoggedInn2, isLoggedInn4 } = require('../lib/auth') //proteger profile
 const pool = require('../database2')
+const pool2 = require('../database')
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
-
-
+const xlsx = require("xlsx");
+const path = require("path");
 router.get("/traerlotes", async (req, res) => {
 
     try {
@@ -467,7 +468,61 @@ router.post("/determinarmapa1bosques", async (req, res) => {
 
     res.json(mensaje)
 })
+router.get("/cargar-excel", async (req, res) => {
+  try {
+    // 1️⃣ Leer el archivo
+    const workbook = xlsx.readFile(path.join(__dirname, "ROLES ELECCIONES 2025.xlsx"));
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(sheet);
 
+    // 2️⃣ Conectarse a la base de datos
+
+    // 3️⃣ Insertar cada fila
+    for (const row of data) {
+      const nombre = row["NOMBRE Y APELLIDO"];
+      const dni = row["DNI"];
+      const tel = row["CELULAR"];
+      const barrio = row["BARRIO"];
+      const direccion = row["DOMICILIO"];
+      const referido = row["REFERIDO"];
+      const movilidad = row["MOVILIDAD"];
+      const vianda = row["VIANDA"];
+      const rol2023 = row["ROL ELECCIONES 2023"];
+      const definitivo2023 = row["FUISTE FISCAL EN EL ESCRUTINIO DEFINITIVO 2023?"];
+      const equipoFisca = row["TE GUSTARIA SER PARTE DEL EQUIPO DE FISCA"];
+      const disponibilidad = row["DISPONIBILIDAD HORARIA"];
+      const observaciones = row["OBSERVACIONES"];
+
+      await pool2.query(
+        `INSERT INTO roles_fisca 
+        (nombre, dni, tel, barrio, direccion, referido, movilidad, vianda, rol2023, definitivo2023, equipoFisca, disponibilidad, observaciones)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          nombre || null,
+          dni || null,
+          tel || null,
+          barrio || null,
+          direccion || null,
+          referido || null,
+          movilidad || null,
+          vianda || null,
+          rol2023 || null,
+          definitivo2023 || null,
+          equipoFisca || null,
+          disponibilidad || null,
+          observaciones || null,
+        ]
+      );
+    }
+
+    await pool2.end();
+    res.send("Datos cargados correctamente desde el Excel.");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error al procesar el archivo.");
+  }
+});
 
 module.exports = router
 
