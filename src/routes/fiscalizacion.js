@@ -1156,9 +1156,8 @@ router.get('/traerinscripcionesdeunencargado/:id', async (req, res,) => {
     const id = req.params.id
     console.log(91)
     try {
-        estr = await pool.query('select * from inscripciones_fiscales2  where  id_encargado =?', [id])
+        estr = await pool.query('select * from inscripciones_fiscales  where  id_encargado =? and edicion=2025', [id])
 
-        console.log(estr)
         res.json(estr)
     } catch (error) {
         console.log(error)
@@ -1488,7 +1487,7 @@ router.get('/todaslasasignaciones2', async (req, res,) => {
 
 
     try {
-        estr = await pool.query('select * from asignaciones_fiscales2 join (select dni as dniper,telefono, nombre, apellido,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on asignaciones_fiscales2.dni=selec1.dniper  join (select id as idmesa, numero, id_escuela as idescuelamesa from mesas_fiscales) as sele on asignaciones_fiscales2.mesa=sele.idmesa join (select id as id_auxesc,nombre as nombredondevota from escuelas ) as selec3 on selec1.id_donde_vota=selec3.id_auxesc join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on sele.idescuelamesa=selec2.idescuela')
+        estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono, nombre, apellido,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper  join (select id as idmesa, numero, id_escuela as idescuelamesa from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa join (select id as id_auxesc,nombre as nombredondevota from escuelas ) as selec3 on selec1.id_donde_vota=selec3.id_auxesc join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on sele.idescuelamesa=selec2.idescuela where asignaciones_fiscales.edicion=2025')
 
         res.json([estr])
     } catch (error) {
@@ -1753,9 +1752,9 @@ router.post("/modificarestadodeinscrip", async (req, res) => {
 
     try {
         console.log(estado)
-        await pool.query('update inscripciones_fiscales2 set estado =?  where  id = ?', [estado, id])
+        await pool.query('update inscripciones_fiscales set estado =?  where  id = ?', [estado, id])
 if (observaciones!= undefined){
-    const ins =  await pool.query('select * from inscripciones_fiscales2 where id =?', [id])
+    const ins =  await pool.query('select * from inscripciones_fiscales where id =?', [id])
     await pool.query('insert into observaciones set detalle=?,id_ref=? ', [observaciones, ins[0]['dni']])
 }
 
