@@ -2171,7 +2171,7 @@ router.post("/enviarinscripcioninterna", async (req, res) => {
                 }
 
                 await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?, cargadopor=?, fecha_carga=?,como_se_entero=?,apellido_referido=?,nombre_referido=?,edicion=2025,referente=?,funcion=?', [nombre, apellido, dni, id_aliado, (new Date(Date.now())).toLocaleDateString(), como_se_entero, apellido_referido, nombre_referido,referente,funcion])
-                res.json('inscripto correctamente, muchas gracias por completar, por favor aguarda en unos dias nos comunicaremos al numero de telefono registrado')
+                res.json('Recibimos tu insctipción. Pronto nos ponemos en contacto con vos. Gracias!')
             }
         }
 
