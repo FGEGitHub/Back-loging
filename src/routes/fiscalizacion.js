@@ -2188,101 +2188,74 @@ router.post("/enviarinscripcioninterna", async (req, res) => {
 })
 
 router.post("/enviarinscripcion", async (req, res) => {
-    let { dni, como_se_entero, nombre_referido, apellido_referido, nombre, telefono, telefono2, apellido, id_aliado, asignado_ant } = req.body
+    let { dni, como_se_entero, nombre_referido, apellido_referido, nombre, telefono, telefono2, apellido, id_aliado, asignado_ant } = req.body;
 
     try {
-        console.log(asignado_ant)
-        ///////
+        let id_persona = null;
 
-        existe = await pool.query('select * from personas_fiscalizacion where dni = ?', [dni])
-        let nombre_aliado = ''
-        if (id_aliado == undefined) {
-            id_aliado = 'Autoinscripcion'
-        }
-        if (como_se_entero == undefined) {
-            como_se_entero = 'Sin definir'
-        }
-        if (apellido_referido == undefined) {
-            apellido_referido = 'Sin definir'
-        }
+        // Verificar si ya existe la persona
+        const existe = await pool.query('SELECT * FROM personas_fiscalizacion WHERE dni = ?', [dni]);
 
-        if (nombre_referido == undefined) {
-            nombre_referido = 'Sin definir'
-        }
-        if (existe.length === 0) {//////si existe la personas
+        if (id_aliado == undefined) id_aliado = 'Autoinscripcion';
+        if (como_se_entero == undefined) como_se_entero = 'Sin definir';
+        if (apellido_referido == undefined) apellido_referido = 'Sin definir';
+        if (nombre_referido == undefined) nombre_referido = 'Sin definir';
 
+        if (existe.length === 0) {
+            if (nombre === undefined) nombre = 'No';
+            if (telefono === undefined) telefono = 'No';
+            if (telefono2 === undefined) telefono2 = 'No';
 
-            ///crear nueva persona 
-
-            if (nombre === undefined) {
-                nombre = 'No'
-            }
-
-            if (telefono === undefined) {
-                telefono = 'No'
-            }
-            if (telefono2 === undefined) {
-                telefono2 = 'No'
-            }
-
-
-
-            await pool.query('INSERT INTO personas_fiscalizacion set nombre=?,apellido =?,telefono=?,telefono2=?,dni=?', [nombre, apellido, telefono, telefono2, dni]);
-        }
-        /////////¿Actualmente  se encuentra estudiando? actividad adicional
-        /////////////Tipo de empleo
-
-
-        let telefonoregistrado = await pool.query('select * from inscripciones_fiscales join (select dni as dni_pers, telefono, telefono2 from personas_fiscalizacion) as selec on inscripciones_fiscales.dni = selec.dni_pers where  telefono = ? and edicion=2025 ', [telefono])
-        if (telefonoregistrado.length > 0) {
-            let dnicodif = telefonoregistrado[0]['dni']
-            dnicodif = '****' + dnicodif[dnicodif.length - 3] + dnicodif[dnicodif.length - 2] + dnicodif[dnicodif.length - 1]
-            res.json('Error ya se posee ese numero de telefono, pertenece a ' + dnicodif)
+            // Crear nueva persona y guardar el insertId
+            const result = await pool.query('INSERT INTO personas_fiscalizacion (nombre, apellido, telefono, telefono2, dni) VALUES (?, ?, ?, ?, ?)', [nombre, apellido, telefono, telefono2, dni]);
+            id_persona = result.insertId;
         } else {
-            let exisinscrip = await pool.query('select * from inscripciones_fiscales where  dni=? and edicion=2025 ', [dni])
-
-            if (exisinscrip.length > 0) {
-                res.json('Error fiscal ya inscripto')
-            } else {
-                /// verificar si relamente estba isncripto
-                let participante_antt = await pool.query('select * from inscripciones_fiscales where  dni=? ', [dni])
-                letparticipante_ant = 'No'
-                if (participante_antt.length > 0) {
-                    participante_ant = 'Si'
-
-                }
-                let asignadoo = await pool.query('select * from asignaciones_fiscales where  dni=? ', [dni])
-
-
-                if (asignado_ant == 'Si' && asignadoo.length == 0) {
-                    let detalle = 'Selecciono que fiscalizo pero no se encuentra en la lista'
-                    await pool.query('INSERT INTO observaciones set detalle=?,id_ref=?', [detalle, dni]);
-
-
-
-                }
-                let press = 'Sin definir'
-                if (asignadoo.length > 0) {
-                    press = asignadoo[0]['dato1']
-
-                }
-
-                await pool.query('INSERT INTO inscripciones_fiscales set  nombre=?,apellido=?, dni=?, cargadopor=?, fecha_carga=?,como_se_entero=?,apellido_referido=?,nombre_referido=?,edicion=2025', [nombre, apellido, dni, id_aliado, (new Date(Date.now())).toLocaleDateString(), como_se_entero, apellido_referido, nombre_referido])
-                res.json('inscripto correctamente, muchas gracias por completar, por favor aguarda en unos dias nos comunicaremos al numero de telefono registrado')
-            }
+            // Persona ya existe, tomar el id
+            id_persona = existe[0].id;
         }
 
+        const telefonoregistrado = await pool.query('SELECT * FROM inscripciones_fiscales JOIN (SELECT dni AS dni_pers, telefono, telefono2 FROM personas_fiscalizacion) AS selec ON inscripciones_fiscales.dni = selec.dni_pers WHERE telefono = ? AND edicion = 2025', [telefono]);
 
+        if (telefonoregistrado.length > 0) {
+            let dnicodif = telefonoregistrado[0]['dni'];
+            dnicodif = '****' + dnicodif[dnicodif.length - 3] + dnicodif[dnicodif.length - 2] + dnicodif[dnicodif.length - 1];
+            return res.json('Error ya se posee ese número de teléfono, pertenece a ' + dnicodif);
+        }
 
+        const exisinscrip = await pool.query('SELECT * FROM inscripciones_fiscales WHERE dni = ? AND edicion = 2025', [dni]);
 
+        if (exisinscrip.length > 0) {
+            return res.json('Error fiscal ya inscripto');
+        } else {
+            const participante_antt = await pool.query('SELECT * FROM inscripciones_fiscales WHERE dni = ?', [dni]);
+            let participante_ant = participante_antt.length > 0 ? 'Si' : 'No';
+
+            const asignadoo = await pool.query('SELECT * FROM asignaciones_fiscales WHERE dni = ?', [dni]);
+
+            if (asignado_ant == 'Si' && asignadoo.length == 0) {
+                let detalle = 'Seleccionó que fiscalizó pero no se encuentra en la lista';
+                await pool.query('INSERT INTO observaciones (detalle, id_ref) VALUES (?, ?)', [detalle, dni]);
+            }
+
+            let press = 'Sin definir';
+            if (asignadoo.length > 0) {
+                press = asignadoo[0]['dato1'];
+            }
+
+            // Insertar en inscripciones_fiscales incluyendo el id_persona
+            await pool.query(
+                'INSERT INTO inscripciones_fiscales (nombre, apellido, dni, cargadopor, fecha_carga, como_se_entero, apellido_referido, nombre_referido, edicion, id_persona) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 2025, ?)',
+                [nombre, apellido, dni, id_aliado, (new Date(Date.now())).toLocaleDateString(), como_se_entero, apellido_referido, nombre_referido, id_persona]
+            );
+
+            return res.json('Recibimos tu inscripción. Pronto nos ponemos en contacto con vos. ¡Gracias!');
+        }
     } catch (e) {
-        console.log(e)
-        res.json('Error, algo sucedio')
+        console.log(e);
+        res.json('Error, algo sucedió');
     }
+});
 
-
-
-})
 
 router.post("/volverapaso3", async (req, res) => {
     const { id } = req.body
