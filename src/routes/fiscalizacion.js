@@ -355,7 +355,8 @@ router.get('/todasincripciones', async (req, res,) => {
                     telefono2: persona_auxiliar[0]['telefono2'],
                     id_aliado: inscri2[inscripcion]['id_aliado'],
                     nombre_aliado: inscri2[inscripcion]['nombre_aliado'],
-                    encargado: encargado
+                    encargado: encargado,
+                    id_persona: inscri2[inscripcion]['id_persona'],
                 }
                 envi.push(nuev)
             }
@@ -386,7 +387,7 @@ router.get('/todasincripciones', async (req, res,) => {
                 apellido_referido: inscri2[inscripcion]['apellido_referido'],
                 nombre_referido: inscri2[inscripcion]['nombre_referido'],
                 dni_persona: inscri2[inscripcion]['dni_persona'],
-
+ id_persona: inscri2[inscripcion]['id_persona'],
                 vegano: persona_auxiliar[0]['vegano'],
                 celiaco: persona_auxiliar[0]['celiaco'],
                 telefono: persona_auxiliar[0]['telefono'],
