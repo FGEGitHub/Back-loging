@@ -2212,6 +2212,14 @@ router.post("/enviarinscripcion", async (req, res) => {
         } else {
             // Persona ya existe, tomar el id
             id_persona = existe[0].id;
+            try {
+                  await pool.query(
+                'UPDATE personas_fiscalizacion SET nombre = ?, apellido = ?,telefono=?  WHERE id = ?',
+                [nombre, apellido, telefono,id_persona]
+            );
+            } catch (error) {
+                console.error('Error al obtener el id de la persona:', error);
+            }
         }
 
         const telefonoregistrado = await pool.query('SELECT * FROM inscripciones_fiscales JOIN (SELECT dni AS dni_pers, telefono, telefono2 FROM personas_fiscalizacion) AS selec ON inscripciones_fiscales.dni = selec.dni_pers WHERE telefono = ? AND edicion = 2025', [telefono]);
@@ -2274,105 +2282,92 @@ router.post("/volverapaso3", async (req, res) => {
 
 
 router.post("/asignarmesaafiscal", async (req, res) => {
-    let { dni, id_inscripcion, id_escuela,id_donde_vota, mesa, celiaco, vegano, movilidad, domicilio, fiscal_antes, observaciones} = req.body
-
+    let {
+        dni, id_inscripcion, id_escuela, id_donde_vota, mesa, celiaco, vegano,
+        movilidad, domicilio, fiscal_antes, observaciones, nombre, apellido,
+        telefono, telefono2, como_se_entero, nombre_referido, apellido_referido, asignadopor // ✅ agregado
+    } = req.body;
+   if (!asignadopor) asignadopor = 'sin definir';
     try {
-        //paso 1
+        let exi = await pool.query('select * from personas_fiscalizacion where dni =?', [dni]);
 
-        exi = await pool.query('select * from personas_fiscalizacion where dni =?', [dni])
-        if (domicilio == undefined){
-            if (exi.length>0){
-                domicilio=exi[0]['domicilio']
-            }else{
-                domicilio='sin definir'
-            }
-        }
-        if (celiaco == undefined){
-            if (exi.length>0){
-                celiaco=exi[0]['celiaco']
-            }else{
-                celiaco='sin definir'
-            }
-        }
-        if (vegano == undefined){
-            if (exi.length>0){
-                vegano=exi[0]['vegano']
-            }else{
-                vegano='sin definir'
-            }
-        }
-        if (fiscal_antes == undefined){
-            if (exi.length>0){
-                fiscal_antes=exi[0]['fiscal_antes']
-            }else{
-                fiscal_antes='sin definir'
-            }
-        }
+        if (!domicilio) domicilio = exi[0]?.domicilio || 'sin definir';
+        if (!celiaco) celiaco = exi[0]?.celiaco || 'sin definir';
+        if (!vegano) vegano = exi[0]?.vegano || 'sin definir';
+        if (!fiscal_antes) fiscal_antes = exi[0]?.fiscal_antes || 'sin definir';
+        if (!movilidad) movilidad = exi[0]?.movilidad || 'sin definir';
 
-        if (movilidad == undefined){
-            if (exi.length>0){
-                movilidad=exi[0]['movilidad']
-            }else{
-                movilidad='sin definir'
-            }
-        }
-        
         if (exi.length > 0) {
-           
-            await pool.query('update personas_fiscalizacion set vegano=?,celiaco=?, movilidad=?,domicilio=?, fiscal_antes=?,dni=?, id_donde_vota=? where id=?', [vegano, celiaco, movilidad, domicilio, fiscal_antes, dni, id_donde_vota, exi[0]['id']])
-            
-            await pool.query('update inscripciones_fiscales set estado="Asignado"   where id=?', [ id_inscripcion])
-           
+            await pool.query(
+                'update personas_fiscalizacion set vegano=?,celiaco=?, movilidad=?,domicilio=?, fiscal_antes=?,dni=?, id_donde_vota=? where id=?',
+                [vegano, celiaco, movilidad, domicilio, fiscal_antes, dni, id_donde_vota, exi[0]['id']]
+            );
         } else {
-        
-            exi = await pool.query('select * from personas_fiscalizacion where nombre = ? and apellido =? and dni ="Sin definir" ', [nombre, apellido])
-            console.log(exi)
+            exi = await pool.query('select * from personas_fiscalizacion where nombre = ? and apellido = ? and dni = "Sin definir"', [nombre, apellido]);
             if (exi.length > 0) {
-                await pool.query('update personas_fiscalizacion set nombre=?, apellido=?,celiaco=?,  vegano=?, movilidad=?,domicilio=?, fiscal_antes=?,dni=?,id_donde_vota=?  where id=?', [nombre, apellido, celiaco, vegano, movilidad, domicilio, fiscal_antes, dni, id_donde_vota, exi[0]['id']])
+                await pool.query('update personas_fiscalizacion set nombre=?, apellido=?,celiaco=?, vegano=?, movilidad=?,domicilio=?, fiscal_antes=?,dni=?,id_donde_vota=?  where id=?',
+                    [nombre, apellido, celiaco, vegano, movilidad, domicilio, fiscal_antes, dni, id_donde_vota, exi[0]['id']]
+                );
             } else {
-                exi = await pool.query('select * from personas_fiscalizacion where apellido =? and dni ="Sin definir" ', [apellido])
-
+                exi = await pool.query('select * from personas_fiscalizacion where apellido = ? and dni = "Sin definir"', [apellido]);
                 if (exi.length > 0) {
-                    await pool.query('update personas_fiscalizacion set nombre=?, apellido=?,celiaco=?, vegano=?, movilidad=?,domicilio=?, fiscal_antes=?,dni=?,id_donde_vot=? where id=?', [nombre, apellido, celiaco, vegano, movilidad, domicilio, fiscal_antes, dni, id_donde_vota, exi[0]['id']])
-
+                    await pool.query('update personas_fiscalizacion set nombre=?, apellido=?,celiaco=?, vegano=?, movilidad=?,domicilio=?, fiscal_antes=?,dni=?,id_donde_vota=? where id=?',
+                        [nombre, apellido, celiaco, vegano, movilidad, domicilio, fiscal_antes, dni, id_donde_vota, exi[0]['id']]
+                    );
                 } else {
-                    exi = await pool.query('select * from personas_fiscalizacion where nombre =? and dni ="Sin definir" ', [nombre])
-
+                    exi = await pool.query('select * from personas_fiscalizacion where nombre = ? and dni = "Sin definir"', [nombre]);
                     if (exi.length > 0) {
-                        await pool.query('update personas_fiscalizacion set nombre=?, apellido=?,vegano=?, movilidad=?,domicilio=?, fiscal_antes=?,dni=?,id_donde_vota=?  where id=?', [nombre, apellido, vegano, movilidad, domicilio, fiscal_antes, dni, id_donde_vota, exi[0]['id']])
-                     
+                        await pool.query('update personas_fiscalizacion set nombre=?, apellido=?,vegano=?, movilidad=?,domicilio=?, fiscal_antes=?,dni=?,id_donde_vota=?  where id=?',
+                            [nombre, apellido, vegano, movilidad, domicilio, fiscal_antes, dni, id_donde_vota, exi[0]['id']]
+                        );
                     } else {
-
-                        await pool.query('insert into personas_fiscalizacion set vegano=?,celiaco=?,  movilidad=?,domicilio=?, fiscal_antes=?, dni =?, nombre=?, apellido=?, telefono=?, telefono2=?,id_donde_vota=? ', [vegano, celiaco, movilidad, domicilio, fiscal_antes, dni, nombre, apellido, telefono, telefono2, id_donde_vota])
-
-                      
+                        await pool.query('insert into personas_fiscalizacion set vegano=?,celiaco=?, movilidad=?,domicilio=?, fiscal_antes=?, dni=?, nombre=?, apellido=?, telefono=?, telefono2=?, id_donde_vota=?',
+                            [vegano, celiaco, movilidad, domicilio, fiscal_antes, dni, nombre, apellido, telefono, telefono2, id_donde_vota]
+                        );
                     }
                 }
-
-
             }
-
-
-
         }
 
-        ///paso 2
-        const es = await pool.query('select * from escuelas where id=?', [id_escuela])
+        // ✅ ACTUALIZAR INSCRIPCIÓN con campos opcionales
+        let sql = 'update inscripciones_fiscales set estado="Asignado", como_se_entero=?';
+        let params = [como_se_entero || 'No definido'];
 
-        await pool.query('insert into asignaciones_fiscales set id_inscripcion=?, escuela=? ,mesa=?, dni=?, zona=? ,edicion=2025', [id_inscripcion, id_escuela, mesa, dni, es[0]['circuito']])
-        await pool.query('update inscripciones_fiscales set estado="Asignado" where id=?', [id_inscripcion])
-        if (observaciones != undefined){
-            await pool.query('insert into observaciones set detalle=?, id_ref=? ', [observaciones, dni])
-
+        if (nombre_referido) {
+            sql += ', nombre_referido=?';
+            params.push(nombre_referido);
         }
-        res.json('Realizado')
+
+        if (apellido_referido) {
+            sql += ', apellido_referido=?';
+            params.push(apellido_referido);
+        }
+
+        sql += ' where id=?';
+        params.push(id_inscripcion);
+
+        await pool.query(sql, params);
+
+        // PASO 2 - asignación
+        const es = await pool.query('select * from escuelas where id=?', [id_escuela]);
+        await pool.query(
+            'insert into asignaciones_fiscales set id_inscripcion=?, escuela=? ,mesa=?, dni=?, zona=?,asignadopor=? ,edicion=2025',
+            [id_inscripcion, id_escuela, mesa, dni, es[0]['circuito'],asignadopor]
+        );
+
+        if (observaciones) {
+            await pool.query(
+                'insert into observaciones set detalle=?, id_ref=? ',
+                [observaciones, dni]
+            );
+        }
+
+        res.json('Realizado');
     } catch (error) {
-        console.log(error)
-        res.json('error')
+        console.log(error);
+        res.json('error');
     }
-
-
-})
+});
 
 
 router.post("/inscribir", async (req, res) => {
