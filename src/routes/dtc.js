@@ -28,6 +28,7 @@ const client = new Client({
     // Si necesitas especificar la ruta del navegador, puedes agregar la opción executablePath:
     // executablePath: '/path/to/your/chrome',
 });
+
  // Crear el cliente con LocalAuth para guardar la sesión
 
  
@@ -52,7 +53,84 @@ const client = new Client({
      console.log('Cliente desconectado:', reason);
  });
  
- // 
+
+
+
+
+
+
+
+
+
+
+ // prueba recepcion de mensaje 
+const estados = {}; // Guarda en qué estado está cada número
+
+client.on('message', async (message) => {
+    try {
+        if (!message || !message.body) return;
+
+        const texto = message.body.toLowerCase().trim();
+        const numero = message.from;
+
+        // Lista de números autorizados
+        const numerosPermitidos = ['5493795008689@c.us', '5493791234567@c.us'];
+        if (!numerosPermitidos.includes(numero)) return;
+
+        // Paso 1: Si está esperando DNI
+        if (estados[numero] === 'esperando_dni') {
+            const dni = texto.replace(/\D/g, ''); // Eliminar todo lo que no sea número
+
+            if (dni.length < 7 || dni.length > 9) {
+                await message.reply('❌ El DNI no parece válido. Por favor, intentá nuevamente.');
+                return;
+            }
+
+            const resultado = await pool.query('SELECT * FROM inscripciones_fiscales WHERE dni = ? and edicion=2025', [dni]);
+
+            if (resultado.length > 0) {
+                await message.reply(`✅ Estás inscripto para el año 2025. ¡Gracias por participar!`);
+            } else {
+                await message.reply('🚫 No encontramos una inscripción con ese DNI.');
+            }
+
+            estados[numero] = null; // Reiniciar el estado
+
+            // Mostrar nuevamente el menú
+            await message.reply(`📋 ¿Querés hacer otra consulta?\n\n1️⃣ Cuánta gente tenemos inscripta?\n2️⃣ ¿Quiénes son los candidatos?\n3️⃣ Consultar estado de tu inscripción`);
+            return;
+        }
+
+        // Paso 2: Menú principal
+        if (texto === 'hola') {
+            await message.reply(`¡Hola! 👋 ¿En qué te puedo dar una mano?\nElegí una opción respondiendo con el número correspondiente:\n\n1️⃣ Cuánta gente tenemos inscripta?\n2️⃣ ¿Quiénes son los candidatos?\n3️⃣ Consultar estado de tu inscripción`);
+            return;
+        }
+
+        if (texto === '1') {
+            const rta = await pool.query('SELECT * FROM inscripciones_fiscales WHERE edicion = 2025');
+            await message.reply(`📘 Tenemos actualmente ${rta.length} personas inscriptas para el 2025.`);
+            return;
+        }
+
+        if (texto === '2') {
+            await message.reply(`✅ El Cuqui y la Gaby 💪`);
+            return;
+        }
+
+        if (texto === '3') {
+            await message.reply(`🔎 Por favor, indicame tu DNI para verificar el estado de tu inscripción.`);
+            estados[numero] = 'esperando_dni';
+            return;
+        }
+
+    } catch (error) {
+        console.error('Error procesando el mensaje:', error);
+    }
+});
+
+
+
  // 
 client.initialize();
     ////////////whatapweb
