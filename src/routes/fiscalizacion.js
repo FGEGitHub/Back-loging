@@ -1287,16 +1287,16 @@ router.get('/todaslasasignacionesdeunaescuela/:id', async (req, res,) => {
     console.log(id)
     try {
 
-        estr = await pool.query('select * from asignaciones_fiscales2 join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales2.dni=selec1.dniper  left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales2.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero, id_escuela as idescc from mesas_fiscales) as sele on asignaciones_fiscales2.mesa=sele.idmesa left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on sele.idescc=selec2.idescuela where  id_usuario =? order by numero', [id])
+        estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper  left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero, id_escuela as idescc from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on sele.idescc=selec2.idescuela where  id_usuario =? and edicion=2025 order by numero', [id])
 
         cant = await pool.query('select * from mesas_fiscales join (select id_usuario, id as idescuela from escuelas) as sele on mesas_fiscales.id_escuela=sele.idescuela where id_usuario=? and numero not in ("Suplente 1","Suplente 2","Suplente 3","Suplente 4","Suplente 5","Suplente 6","Suplente 7")', [id])
-        const esc = await pool.query('select * from asignaciones_fiscales2 join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales2.dni=selec1.dniper  left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales2.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero, id_escuela as idescc from mesas_fiscales) as sele on asignaciones_fiscales2.mesa=sele.idmesa left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on sele.idescc=selec2.idescuela where  id_usuario =? and nuevo="Si"', [id])
+        const esc = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper  left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero, id_escuela as idescc from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on sele.idescc=selec2.idescuela where  id_usuario =? and edicion=2025', [id])
 
 
 
 
-        supl = await pool.query('select * from asignaciones_fiscales2 join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales2.dni=selec1.dniper  left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales2.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero, id_escuela as idescc from mesas_fiscales) as sele on asignaciones_fiscales2.mesa=sele.idmesa left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on sele.idescc=selec2.idescuela where  id_usuario =? and numero in ("Suplente 1","Suplente 2","Suplente 3","Suplente 4","Suplente 5","Suplente 6","Suplente 7")', [id])
-
+        supl = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper  left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero, id_escuela as idescc from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on sele.idescc=selec2.idescuela where  id_usuario =? and numero in ("Suplente 1","Suplente 2","Suplente 3","Suplente 4","Suplente 5","Suplente 6","Suplente 7") and edicion=2025', [id])
+//console.log(estr, cant.length, supl.length, esc.length)
         res.json([estr, cant.length, supl.length, esc.length])
     } catch (error) {
         console.log(error)
@@ -1667,39 +1667,112 @@ router.post("/rechazarincrip", async (req, res) => {
 
 
 router.post("/modificarpersonafisca", async (req, res) => {
-    let { id, dni, nombre, apellido, celiaco, vegano, movilidad, domicilio, telefono, telefono2 } = req.body
-    console.log(id, dni, nombre, apellido, celiaco, vegano, movilidad, domicilio, telefono, telefono2)
-    if (movilidad == undefined) {
-        movilidad = 'sin definir'
-    }
-    if (domicilio == undefined) {
-        domicilio = 'sin definir'
-    }
-    if (telefono == undefined) {
-        telefono = 'sin definir'
-    }
-    if (telefono2 == undefined) {
-        telefono2 = 'sin definir'
-    }
-    if (vegano == undefined) {
-        vegano = 'sin definir'
-    }
-    if (celiaco == undefined) {
-        celiaco = 'sin definir'
-    }
+    const {
+        id,
+        dni,
+        nombre,
+        apellido,
+        celiaco,
+        vegano,
+        movilidad,
+        domicilio,
+        telefono,
+        telefono2
+    } = req.body;
 
     try {
-        await pool.query('update personas_fiscalizacion set  dni=?, nombre=?, apellido=?, celiaco=?, vegano=?, movilidad=?, domicilio=?,telefono=?,telefono2=? where  id = ?', [dni, nombre, apellido, celiaco, vegano, movilidad, domicilio, telefono, telefono2, id])
-        console.log('realizado')
-        res.json('Realizado')
+        console.log(nombre.apellido)
+        // Construcción dinámica de campos y valores para personas_fiscalizacion
+        const camposPersona = [];
+        const valoresPersona = [];
+
+        if (dni !== undefined) {
+            camposPersona.push("dni = ?");
+            valoresPersona.push(dni);
+        }
+        if (nombre !== undefined) {
+            camposPersona.push("nombre = ?");
+            valoresPersona.push(nombre);
+        }
+        if (apellido !== undefined) {
+            camposPersona.push("apellido = ?");
+            valoresPersona.push(apellido);
+        }
+        if (celiaco !== undefined) {
+            camposPersona.push("celiaco = ?");
+            valoresPersona.push(celiaco);
+        }
+        if (vegano !== undefined) {
+            camposPersona.push("vegano = ?");
+            valoresPersona.push(vegano);
+        }
+        if (movilidad !== undefined) {
+            camposPersona.push("movilidad = ?");
+            valoresPersona.push(movilidad);
+        }
+        if (domicilio !== undefined) {
+            camposPersona.push("domicilio = ?");
+            valoresPersona.push(domicilio);
+        }
+        if (telefono !== undefined) {
+            camposPersona.push("telefono = ?");
+            valoresPersona.push(telefono);
+        }
+        if (telefono2 !== undefined) {
+            camposPersona.push("telefono2 = ?");
+            valoresPersona.push(telefono2);
+        }
+
+        if (camposPersona.length > 0) {
+            const queryPersona = `UPDATE personas_fiscalizacion SET ${camposPersona.join(', ')} WHERE id = ?`;
+            valoresPersona.push(id);
+            await pool.query(queryPersona, valoresPersona);
+        }
+
+        // Construcción dinámica de campos y valores para inscripciones_fiscales
+        const camposInscripcion = [];
+        const valoresInscripcion = [];
+
+        if (nombre !== undefined) {
+            camposInscripcion.push("nombre = ?");
+            valoresInscripcion.push(nombre);
+        }
+        if (apellido !== undefined) {
+            camposInscripcion.push("apellido = ?");
+            valoresInscripcion.push(apellido);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+        }
+  
+
+        if (camposInscripcion.length > 0) {
+            const queryInscripcion = `UPDATE inscripciones_fiscales SET ${camposInscripcion.join(', ')} WHERE id_persona = ?`;
+            valoresInscripcion.push(id);
+            await pool.query(queryInscripcion, valoresInscripcion);
+        }
+
+        console.log("Modificación realizada según campos definidos");
+        res.json("Realizado");
     } catch (error) {
-        console.log(error)
-        res.json('No Realizado')
-
+        console.error(error);
+        res.status(500).json("No Realizado");
     }
+});
 
-
-})
 
 
 router.post("/volverapaso1", async (req, res) => {
@@ -2593,6 +2666,8 @@ router.post('/crearmesa', async (req, res) => {
 
 router.post('/marcarnocontestado', async (req, res) => {
     const { id_inscripcion } = req.body
+    console.log(id_inscripcion)
+
     try {
         const inc = await pool.query('select * from inscripciones_fiscales where id =?', [id_inscripcion])
         if (inc[0]['estado'] == 'No contestado') {
