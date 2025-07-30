@@ -74,7 +74,7 @@ client.on('message', async (message) => {
         const numero = message.from;
 
         // Lista de números autorizados
-        const numerosPermitidos = ['5493795008689@c.us', '5493791234567@c.us'];
+        const numerosPermitidos = ['5493795008689@c.us', '5493794234567@c.us', '5493794702861@c.us'];
         if (!numerosPermitidos.includes(numero)) return;
 
         // Paso 1: Si está esperando DNI
@@ -161,6 +161,51 @@ const storage2 = multer.diskStorage({
 
 const upload2 = multer({ storage2 });
 /////////
+
+/* router.get('/enviar-mensajes', async (req, res) => {
+    try {
+      const registros = await pool.query(`
+            SELECT * FROM inscripciones_fiscales 
+            JOIN (
+                SELECT id AS idp, telefono FROM personas_fiscalizacion
+            ) AS sel ON inscripciones_fiscales.id_persona = sel.idp 
+            WHERE edicion = 2025
+        `)
+
+        let enviados = 0;
+        for (const registro of registros) {
+            const telefono = registro.telefono;
+
+            // Normalizar número (solo si tiene al menos 10 dígitos)
+            if (telefono && telefono.length >= 10) {
+                const numeroFormateado = `549${telefono.replace(/\D/g, '')}@c.us`;
+
+                const mensaje = `Hola somos del equipo de la CcAri #Lista47. Gracias por tu preinscripción 💚; nos volveremos a comunicar con vos a partir de la semana que viene, una vez publicado el padron definitivo.
+#VAMOSCTES
+VALDEZ JUAN PABLO GOB.
+POLICH GUSTAVO INT.
+CUQUI CALVANO DIP. PROV.
+GABY GAUNA CONCEJAL`;
+
+                try {
+                    await client.sendMessage(numeroFormateado, mensaje);
+                    enviados++;
+                } catch (err) {
+                    console.error(`❌ Error enviando a ${telefono}`, err.message);
+                }
+            }
+        }
+
+        res.send(`✅ Se enviaron ${enviados} mensajes correctamente.`);
+    } catch (error) {
+        console.error('Error al enviar mensajes:', error);
+        res.status(500).send('Error al enviar mensajes.');
+    }
+});
+ */
+
+
+
 const upload = multer({ storage });
 
 router.post('/modificar_alumno_fines', async (req, res) => {
