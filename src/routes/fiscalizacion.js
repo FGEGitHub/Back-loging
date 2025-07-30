@@ -300,7 +300,12 @@ router.get('/todasincripciones', async (req, res,) => {
 
                 persona_auxiliar = await pool.query('select * from personas_fiscalizacion where dni= ? ', [inscri2[inscripcion]['dni']])
             }
+            let inscritoAntes = await pool.query('select * from inscripciones_fiscales where dni = ?  and edicion is null', [inscri2[inscripcion]['dni']])
+            let seinscribio = inscritoAntes.length > 0 ? "Si" : "No"
 
+            // ✅ Verifica si ya fiscalizó en otra edición
+            let fiscalizoAntes = await pool.query('select * from asignaciones_fiscales where dni = ?  and edicion is null', [inscri2[inscripcion]['dni']])
+            let fiscalizo = fiscalizoAntes.length > 0 ? "Si" : "No"
             let band = true
             try {
                 let usua = await pool.query('select * from usuarios where id = ? ', [inscri2[inscripcion]['cargadopor']])
@@ -336,7 +341,8 @@ router.get('/todasincripciones', async (req, res,) => {
             }
             if (band) {
                 let nuev = {
-                    fiscalizo: inscri2[inscripcion]['asignado_ant'],
+                    fiscalizo: fiscalizo,
+                    seinscribio: seinscribio,
                     id: inscri2[inscripcion]['id'],
                     observaciones: inscri2[inscripcion]['observaciones'],
                     dni: inscri2[inscripcion]['dni'],
@@ -387,7 +393,7 @@ router.get('/todasincripciones', async (req, res,) => {
                 apellido_referido: inscri2[inscripcion]['apellido_referido'],
                 nombre_referido: inscri2[inscripcion]['nombre_referido'],
                 dni_persona: inscri2[inscripcion]['dni_persona'],
- id_persona: inscri2[inscripcion]['id_persona'],
+                id_persona: inscri2[inscripcion]['id_persona'],
                 vegano: persona_auxiliar[0]['vegano'],
                 celiaco: persona_auxiliar[0]['celiaco'],
                 telefono: persona_auxiliar[0]['telefono'],
@@ -768,7 +774,7 @@ router.get('/listadeescuelas', async (req, res,) => {
             let cantidad_pres = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa join (select dni as dnipers, celiaco from personas_fiscalizacion) as selec5 on asignaciones_fiscales.dni=selec5.dnipers where dato1 ="Si" and id_escuela=? and edicion=2025', [estr[auxiescuela]['id']])
             let cantidad_aus = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales.mesa=selec1.idmesa join (select dni as dnipers, celiaco from personas_fiscalizacion) as selec5 on asignaciones_fiscales.dni=selec5.dnipers where dato1 ="No" and id_escuela=? and edicion=2025', [estr[auxiescuela]['id']])
             let cantidad_movil = 0
-            let cantidad_suplentes =[] /* await pool.query('select * from asignaciones_fiscales2 join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales2.mesa=selec1.idmesa where id_escuela=? and (numero = "Suplente 1" or numero = "Suplente 2" or numero = "Suplente 3" or numero = "Suplente 4" or numero = "Suplente 5" or numero = "Suplente 6" or numero = "Suplente 7")', [estr[auxiescuela]['id']]) */
+            let cantidad_suplentes = [] /* await pool.query('select * from asignaciones_fiscales2 join (select id as idmesa, id_escuela, numero from mesas_fiscales ) as selec1 on asignaciones_fiscales2.mesa=selec1.idmesa where id_escuela=? and (numero = "Suplente 1" or numero = "Suplente 2" or numero = "Suplente 3" or numero = "Suplente 4" or numero = "Suplente 5" or numero = "Suplente 6" or numero = "Suplente 7")', [estr[auxiescuela]['id']]) */
             let lestr = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa from asignaciones_fiscales2) as selec2 on mesas_fiscales.id=selec2.mesaa join (select id as idescuela, nombre as nombre_escuela from escuelas) as selec4 on mesas_fiscales.id_escuela=selec4.idescuela  where selec2.mesaa IS NULL and (numero = "Suplente 1" or numero = "Suplente 2" or numero = "Suplente 3" or numero = "Suplente 4" or numero = "Suplente 5" or numero = "Suplente 6" or numero = "Suplente 7")and id_escuela=?', [estr[auxiescuela]['id']])
             for (auximesa in cantidad_mesas) {
                 // let mesarecorrido = await pool.query('select * from mesas_fiscales join (select mesa as mesaa, dni  from asignaciones_fiscales) as selec1 on mesas_fiscales.id=selec1.mesaa join (select dni as dnipers, id_donde_vota from personas_fiscalizacion) as selec2 on selec1.dni=selec2.dnipers where id=? ',[cantidad_mesas[auximesa]['id']])
@@ -1296,7 +1302,7 @@ router.get('/todaslasasignacionesdeunaescuela/:id', async (req, res,) => {
 
 
         supl = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper  left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero, id_escuela as idescc from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on sele.idescc=selec2.idescuela where  id_usuario =? and numero in ("Suplente 1","Suplente 2","Suplente 3","Suplente 4","Suplente 5","Suplente 6","Suplente 7") and edicion=2025', [id])
-//console.log(estr, cant.length, supl.length, esc.length)
+        //console.log(estr, cant.length, supl.length, esc.length)
         res.json([estr, cant.length, supl.length, esc.length])
     } catch (error) {
         console.log(error)
@@ -1755,9 +1761,9 @@ router.post("/modificarpersonafisca", async (req, res) => {
 
 
 
-            
+
         }
-  
+
 
         if (camposInscripcion.length > 0) {
             const queryInscripcion = `UPDATE inscripciones_fiscales SET ${camposInscripcion.join(', ')} WHERE id_persona = ?`;
@@ -2310,7 +2316,7 @@ router.post("/enviarinscripcion", async (req, res) => {
         if (exisinscrip.length > 0) {
             return res.json('Error fiscal ya inscripto');
         } else {
-            const participante_antt = await pool.query('SELECT * FROM inscripciones_fiscales WHERE dni = ?', [dni]);
+            const participante_antt = await pool.query('SELECT * FROM inscripciones_fiscales WHERE dni = ? and edicion !=2025', [dni]);
             let participante_ant = participante_antt.length > 0 ? 'Si' : 'No';
 
             const asignadoo = await pool.query('SELECT * FROM asignaciones_fiscales WHERE dni = ?', [dni]);
@@ -2390,13 +2396,13 @@ router.post("/asignarmesaafiscal", async (req, res) => {
                         exi[0].id
                     ]
                 );
-   await pool.query(
+                await pool.query(
                     'UPDATE inscripciones_fiscales SET nombre = ?, apellido = ? WHERE id = ?',
                     [
                         cambioNombre ? nombre : exi[0].nombre,
                         cambioApellido ? apellido : exi[0].apellido,
-                
-                      id_inscripcion
+
+                        id_inscripcion
                     ]
                 );
             }
