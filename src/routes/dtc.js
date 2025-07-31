@@ -74,7 +74,7 @@ client.on('message', async (message) => {
         const numero = message.from;
 
         // Lista de números autorizados
-        const numerosPermitidos = ['5493795008689@c.us', '5493794234567@c.us', '5493794702861@c.us'];
+        const numerosPermitidos = ['5493795008689@c.us', '5493794675028@c.us', '5493794702861@c.us'];
         if (!numerosPermitidos.includes(numero)) return;
 
         // Paso 1: Si está esperando DNI
