@@ -90,7 +90,7 @@ client.on('message', async (message) => {
 
     if (resultado.length > 0) {
         const fiscal = resultado[0];
-        const fecha = resultado[0].fecha
+        const fecha = resultado[0].fecha_carga
 
         if (fiscal.estado === 'asignado') {
             await message.reply(`✅ Estás inscripto para el 2025 y ya fuiste asignado a una mesa. ¡Gracias por tu compromiso!`);
