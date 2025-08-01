@@ -29,17 +29,17 @@ const upload = multer({ dest: 'uploads/' });
 router.get('/sacarcero', async (req, res) => {
 
   const personas = await pool.query('select * from personas')
-  for(x in personas){
-    cadena=personas[x]['tel']
+  for (x in personas) {
+    cadena = personas[x]['tel']
     if (cadena.charAt(0) === "0") {
-      console.log('actualizado',personas[x]['tel'],'a ')
+      console.log('actualizado', personas[x]['tel'], 'a ')
       // Si es "0", devolver el resto de la cadena después del primer carácter
-      ac= cadena.slice(1);
-       console.log(ac)
-       await pool.query('update personas set tel=? where id=?',[ac,personas[x]['id']])
+      ac = cadena.slice(1);
+      console.log(ac)
+      await pool.query('update personas set tel=? where id=?', [ac, personas[x]['id']])
 
-  } 
- 
+    }
+
 
   }
   res.send('Listo')
@@ -56,35 +56,35 @@ router.post('/subirexcelclientes', upload.single('excel'), async (req, res) => {
     const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
     // Procesar los datos
-  /*   const sheetData = sheetData.map(row => ({
-      nombre: row.Nombre,
-      apellido: row.Apellido
-
-     ));    // Agrega más campos según las columnas que necesites procesar
-    } */
+    /*   const sheetData = sheetData.map(row => ({
+        nombre: row.Nombre,
+        apellido: row.Apellido
+  
+       ));    // Agrega más campos según las columnas que necesites procesar
+      } */
 
 
 
     ///////////////////////////////////////////////////////////////////
     for (property in sheetData) {
       // a += 1
-        ///////
+      ///////
 
-  
-          ///actualizar
 
-          if (sheetData[property]['adrema'] === undefined) {
-            adrema = 'sin definir'
-          } else {
-            adrema = sheetData[property]['Nombre']
+      ///actualizar
 
-          }
-          exis = await pool2.query('select * from clientes where nombre=? and telefono=? and correo=? and fecha_nac=? and estado_civil=? and sexo=? and provincia=?', [sheetData[property]['nombre'],sheetData[property]['tel'],sheetData[property]['email'],sheetData[property]['fecha_nac'],sheetData[property]['estadoc'],sheetData[property]['sexo'],sheetData[property]['provincia']])
-          if (exis==0){
-            await pool2.query('insert into clientes set nombre=?,telefono=?,correo=?,fecha_nac=?,estado_civil=?,sexo=?,provincia=?', [sheetData[property]['nombre'],sheetData[property]['tel'],sheetData[property]['email'],sheetData[property]['fecha_nac'],sheetData[property]['estadoc'],sheetData[property]['sexo'],sheetData[property]['provincia']])
+      if (sheetData[property]['adrema'] === undefined) {
+        adrema = 'sin definir'
+      } else {
+        adrema = sheetData[property]['Nombre']
 
-          }
-  
+      }
+      exis = await pool2.query('select * from clientes where nombre=? and telefono=? and correo=? and fecha_nac=? and estado_civil=? and sexo=? and provincia=?', [sheetData[property]['nombre'], sheetData[property]['tel'], sheetData[property]['email'], sheetData[property]['fecha_nac'], sheetData[property]['estadoc'], sheetData[property]['sexo'], sheetData[property]['provincia']])
+      if (exis == 0) {
+        await pool2.query('insert into clientes set nombre=?,telefono=?,correo=?,fecha_nac=?,estado_civil=?,sexo=?,provincia=?', [sheetData[property]['nombre'], sheetData[property]['tel'], sheetData[property]['email'], sheetData[property]['fecha_nac'], sheetData[property]['estadoc'], sheetData[property]['sexo'], sheetData[property]['provincia']])
+
+      }
+
 
     }
 
@@ -108,35 +108,35 @@ router.post('/subirexcellotes', upload.single('excel'), async (req, res) => {
     const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
     // Procesar los datos
-  /*   const sheetData = sheetData.map(row => ({
-      nombre: row.Nombre,
-      apellido: row.Apellido
-
-     ));    // Agrega más campos según las columnas que necesites procesar
-    } */
+    /*   const sheetData = sheetData.map(row => ({
+        nombre: row.Nombre,
+        apellido: row.Apellido
+  
+       ));    // Agrega más campos según las columnas que necesites procesar
+      } */
 
 
 
     ///////////////////////////////////////////////////////////////////
     for (property in sheetData) {
       // a += 1
-        ///////
+      ///////
 
-  
-          ///actualizar
 
-          if (sheetData[property]['adrema'] === undefined) {
-            adrema = 'sin definir'
-          } else {
-            adrema = sheetData[property]['Nombre']
+      ///actualizar
 
-          }
-          exis = await pool2.query('select * from lotes where manzana=? and sector=? and lote=?', [sheetData[property]['manzana'],sheetData[property]['sector'],sheetData[property]['lote']])
-          if (exis==0){
-            await pool2.query('insert into lotes set manzana=?,lote=?,sector=?,superficie=?,estado=?,adrema=?', [sheetData[property]['manzana'],sheetData[property]['lote'],sheetData[property]['sector'],sheetData[property]['superficie'],sheetData[property]['estado'],adrema])
+      if (sheetData[property]['adrema'] === undefined) {
+        adrema = 'sin definir'
+      } else {
+        adrema = sheetData[property]['Nombre']
 
-          }
-  
+      }
+      exis = await pool2.query('select * from lotes where manzana=? and sector=? and lote=?', [sheetData[property]['manzana'], sheetData[property]['sector'], sheetData[property]['lote']])
+      if (exis == 0) {
+        await pool2.query('insert into lotes set manzana=?,lote=?,sector=?,superficie=?,estado=?,adrema=?', [sheetData[property]['manzana'], sheetData[property]['lote'], sheetData[property]['sector'], sheetData[property]['superficie'], sheetData[property]['estado'], adrema])
+
+      }
+
 
     }
 
@@ -160,24 +160,24 @@ router.post('/subirexcel', upload.single('excel'), async (req, res) => {
     const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
     // Procesar los datos
-  /*   const sheetData = sheetData.map(row => ({
-      nombre: row.Nombre,
-      apellido: row.Apellido
+    /*   const sheetData = sheetData.map(row => ({
+        nombre: row.Nombre,
+        apellido: row.Apellido
+  
+       ));    // Agrega más campos según las columnas que necesites procesar
+      } */
 
-     ));    // Agrega más campos según las columnas que necesites procesar
-    } */
 
 
- 
 
- 
+
 
 
 
     ///////////////////////////////////////////////////////////////////
     for (property in sheetData) {
       // a += 1
-      cat="cero"
+      cat = "cero"
       console.log(sheetData[property]['D.N.I.'])
       aux = sheetData[property]['D.N.I.']
       existe = await pool.query('select * from personas where dni = ?', [aux])
@@ -188,218 +188,218 @@ router.post('/subirexcel', upload.single('excel'), async (req, res) => {
 
 
 
-        if (existe.length > 0) {
-
-         
-
-          ///actualizar
-
-          if (sheetData[property]['Nombre'] === undefined) {
-            nombre = 'No'
-          } else {
-            nombre = sheetData[property]['Nombre']
-
-          }
-          if (sheetData[property]['Apellido'] === undefined) {
-            apellido = 'No'
-          } else {
-            apellido = sheetData[property]['Apellido']
-          }
-          if (sheetData[property]['D.N.I.'] === undefined) {
-            dni = 'No'
-          } else {
-            dni = sheetData[property]['D.N.I.']
-          }
-          if (sheetData[property]['Correo electrónico'] === undefined) {
-            mail = 'No'
-          } else {
-            mail = sheetData[property]['Correo electrónico']
-
-          }
-          if (sheetData[property]['Domicilio'] === undefined) {
-            direccion = 'No'
-          } else {
-            direccion = sheetData[property]['Domicilio']
-          }
-          if (sheetData[property]['recibir_novedades'] === undefined) {
-            recibir_novedades = 'No'
-          } else {
-            recibir_novedades = sheetData[property]['recibir_novedades']
-          }
-          if (sheetData[property]['Barrio'] === undefined) {
-            barrio = 'No'
-          } else {
-            barrio = sheetData[property]['Barrio']
-          }
-          if (sheetData[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'] === undefined) {
-            fecha_nac = 'No'
-          } else {
-            fecha_nac = sheetData[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)']
-          }
-          if (sheetData[property]['Número de teléfono de contacto'] === undefined) {
-            tel = 'No'
-          } else {
-            tel = sheetData[property]['Número de teléfono de contacto']
-          }
-          if (sheetData[property]['Número de teléfono alternativo'] === undefined) {
-            tel2 = 'No'
-          } else {
-            tel2 = sheetData[property]['Número de teléfono alternativo']
-          }
-          if (sheetData[property]['¿Participaste o participas de nuestra Feria de Mujeres Emprendedoras?'] === undefined) {
-            participante_feria = 'No'
-          } else {
-            participante_feria = sheetData[property]['¿Participaste o participas de nuestra Feria de Mujeres Emprendedoras?']
-          }
-          
-
-          if (sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente? '] === undefined) {
-            participante_anterior = 'No'
-          } else {
-            participante_anterior = sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente? ']
-          }
-          if (sheetData[property]['Nivel educativo alcanzado'] === undefined) {
-            nivel_secundario = 'No'
-          } else {
-            nivel_secundario = sheetData[property]['Nivel educativo alcanzado']
-          }
-          if (sheetData[property]['¿Actualmente estas trabajando?'] === undefined) {
-            trabajo = 'No'
-          } else {
-            trabajo = sheetData[property]['¿Actualmente estas trabajando?']
-          }
-          if (sheetData[property]['Si tu respuesta fue sí, contamos como es tu empleo:'] === undefined) {
-            tipo_trabajo = 'No'
-          } else {
-            tipo_trabajo = sheetData[property]['Si tu respuesta fue sí, contamos como es tu empleo:']
-          }
-          if (sheetData[property]['¿Qué tipo de trabajo posees?'] === undefined) {
-            tipo_empleo = 'No'
-          } else {
-            tipo_empleo = sheetData[property]['¿Qué tipo de trabajo posees?']
-          }
-          if (sheetData[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'] === undefined) {
-            hijos = 'No'
-          } else {
-            hijos = sheetData[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?']
-          }
-          if (sheetData[property]['¿Te gustaría recibir novedades de nuevos cursos y/o actividades que llevemos adelante desde nuestro espacio?'] === undefined) {
-            novedades = 'No'
-          } else {
-            novedades = sheetData[property]['¿Te gustaría recibir novedades de nuevos cursos y/o actividades que llevemos adelante desde nuestro espacio?']
-          }
-         idp = await pool.query('select * from personas where dni =?',[dni])
-          cat = await caregorizar.asignarcategoria(idp)
-
-          await pool.query('update personas set categoria=?, tipo_empleo=?, mail=?, participante_feria=?, recibir_novedades=?,direccion =?,barrio=?,fecha_nac=?, tel=?, tel2=?,participante_anterior=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,hijos=? where dni = ?', [cat,tipo_empleo, mail, participante_feria, recibir_novedades,direccion, barrio, fecha_nac, tel, tel2, participante_anterior, nivel_secundario, trabajo, tipo_trabajo, hijos, aux])
+          if (existe.length > 0) {
 
 
+
+            ///actualizar
+
+            if (sheetData[property]['Nombre'] === undefined) {
+              nombre = 'No'
+            } else {
+              nombre = sheetData[property]['Nombre']
+
+            }
+            if (sheetData[property]['Apellido'] === undefined) {
+              apellido = 'No'
+            } else {
+              apellido = sheetData[property]['Apellido']
+            }
+            if (sheetData[property]['D.N.I.'] === undefined) {
+              dni = 'No'
+            } else {
+              dni = sheetData[property]['D.N.I.']
+            }
+            if (sheetData[property]['Correo electrónico'] === undefined) {
+              mail = 'No'
+            } else {
+              mail = sheetData[property]['Correo electrónico']
+
+            }
+            if (sheetData[property]['Domicilio'] === undefined) {
+              direccion = 'No'
+            } else {
+              direccion = sheetData[property]['Domicilio']
+            }
+            if (sheetData[property]['recibir_novedades'] === undefined) {
+              recibir_novedades = 'No'
+            } else {
+              recibir_novedades = sheetData[property]['recibir_novedades']
+            }
+            if (sheetData[property]['Barrio'] === undefined) {
+              barrio = 'No'
+            } else {
+              barrio = sheetData[property]['Barrio']
+            }
+            if (sheetData[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'] === undefined) {
+              fecha_nac = 'No'
+            } else {
+              fecha_nac = sheetData[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)']
+            }
+            if (sheetData[property]['Número de teléfono de contacto'] === undefined) {
+              tel = 'No'
+            } else {
+              tel = sheetData[property]['Número de teléfono de contacto']
+            }
+            if (sheetData[property]['Número de teléfono alternativo'] === undefined) {
+              tel2 = 'No'
+            } else {
+              tel2 = sheetData[property]['Número de teléfono alternativo']
+            }
+            if (sheetData[property]['¿Participaste o participas de nuestra Feria de Mujeres Emprendedoras?'] === undefined) {
+              participante_feria = 'No'
+            } else {
+              participante_feria = sheetData[property]['¿Participaste o participas de nuestra Feria de Mujeres Emprendedoras?']
+            }
+
+
+            if (sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente? '] === undefined) {
+              participante_anterior = 'No'
+            } else {
+              participante_anterior = sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente? ']
+            }
+            if (sheetData[property]['Nivel educativo alcanzado'] === undefined) {
+              nivel_secundario = 'No'
+            } else {
+              nivel_secundario = sheetData[property]['Nivel educativo alcanzado']
+            }
+            if (sheetData[property]['¿Actualmente estas trabajando?'] === undefined) {
+              trabajo = 'No'
+            } else {
+              trabajo = sheetData[property]['¿Actualmente estas trabajando?']
+            }
+            if (sheetData[property]['Si tu respuesta fue sí, contamos como es tu empleo:'] === undefined) {
+              tipo_trabajo = 'No'
+            } else {
+              tipo_trabajo = sheetData[property]['Si tu respuesta fue sí, contamos como es tu empleo:']
+            }
+            if (sheetData[property]['¿Qué tipo de trabajo posees?'] === undefined) {
+              tipo_empleo = 'No'
+            } else {
+              tipo_empleo = sheetData[property]['¿Qué tipo de trabajo posees?']
+            }
+            if (sheetData[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'] === undefined) {
+              hijos = 'No'
+            } else {
+              hijos = sheetData[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?']
+            }
+            if (sheetData[property]['¿Te gustaría recibir novedades de nuevos cursos y/o actividades que llevemos adelante desde nuestro espacio?'] === undefined) {
+              novedades = 'No'
+            } else {
+              novedades = sheetData[property]['¿Te gustaría recibir novedades de nuevos cursos y/o actividades que llevemos adelante desde nuestro espacio?']
+            }
+            idp = await pool.query('select * from personas where dni =?', [dni])
+            cat = await caregorizar.asignarcategoria(idp)
+
+            await pool.query('update personas set categoria=?, tipo_empleo=?, mail=?, participante_feria=?, recibir_novedades=?,direccion =?,barrio=?,fecha_nac=?, tel=?, tel2=?,participante_anterior=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,hijos=? where dni = ?', [cat, tipo_empleo, mail, participante_feria, recibir_novedades, direccion, barrio, fecha_nac, tel, tel2, participante_anterior, nivel_secundario, trabajo, tipo_trabajo, hijos, aux])
+
+
+          } else {
+            ///crear nueva persona 
+
+            if (sheetData[property]['Nombre'] === undefined) {
+              nombre = 'No'
+            } else {
+              nombre = sheetData[property]['Nombre']
+
+            }
+            if (sheetData[property]['Apellido'] === undefined) {
+              apellido = 'No'
+            } else {
+              apellido = sheetData[property]['Apellido']
+            }
+            if (sheetData[property]['D.N.I.'] === undefined) {
+              dni = 'No'
+            } else {
+              dni = sheetData[property]['D.N.I.']
+            }
+            if (sheetData[property]['Domicilio'] === undefined) {
+              direccion = 'No'
+            } else {
+              direccion = sheetData[property]['Domicilio']
+            }
+            if (sheetData[property]['Correo electrónico'] === undefined) {
+              mail = 'No'
+            } else {
+              mail = sheetData[property]['Correo electrónico']
+
+            }
+            if (sheetData[property]['¿Qué tipo de trabajo posees?'] === undefined) {
+              tipo_empleo = 'No'
+            } else {
+              tipo_empleo = sheetData[property]['¿Qué tipo de trabajo posees?']
+            }
+            if (sheetData[property]['recibir_novedades'] === undefined) {
+              recibir_novedades = 'No'
+            } else {
+              recibir_novedades = sheetData[property]['recibir_novedades']
+            }
+            if (sheetData[property]['¿Participaste o participas de nuestra Feria de Mujeres Emprendedoras?'] === undefined) {
+              participante_feria = 'No'
+            } else {
+              participante_feria = sheetData[property]['¿Participaste o participas de nuestra Feria de Mujeres Emprendedoras?']
+            }
+
+            if (sheetData[property]['Barrio'] === undefined) {
+              barrio = 'No'
+            } else {
+              barrio = sheetData[property]['Barrio']
+            }
+            if (sheetData[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'] === undefined) {
+              fecha_nac = 'No'
+            } else {
+              fecha_nac = sheetData[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)']
+            }
+            if (sheetData[property]['Número de teléfono de contacto'] === undefined) {
+              tel = 'No'
+            } else {
+              tel = sheetData[property]['Número de teléfono de contacto']
+            }
+            if (sheetData[property]['Número de teléfono alternativo'] === undefined) {
+              tel2 = 'No'
+            } else {
+              tel2 = sheetData[property]['Número de teléfono alternativo']
+            }
+            if (sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente? '] === undefined) {
+              participante_anterior = 'No'
+            } else {
+              participante_anterior = sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente? ']
+            }
+            if (sheetData[property]['Nivel educativo alcanzado'] === undefined) {
+              nivel_secundario = 'No'
+            } else {
+              nivel_secundario = sheetData[property]['Nivel educativo alcanzado']
+            }
+            if (sheetData[property]['¿Actualmente estas trabajando?'] === undefined) {
+              trabajo = 'No'
+            } else {
+              trabajo = sheetData[property]['¿Actualmente estas trabajando?']
+            }
+            if (sheetData[property]['Si tu respuesta fue sí, contamos como es tu empleo:'] === undefined) {
+              tipo_trabajo = 'No'
+            } else {
+              tipo_trabajo = sheetData[property]['Si tu respuesta fue sí, contamos como es tu empleo:']
+            }
+            if (sheetData[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'] === undefined) {
+              hijos = 'No'
+            } else {
+              hijos = sheetData[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?']
+            }
+            if (sheetData[property]['¿Te gustaría recibir novedades de nuevos cursos y/o actividades que llevemos adelante desde nuestro espacio?'] === undefined) {
+              novedades = 'No'
+            } else {
+              novedades = sheetData[property]['¿Te gustaría recibir novedades de nuevos cursos y/o actividades que llevemos adelante desde nuestro espacio?']
+            }
+            let idp = await pool.query('select * from personas where dni =?', [dni])
+            cat = await caregorizar.asignarcategoria(idp)
+
+            await pool.query('INSERT INTO personas set categoria=?,tipo_empleo=?, mail=?, participante_feria=?, recibir_novedades=?, nombre=?,apellido=?,dni=?,direccion=?,barrio=?,fecha_nac=?,tel=?, tel2=?,participante_anterior=?, nivel_secundario=?, trabajo=?,tipo_trabajo=?,hijos=?', [cat, tipo_empleo, mail, participante_feria, recibir_novedades, nombre, apellido, dni, direccion, barrio, fecha_nac, tel, tel2, participante_anterior, nivel_secundario, trabajo, tipo_trabajo, hijos]);
+          }
+          /////////¿Actualmente  se encuentra estudiando? actividad adicional
+          /////////////Tipo de empleo
         } else {
-          ///crear nueva persona 
 
-          if (sheetData[property]['Nombre'] === undefined) {
-            nombre = 'No'
-          } else {
-            nombre = sheetData[property]['Nombre']
-
-          }
-          if (sheetData[property]['Apellido'] === undefined) {
-            apellido = 'No'
-          } else {
-            apellido = sheetData[property]['Apellido']
-          }
-          if (sheetData[property]['D.N.I.'] === undefined) {
-            dni = 'No'
-          } else {
-            dni = sheetData[property]['D.N.I.']
-          }
-          if (sheetData[property]['Domicilio'] === undefined) {
-            direccion = 'No'
-          } else {
-            direccion = sheetData[property]['Domicilio']
-          }
-          if (sheetData[property]['Correo electrónico'] === undefined) {
-            mail = 'No'
-          } else {
-            mail = sheetData[property]['Correo electrónico']
-
-          }
-          if (sheetData[property]['¿Qué tipo de trabajo posees?'] === undefined) {
-            tipo_empleo = 'No'
-          } else {
-            tipo_empleo = sheetData[property]['¿Qué tipo de trabajo posees?']
-          }
-          if (sheetData[property]['recibir_novedades'] === undefined) {
-            recibir_novedades = 'No'
-          } else {
-            recibir_novedades = sheetData[property]['recibir_novedades']
-          }
-          if (sheetData[property]['¿Participaste o participas de nuestra Feria de Mujeres Emprendedoras?'] === undefined) {
-            participante_feria = 'No'
-          } else {
-            participante_feria = sheetData[property]['¿Participaste o participas de nuestra Feria de Mujeres Emprendedoras?']
-          }
-          
-          if (sheetData[property]['Barrio'] === undefined) {
-            barrio = 'No'
-          } else {
-            barrio = sheetData[property]['Barrio']
-          }
-          if (sheetData[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)'] === undefined) {
-            fecha_nac = 'No'
-          } else {
-            fecha_nac = sheetData[property]['Fecha de nacimiento (indicar mes, dia y año. Ejempo 08/11/1987 11 de agosto de 1987)']
-          }
-          if (sheetData[property]['Número de teléfono de contacto'] === undefined) {
-            tel = 'No'
-          } else {
-            tel = sheetData[property]['Número de teléfono de contacto']
-          }
-          if (sheetData[property]['Número de teléfono alternativo'] === undefined) {
-            tel2 = 'No'
-          } else {
-            tel2 = sheetData[property]['Número de teléfono alternativo']
-          }
-          if (sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente? '] === undefined) {
-            participante_anterior = 'No'
-          } else {
-            participante_anterior = sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente? ']
-          }
-          if (sheetData[property]['Nivel educativo alcanzado'] === undefined) {
-            nivel_secundario = 'No'
-          } else {
-            nivel_secundario = sheetData[property]['Nivel educativo alcanzado']
-          }
-          if (sheetData[property]['¿Actualmente estas trabajando?'] === undefined) {
-            trabajo = 'No'
-          } else {
-            trabajo = sheetData[property]['¿Actualmente estas trabajando?']
-          }
-          if (sheetData[property]['Si tu respuesta fue sí, contamos como es tu empleo:'] === undefined) {
-            tipo_trabajo = 'No'
-          } else {
-            tipo_trabajo = sheetData[property]['Si tu respuesta fue sí, contamos como es tu empleo:']
-          }
-          if (sheetData[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?'] === undefined) {
-            hijos = 'No'
-          } else {
-            hijos = sheetData[property]['En caso de haber respondido Si a la pregunta anterior, ¿Cuántos hijos tiene?']
-          }
-          if (sheetData[property]['¿Te gustaría recibir novedades de nuevos cursos y/o actividades que llevemos adelante desde nuestro espacio?'] === undefined) {
-            novedades = 'No'
-          } else {
-            novedades = sheetData[property]['¿Te gustaría recibir novedades de nuevos cursos y/o actividades que llevemos adelante desde nuestro espacio?']
-          }
-          let idp = await pool.query('select * from personas where dni =?',[dni])
-          cat = await caregorizar.asignarcategoria(idp)
-
-          await pool.query('INSERT INTO personas set categoria=?,tipo_empleo=?, mail=?, participante_feria=?, recibir_novedades=?, nombre=?,apellido=?,dni=?,direccion=?,barrio=?,fecha_nac=?,tel=?, tel2=?,participante_anterior=?, nivel_secundario=?, trabajo=?,tipo_trabajo=?,hijos=?', [cat,tipo_empleo, mail, participante_feria, recibir_novedades,nombre, apellido, dni, direccion , barrio, fecha_nac, tel, tel2, participante_anterior, nivel_secundario, trabajo, tipo_trabajo, hijos]);
         }
-        /////////¿Actualmente  se encuentra estudiando? actividad adicional
-        /////////////Tipo de empleo
-      }else{
-        
-      }
 
       }
       //////
@@ -423,86 +423,86 @@ router.post('/subirexcel', upload.single('excel'), async (req, res) => {
           break;
         case "Martes de 18 a 20hs - COSTURA CREATIVA":
           id_curso = 412
-            break;
+          break;
         case "Lunes de 14 a 16hs - BARBERÍA":
           id_curso = 413
-              break;
+          break;
 
         case "Lunes de 16 a 18hs - BARBERÍA":
           id_curso = 414
-                break;
+          break;
 
         case "Lunes de 18 a 20hs - BARBERÍA":
           id_curso = 415
-                  break;
+          break;
 
         case "Jueves de 08 a 10hs - BARBERÍA":
           id_curso = 416
-                    break;
+          break;
 
         case "Jueves de 10 a 12hs - BARBERÍA":
           id_curso = 417
-                      break;
+          break;
 
         case "Lunes de 08 a 10hs - CROCHET DESDE CERO":
           id_curso = 418
-                        break;
+          break;
 
         case "Lunes de 10 a 12hs - CROCHER DESDE CERO":
           id_curso = 419
-                          break;
+          break;
         case "Miércoles 08 a 10hs - CROCHET DESDE CERO":
           id_curso = 420
-                            break;
+          break;
 
         case "Miércoles de 10 a 12hs - CROCHET DESDE CERO":
           id_curso = 421
-                              break;
+          break;
 
         case "Miércoles de 14 a 16hs - COCINA EXPRESS":
           id_curso = 422
-                                break;
+          break;
 
         case "Miércoles de 16 a 18hs - COCINA EXPRESS":
           id_curso = 423
-                                  break;
+          break;
 
         case "Miércoles de 18 a 20hs - COCINA EXPRESS":
           id_curso = 424
-                                    break;
+          break;
 
         case "Viernes de 08 a 10hs - COCINA EXPRESS":
           id_curso = 425
-                                      break;
+          break;
 
         case "Viernes de 10 a 12hs - COCINA EXPRESS":
           id_curso = 426
-                                        break;
+          break;
 
         case "Jueves de 14 a 16hs - DECORACIÓN DE TORTAS":
           id_curso = 427
-                                          break;
+          break;
 
         case "Jueves de 16 a 18hs - DECORACIÓN DE TORTAS":
           id_curso = 428
-                                            break;
-                                            
+          break;
+
         case "Jueves de 18 a 20hs - DECORACIÓN DE TORTAS":
           id_curso = 429
-                                            break;
-                                            
+          break;
+
         case "Viernes de 14 a 16hs - COCTELERÍA":
           id_curso = 430
-                                            break;
-                                            
+          break;
+
         case "Viernes de 16 a 18hs - COCTELERÍA":
           id_curso = 431
-                                            break;
-                                            
+          break;
+
         case "Viernes de 18 a 20hs - COCTELERÍA":
           id_curso = 432
-                                            break;
-                                            
+          break;
+
 
 
 
@@ -530,86 +530,86 @@ router.post('/subirexcel', upload.single('excel'), async (req, res) => {
           break;
         case "Martes de 18 a 20hs - COSTURA CREATIVA":
           id_curso = 412
-            break;
+          break;
         case "Lunes de 14 a 16hs - BARBERÍA":
           id_curso = 413
-              break;
+          break;
 
         case "Lunes de 16 a 18hs - BARBERÍA":
           id_curso = 414
-                break;
+          break;
 
         case "Lunes de 18 a 20hs - BARBERÍA":
           id_curso = 415
-                  break;
+          break;
 
         case "Jueves de 08 a 10hs - BARBERÍA":
           id_curso = 416
-                    break;
+          break;
 
         case "Jueves de 10 a 12hs - BARBERÍA":
           id_curso = 417
-                      break;
+          break;
 
         case "Lunes de 08 a 10hs - CROCHET DESDE CERO":
           id_curso = 418
-                        break;
+          break;
 
         case "Lunes de 10 a 12hs - CROCHER DESDE CERO":
           id_curso = 419
-                          break;
+          break;
         case "Miércoles 08 a 10hs - CROCHET DESDE CERO":
           id_curso = 420
-                            break;
+          break;
 
         case "Miércoles de 10 a 12hs - CROCHET DESDE CERO":
           id_curso = 421
-                              break;
+          break;
 
         case "Miércoles de 14 a 16hs - COCINA EXPRESS":
           id_curso = 422
-                                break;
+          break;
 
         case "Miércoles de 16 a 18hs - COCINA EXPRESS":
           id_curso = 423
-                                  break;
+          break;
 
         case "Miércoles de 18 a 20hs - COCINA EXPRESS":
           id_curso = 424
-                                    break;
+          break;
 
         case "Viernes de 08 a 10hs - COCINA EXPRESS":
           id_curso = 425
-                                      break;
+          break;
 
         case "Viernes de 10 a 12hs - COCINA EXPRESS":
           id_curso = 426
-                                        break;
+          break;
 
         case "Jueves de 14 a 16hs - DECORACIÓN DE TORTAS":
           id_curso = 427
-                                          break;
+          break;
 
         case "Jueves de 16 a 18hs - DECORACIÓN DE TORTAS":
           id_curso = 428
-                                            break;
-                                            
+          break;
+
         case "Jueves de 18 a 20hs - DECORACIÓN DE TORTAS":
           id_curso = 429
-                                            break;
-                                            
+          break;
+
         case "Viernes de 14 a 16hs - COCTELERÍA":
           id_curso = 430
-                                            break;
-                                            
+          break;
+
         case "Viernes de 16 a 18hs - COCTELERÍA":
           id_curso = 431
-                                            break;
-                                            
+          break;
+
         case "Viernes de 18 a 20hs - COCTELERÍA":
           id_curso = 432
-                                            break;
-                                            
+          break;
+
 
 
 
@@ -620,70 +620,71 @@ router.post('/subirexcel', upload.single('excel'), async (req, res) => {
       }
       dos = id_curso
 
-        if (yainscripto.length == 0) {
-      try {
+      if (yainscripto.length == 0) {
+        try {
 
-       
-        if (sheetData[property]['D.N.I.'] === undefined) {
-          dni = '34825125'
-        } else {
-          dni = sheetData[property]['D.N.I.']
+
+          if (sheetData[property]['D.N.I.'] === undefined) {
+            dni = '34825125'
+          } else {
+            dni = sheetData[property]['D.N.I.']
+          }
+          let idp = await pool.query('select * from personas where dni =?', [dni])
+          cat = await caregorizar.asignarcategoria(idp)
+          console.log(cat)
+          await pool.query('update personas set categoria=? where dni =?', [cat, dni])
+
+          if (sheetData[property]['¿Por que querés tomar alguno de estos cursos?'] === undefined) {
+            motivacion = 'Sin completar'
+          } else {
+            motivacion = sheetData[property]['¿Por que querés tomar alguno de estos cursos?']
+          }
+          if (sheetData[property]['Posee alguno de los  siguientes dispositivos con conexión a internet:'] === undefined) {
+            conexion_int = 'Sin completar'
+          } else {
+            conexion_int = sheetData[property]['Posee alguno de los  siguientes dispositivos con conexión a internet:']
+          }
+          if (sheetData[property]['D.N.I.'] === undefined) {
+            dni_persona = 'Sin completar'
+          } else {
+            dni_persona = sheetData[property]['D.N.I.']
+          }
+          if (sheetData[property]['¿Qué te gustaría hacer con las habilidades aprendidas?'] === undefined) {
+            objetivo = 'Sin completar'
+          } else {
+            objetivo = sheetData[property]['¿Qué te gustaría hacer con las habilidades aprendidas?']
+          }
+          if (sheetData[property]['Disponibilidad Horaria para cursar '] === undefined) {
+            horario = 'Sin completar'
+          } else {
+            horario = sheetData[property]['Disponibilidad Horaria para cursar ']
+          }
+          if (sheetData[property]['¿Cómo te enteraste de los cursos?'] === undefined) {
+            como_se_entero = 'Sin completar'
+          } else {
+            como_se_entero = sheetData[property]['¿Cómo te enteraste de los cursos?']
+          }
+
+          if (sheetData[property]['¿Qué curso te gustaría que agreguemos en las próximas ofertas?'] === undefined) {
+            recomendacion = 'Sin completar'
+          } else {
+            recomendacion = sheetData[property]['¿Qué curso te gustaría que agreguemos en las próximas ofertas?']
+          }
+
+
+
+          await pool.query('INSERT INTO inscripciones set id_persona=?,motivacion=?,conexion_int=?,dni_persona=?,objetivo=?,horario=?, estado="pendiente",uno=?,dos=?,como_se_entero=?,recomendacion=?,edicion=3', [idp[0]['id'], motivacion, conexion_int, dni_persona, objetivo, horario, uno, dos, como_se_entero, recomendacion]);
+
+
+
+
+
+
+        } catch (e) {
+          console.log(e)
         }
-        let idp = await pool.query('select * from personas where dni =?',[dni])
-        cat = await caregorizar.asignarcategoria(idp)
-        console.log(cat)
-        await pool.query('update personas set categoria=? where dni =?', [cat, dni])
+      }
 
-        if (sheetData[property]['¿Por que querés tomar alguno de estos cursos?'] === undefined) {
-          motivacion = 'Sin completar'
-        } else {
-          motivacion = sheetData[property]['¿Por que querés tomar alguno de estos cursos?']
-        }
-        if (sheetData[property]['Posee alguno de los  siguientes dispositivos con conexión a internet:'] === undefined) {
-          conexion_int = 'Sin completar'
-        } else {
-          conexion_int = sheetData[property]['Posee alguno de los  siguientes dispositivos con conexión a internet:']
-        }
-        if (sheetData[property]['D.N.I.'] === undefined) {
-          dni_persona = 'Sin completar'
-        } else {
-          dni_persona = sheetData[property]['D.N.I.']
-        }
-        if (sheetData[property]['¿Qué te gustaría hacer con las habilidades aprendidas?'] === undefined) {
-          objetivo = 'Sin completar'
-        } else {
-          objetivo = sheetData[property]['¿Qué te gustaría hacer con las habilidades aprendidas?']
-        }
-        if (sheetData[property]['Disponibilidad Horaria para cursar '] === undefined) {
-          horario = 'Sin completar'
-        } else {
-          horario = sheetData[property]['Disponibilidad Horaria para cursar ']
-        }
-        if (sheetData[property]['¿Cómo te enteraste de los cursos?'] === undefined) {
-          como_se_entero = 'Sin completar'
-        } else {
-          como_se_entero = sheetData[property]['¿Cómo te enteraste de los cursos?']
-        }
-
-        if (sheetData[property]['¿Qué curso te gustaría que agreguemos en las próximas ofertas?'] === undefined) {
-          recomendacion = 'Sin completar'
-        } else {
-          recomendacion = sheetData[property]['¿Qué curso te gustaría que agreguemos en las próximas ofertas?']
-        }
-        
-
-
-        await pool.query('INSERT INTO inscripciones set id_persona=?,motivacion=?,conexion_int=?,dni_persona=?,objetivo=?,horario=?, estado="pendiente",uno=?,dos=?,como_se_entero=?,recomendacion=?,edicion=3', [idp[0]['id'],motivacion, conexion_int, dni_persona, objetivo, horario, uno, dos,como_se_entero,recomendacion]);
-
-
-      
-
-
-
-      } catch (e) {
-        console.log(e)
-      }}
-  
     }
 
 
@@ -1227,79 +1228,9 @@ router.post("/agregarobservacion", async (req, res) => {
 
 
 })
-/* router.post("/enviarinscripcioncarnaval", async (req, res) => {
-  let {
-    nombre, apellido, dni, tel, localidad, fecha_nac,
-    direccion, barrio, curso,
-    alumna_anterior = "No",
-    tiene_espacio = "No",
-    enseniar = "No",
-    curso_adic = "No",
-    profesion = "No",
-    agregar_whatsap= "No"
-  } = req.body;
 
-  // Normalizar campos vacíos
-  alumna_anterior = alumna_anterior || "No";
-  tiene_espacio = tiene_espacio || "No";
-  enseniar = enseniar || "No";
-  curso_adic = curso_adic || "No";
-  profesion = profesion || "No";
-  agregar_whatsap= agregar_whatsap|| "No";
+///oftalmologoco
 
-  try {
-    // Verificar si ya existe la persona
-    let pers = await pool.query('SELECT * FROM personas WHERE dni = ?', [dni]);
-
-    if (pers.length > 0) {
-      await pool.query(
-        `UPDATE personas 
-         SET fecha_nac = ?, nombre = ?, apellido = ?, dni = ?, tel = ?, direccion = ?, barrio = ?, localidad = ? 
-         WHERE dni = ?`,
-        [fecha_nac, nombre, apellido, dni, tel, direccion, barrio, localidad, dni]
-      );
-    } else {
-      await pool.query(
-        `INSERT INTO personas 
-         (fecha_nac, nombre, apellido, dni, tel, direccion, barrio, localidad) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [fecha_nac, nombre, apellido, dni, tel, direccion, barrio, localidad]
-      );
-    }
-
-    // Obtener persona actualizada o creada
-    pers = await pool.query('SELECT * FROM personas WHERE dni = ?', [dni]);
-
-    // Verificar si ya está inscripta
-    const yainsc = await pool.query(
-      'SELECT * FROM inscripciones_carnaval WHERE id_persona = ? AND id > 590 AND detalle = ?',
-      [pers[0]['id'], "Botox capilar( alisado)"]
-    );
-
-    let mensaje = '';
-
-    if (yainsc.length > 0) {
-      mensaje = 'Con estos datos ya tenemos una inscripción, no hace falta que te vuelvas a anotar. Por favor aguarda nuestro contacto.';
-    } else {
-      const fecha = new Date();
-
-      await pool.query(
-        `INSERT INTO inscripciones_carnaval 
-         (fecha, dni_persona, id_persona, detalle,  alumna_anterior, tiene_espacio, enseniar, curso_adic, profesion, agregar_whatsap)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [fecha, dni, pers[0]['id'], "Botox capilar( alisado)", alumna_anterior, tiene_espacio, enseniar, curso_adic, profesion,agregar_whatsap]
-      );
-
-      mensaje = 'Inscripción realizada, te pedimos que aguardes contacto';
-    }
-
-    res.json(mensaje);
-
-  } catch (error) {
-    console.log(error);
-    res.json('Error: algo sucedió, verificá que hayas completado todos los campos');
-  }
-}); */
 
 router.post("/enviarinscripcioncarnaval", async (req, res) => {
 /*   let {
@@ -1360,6 +1291,86 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
     // Verificar si ya está inscripta
     const yainsc = await pool.query(
       'SELECT * FROM inscripciones_carnaval WHERE id_persona = ? AND id > 590 AND detalle = ?',
+      [pers[0]['id'], "Op oftalmologico agosto"]
+    );
+
+    let mensaje = '';
+
+    if (yainsc.length > 0) {
+      mensaje = 'Con estos datos ya tenemos una inscripción, no hace falta que te vuelvas a anotar. Por favor aguarda nuestro contacto.';
+    } else {
+      const fecha = new Date();
+
+      await pool.query(
+        `INSERT INTO inscripciones_carnaval 
+         ( fecha, dni_persona, id_persona, detalle,  curso,profesion,alumna_anterior,tiene_espacio,enseniar,curso_adic,agregar_whatsap)
+         VALUES (?, ?, ?, ?, ?,?,?,?,?,?,?)`,
+        [ fecha, dni, pers[0]['id'], "Op oftalmologico agosto", curso,profesion,alumna_anterior,tiene_espacio,enseniar,curso_adic,agregar_whatsap]
+      );
+
+      mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto';
+    }
+
+    res.json(mensaje);
+
+  } catch (error) {
+    console.log(error);
+    res.json('Error: algo sucedió, verificá que hayas completado todos los campos');
+  }
+});
+
+/* 
+///incripcion de essme
+router.post("/enviarinscripcioncarnaval", async (req, res) => {
+
+
+
+  let {
+    nombre, apellido, dni, tel, localidad, fecha_nac,
+    direccion, barrio, curso,
+    alumna_anterior,
+    tiene_espacio,
+    enseniar,
+    curso_adic,
+    profesion,
+    agregar_whatsap
+  } = req.body;
+
+
+  // Normalizar campos vacíos
+  alumna_anterior = alumna_anterior || "No";
+  tiene_espacio = tiene_espacio || "No";
+  enseniar = enseniar || "No";
+  curso_adic = curso_adic || "No";
+  profesion = profesion || "No";
+  agregar_whatsap = agregar_whatsap || "No";
+
+  try {
+    // Verificar si ya existe la persona
+    let pers = await pool.query('SELECT * FROM personas WHERE dni = ?', [dni]);
+
+    if (pers.length > 0) {
+      await pool.query(
+        `UPDATE personas 
+         SET fecha_nac = ?, nombre = ?, apellido = ?, dni = ?, tel = ?, direccion = ?, barrio = ?, localidad = ? 
+         WHERE dni = ?`,
+        [fecha_nac, nombre, apellido, dni, tel, direccion, barrio, localidad, dni]
+      );
+    } else {
+      await pool.query(
+        `INSERT INTO personas 
+         (fecha_nac, nombre, apellido, dni, tel, direccion, barrio, localidad) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [fecha_nac, nombre, apellido, dni, tel, direccion, barrio, localidad]
+      );
+    }
+
+    // Obtener persona actualizada o creada
+    pers = await pool.query('SELECT * FROM personas WHERE dni = ?', [dni]);
+
+    // Verificar si ya está inscripta
+    const yainsc = await pool.query(
+      'SELECT * FROM inscripciones_carnaval WHERE id_persona = ? AND id > 590 AND detalle = ?',
       [pers[0]['id'], "Fotoproducto-catering"]
     );
 
@@ -1374,7 +1385,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
         `INSERT INTO inscripciones_carnaval 
          ( fecha, dni_persona, id_persona, detalle,  curso,profesion,alumna_anterior,tiene_espacio,enseniar,curso_adic,agregar_whatsap)
          VALUES (?, ?, ?, ?, ?,?,?,?,?,?,?)`,
-        [ fecha, dni, pers[0]['id'], "Fotoproducto-catering", curso,profesion,alumna_anterior,tiene_espacio,enseniar,curso_adic,agregar_whatsap]
+        [fecha, dni, pers[0]['id'], "Fotoproducto-catering", curso, profesion, alumna_anterior, tiene_espacio, enseniar, curso_adic, agregar_whatsap]
       );
 
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto';
@@ -1386,7 +1397,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
     console.log(error);
     res.json('Error: algo sucedió, verificá que hayas completado todos los campos');
   }
-});
+}); */
 
 router.post("/enviarinscripcion", async (req, res) => {
   let { nombre, apellido, dni, tel, tel2, fecha_nac, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, participante_feria, motivacion } = req.body
@@ -1452,7 +1463,7 @@ router.post("/enviarinscripcion", async (req, res) => {
 
 
 router.post("/enviarinscripcion2", async (req, res) => {
-  let {uno, dos, nombre, apellido, dni, tel, tel2, fecha_nac, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, participante_feria, motivacion,modalidad,emprendimiento,genero, otrogenero } = req.body
+  let { uno, dos, nombre, apellido, dni, tel, tel2, fecha_nac, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, participante_feria, motivacion, modalidad, emprendimiento, genero, otrogenero } = req.body
   ///participante_feria
   if (tipo_trabajo === undefined) {
     tipo_trabajo = 'Sin determinar'
@@ -1471,11 +1482,11 @@ router.post("/enviarinscripcion2", async (req, res) => {
   if (otrogenero == undefined) {
     otrogenero = 'Sin determinar'
   }
-  
+
   if (emprendimiento == undefined) {
     emprendimiento = 'Sin determinar'
   }
-  console.log(uno,dos,nombre, fecha_nac, participante_feria, apellido, dni, tel, tel2, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, motivacion,modalidad ,genero, otrogenero  )
+  console.log(uno, dos, nombre, fecha_nac, participante_feria, apellido, dni, tel, tel2, prioridad1, prioridad2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, motivacion, modalidad, genero, otrogenero)
 
   try {
     let pers = await pool.query('select * from personas where dni =?', [dni])
@@ -1501,7 +1512,7 @@ router.post("/enviarinscripcion2", async (req, res) => {
     else {
       fecha = (new Date(Date.now()))
       cat = await caregorizar.asignarcategoria(pers)
-      console.log(uno,dos)
+      console.log(uno, dos)
       await pool.query('insert into inscripciones set uno=?,dos=?, fecha=?,dni_persona=?,emprendimiento=?,motivacion=?,id_persona=?,edicion=?', [uno, dos, fecha, dni, emprendimiento, motivacion, pers[0]['id'], 6])
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto'
     }
@@ -1523,10 +1534,10 @@ router.post("/cambiarestadocursado", async (req, res) => {
   const { estado, id_cursado } = req.body
 
   try {
-   
+
     cursado = await pool.query('select * from cursado where id =?', [id_cursado])
     await pool.query('update inscripciones set estado="Inscripta" where id=? ', [cursado[0]['id_inscripcion']])
-    await pool.query('delete  from  cursado  where id=? ', [ id_cursado])
+    await pool.query('delete  from  cursado  where id=? ', [id_cursado])
 
     res.json('Realizado')
   } catch (error) {
@@ -1802,7 +1813,7 @@ router.get('/cargarpersonas111', async (req, res) => {
       }
 
       try {
-      
+
         await pool.query('INSERT INTO personas set apellido=?,nombre=?,dni=?,usuario=?,direccion=?,barrio=?,residencia=?,tel=?,tel2=?,participante_anterior=?,nivel_secundario=?,hijos=?,como_se_entero=?', [sheetData[property]['Apellido'], sheetData[property]['Nombre'], sheetData[property]['D.N.I.'], 'No', sheetData[property]['Dirección calle'] + '-' + sheetData[property][' Altura'] + '-' + sheetData[property]['Piso y departamento (en caso que corresponda)'], sheetData[property]['Barrio'], sheetData[property]['Donde vivís'], sheetData[property]['Número de teléfono de contacto'], sheetData[property]['Número de teléfono alternativo'], sheetData[property]['¿Participaste de algún curso de la Escuela de Mujeres Emprendedoras anteriormente?  '], sheetData[property]['Nivel educativo alcanzado'], sheetData[property]['¿Cómo te enteraste de los cursos?']]);
 
 
@@ -2231,30 +2242,30 @@ router.post('/subirexceltelefonos', upload.single('excel'), async (req, res) => 
     const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
     // Procesar los datos
-  /*   const sheetData = sheetData.map(row => ({
-      nombre: row.Nombre,
-      apellido: row.Apellido
-
-     ));    // Agrega más campos según las columnas que necesites procesar
-    } */
+    /*   const sheetData = sheetData.map(row => ({
+        nombre: row.Nombre,
+        apellido: row.Apellido
+  
+       ));    // Agrega más campos según las columnas que necesites procesar
+      } */
 
 
 
     ///////////////////////////////////////////////////////////////////
     for (property in sheetData) {
       // a += 1
-        ///////
+      ///////
 
-  
-          ///actualizar
-try {
-  await pool.query('UPDATE personas set tel=? where dni = ?  ', [sheetData[property]['Número de teléfono de contacto '], sheetData[property]['D.N.I.']])
-  console.log("sa")
-} catch (error) {
-  console.log(error)
-}
 
- 
+      ///actualizar
+      try {
+        await pool.query('UPDATE personas set tel=? where dni = ?  ', [sheetData[property]['Número de teléfono de contacto '], sheetData[property]['D.N.I.']])
+        console.log("sa")
+      } catch (error) {
+        console.log(error)
+      }
+
+
 
     }
 
