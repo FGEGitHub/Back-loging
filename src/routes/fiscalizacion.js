@@ -748,7 +748,7 @@ router.get('/listademesas', async (req, res,) => {
 
 
     try {
-        estr = await pool.query('select * from mesas_fiscales left join (select id as id_esc,circuito, nombre, etapa2 from escuelas) as selec1 on mesas_fiscales.id_escuela=selec1.id_esc left join (select mesa as mesaf, dni from asignaciones_fiscales2) as selec2 on mesas_fiscales.id=selec2.mesaf left join (select dni as dnipers, apellido, nombre as nombrepers,id_donde_vota, telefono, telefono2 from personas_fiscalizacion) as selec3 on selec2.dni=selec3.dnipers left join (select id as idescuelaa, nombre as nombredondevota from escuelas) as selec5 on selec3.id_donde_vota=selec5.idescuelaa')
+        estr = await pool.query('select * from mesas_fiscales left join (select id as id_esc,circuito, nombre from escuelas) as selec1 on mesas_fiscales.id_escuela=selec1.id_esc left join (select mesa as mesaf, dni, edicion from asignaciones_fiscales where edicion=2025 ) as selec2 on mesas_fiscales.id=selec2.mesaf left join (select dni as dnipers, apellido, nombre as nombrepers,id_donde_vota, telefono, telefono2 from personas_fiscalizacion) as selec3 on selec2.dni=selec3.dnipers left join (select id as idescuelaa, nombre as nombredondevota from escuelas) as selec5 on selec3.id_donde_vota=selec5.idescuelaa  ORDER BY CAST(numero AS UNSIGNED)')
 
         res.json(estr)
     } catch (error) {
