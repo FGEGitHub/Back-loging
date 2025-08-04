@@ -48,7 +48,7 @@ console.log(response)
 });
 
 
-
+/* 
 
 router.get('/consultar-padron', async (req, res) => {
   try {
