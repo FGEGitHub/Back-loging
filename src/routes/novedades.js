@@ -59,7 +59,10 @@ console.log(registros.length)
       return res.json({ mensaje: 'No hay registros para edición 2025' });
     }
 
-    const browser = await puppeteer.launch({ headless: true });
+const browser = await puppeteer.launch({
+  headless: true,
+  args: ['--no-sandbox', '--disable-setuid-sandbox']
+});
     const page = await browser.newPage();
 
     // Función para consultar escuela por DNI, probando sexos M y F
@@ -134,7 +137,10 @@ console.log(registros.length)
       return res.json({ mensaje: 'No hay registros para edición 2025' });
     }
 
-    const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({
+  headless: true,
+  args: ['--no-sandbox', '--disable-setuid-sandbox']
+});
     const page = await browser.newPage();
 
     // Función para consultar escuela por DNI, probando sexos M y F
