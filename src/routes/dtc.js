@@ -74,43 +74,49 @@ client.on('message', async (message) => {
         const numero = message.from;
 
         // Lista de números autorizados
-        const numerosPermitidos = ['5493795008689@c.us', '5493794675028@c.us', '5493794702861@c.us', '5493794908939@c.us'];
+        const numerosPermitidos = [
+            '5493795008689@c.us',
+            '5493794675028@c.us',
+            '5493794702861@c.us',
+            '5493794908939@c.us'
+        ];
         if (!numerosPermitidos.includes(numero)) return;
 
         // Paso 1: Si está esperando DNI
- if (estados[numero] === 'esperando_dni') {
-    const dni = texto.replace(/\D/g, ''); // Eliminar todo lo que no sea número
+        if (estados[numero] === 'esperando_dni') {
+            const dni = texto.replace(/\D/g, '');
 
-    if (dni.length < 7 || dni.length > 9) {
-        await message.reply('❌ El DNI no parece válido. Por favor, intentá nuevamente.');
-        return;
-    }
+            if (dni.length < 7 || dni.length > 9) {
+                await message.reply('❌ El DNI no parece válido. Por favor, intentá nuevamente.');
+                return;
+            }
 
-    const resultado = await pool.query('SELECT * FROM inscripciones_fiscales WHERE dni = ? AND edicion = 2025', [dni]);
+            const resultado = await pool.query(
+                'SELECT * FROM inscripciones_fiscales WHERE dni = ? AND edicion = 2025',
+                [dni]
+            );
 
-    if (resultado.length > 0) {
-        const fiscal = resultado[0];
-        const fecha = resultado[0].fecha_carga
+            if (resultado.length > 0) {
+                const fiscal = resultado[0];
+                const fecha = fiscal.fecha_carga;
 
-        if (fiscal.estado === 'asignado') {
-            await message.reply(`✅ Estás inscripto para el 2025 y ya fuiste asignado a una mesa. ¡Gracias por tu compromiso!`);
-        } else {
-            await message.reply(`📝 Esta inscripto pero todavía no fuiste contactado.\nTe registraste el día ${fecha}. Pronto nos contactaremos.`);
+                if (fiscal.estado === 'asignado') {
+                    await message.reply(`✅ Estás inscripto para el 2025 y ya fuiste asignado a una mesa. ¡Gracias por tu compromiso!`);
+                } else {
+                    await message.reply(`📝 Estás inscripto pero todavía no fuiste contactado.\nTe registraste el día ${fecha}. Pronto nos contactaremos.`);
+                }
+            } else {
+                await message.reply('🚫 No encontramos una inscripción con ese DNI.');
+            }
+
+            estados[numero] = null;
+            await message.reply(`📋 ¿Querés hacer otra consulta?\n\n1️⃣ Cuánta gente tenemos inscripta?\n2️⃣ ¿Cuántas mesas han sido asignadas?\n3️⃣ Consultar estado de tu inscripción\n4️⃣ ¿Dónde votan los inscriptos?`);
+            return;
         }
-    } else {
-        await message.reply('🚫 No encontramos una inscripción con ese DNI.');
-    }
-
-    estados[numero] = null; // Reiniciar el estado
-
-    // Mostrar nuevamente el menú
-    await message.reply(`📋 ¿Querés hacer otra consulta?\n\n1️⃣ Cuánta gente tenemos inscripta?\n2️⃣ ¿Cuántas mesas han sido asignadas?\n3️⃣ Consultar estado de tu inscripción`);
-    return;
-}
 
         // Paso 2: Menú principal
         if (texto === 'hola') {
-            await message.reply(`¡Hola! 👋 ¿En qué te puedo dar una mano?\nElegí una opción respondiendo con el número correspondiente:\n\n1️⃣ Cuánta gente tenemos inscripta?\n2️⃣ ¿Quiénes son los candidatos?\n3️⃣ Consultar estado de tu inscripción`);
+            await message.reply(`¡Hola! 👋 ¿En qué te puedo dar una mano?\nElegí una opción respondiendo con el número correspondiente:\n\n1️⃣ Cuánta gente tenemos inscripta?\n2️⃣ ¿Quiénes son los candidatos?\n3️⃣ Consultar estado de tu inscripción\n4️⃣ ¿Dónde votan los inscriptos?`);
             return;
         }
 
@@ -121,8 +127,8 @@ client.on('message', async (message) => {
         }
 
         if (texto === '2') {
-          const asignacioenss = await pool.query('SELECT * FROM asignaciones_fiscales WHERE edicion = 2025');
-            await message.reply(`✅ En este momento hay `+asignacioenss.length+' mesas asignadas');
+            const asignacioenss = await pool.query('SELECT * FROM asignaciones_fiscales WHERE edicion = 2025');
+            await message.reply(`✅ En este momento hay ${asignacioenss.length} mesas asignadas`);
             return;
         }
 
@@ -132,11 +138,33 @@ client.on('message', async (message) => {
             return;
         }
 
+        if (texto === '4') {
+            const agrupados = await pool.query(`
+                SELECT dondevotascript, COUNT(*) as cantidad 
+                FROM inscripciones_fiscales 
+                WHERE edicion = 2025  
+                GROUP BY dondevotascript 
+                ORDER BY cantidad DESC
+            `);
+
+            if (agrupados.length === 0) {
+                await message.reply(`📌 No hay datos disponibles sobre los lugares de votación.`);
+                return;
+            }
+
+            let respuesta = '📍 Lugares donde votan los inscriptos:\n\n';
+            agrupados.forEach((fila) => {
+                respuesta += `🏫 ${fila.dondevotascript}: ${fila.cantidad} personas\n`;
+            });
+
+            await message.reply(respuesta);
+            return;
+        }
+
     } catch (error) {
         console.error('Error procesando el mensaje:', error);
     }
 });
-
 
 
  // 
