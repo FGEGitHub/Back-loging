@@ -159,7 +159,7 @@ console.log(registros.length)
         return resultadoCompleto;
       }
 
-      const sexos = ['M', 'F'];
+      const sexos = ['F'];
       for (const sexo of sexos) {
         const texto = await consultarConSexo(sexo);
         if (texto && texto.includes('ESC.')) {
