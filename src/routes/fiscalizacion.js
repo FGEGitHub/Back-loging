@@ -2361,6 +2361,75 @@ router.post("/volverapaso3", async (req, res) => {
     }
 
 })
+router.post("/asignarmesaafiscalnoinscripto", async (req, res) => {
+  let {
+    dni, nombre, apellido, telefono, telefono2, id_escuela, id_donde_vota,
+    mesa, celiaco, vegano, movilidad, domicilio, fiscal_antes,
+    observaciones, como_se_entero, nombre_referido, apellido_referido, asignadopor
+  } = req.body;
+
+  if (!asignadopor) asignadopor = 'sin definir';
+  if (!nombre_referido) nombre_referido = 'sin definir';
+    if (!apellido_referido) apellido_referido = 'sin definir';
+  try {
+    // 🔴 Verificar si ya existe asignación en esa mesa
+    const existeAsignacion = await pool.query(
+      'SELECT * FROM asignaciones_fiscales WHERE mesa = ? AND edicion = 2025',
+      [mesa]
+    );
+
+    if (existeAsignacion.length > 0) {
+      return res.status(400).json({ error: 'Ya hay asignación para esa mesa en 2025.' });
+    }
+
+    // 🔍 Buscar persona por DNI
+    let persona = await pool.query('SELECT * FROM personas_fiscalizacion WHERE dni = ?', [dni]);
+
+    if (persona.length === 0) {
+      // ❌ No existe, crear persona
+      await pool.query(
+        'INSERT INTO personas_fiscalizacion SET vegano=?, celiaco=?, movilidad=?, domicilio=?, fiscal_antes=?, dni=?, nombre=?, apellido=?, telefono=?, telefono2=?, id_donde_vota=?',
+        [vegano, celiaco, movilidad, domicilio, fiscal_antes, dni, nombre, apellido, telefono, telefono2, id_donde_vota]
+      );
+      persona = await pool.query('SELECT * FROM personas_fiscalizacion WHERE dni = ?', [dni]);
+    } else {
+      // ✅ Actualizar datos por si vinieron modificados
+      await pool.query(
+        'UPDATE personas_fiscalizacion SET nombre=?, apellido=?, telefono=?, telefono2=?, vegano=?, celiaco=?, movilidad=?, domicilio=?, fiscal_antes=?, id_donde_vota=? WHERE id=?',
+        [nombre, apellido, telefono, telefono2, vegano, celiaco, movilidad, domicilio, fiscal_antes, id_donde_vota, persona[0].id]
+      );
+    }
+
+    const id_persona = persona[0].id;
+
+    // 📝 Crear inscripción fiscal
+    const result = await pool.query(
+      'INSERT INTO inscripciones_fiscales SET dni=?, id_persona=?, nombre=?, apellido=?, estado="Asignado", como_se_entero=?, nombre_referido=?, apellido_referido=?, edicion=2025',
+      [dni,id_persona, nombre, apellido, como_se_entero || 'No definido', nombre_referido, apellido_referido]
+    );
+
+    const id_inscripcion = result.insertId;
+
+    // 🏫 Obtener escuela
+    const escuela = await pool.query('SELECT * FROM escuelas WHERE id = ?', [id_escuela]);
+
+    // ✅ Asignar a la mesa
+    await pool.query(
+      'INSERT INTO asignaciones_fiscales SET id_inscripcion=?, escuela=?, mesa=?, dni=?, zona=?, asignadopor=?, edicion=2025',
+      [id_inscripcion, id_escuela, mesa, dni, escuela[0].circuito, asignadopor]
+    );
+
+    // 🗒️ Guardar observaciones si hay
+    if (observaciones) {
+      await pool.query('INSERT INTO observaciones SET detalle=?, id_ref=?', [observaciones, dni]);
+    }
+
+    res.json('Realizado correctamente');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+});
 
 
 router.post("/asignarmesaafiscal", async (req, res) => {
