@@ -363,6 +363,7 @@ router.get('/todasincripciones', async (req, res,) => {
                     nombre_aliado: inscri2[inscripcion]['nombre_aliado'],
                     encargado: encargado,
                     id_persona: inscri2[inscripcion]['id_persona'],
+                      dondevotascript: inscri2[inscripcion]['dondevotascript'],
                 }
                 envi.push(nuev)
             }
@@ -400,6 +401,7 @@ router.get('/todasincripciones', async (req, res,) => {
                 telefono2: persona_auxiliar[0]['telefono2'],
                 id_aliado: inscri2[inscripcion]['id_aliado'],
                 nombre_aliado: inscri2[inscripcion]['nombre_aliado'],
+                dondevotascript: inscri2[inscripcion]['dondevotascript'],
                 encargado: encargado
             }
 
