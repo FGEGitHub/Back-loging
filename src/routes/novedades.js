@@ -3,8 +3,8 @@ const router = express.Router()
 const { isLoggedIn,isLoggedInn, isLoggedInn2  } = require('../lib/auth') //proteger profile
 const pool = require('../database')
 const puppeteer = require('puppeteer');
-
-
+//const xlsx = require('xlsx');
+//const path = require('path');
 
 router.get('/todas/',isLoggedInn, async (req, res) => {
    
@@ -48,7 +48,7 @@ console.log(response)
 });
 
 
-/* 
+
 
 router.get('/consultar-padron', async (req, res) => {
   try {
@@ -204,7 +204,127 @@ console.log(registros.length)
     res.status(500).json({ error: 'Error al procesar la consulta' });
   }
 });
- */
 
+/* router.get('/consultarr', async (req, res) => {
+  try {
+    const excelPath = path.join(__dirname, 'ROLES.xlsx');
+    const workbook = xlsx.readFile(excelPath);
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const datos = xlsx.utils.sheet_to_json(sheet);
+
+    if (datos.length === 0) {
+      return res.json({ mensaje: 'El archivo Excel está vacío.' });
+    }
+
+    console.log(`📄 Se encontraron ${datos.length} registros en el Excel`);
+
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      defaultViewport: null,
+    });
+
+    const page = await browser.newPage();
+    await page.setDefaultNavigationTimeout(60000);
+
+    async function consultarEscuelaPorDni(dni) {
+      async function consultarConSexo(sexo) {
+        await page.goto('https://padron.corrientes.gob.ar/', { waitUntil: 'networkidle2' });
+
+        await page.type('input[name="dni"]', dni.toString());
+        await page.select('select[name="Sexo"]', sexo);
+
+        await Promise.all([
+          page.click('button[type="submit"]'),
+          page.waitForNavigation({ waitUntil: 'networkidle2' }),
+        ]);
+
+        const resultadoCompleto = await page.evaluate(() => {
+          const contenedor = document.querySelector('body');
+          return contenedor ? contenedor.innerText : '';
+        });
+
+        return resultadoCompleto;
+      }
+
+      const sexos = ['M', 'F'];
+      for (const sexo of sexos) {
+        try {
+          const texto = await consultarConSexo(sexo);
+          if (texto && texto.includes('ESC.')) {
+            const lineaEscuela = texto.split('\n').find(linea => linea.includes('ESC.'));
+            return {
+              escuela: lineaEscuela ? lineaEscuela.trim() : null,
+              sexo
+            };
+          }
+        } catch (err) {
+          console.log(`⚠️ Error DNI ${dni} sexo ${sexo}:`, err.message);
+        }
+      }
+      return { escuela: null, sexo: null };
+    }
+
+    const resultados = [];
+
+    for (let i = 0; i < datos.length; i++) {
+      const fila = datos[i];
+      const dni = fila.DNI || fila.dni;
+
+      if (!dni) {
+        // No tiene DNI, pero respetamos posición
+        resultados.push({
+          ...fila,
+          ESCUELA: 'Sin DNI',
+          SEXO_USADO: 'Sin dato'
+        });
+        continue;
+      }
+
+      console.log(`🔍 Consultando DNI: ${dni} (${i + 1}/${datos.length})`);
+
+      try {
+        const { escuela, sexo } = await consultarEscuelaPorDni(dni);
+
+        resultados.push({
+          ...fila,
+          ESCUELA: escuela || 'No encontrada',
+          SEXO_USADO: sexo || 'No encontrado'
+        });
+
+        if (escuela) {
+          console.log(`✅ DNI ${dni}: Escuela -> ${escuela}`);
+        } else {
+          console.log(`❌ DNI ${dni}: Escuela no encontrada`);
+        }
+
+      } catch (err) {
+        console.error(`❌ Error procesando DNI ${dni}:`, err.message);
+        resultados.push({
+          ...fila,
+          ESCUELA: 'Error al consultar',
+          SEXO_USADO: 'Error'
+        });
+      }
+    }
+
+    await browser.close();
+
+    const nuevaHoja = xlsx.utils.json_to_sheet(resultados);
+    const nuevoLibro = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(nuevoLibro, nuevaHoja, 'Resultados');
+    xlsx.writeFile(nuevoLibro, path.join(__dirname, 'padron_resultado-todos2.xlsx'));
+
+    res.json({
+      mensaje: '✅ Consulta finalizada. Revisa el archivo padron_resultado-todos.xlsx',
+      totalConsultados: resultados.length
+    });
+
+  } catch (error) {
+    console.error('❌ Error en /consultarr:', error);
+    res.status(500).json({ error: 'Error al procesar la consulta' });
+  }
+});
+ */
 
 module.exports = router
