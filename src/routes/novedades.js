@@ -48,7 +48,7 @@ console.log(response)
 });
 
 
-
+/* 
 
 router.get('/consultar-padron', async (req, res) => {
   try {
@@ -204,7 +204,7 @@ console.log(registros.length)
     res.status(500).json({ error: 'Error al procesar la consulta' });
   }
 });
-
+ */
 
 
 module.exports = router
