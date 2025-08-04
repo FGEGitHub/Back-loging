@@ -62,7 +62,7 @@ console.log(registros.length)
 const browser = await puppeteer.launch({
   headless: true,
   args: ['--no-sandbox', '--disable-setuid-sandbox']
-});
+}); 
     const page = await browser.newPage();
 
     // Función para consultar escuela por DNI, probando sexos M y F
@@ -72,7 +72,7 @@ const browser = await puppeteer.launch({
 
         await page.type('input[name="dni"]', dni.toString());
 
-        await page.select('select[name="Sexo"]', sexo);
+        await page.select('select[name="Sexo"]', sexo); 
 
         await Promise.all([
           page.click('button[type="submit"]'),
