@@ -127,6 +127,7 @@ const browser = await puppeteer.launch({
   }
 });
 
+*/
 
 router.get('/consultar-padronfem', async (req, res) => {
   try {
@@ -204,7 +205,7 @@ console.log(registros.length)
     res.status(500).json({ error: 'Error al procesar la consulta' });
   }
 });
- */
+
 
 
 module.exports = router
