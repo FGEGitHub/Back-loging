@@ -863,54 +863,53 @@ router.get('/listaexpedientes/', async (req, res) => {
 
 router.get('/listadepersonaspsiq/', async (req, res) => {
   try {
-const chiques = await pool.query(`
-  SELECT 
-    dp.id,
-    dp.nombre,
-    dp.apellido,
-    'psicologa' AS tipo,
-    COALESCE(sel.cantidadturnos, 0) AS cantidadturnos
-  FROM dtc_personas_psicologa dp
-  LEFT JOIN (
-    SELECT 
-      id_persona, 
-      COUNT(*) AS cantidadturnos
-    FROM dtc_turnos
-    WHERE usuariodispositivo = 'No'
-    GROUP BY id_persona
-  ) AS sel
-  ON dp.id = sel.id_persona
+    const chiques = await pool.query(`
+      SELECT * FROM (
+        SELECT 
+          dp.id,
+          dp.nombre,
+          dp.apellido,
+          'psicologa' AS tipo,
+          COALESCE(sel.cantidadturnos, 0) AS cantidadturnos
+        FROM dtc_personas_psicologa dp
+        LEFT JOIN (
+          SELECT 
+            id_persona, 
+            COUNT(*) AS cantidadturnos
+          FROM dtc_turnos
+          WHERE usuariodispositivo = 'No'
+          GROUP BY id_persona
+        ) AS sel
+        ON dp.id = sel.id_persona
 
-  UNION ALL
+        UNION ALL
 
-  SELECT 
-    dc.id,
-    dc.nombre,
-    dc.apellido,
-    'chico' AS tipo,
-    COALESCE(sel2.cantidadturnos, 0) AS cantidadturnos
-  FROM dtc_chicos dc
- JOIN (
-    SELECT 
-      id_persona, 
-      COUNT(*) AS cantidadturnos
-    FROM dtc_turnos
-    WHERE usuariodispositivo = 'Si'
-    GROUP BY id_persona
-  ) AS sel2
-  ON dc.id = sel2.id_persona
+        SELECT 
+          dc.id,
+          dc.nombre,
+          dc.apellido,
+          'chico' AS tipo,
+          COALESCE(sel2.cantidadturnos, 0) AS cantidadturnos
+        FROM dtc_chicos dc
+        JOIN (
+          SELECT 
+            id_persona, 
+            COUNT(*) AS cantidadturnos
+          FROM dtc_turnos
+          WHERE usuariodispositivo = 'Si'
+          GROUP BY id_persona
+        ) AS sel2
+        ON dc.id = sel2.id_persona
+      ) AS combinados
+      WHERE cantidadturnos > 0
+      ORDER BY cantidadturnos DESC, apellido
+    `);
 
-  ORDER BY cantidadturnos DESC, apellido
-`);
-
-
-    // Convierte BigInt a número o cadena
-    const chiquesFormatted = chiques.map(row => {
-      return {
-        ...row,
-        cantidadturnos: typeof row.cantidadturnos === 'bigint' ? Number(row.cantidadturnos) : row.cantidadturnos
-      };
-    });
+    // Formateo de BigInt
+    const chiquesFormatted = chiques.map(row => ({
+      ...row,
+      cantidadturnos: typeof row.cantidadturnos === 'bigint' ? Number(row.cantidadturnos) : row.cantidadturnos
+    }));
 
     const env = {
       total: chiques.length,
@@ -926,6 +925,7 @@ const chiques = await pool.query(`
     res.status(500).json({ error: 'Error en la consulta a la base de datos' });
   }
 });
+
 
 router.get('/listadepersonasgim/', async (req, res) => {
 
