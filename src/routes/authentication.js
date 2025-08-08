@@ -146,7 +146,7 @@ router.get('/noexito',(req,res)=>{
 /////////////jwt prueba
 router.post('/signin2', passport.authenticate('local.signin', { failureRedirect: '/noexito' }),
   function(req, res) {
-    console.log(req.user)
+    
     const userFoRToken ={
         id :req.user.id,
         usuario: req.user.usuario,
@@ -156,7 +156,7 @@ router.post('/signin2', passport.authenticate('local.signin', { failureRedirect:
     }
  
     const token = jwt.sign(userFoRToken, 'fideicomisocs121',{ expiresIn: 60*60*24*7})
-    console.log(req.user)
+  
     res.send({
         id :req.user.id,
         usuario: req.user.usuario,
