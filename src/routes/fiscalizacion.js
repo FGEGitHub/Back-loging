@@ -1627,9 +1627,12 @@ router.post("/modificardondevota", async (req, res) => {
     const { id_donde_vota, id } = req.body
     try {
 
-        console.log(id_donde_vota)
-        console.log(id)
+      
         await pool.query('update personas_fiscalizacion set id_donde_vota=? where id=?  ', [id_donde_vota, id])
+        const personaaa = await pool.query('select * from personas_fiscalizacion where id =?', [id])
+          const escuu = await pool.query('select * from escuelas where id =?', [id_donde_vota])
+           await pool.query('update inscripciones_fiscales  set dondevotascript=? where dni=? and edicion=2025 ', [escuu[0]['nombre'], personaaa[0]['dni']])
+
         res.json('realizado')
     } catch (error) {
         console.log(error)
