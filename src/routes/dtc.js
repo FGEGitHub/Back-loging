@@ -18,9 +18,13 @@ const kmlFilePath2 = path.join(__dirname, '../maps/entregas.kml');
 
  ////////////whatapweb
  const qrcode = require('qrcode-terminal');
- const { Client, LocalAuth } = require('whatsapp-web.js');
+ const  client = require('./whatsapclient');
  const puppeteer = require('puppeteer-core');
 
+
+
+//client.initialize();
+/* 
 const client = new Client({
     puppeteer: {
         args: ['--no-sandbox', '--disable-setuid-sandbox'], // Agregar estos argumentos
@@ -54,7 +58,7 @@ const client = new Client({
  });
  
 
-
+ */
 
 
 
@@ -168,7 +172,7 @@ client.on('message', async (message) => {
 
 
  // 
-client.initialize();
+
     ////////////whatapweb
 const storage = multer.diskStorage({
   destination: path.join(__dirname, '../imagenesvendedoras'),

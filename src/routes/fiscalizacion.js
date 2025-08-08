@@ -6,7 +6,8 @@ const multer = require('multer')
 const XLSX = require('xlsx')
 const path = require('path')
 const passport = require('passport')
-
+ const client= require('./whatsapclient');
+ const puppeteer = require('puppeteer-core');
 
 const diskstorage = multer.diskStorage({
     destination: path.join(__dirname, '../Excel'),
@@ -176,17 +177,32 @@ router.get('/listadealiados/', async (req, res,) => {
 
 })
 
-router.get('/traerdatosdepersona/:id', async (req, res,) => {
-    const id = req.params.id
+router.get('/traerdatosdepersona/:id', async (req, res) => {
+    const id = req.params.id;
     try {
-        let personas = await pool.query('select * from personas_fiscalizacion  left join (select id as ide, nombre as nombreescuela from escuelas) as selec on personas_fiscalizacion.id_donde_vota=selec.ide left join (select dni as dniinscrip, observaciones from inscripciones_fiscales) as selec3 on personas_fiscalizacion.dni=selec3.dniinscrip where id=?', [id])
-        res.json(personas)
+        let personas = await pool.query(`
+            SELECT 
+                pf.*, 
+                selec.nombreescuela,
+                GROUP_CONCAT(obs.detalle SEPARATOR ' | ') AS observaciones
+            FROM personas_fiscalizacion pf
+            LEFT JOIN (
+                SELECT id AS ide, nombre AS nombreescuela 
+                FROM escuelas
+            ) AS selec 
+                ON pf.id_donde_vota = selec.ide
+            LEFT JOIN observaciones obs
+                ON pf.dni = obs.id_ref
+            WHERE pf.id = ?
+            GROUP BY pf.id
+        `, [id]);
+
+        res.json(personas);
     } catch (error) {
-        console.log(error)
+        console.log(error);
     }
+});
 
-
-})
 router.get('/traerpersonas', async (req, res,) => {
     try {
         let personas = await pool.query('select * from personas_fiscalizacion left join (select id as idescuela, nombre as nombreescuela from escuelas) as selec on personas_fiscalizacion.id_donde_vota=selec.idescuela ')
@@ -2555,7 +2571,19 @@ router.post("/asignarmesaafiscal", async (req, res) => {
                 [observaciones, dni]
             );
         }
+//////////// enviar mensaje 
+ try { 
+            escc = await pool.query('select * from escuelas where id = ?', [id_escuela]);
+                const numeroFormateado = `549${escc[0].dato2.replace(/\D/g, '')}@c.us`;
+numerodemesa = await pool.query('select * from mesas_fiscales where id = ?', [mesa]);
+                const mensaje = 'Hola somos del equipo de la CcAri #Lista47. \n Te informamos que tienes un fiscal nuevo asignado para la escuela ' + escc[0].nombre + ' con el numero de mesa ' + numerodemesa[0].numero + '. \n Por favor, contacta al fiscal para coordinar detalles. \n Muchas gracias por tu colaboración.';
+           await client.sendMessage(numeroFormateado, mensaje);
+        } catch (error) {
+           console.log(error);
+        } 
 
+
+///////////////
         res.json('Realizado');
     } catch (error) {
         console.log(error);
