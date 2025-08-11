@@ -23,116 +23,116 @@ const fileUpload = multer({
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.post("/enviardnis", upload.single("archivo"), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No se envió archivo" });
-    }
+// router.post("/enviardnis", upload.single("archivo"), async (req, res) => {
+//   try {
+//     if (!req.file) {
+//       return res.status(400).json({ error: "No se envió archivo" });
+//     }
 
-    // Leer Excel desde buffer
-    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
-    const sheetName = workbook.SheetNames[0];
-    const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
+//     // Leer Excel desde buffer
+//     const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+//     const sheetName = workbook.SheetNames[0];
+//     const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
 
-    // Tomar DNIs de la primera columna, filtrar nulos y no numéricos
-    let dnis = sheet
-      .map(row => row[0])
-      .filter(dni => dni && !isNaN(dni))
-      .map(dni => dni.toString().replace(/\./g, "").trim());
+//     // Tomar DNIs de la primera columna, filtrar nulos y no numéricos
+//     let dnis = sheet
+//       .map(row => row[0])
+//       .filter(dni => dni && !isNaN(dni))
+//       .map(dni => dni.toString().replace(/\./g, "").trim());
 
-    console.log("DNIs leídos:", dnis);
+//     console.log("DNIs leídos:", dnis);
 
-    // Lanzar Puppeteer
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
+//     // Lanzar Puppeteer
+//     const browser = await puppeteer.launch({
+//       headless: true,
+//       args: ["--no-sandbox", "--disable-setuid-sandbox"],
+//     });
 
-    const resultados = [];
+//     const resultados = [];
 
-    async function consultarDatosPorDni(dni) {
-      const sexos = ["M", "F"]; // Masculino, Femenino
+//     async function consultarDatosPorDni(dni) {
+//       const sexos = ["M", "F"]; // Masculino, Femenino
 
-      for (const sexo of sexos) {
-        const page = await browser.newPage();
+//       for (const sexo of sexos) {
+//         const page = await browser.newPage();
 
-        try {
-          await page.goto("https://padron.corrientes.gob.ar/", { waitUntil: "networkidle2" });
+//         try {
+//           await page.goto("https://padron.corrientes.gob.ar/", { waitUntil: "networkidle2" });
 
-          // Limpiar inputs antes de escribir
-          await page.evaluate(() => {
-            document.querySelector('input[name="dni"]').value = "";
-            const select = document.querySelector('select[name="Sexo"]');
-            if (select) select.value = "";
-          });
+//           // Limpiar inputs antes de escribir
+//           await page.evaluate(() => {
+//             document.querySelector('input[name="dni"]').value = "";
+//             const select = document.querySelector('select[name="Sexo"]');
+//             if (select) select.value = "";
+//           });
 
-          await page.type('input[name="dni"]', dni);
-          await page.select('select[name="Sexo"]', sexo);
+//           await page.type('input[name="dni"]', dni);
+//           await page.select('select[name="Sexo"]', sexo);
 
-          await Promise.all([
-            page.click('button[type="submit"]'),
-            page.waitForNavigation({ waitUntil: "networkidle2" }),
-          ]);
+//           await Promise.all([
+//             page.click('button[type="submit"]'),
+//             page.waitForNavigation({ waitUntil: "networkidle2" }),
+//           ]);
 
-          // Aquí extraemos la escuela con $eval, si existe
-          let escuela = "";
-          try {
-            escuela = await page.$eval(
-              ".inline-flex.items-center.text-lg.text-coolGray-800.font-semibold.mt-5",
-              el => el.innerText.trim()
-            );
-          } catch {
-            // No encontró la escuela, queda vacía
-          }
+//           // Aquí extraemos la escuela con $eval, si existe
+//           let escuela = "";
+//           try {
+//             escuela = await page.$eval(
+//               ".inline-flex.items-center.text-lg.text-coolGray-800.font-semibold.mt-5",
+//               el => el.innerText.trim()
+//             );
+//           } catch {
+//             // No encontró la escuela, queda vacía
+//           }
 
-          // Extraemos nombre, orden y verificamos si encontró datos
-          const texto = await page.evaluate(() => document.body.innerText || "");
-          if (texto.includes("¿Dónde voto?")) {
-            const lineas = texto.split("\n").map(l => l.trim()).filter(Boolean);
-            const nombre = lineas.find(l => /^[A-ZÁÉÍÓÚÑ]+,/.test(l)) || "";
-            const ordenLinea = lineas.find(l => l.toLowerCase().includes("orden")) || "";
-            const orden = ordenLinea.replace(/.*Orden:\s*/, "");
+//           // Extraemos nombre, orden y verificamos si encontró datos
+//           const texto = await page.evaluate(() => document.body.innerText || "");
+//           if (texto.includes("¿Dónde voto?")) {
+//             const lineas = texto.split("\n").map(l => l.trim()).filter(Boolean);
+//             const nombre = lineas.find(l => /^[A-ZÁÉÍÓÚÑ]+,/.test(l)) || "";
+//             const ordenLinea = lineas.find(l => l.toLowerCase().includes("orden")) || "";
+//             const orden = ordenLinea.replace(/.*Orden:\s*/, "");
 
-            await page.close();
-            return {
-              dni,
-              nombre,
-              sexo,
-              escuela,
-              orden,
-            };
-          }
+//             await page.close();
+//             return {
+//               dni,
+//               nombre,
+//               sexo,
+//               escuela,
+//               orden,
+//             };
+//           }
 
-          await page.close();
-        } catch (error) {
-          await page.close();
-          throw error;
-        }
-      }
+//           await page.close();
+//         } catch (error) {
+//           await page.close();
+//           throw error;
+//         }
+//       }
 
-      return { dni, error: "No encontrado" };
-    }
+//       return { dni, error: "No encontrado" };
+//     }
 
-    for (const dni of dnis) {
-      try {
-        console.log(`Procesando DNI: ${dni}...`);
-        const datos = await consultarDatosPorDni(dni);
-        resultados.push(datos);
-      } catch (err) {
-        console.log(`Error con DNI ${dni}: ${err.message}`);
-        resultados.push({ dni, error: err.message });
-      }
-    }
+//     for (const dni of dnis) {
+//       try {
+//         console.log(`Procesando DNI: ${dni}...`);
+//         const datos = await consultarDatosPorDni(dni);
+//         resultados.push(datos);
+//       } catch (err) {
+//         console.log(`Error con DNI ${dni}: ${err.message}`);
+//         resultados.push({ dni, error: err.message });
+//       }
+//     }
 
-    await browser.close();
+//     await browser.close();
 
-    res.json(resultados);
+//     res.json(resultados);
 
-  } catch (error) {
-    console.error("Error procesando DNIs:", error);
-    res.status(500).json({ error: "Error al procesar el archivo" });
-  }
-});
+//   } catch (error) {
+//     console.error("Error procesando DNIs:", error);
+//     res.status(500).json({ error: "Error al procesar el archivo" });
+//   }
+// });
 
 router.get('/traerrecomendaciones', async (req, res) => {
     const mesass = await pool.query('select * from mesas_fiscales left join ( select mesa as mesaasig, dni, escuela as escualasig from asignaciones_fiscales2) as selec1 on mesas_fiscales.id= selec1.mesaasig  join (select dni as dnipersona, nombre as nombrepers, apellido, id_donde_vota, telefono, telefono2 from personas_fiscalizacion) as selec2 on selec1.dni=selec2.dnipersona join (select id as idesc, nombre as nombreesc, ubicacion from escuelas) as selec5 on selec2.id_donde_vota=selec5.idesc where id_escuela=? and selec1.escualasig != selec2.id_donde_vota ')

@@ -15,7 +15,7 @@ router.get('/todas/',isLoggedInn, async (req, res) => {
 //res.render('index')
 })
 
-router.get('/consulta', async (req, res) => {
+/* router.get('/consulta', async (req, res) => {
   let { dni, genero } = req.query;
 dni=34825125
 genero='M'
@@ -46,10 +46,10 @@ console.log(response)
     res.status(500).json({ error: 'Error al consultar el padrón' });
   }
 });
+ */
 
 
-
-
+/* 
 router.get('/consultar-padron', async (req, res) => {
   try {
     // Obtener todos los registros con edicion=2025 y dondevotascript null
@@ -128,7 +128,7 @@ router.get('/consultar-padron', async (req, res) => {
     res.status(500).json({ error: 'Error al procesar la consulta' });
   }
 });
-
+ 
 
 
 router.get('/consultar-padronfem', async (req, res) => {
@@ -207,7 +207,7 @@ console.log(registros.length)
     res.status(500).json({ error: 'Error al procesar la consulta' });
   }
 });
-
+*/
 /* router.get('/consultarr', async (req, res) => {
   try {
     const excelPath = path.join(__dirname, 'ROLES.xlsx');
