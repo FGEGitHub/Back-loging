@@ -36,6 +36,6 @@ client.isReady = false;
  
 
 // Inicializar cliente
-//client.initialize();
+client.initialize();
 
 module.exports = client ;
