@@ -48,55 +48,58 @@ console.log(response)
 });
 
 
-/* 
+
 
 router.get('/consultar-padron', async (req, res) => {
   try {
-    // Obtener todos los registros con edicion=2025
-    const registros = await pool.query('SELECT dni FROM inscripciones_fiscales WHERE edicion = 2025');
-console.log(registros.length)
+    // Obtener todos los registros con edicion=2025 y dondevotascript null
+    const registros = await pool.query(
+      'SELECT dni FROM inscripciones_fiscales WHERE edicion = 2025 AND dondevotascript IS NULL'
+    );
+    console.log(`Total DNIs a procesar: ${registros.length}`);
+
     if (registros.length === 0) {
       return res.json({ mensaje: 'No hay registros para edición 2025' });
     }
 
-const browser = await puppeteer.launch({
-  headless: true,
-  args: ['--no-sandbox', '--disable-setuid-sandbox']
-}); 
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+
     const page = await browser.newPage();
 
-    // Función para consultar escuela por DNI, probando sexos M y F
+    // Función para consultar escuela por DNI probando sexos M y F
     async function consultarEscuelaPorDni(dni) {
-      async function consultarConSexo(sexo) {
+      const sexos = ['M', 'F'];
+
+      for (const sexo of sexos) {
         await page.goto('https://padron.corrientes.gob.ar/', { waitUntil: 'networkidle2' });
 
         await page.type('input[name="dni"]', dni.toString());
-
-        await page.select('select[name="Sexo"]', sexo); 
+        await page.select('select[name="Sexo"]', sexo);
 
         await Promise.all([
           page.click('button[type="submit"]'),
           page.waitForNavigation({ waitUntil: 'networkidle2' }),
         ]);
 
-        const resultadoCompleto = await page.evaluate(() => {
-          const contenedor = document.querySelector('body');
-          return contenedor ? contenedor.innerText : '';
-        });
+        // Intentar obtener el elemento con la clase exacta de la escuela
+        try {
+          const escuela = await page.$eval(
+            '.inline-flex.items-center.text-lg.text-coolGray-800.font-semibold.mt-5',
+            el => el.innerText.trim()
+          );
 
-        return resultadoCompleto;
-      }
-
-      const sexos = ['M', 'F'];
-      for (const sexo of sexos) {
-        const texto = await consultarConSexo(sexo);
-        if (texto && texto.includes('ESC.')) {
-          // Extraer línea con escuela
-          const lineaEscuela = texto.split('\n').find(linea => linea.includes('ESC.'));
-          return lineaEscuela ? lineaEscuela.trim() : null;
+          if (escuela && escuela.length > 0) {
+            return escuela; // Devuelve si encontró algo
+          }
+        } catch (e) {
+          // Si no encontró el elemento, probamos con el siguiente sexo
         }
       }
-      return null;
+
+      return null; // No encontró escuela
     }
 
     // Recorrer todos los DNIs secuencialmente
@@ -107,7 +110,6 @@ const browser = await puppeteer.launch({
         console.log(`DNI: ${dni} - Escuela: ${escuela || 'No encontrada'}`);
 
         if (escuela) {
-          // Actualizar el campo dondevotascript con la escuela encontrada
           await pool.query(
             'UPDATE inscripciones_fiscales SET dondevotascript = ? WHERE dni = ? AND edicion = 2025',
             [escuela, dni]
@@ -126,6 +128,7 @@ const browser = await puppeteer.launch({
     res.status(500).json({ error: 'Error al procesar la consulta' });
   }
 });
+
 
 
 router.get('/consultar-padronfem', async (req, res) => {
