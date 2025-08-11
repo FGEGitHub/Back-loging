@@ -77,7 +77,7 @@ client.on('message', async (message) => {
         const texto = message.body.toLowerCase().trim();
         const numero = message.from;
 
-        // Lista de números autorizados
+        // Lista de números autorizados (ajustá si hace falta)
         const numerosPermitidos = [
             '5493795008689@c.us',
             '5493794675028@c.us',
@@ -86,7 +86,7 @@ client.on('message', async (message) => {
         ];
         if (!numerosPermitidos.includes(numero)) return;
 
-        // Paso 1: Si está esperando DNI
+        // Si está esperando DNI
         if (estados[numero] === 'esperando_dni') {
             const dni = texto.replace(/\D/g, '');
 
@@ -118,7 +118,7 @@ client.on('message', async (message) => {
             return;
         }
 
-        // Paso 2: Menú principal
+        // Menú principal
         if (texto === 'hola') {
             await message.reply(`¡Hola! 👋 ¿En qué te puedo dar una mano?\nElegí una opción respondiendo con el número correspondiente:\n\n1️⃣ Cuánta gente tenemos inscripta?\n2️⃣ ¿Quiénes son los candidatos?\n3️⃣ Consultar estado de tu inscripción\n4️⃣ ¿Dónde votan los inscriptos?`);
             return;
@@ -142,35 +142,69 @@ client.on('message', async (message) => {
             return;
         }
 
+        // Opción 4 — USO EXACTO de tu query inicial, sin modificarla
         if (texto === '4') {
+            // <-- esta consulta NO la modifiqué, la puse tal cual pediste -->
             const agrupados = await pool.query(`
-                SELECT 
-                    i.dondevotascript,
-                    COUNT(*) AS cantidad,
-                    IFNULL(COUNT(DISTINCT m.id), 0) AS cantidad_mesas
-                FROM inscripciones_fiscales i
-                LEFT JOIN escuelas e 
-                    ON e.nombre = i.dondevotascript
-                LEFT JOIN mesas_fiscales m 
-                    ON m.id_escuela = e.id
-                    AND m.numero NOT IN (
-                        'Suplente 1', 'Suplente 2', 'Suplente 3', 
-                        'Suplente 4', 'Suplente 5', 'Suplente 6', 'Suplente 7'
-                    )
-                WHERE i.edicion = 2025
-                GROUP BY i.dondevotascript
-                ORDER BY cantidad DESC
+SELECT dondevotascript, COUNT(*) AS cantidad
+FROM marketing.inscripciones_fiscales
+WHERE edicion = 2025
+GROUP BY dondevotascript;
             `);
 
-            if (agrupados.length === 0) {
+            if (!agrupados || agrupados.length === 0) {
                 await message.reply(`📌 No hay datos disponibles sobre los lugares de votación.`);
                 return;
             }
 
+            // Función auxiliar para contar mesas por nombre de escuela
+            const contarMesasPorNombre = async (nombreEscuela) => {
+                if (!nombreEscuela) return 0;
+
+                // Buscamos escuelas con ese nombre
+                const escuelas = await pool.query(
+                    'SELECT id FROM escuelas WHERE nombre = ?',
+                    [nombreEscuela]
+                );
+
+                if (!escuelas || escuelas.length === 0) {
+                    return 0;
+                }
+
+                // Si hay una o varias escuelas con el mismo nombre, contamos todas sus mesas
+                const ids = escuelas.map(e => e.id);
+                const placeholders = ids.map(_ => '?').join(',');
+
+                const mesasRes = await pool.query(
+                    `SELECT COUNT(*) AS cantidad_mesas
+                     FROM mesas_fiscales
+                     WHERE id_escuela IN (${placeholders})
+                       AND numero NOT IN (
+                            'Suplente 1', 'Suplente 2', 'Suplente 3',
+                            'Suplente 4', 'Suplente 5', 'Suplente 6', 'Suplente 7'
+                       )`,
+                    ids
+                );
+
+                // Dependiendo del driver, puede venir como [{cantidad_mesas: X}] o similar
+                if (mesasRes && mesasRes.length > 0 && mesasRes[0].cantidad_mesas != null) {
+                    return parseInt(mesasRes[0].cantidad_mesas, 10);
+                }
+
+                return 0;
+            };
+
+            // Armamos la respuesta consultando mesas por cada dondevotascript
             let respuesta = '📍 Lugares donde votan los inscriptos:\n\n';
-            agrupados.forEach((fila) => {
-                respuesta += `🏫 ${fila.dondevotascript || 'Sin especificar'}: ${fila.cantidad} personas – ${fila.cantidad_mesas} mesas\n`;
-            });
+            for (const fila of agrupados) {
+                const lugar = fila.dondevotascript;
+                const cantidadInscriptos = fila.cantidad;
+
+                // Obtenemos la cantidad de mesas en mesas_fiscales para la(s) escuela(s) con ese nombre
+                const cantidadMesas = await contarMesasPorNombre(lugar);
+
+                respuesta += `🏫 ${lugar || 'Sin especificar'}: ${cantidadInscriptos} personas – ${cantidadMesas} mesas\n`;
+            }
 
             await message.reply(respuesta);
             return;
@@ -180,6 +214,7 @@ client.on('message', async (message) => {
         console.error('Error procesando el mensaje:', error);
     }
 });
+
 
 
 
