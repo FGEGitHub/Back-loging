@@ -131,8 +131,8 @@ client.on('message', async (message) => {
         }
 
         if (texto === '2') {
-            const asignacioenss = await pool.query('SELECT * FROM asignaciones_fiscales WHERE edicion = 2025');
-            await message.reply(`✅ En este momento hay ${asignacioenss.length} mesas asignadas`);
+            const asignaciones = await pool.query('SELECT * FROM asignaciones_fiscales WHERE edicion = 2025');
+            await message.reply(`✅ En este momento hay ${asignaciones.length} mesas asignadas`);
             return;
         }
 
@@ -144,10 +144,21 @@ client.on('message', async (message) => {
 
         if (texto === '4') {
             const agrupados = await pool.query(`
-                SELECT dondevotascript, COUNT(*) as cantidad 
-                FROM inscripciones_fiscales 
-                WHERE edicion = 2025  
-                GROUP BY dondevotascript 
+                SELECT 
+                    i.dondevotascript,
+                    COUNT(*) AS cantidad,
+                    IFNULL(COUNT(DISTINCT m.id), 0) AS cantidad_mesas
+                FROM inscripciones_fiscales i
+                LEFT JOIN escuelas e 
+                    ON e.nombre = i.dondevotascript
+                LEFT JOIN mesas m 
+                    ON m.id_escuela = e.id
+                    AND m.numero NOT IN (
+                        'Suplente 1', 'Suplente 2', 'Suplente 3', 
+                        'Suplente 4', 'Suplente 5', 'Suplente 6', 'Suplente 7'
+                    )
+                WHERE i.edicion = 2025
+                GROUP BY i.dondevotascript
                 ORDER BY cantidad DESC
             `);
 
@@ -158,7 +169,7 @@ client.on('message', async (message) => {
 
             let respuesta = '📍 Lugares donde votan los inscriptos:\n\n';
             agrupados.forEach((fila) => {
-                respuesta += `🏫 ${fila.dondevotascript}: ${fila.cantidad} personas\n`;
+                respuesta += `🏫 ${fila.dondevotascript || 'Sin especificar'}: ${fila.cantidad} personas – ${fila.cantidad_mesas} mesas\n`;
             });
 
             await message.reply(respuesta);
@@ -169,6 +180,7 @@ client.on('message', async (message) => {
         console.error('Error procesando el mensaje:', error);
     }
 });
+
 
 
  // 
@@ -202,14 +214,14 @@ const storage2 = multer.diskStorage({
 const upload2 = multer({ storage2 });
 /////////
 
-/* router.get('/enviar-mensajes', async (req, res) => {
+ router.get('/enviar-mensajes', async (req, res) => {
     try {
       const registros = await pool.query(`
             SELECT * FROM inscripciones_fiscales 
             JOIN (
                 SELECT id AS idp, telefono FROM personas_fiscalizacion
             ) AS sel ON inscripciones_fiscales.id_persona = sel.idp 
-            WHERE edicion = 2025
+            WHERE edicion = 2025 and id>1831
         `)
 
         let enviados = 0;
@@ -221,11 +233,11 @@ const upload2 = multer({ storage2 });
                 const numeroFormateado = `549${telefono.replace(/\D/g, '')}@c.us`;
 
                 const mensaje = `Hola somos del equipo de la CcAri #Lista47. Gracias por tu preinscripción 💚; nos volveremos a comunicar con vos a partir de la semana que viene, una vez publicado el padron definitivo.
-#VAMOSCTES
-VALDEZ JUAN PABLO GOB.
-POLICH GUSTAVO INT.
-CUQUI CALVANO DIP. PROV.
-GABY GAUNA CONCEJAL`;
+Vamos ctes!
+Juan Pablo Valdes Gobernador 
+Cuqui Calvano Diputado 
+Claudio Polich Intendente 
+Gaby Gauna Concejal`;
 
                 try {
                     await client.sendMessage(numeroFormateado, mensaje);
@@ -242,7 +254,7 @@ GABY GAUNA CONCEJAL`;
         res.status(500).send('Error al enviar mensajes.');
     }
 });
- */
+ 
 
 
 
