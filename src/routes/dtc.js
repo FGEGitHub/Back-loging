@@ -151,7 +151,7 @@ client.on('message', async (message) => {
                 FROM inscripciones_fiscales i
                 LEFT JOIN escuelas e 
                     ON e.nombre = i.dondevotascript
-                LEFT JOIN mesas m 
+                LEFT JOIN mesas_fiscales m 
                     ON m.id_escuela = e.id
                     AND m.numero NOT IN (
                         'Suplente 1', 'Suplente 2', 'Suplente 3', 
