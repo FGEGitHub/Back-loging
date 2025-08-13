@@ -2116,24 +2116,31 @@ router.post("/modificarescuelaubicacion", async (req, res) => {
 })
 
 router.post("/modificarescuela", async (req, res) => {
-    let { nombre, circuito, id, dato1, dato2 } = req.body
-
+    let { nombre, circuito, id, dato1, dato2 } = req.body;
 
     try {
-        if (dato1 == undefined) {
-            dato1 = "Sin definir"
+        // Traer valores actuales
+        const rows = await pool.query("SELECT dato1, dato2 FROM escuelas WHERE id = ?", [id]);
+        if (rows.length === 0) {
+            return res.status(404).json("Escuela no encontrada");
         }
-        if (dato2 == undefined) {
-            dato1 = "Sin definir"
-        }
-        await pool.query('update escuelas set nombre=?, circuito =?,dato1=? ,dato2=? where  id = ?', [nombre, circuito, dato1, dato2, id])
-        res.json("Modificado")
-    } catch (error) {
-        console.log(error)
-        res.json("No modificado")
-    }
 
-})
+        // Si no viene en la request, usar el valor existente
+        if (dato1 === undefined) dato1 = rows[0].dato1;
+        if (dato2 === undefined) dato2 = rows[0].dato2;
+
+        await pool.query(
+            "UPDATE escuelas SET nombre = ?, circuito = ?, dato1 = ?, dato2 = ? WHERE id = ?",
+            [nombre, circuito, dato1, dato2, id]
+        );
+
+        res.json("Modificado");
+    } catch (error) {
+        console.error(error);
+        res.status(500).json("No modificado");
+    }
+});
+
 
 
 router.post("/borrarescuela", async (req, res) => {
