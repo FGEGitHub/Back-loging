@@ -374,7 +374,7 @@ router.get('/traerobservaciones/:dni', async (req, res,) => {
 })
 
 
-router.get('/todasincripciones', async (req, res,) => {
+/* router.get('/todasincripciones', async (req, res,) => {
 
     //  let inscri = await pool.query('select * from inscripciones_fiscales join (select dni as dni_persona, movilidad, vegano, celiaco, telefono,telefono2 from personas_fiscalizacion ) as selec on inscripciones_fiscales.dni=selec.dni_persona left join (select id as id_aliado, nombre as nombre_aliado from usuarios)  as selec2 on inscripciones_fiscales.cargadopor=selec2.id_aliado  where inscripciones_fiscales.estado="Pendiente" ')
 
@@ -540,7 +540,128 @@ router.get('/todasincripciones', async (req, res,) => {
 
     res.json([envi])
 })
+ */
+router.get('/todasincripciones', async (req, res) => {
+  try {
+    // Traer todas las inscripciones de la edición 2025
+    const inscri = await pool.query('SELECT * FROM inscripciones_fiscales WHERE edicion = 2025');
 
+    // Traer todos los usuarios para mapear por id y evitar múltiples queries
+    const usuarios = await pool.query('SELECT id, nombre, nivel FROM usuarios');
+    const mapUsuarios = {};
+    usuarios.forEach(u => { mapUsuarios[u.id] = u; });
+
+    const envi = [];
+
+    for (const ins of inscri) {
+      try {
+        // -------------------
+        // Cargado por
+        // -------------------
+        let cargadop = "Autoinscripcion";
+        if (ins.cargadopor && mapUsuarios[ins.cargadopor]) {
+          cargadop = mapUsuarios[ins.cargadopor].nombre;
+        }
+
+        // -------------------
+        // Encargado
+        // -------------------
+        let encargado = "Sin asignar";
+        if (ins.id_encargado && ins.id_encargado != 0) {
+          encargado = mapUsuarios[ins.id_encargado] ? mapUsuarios[ins.id_encargado].nombre : "Sin asignar";
+        }
+
+        // -------------------
+        // Datos de persona
+        // -------------------
+        let persona_auxiliar = [];
+        if (ins.dni && ins.dni !== "Sin definir") {
+          persona_auxiliar = await pool.query('SELECT * FROM personas_fiscalizacion WHERE dni = ?', [ins.dni]);
+        } else if (ins.nombre || ins.apellido) {
+          const conditions = [];
+          const params = [];
+          if (ins.nombre) { conditions.push('nombre = ?'); params.push(ins.nombre); }
+          if (ins.apellido) { conditions.push('apellido = ?'); params.push(ins.apellido); }
+          persona_auxiliar = await pool.query(
+            `SELECT * FROM personas_fiscalizacion WHERE ${conditions.join(' AND ')}`, params
+          );
+        }
+
+        if (persona_auxiliar.length === 0) {
+          persona_auxiliar.push({
+            vegano: "verificar",
+            celiaco: "verificar",
+            telefono: "verificar",
+            telefono2: "verificar",
+            id_aliado: "verificar"
+          });
+        }
+
+        // -------------------
+        // Se inscribió antes
+        // -------------------
+        const inscritoAntes = await pool.query(
+          'SELECT * FROM inscripciones_fiscales WHERE dni = ? AND edicion IS NULL',
+          [ins.dni]
+        );
+        const seinscribio = inscritoAntes.length > 0 ? "Si" : "No";
+
+        // -------------------
+        // Fiscalizó antes
+        // -------------------
+        const fiscalizoAntes = await pool.query(
+          'SELECT * FROM asignaciones_fiscales WHERE dni = ? AND edicion IS NULL',
+          [ins.dni]
+        );
+        const fiscalizo = fiscalizoAntes.length > 0 ? "Si" : "No";
+
+        // -------------------
+        // Evitar duplicados para usuarios nivel 8
+        // -------------------
+        let agregar = true;
+        if (ins.cargadopor && mapUsuarios[ins.cargadopor] && mapUsuarios[ins.cargadopor].nivel === 8) {
+          if (envi.find(e => e.id === ins.id)) agregar = false;
+        }
+
+        if (agregar) {
+          envi.push({
+            id: ins.id,
+            dni: ins.dni,
+            nombre: ins.nombre,
+            apellido: ins.apellido,
+            cargadopor: cargadop,
+            fecha_carga: ins.fecha_carga,
+            observaciones: ins.observaciones,
+            estado: ins.estado,
+            como_se_entero: ins.como_se_entero,
+            apellido_referido: ins.apellido_referido,
+            nombre_referido: ins.nombre_referido,
+            dni_persona: ins.dni_persona,
+            vegano: persona_auxiliar[0].vegano,
+            celiaco: persona_auxiliar[0].celiaco,
+            telefono: persona_auxiliar[0].telefono,
+            telefono2: persona_auxiliar[0].telefono2,
+            id_aliado: persona_auxiliar[0].id_aliado,
+            nombre_aliado: ins.nombre_aliado,
+            encargado: encargado,
+            id_persona: ins.id_persona,
+            dondevotascript: ins.dondevotascript,
+            fiscalizo,
+            seinscribio
+          });
+        }
+      } catch (innerError) {
+        console.error('Error procesando inscripcion:', ins.id, innerError);
+      }
+    }
+
+    res.json([envi]);
+
+  } catch (error) {
+    console.error('Error API todasincripciones:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
 
 router.get('/todasincripciones2/:id', async (req, res,) => {
     const id = req.params.id
