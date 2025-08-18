@@ -209,6 +209,18 @@ GROUP BY dondevotascript;
             await message.reply(respuesta);
             return;
         }
+if (texto === '5') {
+    // Consulta unida entre inscripciones y asignaciones
+    const resultado = await pool.query(`
+        SELECT i.*, a.*
+        FROM inscripciones_fiscales i
+        JOIN asignaciones_fiscales a ON i.dni = a.dni
+        WHERE i.edicion = 2025
+    `);
+
+    await message.reply(`📊 En total hay ${resultado.length} registros de inscriptos que ya tienen asignación en la edición 2025.`);
+    return;
+}
 
     } catch (error) {
         console.error('Error procesando el mensaje:', error);
