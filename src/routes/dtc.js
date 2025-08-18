@@ -120,7 +120,7 @@ client.on('message', async (message) => {
 
         // Menú principal
         if (texto === 'hola') {
-            await message.reply(`¡Hola! 👋 ¿En qué te puedo dar una mano?\nElegí una opción respondiendo con el número correspondiente:\n\n1️⃣ Cuánta gente tenemos inscripta?\n2️⃣ ¿Quiénes son los candidatos?\n3️⃣ Consultar estado de tu inscripción\n4️⃣ ¿Dónde votan los inscriptos?`);
+            await message.reply(`¡Hola! 👋 ¿En qué te puedo dar una mano?\nElegí una opción respondiendo con el número correspondiente:\n\n1️⃣ Cuánta gente tenemos inscripta?\n2️⃣ ¿Quiénes son los candidatos?\n3️⃣ Consultar estado de tu inscripción\n4️⃣ ¿Dónde votan los inscriptos?n\n4️⃣ ¿Cuantos fiscales ya fiscalizaron?`);
             return;
         }
 
@@ -210,15 +210,15 @@ GROUP BY dondevotascript;
             return;
         }
 if (texto === '5') {
-    // Consulta unida entre inscripciones y asignaciones
     const resultado = await pool.query(`
-        SELECT i.*, a.*
+        SELECT COUNT(*) AS total
         FROM inscripciones_fiscales i
         JOIN asignaciones_fiscales a ON i.dni = a.dni
         WHERE i.edicion = 2025
     `);
 
-    await message.reply(`📊 En total hay ${resultado.length} registros de inscriptos que ya tienen asignación en la edición 2025.`);
+    const total = resultado[0].total;
+    await message.reply(`📊 En total hay ${total} inscriptosque ya han fiscalizado en 2023.`);
     return;
 }
 
