@@ -820,7 +820,7 @@ router.get('/traerinscripcionesenc/:id', async (req, res) => {
     const id = req.params.id
 
 
-    const etc = await pool.query('select * from inscripciones_fiscales left join (select dni as dnip, id_donde_vota from personas_fiscalizacion) as selec on inscripciones_fiscales.dni=selec.dnip left join (select id as idesc, nombre as nombreesc,etapa2 from escuelas) as selec2 on selec.id_donde_vota=selec2.idesc  where  (id_encargado is null or id_encargado= 0) and inscripciones_fiscales.estado="Pendiente" and edicion=2025 order by nombreesc', [id])
+    const etc = await pool.query('select * from inscripciones_fiscales left join (select dni as dnip, id_donde_vota from personas_fiscalizacion) as selec on inscripciones_fiscales.dni=selec.dnip left join (select id as idesc, nombre as nombreesc,etapa2 from escuelas) as selec2 on selec.id_donde_vota=selec2.idesc  where  (id_encargado is null or id_encargado= 0) and inscripciones_fiscales.estado="Pendiente" and edicion=2025 order by dondevotascript', [id])
 
     res.json(etc);
 
