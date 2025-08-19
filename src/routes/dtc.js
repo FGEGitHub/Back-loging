@@ -237,13 +237,14 @@ if (texto === '6') {
       )
     LEFT JOIN asignaciones_fiscales a 
       ON a.escuela = e.id
+      where edicion=2025
     GROUP BY e.id, e.nombre
     ORDER BY e.nombre;
   `);
 
   let respuesta = "📊 Listado de escuelas:\n\n";
   resultado.forEach(r => {
-    respuesta += `🏫 ${r.escuela}\n : ${r.cantidad_asignados} / Mesas: ${r.cantidad_mesas}\n\n`;
+    respuesta += `🏫 ${r.escuela}\n Fiscales : ${r.cantidad_asignados} / Mesas: ${r.cantidad_mesas}\n\n`;
   });
 
   await message.reply(respuesta);
