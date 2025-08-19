@@ -1149,7 +1149,7 @@ router.get('/confirmarcapa/:id', async (req, res,) => {
     try {
 
 
-        await pool.query('update asignaciones_fiscales2 set capacitado="Si"  where id=?', [id])
+        await pool.query('update asignaciones_fiscales set capacitado="Si"  where id=?', [id])
 
 
         res.json('realizado con exito')
