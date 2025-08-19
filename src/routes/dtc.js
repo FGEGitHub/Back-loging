@@ -114,13 +114,13 @@ client.on('message', async (message) => {
             }
 
             estados[numero] = null;
-            await message.reply(`📋 ¿Querés hacer otra consulta?\n\n1️⃣ Cuánta gente tenemos inscripta?\n2️⃣ ¿Cuántas mesas han sido asignadas?\n3️⃣ Consultar estado de tu inscripción\n4️⃣ ¿Dónde votan los inscriptos?`);
+            await message.reply(`📋 ¿Querés hacer otra consulta?\n\n1️⃣ Cuánta gente tenemos inscripta?\n2️⃣ ¿Cuántas mesas han sido asignadas?\n3️⃣ Consultar estado de tu inscripción\n5️⃣ ¿Dónde votan los inscriptos?\n6️⃣ Ver avance de las escuelas`);
             return;
         }
 
         // Menú principal
         if (texto === 'hola') {
-            await message.reply(`¡Hola! 👋 ¿En qué te puedo dar una mano?\nElegí una opción respondiendo con el número correspondiente:\n\n1️⃣ Cuánta gente tenemos inscripta?\n2️⃣ ¿Quiénes son los candidatos?\n3️⃣ Consultar estado de tu inscripción\n4️⃣ ¿Dónde votan los inscriptos?n\n4️⃣ ¿Cuantos fiscales ya fiscalizaron?`);
+            await message.reply(`📋 ¿Hola soy fiscabo en que te puedo ayudar?\n\n1️⃣ Cuánta gente tenemos inscripta?\n2️⃣ ¿Cuántas mesas han sido asignadas?\n3️⃣ Consultar estado de tu inscripción\n5️⃣ ¿Dónde votan los inscriptos?\n6️⃣Ver avance de las escuelas`);
             return;
         }
 
@@ -220,6 +220,34 @@ if (texto === '5') {
     const total = resultado[0].total;
     await message.reply(`📊 En total hay ${total} inscriptosque ya han fiscalizado en 2023.`);
     return;
+}
+if (texto === '6') {
+  const resultado = await pool.query(`
+    SELECT 
+      e.id,
+      e.nombre AS escuela,
+      COUNT(DISTINCT a.id) AS cantidad_asignados,
+      COUNT(DISTINCT m.id) AS cantidad_mesas
+    FROM escuelas e
+    LEFT JOIN mesas_fiscales m 
+      ON m.id_escuela = e.id
+      AND m.numero NOT IN (
+        'Suplente 1','Suplente 2','Suplente 3',
+        'Suplente 4','Suplente 5','Suplente 6','Suplente 7'
+      )
+    LEFT JOIN asignaciones_fiscales a 
+      ON a.escuela = e.id
+    GROUP BY e.id, e.nombre
+    ORDER BY e.nombre;
+  `);
+
+  let respuesta = "📊 Listado de escuelas:\n\n";
+  resultado.forEach(r => {
+    respuesta += `🏫 ${r.escuela}\n : ${r.cantidad_asignados} / Mesas: ${r.cantidad_mesas}\n\n`;
+  });
+
+  await message.reply(respuesta);
+  return;
 }
 
     } catch (error) {
