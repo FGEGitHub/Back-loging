@@ -1227,7 +1227,7 @@ router.get('/datosdemesas', async (req, res) => {
         let cant = await pool.query('select * from mesas_fiscales join (select id as ides, etapa2 from escuelas) as selec on mesas_fiscales.id_escuela=selec.ides where numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6" and numero != "Suplente 7"')
         console.log(cant.length)
         let asig = await pool.query('select * from asignaciones_fiscales left join (select id as idmesa, numero, id_escuela from mesas_fiscales) as selec on asignaciones_fiscales.mesa=selec.idmesa left join (select id as idescuela, etapa2 from escuelas) as selec2 on selec.id_escuela=selec2.idescuela where (numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6"  and numero != "Suplente 7") and edicion=2025')
-        let esc = await pool.query('select * from escuelas ')
+        let esc = await pool.query('select * from escuelas where id!=5 and id !=10 and id != 8 and id != 9 ')
         // let yassig = await pool.query('select * from mesas_fiscales join (select id as ide, circuito, nombre from escuelas) as sele on mesas_fiscales.id_escuela=sele.ide where circuito ="2" or nombre=? or nombre=? or nombre=? ', ['COLEGIO "MANUEL VICENTE FIGUERERO"', 'ESC. Nº 34 "EL SANTO DE LA ESPADA"', "ESCUELA TECNICA U.O.C.R.A."])
         console.log("yasig")
         let yassig = await pool.query('select * from mesas_fiscales join (select id as ide, circuito, nombre from escuelas) as sele on mesas_fiscales.id_escuela=sele.ide ')
