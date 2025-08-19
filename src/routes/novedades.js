@@ -48,7 +48,7 @@ console.log(response)
 });
  */
 
-
+/* 
 
 router.get('/consultar-padron', async (req, res) => {
   try {
@@ -128,7 +128,7 @@ router.get('/consultar-padron', async (req, res) => {
     res.status(500).json({ error: 'Error al procesar la consulta' });
   }
 }); 
- 
+  */
 /*
 
 router.get('/consultar-padronfem', async (req, res) => {
