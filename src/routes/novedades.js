@@ -49,12 +49,12 @@ console.log(response)
  */
 
 
-
+/* 
 router.get('/consultar-padron', async (req, res) => {
   try {
     // Obtener todos los registros con edicion=2025 y dondevotascript null
     const registros = await pool.query(
-      'SELECT dni FROM inscripciones_fiscales WHERE edicion = 2025 AND dondevotascript IS NULL or dondevotascript = "Sin definir"'
+      'SELECT dni FROM inscripciones_fiscales WHERE edicion = 2025 AND dondevotascript IS NULL or dondevotascript = "Sin definir and id>2135"'
     );
     console.log(`Total DNIs a procesar: ${registros.length}`);
 
@@ -127,7 +127,7 @@ router.get('/consultar-padron', async (req, res) => {
     console.error('Error en /consultar-padron:', error);
     res.status(500).json({ error: 'Error al procesar la consulta' });
   }
-}); 
+}); */
  
 /*
 
