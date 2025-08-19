@@ -1827,7 +1827,7 @@ router.get('/asignarautolasetc2', async (req, res,) => {
 })
 
 
-router.get('/todaspaso42/:id', async (req, res,) => {
+/* router.get('/todaspaso42/:id', async (req, res,) => {
     const id = req.params.id
     //  estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono, nombre, apellido,id as idpersona, id_donde_vota from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper join (select id as idescuela, nombre as nombreescuela from escuelas) as selec2 on asignaciones_fiscales.escuela=selec2.idescuela join (select id as idmesa, numero from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa join (select id as id_auxesc,nombre as nombredondevota from escuelas ) as selec3 on selec1.id_donde_vota=selec3.id_auxesc ')
 
@@ -1838,7 +1838,71 @@ router.get('/todaspaso42/:id', async (req, res,) => {
     //const tod = await pool.query('select * from inscripciones_fiscales2 join (select id as idp from personas )as selec on ')
     res.json([estr])
 
-})
+}) */
+router.get('/todaspaso42/:id', async (req, res) => {
+  const id = req.params.id;
+
+  const estr = await pool.query(`
+    SELECT 
+      inscripciones_fiscales.*, 
+      selec1.idper, 
+      selec1.dniper, 
+      selec1.telefono, 
+      selec1.idpersona, 
+      selec6.idant, 
+      selec6.id_don, 
+      selec7.dondefiscal,
+
+      -- Cantidad de asignados en esa escuela
+      CASE 
+        WHEN inscripciones_fiscales.dondevotascript = esc.nombre 
+        THEN (
+          SELECT CAST(COUNT(*) AS UNSIGNED) 
+          FROM asignaciones_fiscales af 
+          WHERE af.escuela = esc.id
+            AND af.edicion = 2025
+        )
+        ELSE 0
+      END AS cantidad_asignados,
+
+      -- Cantidad de mesas en esa escuela
+      CASE 
+        WHEN inscripciones_fiscales.dondevotascript = esc.nombre 
+        THEN (
+          SELECT CAST(COUNT(*) AS UNSIGNED) 
+          FROM mesas_fiscales mf 
+          WHERE mf.id_escuela = esc.id
+        )
+        ELSE 0
+      END AS cantidad_mesas
+
+    FROM inscripciones_fiscales
+
+    LEFT JOIN (
+      SELECT id AS idper, dni AS dniper, telefono, id AS idpersona, id_donde_vota
+      FROM personas_fiscalizacion
+    ) AS selec1 ON inscripciones_fiscales.dni = selec1.dniper
+
+    LEFT JOIN (
+      SELECT id AS idant, escuela AS id_don 
+      FROM asignaciones_fiscales
+      WHERE edicion = 2025
+    ) AS selec6 ON inscripciones_fiscales.dni = selec6.idant
+
+    LEFT JOIN (
+      SELECT id AS idescant, nombre AS dondefiscal 
+      FROM escuelas
+    ) AS selec7 ON selec6.id_don = selec7.idescant
+
+    -- Para comparar con dondevotascript
+    LEFT JOIN escuelas esc ON inscripciones_fiscales.dondevotascript = esc.nombre
+
+    WHERE inscripciones_fiscales.id_encargado = ? 
+      AND inscripciones_fiscales.edicion = 2025
+  `, [id]);
+
+  res.json([estr]);
+});
 
 
 router.get('/todaspaso4', async (req, res,) => {
