@@ -160,7 +160,7 @@ if (texto === '4') {
         await message.reply("📌 No hay datos de escuelas.");
         return;
     }
-
+  
     let respuesta = "📍 Escuelas e inscriptos:\n\n";
     for (const fila of resultados) {
         respuesta += `🏫 ${fila.escuela}: cantidad ${fila.cantidad}\n`;
