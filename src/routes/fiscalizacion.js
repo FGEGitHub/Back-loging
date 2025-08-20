@@ -2891,7 +2891,7 @@ router.post("/asignarmesaafiscal", async (req, res) => {
               const numeroFormateado = `549${escc[0].dato2.replace(/\D/g, '')}@c.us`;
 numerodemesa = await pool.query('select * from mesas_fiscales where id = ?', [mesa]);
 const personasa = await pool.query('select * from personas_fiscalizacion where dni = ?', [dni]);
-            const mensaje = 'Hola somos del equipo de la CcAri #Lista47. \n Te informamos que tienes un fiscal nuevo \n'+personasa[0]['nombre']+' '+personasa[0]['apellido'][0]+'.. asignado para la escuela ' + escc[0].nombre + ' con el numero de mesa ' + numerodemesa[0].numero + '. \n Por favor, contacta al fiscal para coordinar detalles. \n Muchas gracias por tu colaboración.';
+            const mensaje = 'Hola! Te informamos que tienes un fiscal nuevo \n'+personasa[0]['nombre']+' '+personasa[0]['apellido'][0]+'.. asignado para la escuela ' + escc[0].nombre + ' con el numero de mesa ' + numerodemesa[0].numero + '. \n Por favor, contacta al fiscal para coordinar detalles. \n Muchas gracias por tu colaboración.';
          await client.sendMessage(numeroFormateado, mensaje);
            console.log('mensaje enviado')
         } catch (error) {
