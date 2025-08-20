@@ -874,7 +874,15 @@ router.get('/traerescuelas2', async (req, res) => {
 
 })
 
+router.get('/traerescuelas222222', async (req, res) => {
 
+
+
+    const etc = await pool.query('select * from escuelas left join (select tel, observaciones from roles_fisca) as sel on escuelas.dato2=sel.tel order by nombre ')
+    const etc2 = await pool.query('select * from escuelas   order by nombre')
+    res.json([etc, etc2]);
+
+})
 router.get('/traerescuelas3', async (req, res) => {
 
 

@@ -276,6 +276,88 @@ router.get('/consultar-padron', async (req, res) => {
   }
 }); 
   */
+
+
+
+router.get('/consultar-padron-roles', async (req, res) => {
+  try {
+    // Traer todos los registros de roles_fisca
+    const registros = await pool.query(
+      'SELECT dni FROM roles_fisca'
+    );
+    console.log(`Total DNIs a procesar en roles_fisca: ${registros.length}`);
+
+    if (registros.length === 0) {
+      return res.json({ mensaje: 'No hay registros en roles_fisca para edición 2025' });
+    }
+
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+
+    const page = await browser.newPage();
+
+    // Función para consultar escuela por DNI probando sexos M y F
+    async function consultarEscuelaPorDni(dni) {
+      const sexos = ['M', 'F'];
+
+      for (const sexo of sexos) {
+        await page.goto('https://padron.corrientes.gob.ar/', { waitUntil: 'networkidle2' });
+
+        await page.type('input[name="dni"]', dni.toString());
+        await page.select('select[name="Sexo"]', sexo);
+
+        await Promise.all([
+          page.click('button[type="submit"]'),
+          page.waitForNavigation({ waitUntil: 'networkidle2' }),
+        ]);
+
+        // Intentar obtener el nombre de la escuela
+        try {
+          const escuela = await page.$eval(
+            '.inline-flex.items-center.text-lg.text-coolGray-800.font-semibold.mt-5',
+            el => el.innerText.trim()
+          );
+
+          if (escuela && escuela.length > 0) {
+            return escuela; // si encontró, lo devuelve
+          }
+        } catch (e) {
+          // no encontró con este sexo, intenta con el siguiente
+        }
+      }
+
+      return null; // no encontró nada
+    }
+
+    // Recorrer todos los DNIs
+    for (const fila of registros) {
+      const dni = fila.dni;
+      try {
+        const escuela = await consultarEscuelaPorDni(dni);
+        console.log(`DNI: ${dni} - Escuela: ${escuela || 'No encontrada'}`);
+
+        if (escuela) {
+          await pool.query(
+            'UPDATE roles_fisca SET observaciones = ? WHERE dni = ? ',
+            [escuela, dni]
+          );
+        }
+      } catch (err) {
+        console.error(`Error consultando DNI ${dni}:`, err.message);
+      }
+    }
+
+    await browser.close();
+
+    res.json({ mensaje: 'Consulta finalizada en roles_fisca. Revisa la consola para resultados.' });
+  } catch (error) {
+    console.error('Error en /consultar-padron-roles:', error);
+    res.status(500).json({ error: 'Error al procesar la consulta en roles_fisca' });
+  }
+});
+
 /*
 
 router.get('/consultar-padronfem', async (req, res) => {
