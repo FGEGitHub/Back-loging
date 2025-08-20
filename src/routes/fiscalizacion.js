@@ -2675,14 +2675,14 @@ router.post("/volverapaso3", async (req, res) => {
 
     try {
         const asignacion = await pool.query('select * from asignaciones_fiscales where id =?', [id])
-
+        const persbaja = await pool.query('select * from personas_fiscalizacion where dni =?', [asignacion[0]['dni']])
         await pool.query('update inscripciones_fiscales set estado="Baja" where id=?', [asignacion[0]['id_inscripcion']])
         await pool.query('delete  from  asignaciones_fiscales where id = ?', [id])
 /////envio de mensaje
  escc = await pool.query('select * from escuelas where id = ?', [asignacion[0]['escuela']]);
                const numeroFormateado = `549${escc[0].dato2.replace(/\D/g, '')}@c.us`;
 
-             const mensaje = 'Hola somos del equipo llamadasFisca de la CcAri #Lista47. \n Te informamos que se te dio de baja un fiscal,  ' + escc[0].nombre + '. \n Por favor,si esta en el grupo sacalo. \n Muchas gracias por tu colaboración.';
+             const mensaje = 'Hola somos del equipo llamadasFisca de la CcAri #Lista47. \n Te informamos que se te dio de baja un fiscal,  '+persbaja[0]['nombre']+' '+persbaja[0]['apellido'][0]+' , de ' + escc[0].nombre + '. \n Por favor,si esta en el grupo sacalo. \n Muchas gracias por tu colaboración.';
          await client.sendMessage(numeroFormateado, mensaje);
 
 
