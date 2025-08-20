@@ -6,6 +6,122 @@ const puppeteer = require('puppeteer');
 //const xlsx = require('xlsx');
 //const path = require('path');
 
+
+/* router.get("/consultar-padron-escuelas", async (req, res) => {
+  try {
+    // 1. Traer todas las escuelas con join a roles_fisca por dato2 = tel
+    const registros = await pool.query(`
+      SELECT e.dato1, e.nombre, r.dni
+      FROM escuelas e
+      JOIN roles_fisca r ON e.dato2 = r.tel
+    `);
+
+    if (registros.length === 0) {
+      return res.send("<h3>No hay coincidencias entre escuelas y roles_fisca</h3>");
+    }
+
+    console.log(`Total de registros a procesar: ${registros.length}`);
+
+    // 2. Abrir puppeteer
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+    const page = await browser.newPage();
+
+    // 3. Función que busca la escuela en la web del padrón
+    async function consultarEscuelaPorDni(dni) {
+      const sexos = ["M", "F"];
+      for (const sexo of sexos) {
+        await page.goto("https://padron.corrientes.gob.ar/", {
+          waitUntil: "networkidle2",
+        });
+
+        await page.type('input[name="dni"]', dni.toString());
+        await page.select('select[name="Sexo"]', sexo);
+
+        await Promise.all([
+          page.click('button[type="submit"]'),
+          page.waitForNavigation({ waitUntil: "networkidle2" }),
+        ]);
+
+        try {
+          const escuela = await page.$eval(
+            ".inline-flex.items-center.text-lg.text-coolGray-800.font-semibold.mt-5",
+            (el) => el.innerText.trim()
+          );
+          if (escuela && escuela.length > 0) {
+            return escuela;
+          }
+        } catch (e) {
+          // no encontró con ese sexo, prueba con el otro
+        }
+      }
+      return "No encontrada";
+    }
+
+    // 4. Procesar todos los registros secuencialmente
+    const resultados = [];
+    for (const fila of registros) {
+      try {
+        const escuelaPadron = await consultarEscuelaPorDni(fila.dni);
+        console.log(
+          `DNI: ${fila.dni} - Escuela padrón: ${escuelaPadron}`
+        );
+
+        resultados.push({
+          dato1: fila.dato1,
+          nombre: fila.nombre,
+          dni: fila.dni,
+          escuelaPadron,
+        });
+      } catch (err) {
+        console.error(`Error con DNI ${fila.dni}:`, err.message);
+        resultados.push({
+          dato1: fila.dato1,
+          nombre: fila.nombre,
+          dni: fila.dni,
+          escuelaPadron: "Error al consultar",
+        });
+      }
+    }
+
+    await browser.close();
+
+    // 5. Renderizar tabla HTML simple
+    let html = `
+      <h2>Resultados de Consulta</h2>
+      <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+          <tr>
+            <th>Dato1</th>
+            <th>Nombre Escuela</th>
+            <th>DNI</th>
+            <th>Escuela donde vota</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    resultados.forEach((r) => {
+      html += `
+        <tr>
+          <td>${r.dato1}</td>
+          <td>${r.nombre}</td>
+          <td>${r.dni}</td>
+          <td>${r.escuelaPadron}</td>
+        </tr>
+      `;
+    });
+    html += "</tbody></table>";
+
+    res.send(html);
+  } catch (error) {
+    console.error("Error en /consultar-padron-escuelas:", error);
+    res.status(500).send("Error al procesar la consulta");
+  }
+}); */
+
+
 router.get('/todas/',isLoggedInn, async (req, res) => {
    
   
@@ -48,13 +164,13 @@ console.log(response)
 });
  */
 
-/* 
+
 
 router.get('/consultar-padron', async (req, res) => {
   try {
     // Obtener todos los registros con edicion=2025 y dondevotascript null
     const registros = await pool.query(
-      'SELECT dni FROM inscripciones_fiscales WHERE edicion = 2025 and id>2245'
+      'SELECT dni FROM inscripciones_fiscales WHERE edicion = 2025 and id>2305'
     );
     console.log(`Total DNIs a procesar: ${registros.length}`);
 
@@ -128,7 +244,7 @@ router.get('/consultar-padron', async (req, res) => {
     res.status(500).json({ error: 'Error al procesar la consulta' });
   }
 }); 
-  */
+
 /*
 
 router.get('/consultar-padronfem', async (req, res) => {
