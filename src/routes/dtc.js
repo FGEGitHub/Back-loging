@@ -147,11 +147,20 @@ client.on('message', async (message) => {
     const resultados = await pool.query(`
         SELECT 
             e.nombre AS escuela,
-            COUNT(i.id) AS cantidad
+            COUNT(DISTINCT i.id) AS cantidad_inscriptos,
+            COUNT(DISTINCT CASE 
+                WHEN m.numero NOT IN (
+                    'Suplente 1','Suplente 2','Suplente 3',
+                    'Suplente 4','Suplente 5','Suplente 6','Suplente 7'
+                ) THEN m.id
+                ELSE NULL
+            END) AS cantidad_mesas
         FROM escuelas e
         LEFT JOIN marketing.inscripciones_fiscales i
             ON e.nombre = i.dondevotascript
            AND i.edicion = 2025
+        LEFT JOIN mesas_fiscales m
+            ON m.id_escuela = e.id
         GROUP BY e.id, e.nombre
         ORDER BY e.nombre;
     `);
@@ -163,12 +172,13 @@ client.on('message', async (message) => {
 
     let respuesta = "📍 Escuelas e inscriptos:\n\n";
     for (const fila of resultados) {
-        respuesta += `🏫 ${fila.escuela}: cantidad ${fila.cantidad}\n`;
+        respuesta += `🏫 ${fila.escuela}: ${fila.cantidad_inscriptos} personas – ${fila.cantidad_mesas} mesas\n`;
     }
 
     await message.reply(respuesta);
     return;
 }
+
 if (texto === '5') {
     const resultado = await pool.query(`
         SELECT COUNT(*) AS total
