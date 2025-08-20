@@ -201,7 +201,7 @@ router.get('/consultar-padron', async (req, res) => {
   try {
     // Obtener todos los registros con edicion=2025 y dondevotascript null
     const registros = await pool.query(
-      'SELECT dni FROM inscripciones_fiscales WHERE edicion = 2025 and id>2362'
+      'SELECT dni FROM inscripciones_fiscales WHERE edicion = 2025 and id>2418'
     );
     console.log(`Total DNIs a procesar: ${registros.length}`);
 
@@ -277,7 +277,7 @@ router.get('/consultar-padron', async (req, res) => {
 }); 
 
 
-/* 
+
 
 router.get('/consultar-padron-roles', async (req, res) => {
   try {
@@ -356,7 +356,7 @@ router.get('/consultar-padron-roles', async (req, res) => {
     console.error('Error en /consultar-padron-roles:', error);
     res.status(500).json({ error: 'Error al procesar la consulta en roles_fisca' });
   }
-}); */
+}); 
 
 /*
 

@@ -1117,7 +1117,7 @@ router.get('/rechazarcapacitacion/:id', async (req, res,) => {
     try {
 
 
-        await pool.query('update asignaciones_fiscales2 set capacitado="No"  where id=?', [id])
+        await pool.query('update asignaciones_fiscales set capacitado="No"  where id=?', [id])
 
 
         res.json('realizado con exito')
