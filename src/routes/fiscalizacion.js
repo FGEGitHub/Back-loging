@@ -2676,14 +2676,14 @@ router.post("/volverapaso3", async (req, res) => {
     try {
         const asignacion = await pool.query('select * from asignaciones_fiscales where id =?', [id])
 
-        await pool.query('update inscripciones_fiscales set estado="Pendiente" where id=?', [asignacion[0]['id_inscripcion']])
+        await pool.query('update inscripciones_fiscales set estado="Baja" where id=?', [asignacion[0]['id_inscripcion']])
         await pool.query('delete  from  asignaciones_fiscales where id = ?', [id])
 /////envio de mensaje
-//  escc = await pool.query('select * from escuelas where id = ?', [asignacion[0]['id_inscripcion']]);
-             //   const numeroFormateado = `549${escc[0].dato2.replace(/\D/g, '')}@c.us`;
-//numerodemesa = await pool.query('select * from mesas_fiscales where id = ?', [mesa]);
-               // const mensaje = 'Hola somos del equipo Fisca de la CcAri #Lista47. \n Te informamos que se te dio de baja un fiscal,  ' + escc[0].nombre + '. \n Por favor,si esta en el grupo sacalo. \n Muchas gracias por tu colaboración.';
-          // await client.sendMessage(numeroFormateado, mensaje);
+ escc = await pool.query('select * from escuelas where id = ?', [asignacion[0]['escuela']]);
+               const numeroFormateado = `549${escc[0].dato2.replace(/\D/g, '')}@c.us`;
+
+             const mensaje = 'Hola somos del equipo llamadasFisca de la CcAri #Lista47. \n Te informamos que se te dio de baja un fiscal,  ' + escc[0].nombre + '. \n Por favor,si esta en el grupo sacalo. \n Muchas gracias por tu colaboración.';
+         await client.sendMessage(numeroFormateado, mensaje);
 
 
         res.json('realizado')
