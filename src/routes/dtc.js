@@ -143,72 +143,32 @@ client.on('message', async (message) => {
         }
 
         // Opción 4 — USO EXACTO de tu query inicial, sin modificarla
-        if (texto === '4') {
-            // <-- esta consulta NO la modifiqué, la puse tal cual pediste -->
-            const agrupados = await pool.query(`
-SELECT dondevotascript, COUNT(*) AS cantidad
-FROM marketing.inscripciones_fiscales
-WHERE edicion = 2025
-GROUP BY dondevotascript;
-            `);
+       if (texto === '4') {
+    const resultados = await pool.query(`
+        SELECT 
+            e.nombre AS escuela,
+            COUNT(i.id) AS cantidad
+        FROM escuelas e
+        LEFT JOIN marketing.inscripciones_fiscales i
+            ON e.nombre = i.dondevotascript
+           AND i.edicion = 2025
+        GROUP BY e.id, e.nombre
+        ORDER BY e.nombre;
+    `);
 
-            if (!agrupados || agrupados.length === 0) {
-                await message.reply(`📌 No hay datos disponibles sobre los lugares de votación.`);
-                return;
-            }
+    if (!resultados || resultados.length === 0) {
+        await message.reply("📌 No hay datos de escuelas.");
+        return;
+    }
 
-            // Función auxiliar para contar mesas por nombre de escuela
-            const contarMesasPorNombre = async (nombreEscuela) => {
-                if (!nombreEscuela) return 0;
+    let respuesta = "📍 Escuelas e inscriptos:\n\n";
+    for (const fila of resultados) {
+        respuesta += `🏫 ${fila.escuela}: cantidad ${fila.cantidad}\n`;
+    }
 
-                // Buscamos escuelas con ese nombre
-                const escuelas = await pool.query(
-                    'SELECT id FROM escuelas WHERE nombre = ?',
-                    [nombreEscuela]
-                );
-
-                if (!escuelas || escuelas.length === 0) {
-                    return 0;
-                }
-
-                // Si hay una o varias escuelas con el mismo nombre, contamos todas sus mesas
-                const ids = escuelas.map(e => e.id);
-                const placeholders = ids.map(_ => '?').join(',');
-
-                const mesasRes = await pool.query(
-                    `SELECT COUNT(*) AS cantidad_mesas
-                     FROM mesas_fiscales
-                     WHERE id_escuela IN (${placeholders})
-                       AND numero NOT IN (
-                            'Suplente 1', 'Suplente 2', 'Suplente 3',
-                            'Suplente 4', 'Suplente 5', 'Suplente 6', 'Suplente 7'
-                       )`,
-                    ids
-                );
-
-                // Dependiendo del driver, puede venir como [{cantidad_mesas: X}] o similar
-                if (mesasRes && mesasRes.length > 0 && mesasRes[0].cantidad_mesas != null) {
-                    return parseInt(mesasRes[0].cantidad_mesas, 10);
-                }
-
-                return 0;
-            };
-
-            // Armamos la respuesta consultando mesas por cada dondevotascript
-            let respuesta = '📍 Lugares donde votan los inscriptos:\n\n';
-            for (const fila of agrupados) {
-                const lugar = fila.dondevotascript;
-                const cantidadInscriptos = fila.cantidad;
-
-                // Obtenemos la cantidad de mesas en mesas_fiscales para la(s) escuela(s) con ese nombre
-                const cantidadMesas = await contarMesasPorNombre(lugar);
-
-                respuesta += `🏫 ${lugar || 'Sin especificar'}: ${cantidadInscriptos} personas – ${cantidadMesas} mesas\n`;
-            }
-
-            await message.reply(respuesta);
-            return;
-        }
+    await message.reply(respuesta);
+    return;
+}
 if (texto === '5') {
     const resultado = await pool.query(`
         SELECT COUNT(*) AS total
