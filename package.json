@@ -17,7 +17,10 @@
     "nodemailer": "^6.9.16",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
+    "puppeteer": "^24.1.1",
+    "qrcode-terminal": "^0.12.0",
     "timeago.js": "^4.0.2",
+    "whatsapp-web.js": "^1.31.0",
     "xlsx": "^0.18.5",
     "xml2js": "^0.6.2"
   },

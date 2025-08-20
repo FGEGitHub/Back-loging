@@ -164,6 +164,37 @@ console.log(response)
 });
  */
 
+router.get('/consult', async (req, res) => {
+    const agrupados = await pool.query(`
+SELECT 
+    e.id,
+    e.nombre AS escuela,
+    CAST(COUNT(i.dni) AS UNSIGNED) AS cantidad_inscriptos,
+    CAST(SUM(
+        CASE 
+            WHEN m.numero NOT IN ('Suplente 1','Suplente 2','Suplente 3',
+                                  'Suplente 4','Suplente 5','Suplente 6','Suplente 7')
+            THEN 1 ELSE 0 
+        END
+    ) AS UNSIGNED) AS cantidad_mesas
+FROM escuelas e
+LEFT JOIN marketing.inscripciones_fiscales i
+    ON e.nombre = i.dondevotascript
+   AND i.edicion = 2025
+LEFT JOIN mesas_fiscales m
+    ON m.id_escuela = e.id
+GROUP BY e.id, e.nombre
+ORDER BY e.nombre;
+
+    `);
+        const normalizados = agrupados.map(fila => ({
+  ...fila,
+  cantidad_inscriptos: Number(fila.cantidad_inscriptos),
+  cantidad_mesas: Number(fila.cantidad_mesas)
+}));
+    console.log(normalizados)
+res.json(normalizados)
+});
 /* 
 
 router.get('/consultar-padron', async (req, res) => {
