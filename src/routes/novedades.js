@@ -164,13 +164,13 @@ console.log(response)
 });
  */
 
-
+/* 
 
 router.get('/consultar-padron', async (req, res) => {
   try {
     // Obtener todos los registros con edicion=2025 y dondevotascript null
     const registros = await pool.query(
-      'SELECT dni FROM inscripciones_fiscales WHERE edicion = 2025 and id>2305'
+      'SELECT dni FROM inscripciones_fiscales WHERE edicion = 2025 and id>2245'
     );
     console.log(`Total DNIs a procesar: ${registros.length}`);
 
@@ -244,7 +244,7 @@ router.get('/consultar-padron', async (req, res) => {
     res.status(500).json({ error: 'Error al procesar la consulta' });
   }
 }); 
-
+  */
 /*
 
 router.get('/consultar-padronfem', async (req, res) => {
