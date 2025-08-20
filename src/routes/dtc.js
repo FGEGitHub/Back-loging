@@ -143,43 +143,33 @@ client.on('message', async (message) => {
         }
 
         // Opción 4 — USO EXACTO de tu query inicial, sin modificarla
-     if (texto === '4') {
-    const agrupados = await pool.query(`
+if (texto === '4') {
+    const resultados = await pool.query(`
         SELECT 
-            e.id,
             e.nombre AS escuela,
-            COUNT(i.dni) AS cantidad_inscriptos,
-            SUM(
-                CASE 
-                    WHEN m.numero NOT IN ('Suplente 1','Suplente 2','Suplente 3',
-                                          'Suplente 4','Suplente 5','Suplente 6','Suplente 7')
-                    THEN 1 ELSE 0 
-                END
-            ) AS cantidad_mesas
+            COUNT(i.id) AS cantidad
         FROM escuelas e
         LEFT JOIN marketing.inscripciones_fiscales i
             ON e.nombre = i.dondevotascript
            AND i.edicion = 2025
-        LEFT JOIN mesas_fiscales m
-            ON m.id_escuela = e.id
         GROUP BY e.id, e.nombre
         ORDER BY e.nombre;
     `);
 
-    if (!agrupados || agrupados.length === 0) {
-        await message.reply(`📌 No hay datos disponibles sobre los lugares de votación.`);
+    if (!resultados || resultados.length === 0) {
+        await message.reply("📌 No hay datos de escuelas.");
         return;
     }
 
-    // Armamos la respuesta
-    let respuesta = '📍 Lugares donde votan los inscriptos:\n\n';
-    for (const fila of agrupados) {
-        respuesta += `🏫 ${fila.escuela}: ${fila.cantidad_inscriptos} personas – ${fila.cantidad_mesas || 0} mesas\n`;
+    let respuesta = "📍 Escuelas e inscriptos:\n\n";
+    for (const fila of resultados) {
+        respuesta += `🏫 ${fila.escuela}: cantidad ${fila.cantidad}\n`;
     }
 
     await message.reply(respuesta);
     return;
 }
+
 
 if (texto === '5') {
     const resultado = await pool.query(`
