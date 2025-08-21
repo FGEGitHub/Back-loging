@@ -815,19 +815,71 @@ router.get('/datosusuarioporid/:dni', async (req, res) => {
 
 })
 
-
 router.get('/traerinscripcionesenc/:id', async (req, res) => {
-    const id = req.params.id
+    try {
+        const id = req.params.id;
+
+        const query = `
+            SELECT 
+                i.*,
+                e.nombre AS nombre_escuela,
+                e.dato2 AS dato2_escuela,
+                
+                -- Cantidad de asignados en esa escuela para 2025
+                (
+                    SELECT CAST(COUNT(*) AS UNSIGNED)
+                    FROM asignaciones_fiscales af
+                    WHERE af.escuela = e.id
+                    AND af.edicion = 2025
+                ) AS cantidad_asignados,
+
+                -- Cantidad de mesas en esa escuela
+                (
+                    SELECT CAST(COUNT(*) AS UNSIGNED)
+                    FROM mesas_fiscales mf
+                    WHERE mf.id_escuela = e.id
+                ) AS cantidad_mesas,
+
+                -- Campo lleno: 1 si asignados >= mesas, 0 si no
+                CASE 
+                    WHEN (
+                        (SELECT COUNT(*) FROM asignaciones_fiscales af WHERE af.escuela = e.id AND af.edicion = 2025)
+                        >=
+                        (SELECT COUNT(*) FROM mesas_fiscales mf WHERE mf.id_escuela = e.id)
+                    )
+                    THEN 1
+                    ELSE 0
+                END AS lleno
+
+            FROM inscripciones_fiscales i
+            LEFT JOIN (
+                SELECT dni AS dnip, id_donde_vota 
+                FROM personas_fiscalizacion
+            ) AS selec ON i.dni = selec.dnip
+            LEFT JOIN escuelas e ON i.dondevotascript = e.nombre
+
+            WHERE (i.id_encargado IS NULL OR i.id_encargado = 0)
+            AND i.estado = "Pendiente"
+            AND i.edicion = 2025
+
+            ORDER BY i.dondevotascript
+        `;
+
+        const result = await pool.query(query, [id]);
+
+        // Reemplazo BigInt por Number (por seguridad)
+        const safeResult = JSON.parse(JSON.stringify(result, (key, value) =>
+            typeof value === 'bigint' ? Number(value) : value
+        ));
+console.log(safeResult)
+        res.json(safeResult);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error en la consulta traerinscripcionesenc" });
+    }
+});
 
 
-    const etc = await pool.query('select * from inscripciones_fiscales left join (select dni as dnip, id_donde_vota from personas_fiscalizacion) as selec on inscripciones_fiscales.dni=selec.dnip left join (select id as idesc, nombre as nombreesc,etapa2 from escuelas) as selec2 on selec.id_donde_vota=selec2.idesc  where  (id_encargado is null or id_encargado= 0) and inscripciones_fiscales.estado="Pendiente" and edicion=2025 order by dondevotascript', [id])
-
-    res.json(etc);
-
-
-
-
-})
 
 
 // router.get('/traerinscripcionesenc/:id', async (req, res) => {
