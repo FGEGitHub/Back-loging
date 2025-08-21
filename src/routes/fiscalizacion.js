@@ -880,6 +880,7 @@ router.get('/traerescuelas222222', async (req, res) => {
             SELECT 
                 e.id,
                 e.nombre,
+                   e.dato1,
                 e.dato2,
                   e.tipo_traslado,
                 e.mapa1 AS mapa1,
@@ -1533,20 +1534,47 @@ res.send('listo')
 
 
 
-
-router.get('/verfaltantesescuelas/', async (req, res,) => {
-
-
+router.get('/verfaltantesescuelas/', async (req, res) => {
     try {
+        const estr = await pool.query(`
+            SELECT 
+                selec4.nombre_escuela,
+                GROUP_CONCAT(mesas_fiscales.numero ORDER BY mesas_fiscales.numero SEPARATOR ', ') AS mesas_faltantes,
+                COUNT(mesas_fiscales.id) AS total_faltantes
+            FROM mesas_fiscales
+            LEFT JOIN (
+                SELECT mesa AS mesaa 
+                FROM asignaciones_fiscales 
+                WHERE edicion = 2025
+            ) AS selec2 
+                ON mesas_fiscales.id = selec2.mesaa
+            JOIN (
+                SELECT id AS idescuela, nombre AS nombre_escuela, etapa2 
+                FROM escuelas
+            ) AS selec4 
+                ON mesas_fiscales.id_escuela = selec4.idescuela
+            WHERE 
+                selec2.mesaa IS NULL 
+                AND numero NOT LIKE 'Suplente %'
+                AND selec4.etapa2 = 'Si'
+            GROUP BY selec4.nombre_escuela
+            ORDER BY selec4.nombre_escuela;
+        `);
 
-        let estr = await pool.query('select * from mesas_fiscales left join (select mesa as mesaa from asignaciones_fiscales where edicion=2025) as selec2 on mesas_fiscales.id=selec2.mesaa join (select id as idescuela, nombre as nombre_escuela, etapa2 from escuelas) as selec4 on mesas_fiscales.id_escuela=selec4.idescuela  where selec2.mesaa IS NULL and numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5" and numero != "Suplente 6"  and numero != "Suplente 7" and etapa2="Si"')
-        res.json(estr)
+        // Convierte BigInt a string
+        const safeEstr = JSON.parse(JSON.stringify(estr, replacerBigInt));
+console.log(safeEstr)
+        res.json(safeEstr);
     } catch (error) {
-        console.log(error)
-        res.json(['algo salio mal'])
+        console.log(error);
+        res.json(['algo salió mal']);
     }
+});
 
-})
+// Función fuera de la ruta
+function replacerBigInt(key, value) {
+  return typeof value === 'bigint' ? value.toString() : value;
+}
 
 
 
