@@ -1919,13 +1919,17 @@ router.get('/todaspaso42/:id', async (req, res) => {
         ELSE 0
       END AS cantidad_asignados,
 
-      -- Cantidad de mesas en esa escuela
+      -- Cantidad de mesas en esa escuela (excluyendo suplentes)
       CASE 
         WHEN inscripciones_fiscales.dondevotascript = esc.nombre 
         THEN (
           SELECT CAST(COUNT(*) AS UNSIGNED) 
           FROM mesas_fiscales mf 
           WHERE mf.id_escuela = esc.id
+            AND mf.numero NOT IN (
+              'Suplente 1','Suplente 2','Suplente 3',
+              'Suplente 4','Suplente 5','Suplente 6','Suplente 7'
+            )
         )
         ELSE 0
       END AS cantidad_mesas
@@ -1957,6 +1961,7 @@ router.get('/todaspaso42/:id', async (req, res) => {
 
   res.json([estr]);
 });
+
 
 
 router.get('/todaspaso4', async (req, res,) => {
