@@ -871,7 +871,7 @@ router.get('/traerinscripcionesenc/:id', async (req, res) => {
         const safeResult = JSON.parse(JSON.stringify(result, (key, value) =>
             typeof value === 'bigint' ? Number(value) : value
         ));
-console.log(safeResult)
+
         res.json(safeResult);
     } catch (error) {
         console.error(error);
