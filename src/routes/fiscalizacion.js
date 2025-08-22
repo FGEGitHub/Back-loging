@@ -1608,7 +1608,6 @@ router.get('/verfaltantesescuelas/', async (req, res) => {
 
         // Convierte BigInt a string
         const safeEstr = JSON.parse(JSON.stringify(estr, replacerBigInt));
-        console.log(safeEstr);
 
         res.json(safeEstr);
     } catch (error) {
