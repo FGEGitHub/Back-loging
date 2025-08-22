@@ -1591,23 +1591,38 @@ res.send('listo')
 })
  */
 
-
 router.get('/verfaltantesescuelas/', async (req, res) => {
     try {
         const query = `
             SELECT 
                 e.nombre AS nombre_escuela,
-                GROUP_CONCAT(CASE WHEN af.mesa IS NULL AND m.numero NOT LIKE 'Suplente %' 
-                                  THEN m.numero END ORDER BY m.numero SEPARATOR ', ') AS mesas_faltantes,
-                SUM(CASE WHEN af.mesa IS NULL AND m.numero NOT LIKE 'Suplente %' THEN 1 ELSE 0 END) AS total_faltantes
+                GROUP_CONCAT(
+                    CASE 
+                        WHEN af.mesa IS NULL AND m.numero NOT LIKE 'Suplente %' 
+                        THEN m.numero 
+                    END 
+                    ORDER BY m.numero SEPARATOR ', '
+                ) AS mesas_faltantes,
+                SUM(
+                    CASE 
+                        WHEN af.mesa IS NULL AND m.numero NOT LIKE 'Suplente %' 
+                        THEN 1 
+                        ELSE 0 
+                    END
+                ) AS total_faltantes
             FROM escuelas e
             JOIN mesas_fiscales m ON e.id = m.id_escuela
             LEFT JOIN asignaciones_fiscales af 
                    ON m.id = af.mesa AND af.edicion = 2025
-            WHERE e.etapa2 = 'Si'and e.id != 5 AND e.id != 10 AND e.id != 8 AND e.id != 9
+            WHERE e.etapa2 = 'Si' 
+              AND e.id NOT IN (5, 8, 9, 10)
             GROUP BY e.id, e.nombre
             ORDER BY 
+                -- primero las escuelas llenas (total_faltantes = 0)
                 (SUM(CASE WHEN af.mesa IS NULL AND m.numero NOT LIKE 'Suplente %' THEN 1 ELSE 0 END) = 0) DESC,
+                -- luego ordenar por cantidad de faltantes (mayor a menor)
+                total_faltantes DESC,
+                -- y finalmente por nombre para desempatar
                 e.nombre ASC;
         `;
 
@@ -1622,6 +1637,7 @@ router.get('/verfaltantesescuelas/', async (req, res) => {
         res.json(['algo salió mal']);
     }
 });
+
 
 
 // Función fuera de la ruta
