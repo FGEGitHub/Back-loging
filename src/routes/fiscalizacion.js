@@ -1585,43 +1585,38 @@ res.send('listo')
  */
 
 
-
 router.get('/verfaltantesescuelas/', async (req, res) => {
     try {
-        const estr = await pool.query(`
+        const query = `
             SELECT 
-                selec4.nombre_escuela,
-                GROUP_CONCAT(mesas_fiscales.numero ORDER BY mesas_fiscales.numero SEPARATOR ', ') AS mesas_faltantes,
-                COUNT(mesas_fiscales.id) AS total_faltantes
-            FROM mesas_fiscales
-            LEFT JOIN (
-                SELECT mesa AS mesaa 
-                FROM asignaciones_fiscales 
-                WHERE edicion = 2025
-            ) AS selec2 
-                ON mesas_fiscales.id = selec2.mesaa
-            JOIN (
-                SELECT id AS idescuela, nombre AS nombre_escuela, etapa2 
-                FROM escuelas
-            ) AS selec4 
-                ON mesas_fiscales.id_escuela = selec4.idescuela
-            WHERE 
-                selec2.mesaa IS NULL 
-                AND numero NOT LIKE 'Suplente %'
-                AND selec4.etapa2 = 'Si'
-            GROUP BY selec4.nombre_escuela
-            ORDER BY selec4.nombre_escuela;
-        `);
+                e.nombre AS nombre_escuela,
+                GROUP_CONCAT(CASE WHEN af.mesa IS NULL AND m.numero NOT LIKE 'Suplente %' 
+                                  THEN m.numero END ORDER BY m.numero SEPARATOR ', ') AS mesas_faltantes,
+                SUM(CASE WHEN af.mesa IS NULL AND m.numero NOT LIKE 'Suplente %' THEN 1 ELSE 0 END) AS total_faltantes
+            FROM escuelas e
+            JOIN mesas_fiscales m ON e.id = m.id_escuela
+            LEFT JOIN asignaciones_fiscales af 
+                   ON m.id = af.mesa AND af.edicion = 2025
+            WHERE e.etapa2 = 'Si'and e.id != 5 AND e.id != 10 AND e.id != 8 AND e.id != 9
+            GROUP BY e.id, e.nombre
+            ORDER BY 
+                (SUM(CASE WHEN af.mesa IS NULL AND m.numero NOT LIKE 'Suplente %' THEN 1 ELSE 0 END) = 0) DESC,
+                e.nombre ASC;
+        `;
+
+        const estr = await pool.query(query);
 
         // Convierte BigInt a string
         const safeEstr = JSON.parse(JSON.stringify(estr, replacerBigInt));
-console.log(safeEstr)
+        console.log(safeEstr);
+
         res.json(safeEstr);
     } catch (error) {
         console.log(error);
         res.json(['algo salió mal']);
     }
 });
+
 
 // Función fuera de la ruta
 function replacerBigInt(key, value) {
