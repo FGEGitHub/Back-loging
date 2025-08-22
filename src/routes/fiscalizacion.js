@@ -833,19 +833,25 @@ router.get('/traerinscripcionesenc/:id', async (req, res) => {
                     AND af.edicion = 2025
                 ) AS cantidad_asignados,
 
-                -- Cantidad de mesas en esa escuela
+                -- Cantidad de mesas titulares en esa escuela (ignora suplentes)
                 (
                     SELECT CAST(COUNT(*) AS UNSIGNED)
                     FROM mesas_fiscales mf
                     WHERE mf.id_escuela = e.id
+                    AND mf.numero NOT LIKE 'Suplente %'
                 ) AS cantidad_mesas,
 
-                -- Campo lleno: 1 si asignados >= mesas, 0 si no
+                -- Campo lleno: 1 si asignados >= mesas titulares
                 CASE 
                     WHEN (
-                        (SELECT COUNT(*) FROM asignaciones_fiscales af WHERE af.escuela = e.id AND af.edicion = 2025)
+                        (SELECT COUNT(*) 
+                         FROM asignaciones_fiscales af 
+                         WHERE af.escuela = e.id AND af.edicion = 2025)
                         >=
-                        (SELECT COUNT(*) FROM mesas_fiscales mf WHERE mf.id_escuela = e.id)
+                        (SELECT COUNT(*) 
+                         FROM mesas_fiscales mf 
+                         WHERE mf.id_escuela = e.id
+                         AND mf.numero NOT LIKE 'Suplente %')
                     )
                     THEN 1
                     ELSE 0
@@ -867,17 +873,18 @@ router.get('/traerinscripcionesenc/:id', async (req, res) => {
 
         const result = await pool.query(query, [id]);
 
-        // Reemplazo BigInt por Number (por seguridad)
+        // Convierte BigInt a Number
         const safeResult = JSON.parse(JSON.stringify(result, (key, value) =>
             typeof value === 'bigint' ? Number(value) : value
         ));
-
         res.json(safeResult);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Error en la consulta traerinscripcionesenc" });
     }
 });
+
+
 
 
 
