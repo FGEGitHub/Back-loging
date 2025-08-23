@@ -800,6 +800,40 @@ router.get('/traerincripcionesdealiado/:id', async (req, res) => {
 
 
 })
+router.get('/traerestadisticasdeescuelasm', async (req, res) => { 
+  try {
+    const query = `
+      SELECT 
+          e.nombre AS escuela,
+          COUNT(DISTINCT af.id) AS cantidad_asignados,
+          COUNT(DISTINCT CASE 
+              WHEN mf.numero NOT LIKE 'Suplente %' THEN mf.id 
+          END) AS cantidad_mesas
+      FROM escuelas e
+      LEFT JOIN asignaciones_fiscales af ON e.id = af.escuela
+      LEFT JOIN mesas_fiscales mf 
+          ON e.id = mf.id_escuela 
+          AND mf.numero NOT LIKE 'Suplente %' 
+      WHERE af.edicion = 2025
+      GROUP BY e.id, e.nombre
+    `;
+
+    const rows = await pool.query(query);
+
+    // convertir BigInt a Number
+    const resultado = rows.map(r => ({
+      escuela: r.escuela,
+      cantidad_asignados: Number(r.cantidad_asignados),
+      cantidad_mesas: Number(r.cantidad_mesas)
+    }));
+
+    res.json(resultado);
+  } catch (error) {
+    console.error(error);
+    res.json([]);
+  }
+});
+
 
 
 router.get('/datosusuarioporid/:dni', async (req, res) => {
