@@ -196,17 +196,15 @@ ORDER BY e.nombre;
 res.json(normalizados)
 });
 
-
 router.get('/consultar-padron', async (req, res) => {
   try {
-    // Obtener todos los registros con edicion=2025 y dondevotascript null
     const registros = await pool.query(
       'SELECT dni FROM inscripciones_fiscales WHERE edicion = 2025 and id>2721 and dondevotascript = "Sin definir"'
     );
     console.log(`Total DNIs a procesar: ${registros.length}`);
 
     if (registros.length === 0) {
-      return res.json({ mensaje: 'No hay registros para edición 2025' });
+      return res.redirect('/nuevos?mensaje=No%20hay%20registros%20para%20edicion%202025');
     }
 
     const browser = await puppeteer.launch({
@@ -216,7 +214,6 @@ router.get('/consultar-padron', async (req, res) => {
 
     const page = await browser.newPage();
 
-    // Función para consultar escuela por DNI probando sexos M y F
     async function consultarEscuelaPorDni(dni) {
       const sexos = ['M', 'F'];
 
@@ -231,25 +228,23 @@ router.get('/consultar-padron', async (req, res) => {
           page.waitForNavigation({ waitUntil: 'networkidle2' }),
         ]);
 
-        // Intentar obtener el elemento con la clase exacta de la escuela
         try {
           const escuela = await page.$eval(
             '.inline-flex.items-center.text-lg.text-coolGray-800.font-semibold.mt-5',
             el => el.innerText.trim()
           );
-
           if (escuela && escuela.length > 0) {
-            return escuela; // Devuelve si encontró algo
+            return escuela;
           }
         } catch (e) {
-          // Si no encontró el elemento, probamos con el siguiente sexo
+          // probar siguiente sexo
         }
       }
-
-      return null; // No encontró escuela
+      return null;
     }
 
-    // Recorrer todos los DNIs secuencialmente
+    let nuevos = [];
+
     for (const fila of registros) {
       const dni = fila.dni;
       try {
@@ -261,6 +256,7 @@ router.get('/consultar-padron', async (req, res) => {
             'UPDATE inscripciones_fiscales SET dondevotascript = ? WHERE dni = ? AND edicion = 2025',
             [escuela, dni]
           );
+          nuevos.push({ dni, escuela });
         }
       } catch (err) {
         console.error(`Error consultando DNI ${dni}:`, err.message);
@@ -269,12 +265,26 @@ router.get('/consultar-padron', async (req, res) => {
 
     await browser.close();
 
-    res.json({ mensaje: 'Consulta finalizada. Revisa la consola para resultados.' });
+    // Guardamos en memoria temporal y redirigimos
+    req.app.locals.nuevos = nuevos;
+    res.redirect('/nuevos');
   } catch (error) {
     console.error('Error en /consultar-padron:', error);
     res.status(500).json({ error: 'Error al procesar la consulta' });
   }
-}); 
+});
+
+
+// Nueva ruta que renderiza los resultados
+router.get('/nuevos', (req, res) => {
+  const nuevos = req.app.locals.nuevos || [];
+  res.send(`
+    <h1>Estos son los nuevos que encontré:</h1>
+    <ul>
+      ${nuevos.map(n => `<li>DNI: ${n.dni} - Escuela: ${n.escuela}</li>`).join('')}
+    </ul>
+  `);
+});
 
 
 
