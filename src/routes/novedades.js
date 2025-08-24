@@ -121,15 +121,81 @@ const puppeteer = require('puppeteer');
   }
 }); */
 
+router.get('/reasignar-suplementes', async (req, res) => {
+  try {
+    // 1) Buscar suplentes (asignados en mesas con numero = Suplente)
+    const suplentes = await pool.query(`
+      SELECT af.id AS asignacion_id, af.mesa AS mesa_suplente_id,
+             msu.numero AS mesa_suplente, msu.id_escuela
+      FROM asignaciones_fiscales af
+      JOIN mesas_fiscales msu ON af.mesa = msu.id
+      WHERE af.edicion = 2025
+        AND msu.numero LIKE 'Suplente%'
+      ORDER BY af.id
+    `);
 
-router.get('/todas/',isLoggedInn, async (req, res) => {
-   
-  
-    const etc = await pool.query ('select * from novedades' )
+    console.log("Suplentes encontrados:", suplentes);
 
-  res.json(etc);
-//res.render('index')
-})
+    // 2) Buscar mesas libres (no suplentes y sin asignación en 2025)
+    const libres = await pool.query(`
+      SELECT mf.id AS mesa_id, mf.numero AS mesa_numero, mf.id_escuela
+      FROM mesas_fiscales mf
+      LEFT JOIN asignaciones_fiscales af 
+        ON af.mesa = mf.id AND af.edicion = 2025
+      WHERE af.mesa IS NULL
+        AND mf.numero NOT LIKE 'Suplente%'
+      ORDER BY mf.id
+    `);
+
+    console.log("Mesas libres encontradas:", libres);
+
+    // Organizar mesas libres por escuela
+    const libresPorEscuela = {};
+    libres.forEach(l => {
+      if (!libresPorEscuela[l.id_escuela]) libresPorEscuela[l.id_escuela] = [];
+      libresPorEscuela[l.id_escuela].push(l);
+    });
+
+    console.log("Libres por escuela:", libresPorEscuela);
+
+    // 3) Emparejar suplentes con libres de su misma escuela
+    const cambios = [];
+    for (const suplente of suplentes) {
+      const disponibles = libresPorEscuela[suplente.id_escuela] || [];
+      console.log(`Suplente ${suplente.asignacion_id} de escuela ${suplente.id_escuela} → libres disponibles:`, disponibles);
+
+      if (disponibles.length > 0) {
+        const libre = disponibles.shift(); // tomar la primera libre y removerla
+
+        // Update de la asignación
+        await pool.query(
+          `UPDATE asignaciones_fiscales SET mesa = ? WHERE id = ?`,
+          [libre.mesa_id, suplente.asignacion_id]
+        );
+
+        console.log(`Asignación actualizada: ${suplente.asignacion_id} → Mesa ${libre.mesa_numero} (Escuela ${suplente.id_escuela})`);
+
+        cambios.push({
+          asignacion_id: suplente.asignacion_id,
+          id_escuela: suplente.id_escuela,
+          antes: suplente.mesa_suplente,
+          despues: libre.mesa_numero
+        });
+      }
+    }
+
+    res.json({
+      modificados: cambios.length,
+      cambios
+    });
+
+  } catch (err) {
+    console.error("Error en reasignar-suplementes:", err);
+    res.status(500).json({ error: "Error reasignando suplentes" });
+  }
+});
+
+
 
 /* router.get('/consulta', async (req, res) => {
   let { dni, genero } = req.query;
