@@ -2832,7 +2832,7 @@ router.post("/enviarinscripcion", async (req, res) => {
 });
 
 
-router.post("/volverapaso3", async (req, res) => {
+/* router.post("/volverapaso3", async (req, res) => {
     const { id } = req.body
 
     try {
@@ -2853,7 +2853,87 @@ router.post("/volverapaso3", async (req, res) => {
         res.json('Error ')
     }
 
-})
+}) */
+
+router.post("/volverapaso3", async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    // 1) Obtener la asignación que se va a eliminar
+    const asignacion = await pool.query('SELECT * FROM asignaciones_fiscales WHERE id = ?', [id]);
+    if (asignacion.length === 0) {
+      console.log("No se encontró la asignación");
+      return res.status(404).json({ mensaje: "No se encontró la asignación" });
+    }
+
+    const asign = asignacion[0];
+
+    // 2) Dar de baja en inscripciones
+    await pool.query('UPDATE inscripciones_fiscales SET estado="Baja" WHERE id=?', [asign.id_inscripcion]);
+
+    // 3) Guardar info de la persona que se da de baja
+    const persbaja = await pool.query('SELECT * FROM personas_fiscalizacion WHERE dni = ?', [asign.dni]);
+
+    // 4) Obtener datos de la mesa eliminada
+    const mesa = await pool.query('SELECT * FROM mesas_fiscales WHERE id = ?', [asign.mesa]);
+    if (mesa.length === 0) {
+      console.log("No se encontró la mesa asociada");
+      return res.status(404).json({ mensaje: "No se encontró la mesa asociada" });
+    }
+    const mesaEliminada = mesa[0];
+
+    // 5) Eliminar la asignación
+    await pool.query('DELETE FROM asignaciones_fiscales WHERE id = ?', [id]);
+
+    // 6) Revisar si la mesa eliminada NO es suplente
+    let resultadoReasignacion = "";
+    if (!mesaEliminada.numero.startsWith("Suplente")) {
+      // Buscar un suplente libre de la misma escuela
+      const suplenteLibre = await pool.query(`
+        SELECT af.id AS asignacion_id, af.mesa AS mesa_suplente_id, msu.numero AS mesa_suplente
+        FROM asignaciones_fiscales af
+        JOIN mesas_fiscales msu ON af.mesa = msu.id
+        WHERE af.edicion = 2025
+          AND msu.numero LIKE 'Suplente%'
+          AND msu.id_escuela = ?
+        ORDER BY af.id
+        LIMIT 1
+      `, [mesaEliminada.id_escuela]);
+
+      if (suplenteLibre.length > 0) {
+        // Reasignar el suplente a la mesa liberada
+        await pool.query('UPDATE asignaciones_fiscales SET mesa = ? WHERE id = ?', [mesaEliminada.id, suplenteLibre[0].asignacion_id]);
+        resultadoReasignacion = `Subió un suplente a la mesa ${mesaEliminada.numero}: ${suplenteLibre[0].mesa_suplente}`;
+        console.log(resultadoReasignacion);
+      } else {
+        resultadoReasignacion = "No hay suplentes disponibles para esta mesa todavía";
+        console.log(resultadoReasignacion);
+      }
+    } else {
+      resultadoReasignacion = "La mesa eliminada era un suplente, no se mueve nadie";
+      console.log(resultadoReasignacion);
+    }
+
+    // 7) Enviar mensaje a la persona que se da de baja, incluyendo el resultado de la reasignación
+    const escc = await pool.query('SELECT * FROM escuelas WHERE id = ?', [asign.escuela]);
+    const numeroFormateado = `549${escc[0].dato2.replace(/\D/g, '')}@c.us`;
+
+    const mensaje = `Hola somos del equipo llamadasFisca de la CcAri #Lista47.\n` +
+      `Te informamos que se te dio de baja un fiscal: ${persbaja[0].nombre} ${persbaja[0].apellido[0]}, de ${escc[0].nombre}.\n` +
+      `${resultadoReasignacion}.\n` +
+      `Por favor, si está en el grupo, sacalo.\nMuchas gracias por tu colaboración.`;
+console.log("Mensaje a enviar:", mensaje);
+   // await client.sendMessage(numeroFormateado, mensaje);
+
+    res.json({ mensaje: "Realizado", resultadoReasignacion });
+
+  } catch (error) {
+    console.error("Error en volverapaso3:", error);
+    res.status(500).json({ mensaje: "Error" });
+  }
+});
+
+
 router.post("/asignarmesaafiscalnoinscripto", async (req, res) => {
   let {
     dni, nombre, apellido, telefono, telefono2, id_escuela, id_donde_vota,
