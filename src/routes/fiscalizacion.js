@@ -2923,7 +2923,7 @@ router.post("/volverapaso3", async (req, res) => {
       `${resultadoReasignacion}.\n` +
       `Por favor, si está en el grupo, sacalo.\nMuchas gracias por tu colaboración.`;
 console.log("Mensaje a enviar:", mensaje);
-   // await client.sendMessage(numeroFormateado, mensaje);
+  await client.sendMessage(numeroFormateado, mensaje);
 
     res.json({ mensaje: "Realizado", resultadoReasignacion });
 
