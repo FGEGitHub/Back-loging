@@ -1205,7 +1205,7 @@ router.get('/listadeescuelas', async (req, res,) => {
 
 })
 
-router.get('/listadeescuelas', async (req, res) => {
+router.get('/listadeescuelastrasladoesc', async (req, res) => {
   try {
     const query = `
       SELECT 
@@ -1223,17 +1223,19 @@ router.get('/listadeescuelas', async (req, res) => {
       INNER JOIN inscripciones_fiscales i 
         ON af.id_inscripcion = i.id
       INNER JOIN escuelas e2 
-        ON i.dondevotascrip = e2.nombre
+        ON i.dondevotascript = e2.nombre
       WHERE af.edicion = 2025
+        AND e1.nombre <> e2.nombre   -- 🔹 solo si origen ≠ destino
     `;
 
-    const [rows] = await pool.query(query);
+    const rows = await pool.query(query);
     res.json(rows);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al obtener lista de escuelas" });
   }
 });
+
 
 router.get('/rechazarcapacitacionmesa/:id', async (req, res,) => {
     const id = req.params.id
