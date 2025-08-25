@@ -347,7 +347,7 @@ router.get('/consultar-padron', async (req, res) => {
 router.get('/consultar-padron', async (req, res) => {
   try {
     const registros = await pool.query(
-      'SELECT dni FROM inscripciones_fiscales WHERE edicion = 2025 and id>2873 and dondevotascript = "Sin definir"'
+      'SELECT dni FROM inscripciones_fiscales WHERE edicion = 2025 and id>3232 and dondevotascript = "Sin definir"'
     );
     console.log(`Total DNIs a procesar: ${registros.length}`);
 
