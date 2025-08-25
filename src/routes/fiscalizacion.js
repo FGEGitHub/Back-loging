@@ -972,7 +972,7 @@ router.get('/traerescuelas222222', async (req, res) => {
         const etc = await pool.query(`
             SELECT 
                 e.id,
-                e.nombre,
+                e.nombre,    e.fiscal_general,
                    e.dato1,
                 e.dato2,
                   e.tipo_traslado,
@@ -1205,7 +1205,35 @@ router.get('/listadeescuelas', async (req, res,) => {
 
 })
 
+router.get('/listadeescuelas', async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        e1.nombre AS escuela_origen,
+        e1.mapa1 AS mapa1_origen,
+        e2.nombre AS escuela_destino,
+        e2.mapa1 AS mapa2_destino,
+        p.nombre AS nombrefiscal,
+        p.apellido AS apellidofiscal
+      FROM asignaciones_fiscales af
+      INNER JOIN personas_fiscalizacion p 
+        ON af.dni = p.dni
+      INNER JOIN escuelas e1 
+        ON af.escuela = e1.id
+      INNER JOIN inscripciones_fiscales i 
+        ON af.id_inscripcion = i.id
+      INNER JOIN escuelas e2 
+        ON i.dondevotascrip = e2.nombre
+      WHERE af.edicion = 2025
+    `;
 
+    const [rows] = await pool.query(query);
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener lista de escuelas" });
+  }
+});
 
 router.get('/rechazarcapacitacionmesa/:id', async (req, res,) => {
     const id = req.params.id
