@@ -968,6 +968,7 @@ router.get('/traerescuelas2', async (req, res) => {
         e.id,
         e.nombre,
         e.mapa1,
+           e.dato1,
         COALESCE(a.cant_asignaciones, 0) AS cant_asignaciones,
         COALESCE(m.cant_mesas, 0) AS cant_mesas,
         CASE 
