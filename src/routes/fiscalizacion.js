@@ -1006,6 +1006,66 @@ router.get('/traerescuelas2', async (req, res) => {
 });
 
 
+router.get('/traerescuelasmapacolor', async (req, res) => {
+  try {
+    // Primer array: todas las escuelas
+    const etc = await pool.query('SELECT * FROM escuelas ORDER BY nombre');
+
+    // Segundo array: escuelas con mapa1, asignaciones, mesas y campo llena con 3 estados
+    const etc2 = await pool.query(`
+      SELECT 
+        e.id,
+        e.nombre,
+        e.mapa1,
+        e.dato1,
+        COALESCE(a.cant_asignaciones, 0) AS cant_asignaciones,
+        COALESCE(m.cant_mesas, 0) AS cant_mesas,
+        COALESCE(s.cant_suplentes, 0) AS cant_suplentes,
+        CASE 
+          WHEN COALESCE(a.cant_asignaciones, 0) < COALESCE(m.cant_mesas, 0) 
+            THEN 'Tiene lugar'
+          WHEN COALESCE(a.cant_asignaciones, 0) < (COALESCE(m.cant_mesas, 0) + COALESCE(s.cant_suplentes, 0)) 
+            THEN 'Solo suplentes'
+          ELSE 'Llena'
+        END AS llena
+      FROM escuelas e
+      LEFT JOIN (
+        SELECT escuela, COUNT(*) AS cant_asignaciones
+        FROM asignaciones_fiscales
+        WHERE edicion = 2025
+        GROUP BY escuela
+      ) a ON e.id = a.escuela
+      LEFT JOIN (
+        SELECT id_escuela, COUNT(*) AS cant_mesas
+        FROM mesas_fiscales
+        WHERE numero NOT LIKE 'Suplente%'
+        GROUP BY id_escuela
+      ) m ON e.id = m.id_escuela
+      LEFT JOIN (
+        SELECT id_escuela, COUNT(*) AS cant_suplentes
+        FROM mesas_fiscales
+        WHERE numero LIKE 'Suplente%'
+        GROUP BY id_escuela
+      ) s ON e.id = s.id_escuela
+      ORDER BY e.nombre
+    `);
+
+    // ⚠️ convertir BigInt a Number para que JSON.stringify no rompa
+    const parsedEtc2 = etc2.map(row => ({
+      ...row,
+      cant_asignaciones: Number(row.cant_asignaciones),
+      cant_mesas: Number(row.cant_mesas),
+      cant_suplentes: Number(row.cant_suplentes)
+    }));
+
+    res.json([etc, parsedEtc2]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error en la consulta' });
+  }
+});
+
+
 router.get('/traerescuelas222222', async (req, res) => {
     try {
         const etc = await pool.query(`
