@@ -958,14 +958,42 @@ router.get('/traerescuelas', async (req, res) => {
 
 })
 router.get('/traerescuelas2', async (req, res) => {
+  try {
+    // Primer array: todas las escuelas
+    const etc = await pool.query('SELECT * FROM escuelas ORDER BY nombre');
 
-
-
-    const etc = await pool.query('select * from escuelas  order by nombre ')
-    const etc2 = await pool.query('select * from escuelas   order by nombre')
+    // Segundo array: solo con campo llena
+    const etc2 = await pool.query(`
+      SELECT 
+        e.id,
+        e.nombre,
+        CASE 
+          WHEN COALESCE(a.cant_asignaciones, 0) >= COALESCE(m.cant_mesas, 0) 
+          THEN 'SI' 
+          ELSE 'NO' 
+        END AS llena
+      FROM escuelas e
+      LEFT JOIN (
+        SELECT escuela, COUNT(*) AS cant_asignaciones
+        FROM asignaciones_fiscales
+        WHERE edicion = 2025
+        GROUP BY escuela
+      ) a ON e.id = a.escuela
+      LEFT JOIN (
+        SELECT id_escuela, COUNT(*) AS cant_mesas
+        FROM mesas_fiscales
+        GROUP BY id_escuela
+      ) m ON e.id = m.id_escuela
+      ORDER BY e.nombre
+    `);
+console.log(etc2);
     res.json([etc, etc2]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error en la consulta' });
+  }
+});
 
-})
 
 router.get('/traerescuelas222222', async (req, res) => {
     try {
