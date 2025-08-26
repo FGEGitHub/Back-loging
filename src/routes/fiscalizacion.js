@@ -962,11 +962,14 @@ router.get('/traerescuelas2', async (req, res) => {
     // Primer array: todas las escuelas
     const etc = await pool.query('SELECT * FROM escuelas ORDER BY nombre');
 
-    // Segundo array: solo con campo llena
+    // Segundo array: escuelas con mapa1, asignaciones, mesas y campo llena
     const etc2 = await pool.query(`
       SELECT 
         e.id,
         e.nombre,
+        e.mapa1,
+        COALESCE(a.cant_asignaciones, 0) AS cant_asignaciones,
+        COALESCE(m.cant_mesas, 0) AS cant_mesas,
         CASE 
           WHEN COALESCE(a.cant_asignaciones, 0) >= COALESCE(m.cant_mesas, 0) 
           THEN 'SI' 
@@ -987,7 +990,14 @@ router.get('/traerescuelas2', async (req, res) => {
       ORDER BY e.nombre
     `);
 
-    res.json([etc, etc2]);
+    // ⚠️ convertir BigInt a Number para que JSON.stringify no rompa
+    const parsedEtc2 = etc2.map(row => ({
+      ...row,
+      cant_asignaciones: Number(row.cant_asignaciones),
+      cant_mesas: Number(row.cant_mesas)
+    }));
+
+    res.json([etc, parsedEtc2]);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error en la consulta' });
