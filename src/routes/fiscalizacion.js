@@ -986,7 +986,7 @@ router.get('/traerescuelas2', async (req, res) => {
       ) m ON e.id = m.id_escuela
       ORDER BY e.nombre
     `);
-console.log(etc2);
+
     res.json([etc, etc2]);
   } catch (error) {
     console.error(error);
