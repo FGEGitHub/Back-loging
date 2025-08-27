@@ -260,33 +260,66 @@ const storage2 = multer.diskStorage({
 const upload2 = multer({ storage2 });
 /////////
 
- router.get('/enviar-mensajes', async (req, res) => {
+router.get('/enviar-mensajes', async (req, res) => {
     try {
-      const registros = await pool.query(`
-            SELECT * FROM inscripciones_fiscales 
-            JOIN (
-                SELECT id AS idp, telefono FROM personas_fiscalizacion
-            ) AS sel ON inscripciones_fiscales.id_persona = sel.idp 
-            WHERE edicion = 2025 and id>1831
-        `)
+        const registros = await pool.query(`
+            SELECT 
+                i.fecha_carga,
+                i.nombre,
+                i.apellido,
+                i.dni,
+                i.dondevotascript,
+                p.telefono
+            FROM marketing.inscripciones_fiscales i
+            LEFT JOIN marketing.escuelas e
+                ON i.dondevotascript = e.nombre
+            LEFT JOIN marketing.personas_fiscalizacion p
+                ON i.dni = p.dni
+            WHERE i.edicion = 2025
+              AND i.estado = 'Pendiente'
+              AND e.nombre IS NULL
+        `);
 
         let enviados = 0;
+
         for (const registro of registros) {
             const telefono = registro.telefono;
 
-            // Normalizar número (solo si tiene al menos 10 dígitos)
             if (telefono && telefono.length >= 10) {
                 const numeroFormateado = `549${telefono.replace(/\D/g, '')}@c.us`;
 
-                const mensaje = `Hola somos del equipo de la CcAri #Lista47. Gracias por tu preinscripción 💚; nos volveremos a comunicar con vos a partir de la semana que viene, una vez publicado el padron definitivo.
-Vamos ctes!
-Juan Pablo Valdes Gobernador 
-Cuqui Calvano Diputado 
+                let mensaje;
+
+                if (registro.dondevotascript === "Sin definir") {
+                    mensaje = `Hola somos del Equipo de Fiscalizacion😊, revisamos y vimos que no figurás en el padrón, por lo que en esta elección no vas a poder fiscalizar. Ojalá podamos contar con vos en las próximas 🙌. ¡Gracias por tus ganas de sumarte!
+
+Lista4️⃣7️⃣💚
+
+#VamosCtes
+Juan Pablo Valdés Gobernador 
+Cuqui Calvano Diputado
 Claudio Polich Intendente 
 Gaby Gauna Concejal`;
+                } else {
+                    mensaje = `Hola somos del Equipo de Fiscalizacion😊, revisamos el padrón y no votas en Corrientes Capital, por lo que en esta elección no vas a poder fiscalizar. Ojalá podamos contar con vos en las próximas 🙌. ¡Gracias por tus ganas de sumarte!
+
+Lista4️⃣7️⃣💚
+
+#VamosCtes
+Juan Pablo Valdés Gobernador 
+Cuqui Calvano Diputado
+Claudio Polich Intendente 
+Gaby Gauna Concejal`;
+                }
+
+                // 👉 Mostrar en consola antes de enviar
+                console.log("🗳️ dondevotascript:", registro.dondevotascript);
+                console.log("📞 Telefono:", telefono);
+                console.log("📩 Mensaje a enviar:", mensaje);
+                console.log("---------------------------------------------------");
 
                 try {
-                    await client.sendMessage(numeroFormateado, mensaje);
+                  await client.sendMessage(numeroFormateado, mensaje);
                     enviados++;
                 } catch (err) {
                     console.error(`❌ Error enviando a ${telefono}`, err.message);
@@ -300,7 +333,6 @@ Gaby Gauna Concejal`;
         res.status(500).send('Error al enviar mensajes.');
     }
 });
- 
 
 
 
