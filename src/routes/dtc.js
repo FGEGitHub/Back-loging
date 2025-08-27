@@ -260,7 +260,7 @@ const storage2 = multer.diskStorage({
 const upload2 = multer({ storage2 });
 /////////    
 
-router.get('/enviar-mensajes', async (req, res) => {
+/* router.get('/enviar-mensajes', async (req, res) => {
     try {
         const registros = await pool.query(`
             SELECT 
@@ -332,7 +332,7 @@ Gaby Gauna Concejal`;
         console.error('Error al enviar mensajes:', error);
         res.status(500).send('Error al enviar mensajes.');
     }
-});
+}); */
 
 
 
