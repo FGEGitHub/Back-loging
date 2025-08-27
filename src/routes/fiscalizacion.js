@@ -898,9 +898,10 @@ router.get('/traerinscripcionesenc/:id', async (req, res) => {
             ) AS selec ON i.dni = selec.dnip
             LEFT JOIN escuelas e ON i.dondevotascript = e.nombre
 
-            WHERE (i.id_encargado IS NULL OR i.id_encargado = 0)
-            AND i.estado = "Pendiente"
-            AND i.edicion = 2025
+            WHERE i.estado = "Pendiente"
+              AND i.edicion = 2025
+              AND i.dondevotascript <> 'Sin definir'  -- 👈 excluye los "Sin definir"
+              AND e.id IS NOT NULL                    -- 👈 excluye los que no matchean con ninguna escuela
 
             ORDER BY i.dondevotascript
         `;
