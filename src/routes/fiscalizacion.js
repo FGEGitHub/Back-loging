@@ -1828,24 +1828,112 @@ router.get('/todaslasasignacionesdeunaescuela/:id', async (req, res,) => {
     console.log(id)
     try {
 
-        estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona, vegano,movilidad,celiaco from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper  left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero, id_escuela as idescc from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on sele.idescc=selec2.idescuela where  id_usuario =? and edicion=2025 order by numero', [id])
+        const estr = await pool.query(`
+            SELECT * 
+            FROM asignaciones_fiscales 
+            JOIN (
+                SELECT dni as dniper, telefono, telefono2, nombre, apellido,id as idpersona, vegano,movilidad,celiaco 
+                FROM personas_fiscalizacion
+            ) as selec1 ON asignaciones_fiscales.dni=selec1.dniper  
+            LEFT JOIN (
+                SELECT id as idinscrip, id_encargado, dondevotascript 
+                FROM inscripciones_fiscales
+            ) as selec3 ON asignaciones_fiscales.id_inscripcion=selec3.idinscrip 
+            LEFT JOIN (
+                SELECT id as idmesa, numero, id_escuela as idescc 
+                FROM mesas_fiscales
+            ) as sele ON asignaciones_fiscales.mesa=sele.idmesa 
+            LEFT JOIN (
+                SELECT id as idescuela, nombre as nombreescuela,id_usuario 
+                FROM escuelas
+            ) as selec2 ON sele.idescc=selec2.idescuela 
+            WHERE id_usuario = ? 
+            AND edicion=2025 
+            ORDER BY numero
+        `, [id])
 
-        cant = await pool.query('select * from mesas_fiscales join (select id_usuario, id as idescuela from escuelas) as sele on mesas_fiscales.id_escuela=sele.idescuela where id_usuario=? and numero not in ("Suplente 1","Suplente 2","Suplente 3","Suplente 4","Suplente 5","Suplente 6","Suplente 7")', [id])
-        const esc = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper  left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero, id_escuela as idescc from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on sele.idescc=selec2.idescuela where  id_usuario =? and edicion=2025', [id])
-        esccuelanombre = await pool.query('select * from escuelas where id_usuario = ? ',[id])
+        const cant = await pool.query(`
+            SELECT * 
+            FROM mesas_fiscales 
+            JOIN (
+                SELECT id_usuario, id as idescuela 
+                FROM escuelas
+            ) as sele ON mesas_fiscales.id_escuela=sele.idescuela 
+            WHERE id_usuario=? 
+            AND numero NOT IN ("Suplente 1","Suplente 2","Suplente 3","Suplente 4","Suplente 5","Suplente 6","Suplente 7")
+        `, [id])
 
+        const esc = await pool.query(`
+            SELECT * 
+            FROM asignaciones_fiscales 
+            JOIN (
+                SELECT dni as dniper, telefono, telefono2, nombre, apellido,id as idpersona 
+                FROM personas_fiscalizacion
+            ) as selec1 ON asignaciones_fiscales.dni=selec1.dniper  
+            LEFT JOIN (
+                SELECT id as idinscrip, id_encargado, dondevotascript 
+                FROM inscripciones_fiscales
+            ) as selec3 ON asignaciones_fiscales.id_inscripcion=selec3.idinscrip 
+            LEFT JOIN (
+                SELECT id as idmesa, numero, id_escuela as idescc 
+                FROM mesas_fiscales
+            ) as sele ON asignaciones_fiscales.mesa=sele.idmesa 
+            LEFT JOIN (
+                SELECT id as idescuela, nombre as nombreescuela,id_usuario 
+                FROM escuelas
+            ) as selec2 ON sele.idescc=selec2.idescuela 
+            WHERE id_usuario = ? 
+            AND edicion=2025
+        `, [id])
 
+        const esccuelanombre = await pool.query('SELECT * FROM escuelas WHERE id_usuario = ?', [id])
 
-        supl = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper  left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero, id_escuela as idescc from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on sele.idescc=selec2.idescuela where  id_usuario =? and numero in ("Suplente 1","Suplente 2","Suplente 3","Suplente 4","Suplente 5","Suplente 6","Suplente 7") and edicion=2025', [id])
-        //console.log(estr, cant.length, supl.length, esc.length)
-        res.json([estr, cant.length, supl.length, esc.length,esccuelanombre])
+        const supl = await pool.query(`
+            SELECT * 
+            FROM asignaciones_fiscales 
+            JOIN (
+                SELECT dni as dniper, telefono, telefono2, nombre, apellido,id as idpersona 
+                FROM personas_fiscalizacion
+            ) as selec1 ON asignaciones_fiscales.dni=selec1.dniper  
+            LEFT JOIN (
+                SELECT id as idinscrip, id_encargado, dondevotascript 
+                FROM inscripciones_fiscales
+            ) as selec3 ON asignaciones_fiscales.id_inscripcion=selec3.idinscrip 
+            LEFT JOIN (
+                SELECT id as idmesa, numero, id_escuela as idescc 
+                FROM mesas_fiscales
+            ) as sele ON asignaciones_fiscales.mesa=sele.idmesa 
+            LEFT JOIN (
+                SELECT id as idescuela, nombre as nombreescuela,id_usuario 
+                FROM escuelas
+            ) as selec2 ON sele.idescc=selec2.idescuela 
+            WHERE id_usuario = ? 
+            AND numero IN ("Suplente 1","Suplente 2","Suplente 3","Suplente 4","Suplente 5","Suplente 6","Suplente 7") 
+            AND edicion=2025
+        `, [id])
+
+        // 🔴 Consulta nueva: los que necesitan traslado
+        const necesitanTraslado = await pool.query(`
+            SELECT asignaciones_fiscales.*, selec1.nombre, selec1.apellido, selec3.dondevotascript, selec2.nombreescuela
+            FROM asignaciones_fiscales
+            JOIN (SELECT dni as dniper, nombre, apellido FROM personas_fiscalizacion) as selec1
+                ON asignaciones_fiscales.dni = selec1.dniper
+            LEFT JOIN (SELECT id as idinscrip, dondevotascript FROM inscripciones_fiscales) as selec3
+                ON asignaciones_fiscales.id_inscripcion = selec3.idinscrip
+            LEFT JOIN (SELECT id as idescuela, nombre as nombreescuela, id_usuario FROM escuelas) as selec2
+                ON asignaciones_fiscales.escuela = selec2.idescuela
+            WHERE id_usuario = ?
+            AND edicion=2025
+            AND selec3.dondevotascript <> selec2.nombreescuela
+        `, [id])
+
+        res.json([estr, cant.length, supl.length, esc.length, esccuelanombre, necesitanTraslado.length, necesitanTraslado])
     } catch (error) {
         console.log(error)
         res.send('algo salio mal')
     }
-
-
 })
+
 router.get('/todaslasasignacionesparaasistencia/:id', async (req, res,) => {
     const id = req.params.id
     console.log(id)
