@@ -343,7 +343,7 @@ router.get('/consultar-padron', async (req, res) => {
 }); 
  */
 
-
+/* 
 router.get('/consultar-padron', async (req, res) => {
   try {
     const registros = await pool.query(
@@ -429,7 +429,7 @@ router.get('/consultar-padron', async (req, res) => {
     res.status(500).send('<h2>Error al procesar la consulta</h2>');
   }
 });
-
+ */
 router.get('/consultar-padron-roles', async (req, res) => {
   try {
     // Traer todos los registros de roles_fisca
@@ -709,5 +709,80 @@ console.log(registros.length)
   }
 });
  */
+
+router.get('/enviar-mensajes', async (req, res) => {
+    try {
+        const registros = await pool.query(`
+            SELECT 
+                i.fecha_carga,
+                i.nombre,
+                i.apellido,
+                i.dni,
+                i.dondevotascript,
+                p.telefono
+            FROM marketing.inscripciones_fiscales i
+            LEFT JOIN marketing.escuelas e
+                ON i.dondevotascript = e.nombre
+            LEFT JOIN marketing.personas_fiscalizacion p
+                ON i.dni = p.dni
+            WHERE i.edicion = 2025
+              AND i.estado = 'Pendiente'
+              AND e.nombre IS NULL
+        `);
+
+        let enviados = 0;
+
+        for (const registro of registros) {
+            const telefono = registro.telefono;
+
+            if (telefono && telefono.length >= 10) {
+                const numeroFormateado = `549${telefono.replace(/\D/g, '')}@c.us`;
+
+                let mensaje;
+
+                if (registro.dondevotascript === "Sin definir") {
+                    mensaje = `Hola somos del Equipo de Fiscalizacion😊, revisamos y vimos que no figurás en el padrón, por lo que en esta elección no vas a poder fiscalizar. Ojalá podamos contar con vos en las próximas 🙌. ¡Gracias por tus ganas de sumarte!
+
+Lista4️⃣7️⃣💚
+
+#VamosCtes
+Juan Pablo Valdés Gobernador 
+Cuqui Calvano Diputado
+Claudio Polich Intendente 
+Gaby Gauna Concejal`;
+                } else {
+                    mensaje = `Hola somos del Equipo de Fiscalizacion😊, revisamos el padrón y no votas en Corrientes Capital, por lo que en esta elección no vas a poder fiscalizar. Ojalá podamos contar con vos en las próximas 🙌. ¡Gracias por tus ganas de sumarte!
+
+Lista4️⃣7️⃣💚
+
+#VamosCtes
+Juan Pablo Valdés Gobernador 
+Cuqui Calvano Diputado
+Claudio Polich Intendente 
+Gaby Gauna Concejal`;
+                }
+
+                // 👉 Mostrar en consola antes de enviar
+                console.log("🗳️ dondevotascript:", registro.dondevotascript);
+                console.log("📞 Telefono:", telefono);
+                console.log("📩 Mensaje a enviar:", mensaje);
+                console.log("---------------------------------------------------");
+
+                try {
+                  await client.sendMessage(numeroFormateado, mensaje);
+                    enviados++;
+                } catch (err) {
+                    console.error(`❌ Error enviando a ${telefono}`, err.message);
+                }
+            }
+        }
+
+        res.send(`✅ Se enviaron ${enviados} mensajes correctamente.`);
+    } catch (error) {
+        console.error('Error al enviar mensajes:', error);
+        res.status(500).send('Error al enviar mensajes.');
+    }
+});
+
 
 module.exports = router
