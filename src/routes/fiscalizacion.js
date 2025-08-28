@@ -898,14 +898,14 @@ router.get('/traerinscripcionesenc/:id', async (req, res) => {
             ) AS selec ON i.dni = selec.dnip
             LEFT JOIN escuelas e ON i.dondevotascript = e.nombre
 
-            WHERE i.estado = "Pendiente"
+            WHERE (i.estado = "Pendiente" OR i.estado = "No contestado")
               AND i.edicion = 2025
-           
+              AND i.dondevotascript <> 'Sin definir'  -- 👈 excluye los "Sin definir"
+              AND e.id IS NOT NULL                    -- 👈 excluye los que no matchean con ninguna escuela
 
             ORDER BY i.dondevotascript
         `;
-  /*  AND i.dondevotascript <> 'Sin definir'  -- 👈 excluye los "Sin definir"
-              AND e.id IS NOT NULL                    -- 👈 excluye los que no matchean con ninguna escuela */
+
         const result = await pool.query(query, [id]);
 
         // Convierte BigInt a Number
