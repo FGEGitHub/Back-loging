@@ -901,11 +901,11 @@ router.get('/traerinscripcionesenc/:id', async (req, res) => {
             WHERE i.estado = "Pendiente"
               AND i.edicion = 2025
            
-                             -- 👈 excluye los que no matchean con ninguna escuela
 
             ORDER BY i.dondevotascript
         `;
-
+  /*  AND i.dondevotascript <> 'Sin definir'  -- 👈 excluye los "Sin definir"
+              AND e.id IS NOT NULL                    -- 👈 excluye los que no matchean con ninguna escuela */
         const result = await pool.query(query, [id]);
 
         // Convierte BigInt a Number
