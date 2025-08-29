@@ -1579,10 +1579,48 @@ router.get('/estadisticas1', async (req, res,) => {
 
     let celiaco = await pool.query('select * from asignaciones_fiscales join (select dni as dnip,celiaco from personas_fiscalizacion) as selec on asignaciones_fiscales.dni=selec.dnip where celiaco="Si"and edicion=2025')
     let vegano = await pool.query('select * from asignaciones_fiscales join (select dni as dnip,vegano from personas_fiscalizacion) as selec on asignaciones_fiscales.dni=selec.dnip where vegano="Si"and edicion=2025')
+let suplentesCeliacos = await pool.query(`
+    SELECT 
+        asignaciones_fiscales.id AS id_asignacion,
+        asignaciones_fiscales.dni,
+        asignaciones_fiscales.mesa,
+        mesas_fiscales.numero,
+        mesas_fiscales.id AS id_mesa,
+        mesas_fiscales.numero AS numero_mesa,
+        selec.celiaco
+    FROM asignaciones_fiscales 
+    JOIN (SELECT dni AS dnip, celiaco FROM personas_fiscalizacion) AS selec 
+        ON asignaciones_fiscales.dni = selec.dnip
+    JOIN mesas_fiscales 
+        ON asignaciones_fiscales.mesa = mesas_fiscales.id
+    WHERE selec.celiaco = "Si" 
+      AND asignaciones_fiscales.edicion = 2025
+      AND mesas_fiscales.numero LIKE 'Suplente %'
+`);
+
+let suplentesVeganos = await pool.query(`
+    SELECT 
+        asignaciones_fiscales.id AS id_asignacion,
+        asignaciones_fiscales.dni,
+        asignaciones_fiscales.mesa,
+        mesas_fiscales.numero,
+        mesas_fiscales.id AS id_mesa,
+        mesas_fiscales.numero AS numero_mesa,
+        selec.vegano
+    FROM asignaciones_fiscales 
+    JOIN (SELECT dni AS dnip, vegano FROM personas_fiscalizacion) AS selec 
+        ON asignaciones_fiscales.dni = selec.dnip
+    JOIN mesas_fiscales 
+        ON asignaciones_fiscales.mesa = mesas_fiscales.id
+    WHERE selec.vegano = "Si" 
+      AND asignaciones_fiscales.edicion = 2025
+      AND mesas_fiscales.numero LIKE 'Suplente %'
+`);
+
 
     let contactado = await pool.query('select * from inscripciones_fiscales where estado !="Pendiente"and edicion=2025')
     let asigna = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales.mesa=selec.idmesa where numero != "Suplente 1" and numero != "Suplente 2" and numero != "Suplente 3" and numero != "Suplente 4" and numero != "Suplente 5"and numero != "Suplente 6"  and numero != "Suplente 7" and edicion=2025')
-    let asigna2 = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales.mesa=selec.idmesa where numero = "Suplente 1" or numero = "Suplente 2" or numero = "Suplente 3" or numero = "Suplente 4" or numero = "Suplente 5" or numero = "Suplente 6" or numero = "Suplente 7" and edicion=2025')
+    let asigna2 = await pool.query('select * from asignaciones_fiscales join (select id as idmesa, numero from mesas_fiscales) as selec on asignaciones_fiscales.mesa=selec.idmesa where (numero = "Suplente 1" or numero = "Suplente 2" or numero = "Suplente 3" or numero = "Suplente 4" or numero = "Suplente 5" or numero = "Suplente 6" or numero = "Suplente 7") and edicion=2025')
 
     let recha = await pool.query('select * from inscripciones_fiscales where estado ="Rechazado" and edicion=2025')
     let nocont = await pool.query('select * from inscripciones_fiscales where estado ="No contestado" and edicion=2025')
@@ -1641,6 +1679,8 @@ router.get('/estadisticas1', async (req, res,) => {
         recha: recha.length,
         nocont: nocont.length,
         celiaco: celiaco.length,
+        suplentesCeliacos: suplentesCeliacos.length,
+        suplentesVeganos: suplentesVeganos.length,
         vegano: vegano.length,
         pend: pend.length
 
