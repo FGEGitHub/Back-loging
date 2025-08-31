@@ -422,7 +422,7 @@ router.get('/consultar-padron', async (req, res) => {
 }); 
  */
 
-
+/* 
 router.get('/consultar-padron', async (req, res) => {
   try {
     const registros = await pool.query(
@@ -507,7 +507,7 @@ router.get('/consultar-padron', async (req, res) => {
     console.error('Error en /consultar-padron:', error);
     res.status(500).send('<h2>Error al procesar la consulta</h2>');
   }
-});
+}); */
  
 router.get('/consultar-padron-roles', async (req, res) => {
   try {
