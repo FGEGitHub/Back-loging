@@ -2358,8 +2358,62 @@ router.get('/todaspaso4', async (req, res,) => {
 
 })
 
+router.post("/guardarSeleccion", async (req, res) => {
+  const { mesa, asignacion, nombreLibre } = req.body;
+
+  try {
+    // Buscar la asignación por mesa
+    const [filaMesa] = await pool.query(
+      "SELECT * FROM asignaciones_fiscales WHERE mesa = ?",
+      [mesa]
+    );
+
+    if (!filaMesa || filaMesa.length === 0) {
+      return res.status(404).json({ error: "No se encontró asignación para esa mesa" });
+    }
+
+    let fiscalizaValor = null;
+
+    if (nombreLibre && nombreLibre.trim() !== "") {
+      // Si existe nombreLibre, usarlo directamente
+      fiscalizaValor = nombreLibre;
+    } else if (asignacion) {
+      // Buscar datos de la persona vinculada a la asignación
+      const [persona] = await pool.query(
+        `
+        SELECT p.nombre, p.apellido, p.dni
+        FROM asignaciones_fiscales a
+        JOIN personas_fiscalizacion p ON a.dni = p.dni
+        WHERE a.id = ?
+        `,
+        [asignacion]
+      );
+
+      if (persona && persona.length > 0) {
+        const { nombre, apellido, dni } = persona[0];
+        fiscalizaValor = `${nombre} ${apellido} ${dni}`;
+      }
+    }
+
+    if (!fiscalizaValor) {
+      return res.status(400).json({ error: "No se pudo determinar fiscaliza" });
+    }
+
+    // Actualizar el campo fiscaliza en asignaciones_fiscales
+    await pool.query(
+      "UPDATE asignaciones_fiscales SET fiscaliza = ? WHERE mesa = ?",
+      [fiscalizaValor, mesa]
+    );
+
+    res.json({ success: true, fiscaliza: fiscalizaValor });
+  } catch (error) {
+    console.error("Error en guardarSeleccion:", error);
+    res.status(500).json({ error: "Error en el servidor" });
+  }
+});
 
 
+        
 router.post("/modificardondevota", async (req, res) => {
     const { id_donde_vota, id } = req.body
     try {
