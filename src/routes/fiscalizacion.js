@@ -1982,7 +1982,7 @@ router.get('/todaslasasignacionesparaasistencia/:id', async (req, res,) => {
 
         estr = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona, vegano,movilidad,celiaco from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper  left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero, id_escuela as idescc from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on sele.idescc=selec2.idescuela where  id_usuario =? and edicion=2025 order by numero', [id])
 
-        cant = await pool.query('select * from mesas_fiscales join (select id_usuario, id as idescuela from escuelas) as sele on mesas_fiscales.id_escuela=sele.idescuela where id_usuario=? ', [id])
+        cant = await pool.query('select * from mesas_fiscales join (select id_usuario, id as idescuela from escuelas) as sele on mesas_fiscales.id_escuela=sele.idescuela left join (select mesa as mesaa , fiscaliza, edicion from asignaciones_fiscales where edicion=2025) as sel on mesas_fiscales.id=sel.mesaa where id_usuario=? ', [id])
         const esc = await pool.query('select * from asignaciones_fiscales join (select dni as dniper,telefono,telefono2, nombre, apellido,id as idpersona from personas_fiscalizacion) as selec1 on asignaciones_fiscales.dni=selec1.dniper  left join (select id as idinscrip, id_encargado from inscripciones_fiscales ) as selec3 on asignaciones_fiscales.id_inscripcion=selec3.idinscrip left join (select id as idmesa, numero, id_escuela as idescc from mesas_fiscales) as sele on asignaciones_fiscales.mesa=sele.idmesa left join (select id as idescuela, nombre as nombreescuela,id_usuario from escuelas) as selec2 on sele.idescc=selec2.idescuela where  id_usuario =? and edicion=2025', [id])
         esccuelanombre = await pool.query('select * from escuelas where id_usuario = ? ',[id])
 
@@ -2357,61 +2357,69 @@ router.get('/todaspaso4', async (req, res,) => {
     res.json([estr])
 
 })
-
 router.post("/guardarSeleccion", async (req, res) => {
-  const { mesa, asignacion, nombreLibre } = req.body;
+  const { usuario, asignaciones } = req.body;
+
+  if (!asignaciones || asignaciones.length === 0) {
+    return res.status(400).json({ error: "No se recibieron asignaciones" });
+  }
 
   try {
-    // Buscar la asignación por mesa
-    const [filaMesa] = await pool.query(
-      "SELECT * FROM asignaciones_fiscales WHERE mesa = ?",
-      [mesa]
-    );
+    for (const item of asignaciones) {
+      const { mesa, asignacion, nombreLibre } = item;
 
-    if (!filaMesa || filaMesa.length === 0) {
-      return res.status(404).json({ error: "No se encontró asignación para esa mesa" });
-    }
+      console.log("Procesando mesa:", mesa, "asignacion:", asignacion, "nombreLibre:", nombreLibre);
 
-    let fiscalizaValor = null;
-
-    if (nombreLibre && nombreLibre.trim() !== "") {
-      // Si existe nombreLibre, usarlo directamente
-      fiscalizaValor = nombreLibre;
-    } else if (asignacion) {
-      // Buscar datos de la persona vinculada a la asignación
-      const [persona] = await pool.query(
-        `
-        SELECT p.nombre, p.apellido, p.dni
-        FROM asignaciones_fiscales a
-        JOIN personas_fiscalizacion p ON a.dni = p.dni
-        WHERE a.id = ?
-        `,
-        [asignacion]
+      // buscar mesa
+      const filaMesa = await pool.query(
+        "SELECT * FROM asignaciones_fiscales WHERE mesa = ?",
+        [mesa]
       );
 
-      if (persona && persona.length > 0) {
-        const { nombre, apellido, dni } = persona[0];
-        fiscalizaValor = `${nombre} ${apellido} ${dni}`;
+      if (!filaMesa || filaMesa.length === 0) {
+        console.log("No se encontró asignación para la mesa:", mesa);
+        continue;
+      }
+
+      let fiscalizaValor = null;
+
+      if (nombreLibre && nombreLibre.trim() !== "") {
+        fiscalizaValor = nombreLibre;
+        console.log("Se usará nombreLibre:", fiscalizaValor);
+      } else if (asignacion) {
+        const persona = await pool.query(
+          `SELECT p.nombre, p.apellido, p.dni
+           FROM asignaciones_fiscales a
+           JOIN personas_fiscalizacion p ON a.dni = p.dni
+           WHERE a.id = ?`,
+          [asignacion]
+        );
+        if (persona.length > 0) {
+          const { nombre, apellido, dni } = persona[0];
+          fiscalizaValor = `${nombre} ${apellido} ${dni}`;
+          console.log("Se usará persona de la DB:", fiscalizaValor);
+        } else {
+          console.log("No se encontró persona para asignacion:", asignacion);
+        }
+      }
+
+      if (fiscalizaValor) {
+        console.log("Guardando en mesa", mesa, "valor:", fiscalizaValor);
+        await pool.query(
+          "UPDATE asignaciones_fiscales SET fiscaliza = ? WHERE mesa = ?",
+          [fiscalizaValor, mesa]
+        );
+      } else {
+        console.log("No se pudo determinar fiscaliza para mesa:", mesa);
       }
     }
 
-    if (!fiscalizaValor) {
-      return res.status(400).json({ error: "No se pudo determinar fiscaliza" });
-    }
-
-    // Actualizar el campo fiscaliza en asignaciones_fiscales
-    await pool.query(
-      "UPDATE asignaciones_fiscales SET fiscaliza = ? WHERE mesa = ?",
-      [fiscalizaValor, mesa]
-    );
-
-    res.json({ success: true, fiscaliza: fiscalizaValor });
-  } catch (error) {
-    console.error("Error en guardarSeleccion:", error);
+    res.json({ success: true });
+  } catch (e) {
+    console.error("Error en guardarSeleccion:", e);
     res.status(500).json({ error: "Error en el servidor" });
   }
 });
-
 
         
 router.post("/modificardondevota", async (req, res) => {
