@@ -1998,6 +1998,89 @@ router.get('/todaslasasignacionesparaasistencia/:id', async (req, res,) => {
 
 
 })
+router.get('/vermesasa', async (req, res) => {
+  try {
+    const registros = await pool.query(`
+      SELECT 
+          e.circuito,
+          e.nombre AS escuela_nombre,
+          m.numero AS mesa_numero,
+          a.fiscaliza
+      FROM asignaciones_fiscales a
+      JOIN mesas_fiscales m ON a.mesa = m.id
+      JOIN escuelas e ON a.escuela = e.id
+      WHERE a.edicion = 2025
+      ORDER BY 
+          CAST(e.circuito AS UNSIGNED),
+          e.nombre,
+          CAST(m.numero AS UNSIGNED),
+          m.numero;
+    `);
+
+    // Construir tabla en HTML
+    let tabla = `
+      <html>
+      <head>
+        <style>
+          table {
+            border-collapse: collapse;
+            width: 100%;
+          }
+          th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+          }
+          th {
+            background-color: #f4f4f4;
+          }
+          tr:nth-child(even) {
+            background-color: #f9f9f9;
+          }
+        </style>
+      </head>
+      <body>
+        <h2>Mesas por Escuela</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Circuito</th>
+              <th>Escuela</th>
+              <th>Mesa</th>
+              <th>Fiscaliza</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    registros.forEach(r => {
+      tabla += `
+        <tr>
+          <td>${r.circuito}</td>
+          <td>${r.escuela_nombre}</td>
+          <td>${r.mesa_numero}</td>
+          <td>${r.fiscaliza}</td>
+        </tr>
+      `;
+    });
+
+    tabla += `
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    res.send(tabla); // devolvemos directamente el HTML
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("<h3>Error al obtener asistencias por escuela</h3>");
+  }
+});
+
+
+
 router.get('/traerasistenciasporescuela/', async (req, res,) => {
 
     try {
