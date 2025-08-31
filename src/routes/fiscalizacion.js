@@ -2080,6 +2080,130 @@ router.get('/vermesasa', async (req, res) => {
 });
 
 
+router.get('/vermesasa2', async (req, res) => {
+  try {
+    // Consulta detalle
+    const registros = await pool.query(`
+      SELECT 
+          e.circuito,
+          e.nombre AS escuela_nombre,
+          m.numero AS mesa_numero,
+          a.fiscaliza
+      FROM asignaciones_fiscales a
+      JOIN mesas_fiscales m ON a.mesa = m.id
+      JOIN escuelas e ON a.escuela = e.id
+      WHERE a.edicion = 2025
+      ORDER BY 
+          CAST(e.circuito AS UNSIGNED),
+          e.nombre,
+          CAST(m.numero AS UNSIGNED),
+          m.numero;
+    `);
+
+    // Consulta resumen (agrupado por escuela, solo fiscaliza distinto de "Sin determinar")
+    const resumen = await pool.query(`
+      SELECT 
+          e.circuito,
+          e.nombre AS escuela_nombre,
+          COUNT(*) AS cantidad_mesas
+      FROM asignaciones_fiscales a
+      JOIN mesas_fiscales m ON a.mesa = m.id
+      JOIN escuelas e ON a.escuela = e.id
+      WHERE a.edicion = 2025
+        AND a.fiscaliza <> 'Sin determinar'
+      GROUP BY e.circuito, e.nombre
+      ORDER BY CAST(e.circuito AS UNSIGNED), e.nombre;
+    `);
+
+    // Construir HTML
+    let tabla = `
+      <html>
+      <head>
+        <style>
+          table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 30px;
+          }
+          th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+          }
+          th {
+            background-color: #f4f4f4;
+          }
+          tr:nth-child(even) {
+            background-color: #f9f9f9;
+          }
+        </style>
+      </head>
+      <body>
+        <h2>Resumen por Escuela (Fiscaliza ≠ "Sin determinar")</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Circuito</th>
+              <th>Escuela</th>
+              <th>Cantidad de Mesas</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    resumen.forEach(r => {
+      tabla += `
+        <tr>
+          <td>${r.circuito}</td>
+          <td>${r.escuela_nombre}</td>
+          <td>${r.cantidad_mesas}</td>
+        </tr>
+      `;
+    });
+
+    tabla += `
+          </tbody>
+        </table>
+
+        <h2>Mesas por Escuela</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Circuito</th>
+              <th>Escuela</th>
+              <th>Mesa</th>
+              <th>Fiscaliza</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    registros.forEach(r => {
+      tabla += `
+        <tr>
+          <td>${r.circuito}</td>
+          <td>${r.escuela_nombre}</td>
+          <td>${r.mesa_numero}</td>
+          <td>${r.fiscaliza}</td>
+        </tr>
+      `;
+    });
+
+    tabla += `
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    res.send(tabla);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("<h3>Error al obtener asistencias por escuela</h3>");
+  }
+});
+
 
 router.get('/traerasistenciasporescuela/', async (req, res,) => {
 
