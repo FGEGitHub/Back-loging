@@ -2323,7 +2323,7 @@ if(turrnoo[0].id_persona != undefined){
     try {
       await client.sendMessage(telefono, mensaje);
     } catch (error) {
-       // console.log(error);
+      console.log(error);
     }
 
 
