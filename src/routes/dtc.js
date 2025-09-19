@@ -69,7 +69,7 @@ const client = new Client({
 
  // prueba recepcion de mensaje 
 const estados = {}; // Guarda en qué estado está cada número
-
+/* 
 client.on('message', async (message) => {
     try {
         if (!message || !message.body) return;
@@ -224,7 +224,7 @@ if (texto === '6') {
     } catch (error) {
         console.error('Error procesando el mensaje:', error);
     }
-});
+}); */
 
 
 
