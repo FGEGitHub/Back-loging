@@ -17,7 +17,6 @@ const { MessageMedia } = require("whatsapp-web.js");
 ///import { format } from "date-fns"; // si lo querés más cómodo
 ////solicitado== se suma al partido
 ////convocado,= s enevia a un juagdor la invitacion
-import personalidades from "./personalidades.json" assert { type: "json" };
 function detectarPorKeywords(texto) {
   const lower = texto.toLowerCase();
 
