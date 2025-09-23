@@ -53,7 +53,15 @@ const t = texto.toLowerCase();
   }
   return null; // no detectado por keywords
 }
-  
+  function normalizarTexto(str) {
+  return str
+    .toLowerCase()
+    .normalize("NFD") // quita acentos
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 let fechaISO = "";
 const meses = {
   enero: 0,
@@ -1342,21 +1350,35 @@ async function handleTourismAdvisor(numero, texto, message) {
 
 
 
-  //////info de evento 
-  if (texto.startsWith("masinfoevento_")) {
-    const url = texto.replace("masinfoevento_", "").trim();
+if (/^mas\s*info/i.test(normalizarTexto(texto))) {
+  console.log("➡ Entra en MAS INFO");
 
-    const detalle = await getEventoDetalle(url); // Función que scrapea el detalle del evento
-    if (!detalle) {
-      await message.reply("⚠️ No pude obtener más información del evento.");
-      return;
-    }
+  const query = normalizarTexto(texto).replace(/^mas\s*info\s*/, "");
+  console.log("query normalizado:", query);
 
-    await message.reply(
-      `🎶 *${detalle.titulo}*\n📅 ${detalle.fecha}\n\n${detalle.descripcion}\n\n🔗 ${detalle.url}`
-    );
+  const eventosGuardados = memoriaEventos[numero] || [];
+  console.log("eventosGuardados:", eventosGuardados.map(e => e.titulo));
+
+  const evento = eventosGuardados.find(e =>
+    normalizarTexto(e.titulo).includes(query)
+  );
+
+  if (!evento) {
+    await message.reply("⚠️ No encontré un evento con ese nombre. Probá escribirlo de nuevo o pedir la lista de eventos.");
     return;
   }
+ console.log("evento",evento)
+  const detalle = await getEventoDetalle(evento.enlace);
+  if (!detalle) {
+    await message.reply("⚠️ No pude obtener más información del evento.");
+    return;
+  }
+
+  await message.reply(
+    `🎶 *${detalle.titulo}*\n📅 ${detalle.fecha}\n\n${detalle.descripcion}\n\n🔗 ${evento.enlace}`
+  );
+  return;
+}
 
 
   // ================== DÓNDE COMER ==================
@@ -1406,24 +1428,27 @@ async function handleTourismAdvisor(numero, texto, message) {
   }
 
   // ================== EVENTOS ==================
-  if (consulta.intencion === "turismo_general") {
-    await message.reply("⏳ Estoy buscando los próximos eventos en Corrientes...");
+if (consulta.intencion === "turismo_general") {
+  await message.reply("⏳ Estoy buscando los próximos eventos en Corrientes...");
 
-    const eventos = await getEventosCorrientes();
-    if (!eventos.length) {
-      await message.reply("⚠️ No pude obtener eventos en este momento.");
-      return;
-    }
-
-    // Texto principal con todos los eventos
-    let textoMensaje = "🎉 Próximos eventos en Corrientes:\n\n";
-    eventos.forEach((evento, idx) => {
-      textoMensaje += `${idx + 1}. *${evento.titulo}*\n📅 ${evento.fecha}\n📍 ${evento.lugar}\nPresiona aquí: masinfoevento ${idx + 1}\n\n`;
-    });
-
-    await message.reply(textoMensaje);
+  const eventos = await getEventosCorrientes();
+  if (!eventos.length) {
+    await message.reply("⚠️ No pude obtener eventos en este momento.");
     return;
   }
+
+  // 🔹 Guardamos en memoria para consultas posteriores
+  memoriaEventos[numero] = eventos;
+
+  // Texto principal con todos los eventos
+  let textoMensaje = "🎉 Próximos eventos en Corrientes:\n\n";
+  eventos.forEach((evento, idx) => {
+    textoMensaje += `${idx + 1}. *${evento.titulo}*\n📅 ${evento.fecha}\n📍 ${evento.lugar}\n👉 Escribí: mas info ${evento.titulo}\n\n`;
+  });
+
+  await message.reply(textoMensaje);
+  return;
+}
 
 
   // ================== MÁS INFO EVENTO ==================
@@ -1510,7 +1535,7 @@ if (consulta.intencion === "otra_cosa") {
   // 🧠 Si no coincide con un lugar → uso de LLM con GROQ
   const systemPersona =
     "Sos un bot especializado  en Turismo nacido y criado en Corrientes, Argentina. habla como correntino pero no exageres con los terminos ni modismo " +
-    "Sabés todo sobre turismo local. No inventes datos. " +
+    "Sabés todo sobre turismo local. No inventes datos. Verifica los datos de la ciudad de corrientes capital argentina " +
     "Si el usuario pide consejos, recomendale preguntar sobre dónde comer o qué eventos hay."+
     "Intenta recomendarle que pida lugares para comer o eventos. " +"Usa emojis en tus respuestas y habla de forma coloquial, como un correntino más."+"Tu creador es el desarrollador de software Pipao";
 
@@ -1525,6 +1550,7 @@ if (consulta.intencion === "otra_cosa") {
 // ================== SCRAPER DETALLE EVENTO ==================
 async function getEventoDetalle(url) {
   try {
+    console.log(url)
     const { data } = await axios.get(url);
     const $ = cheerio.load(data);
 
@@ -1584,7 +1610,8 @@ async function getEventosCorrientes() {
 
       const descripcion = $(el).find(".tribe-events-list-event-description").text().trim() || "Sin descripción";
 
-      const enlace = $(el).find(".tribe-events-read-more").text().trim() || "Sin enlace";
+      const enlace = $(el).find(".tribe-events-read-more").attr("href")?.trim() || "Sin enlace";
+
 
       eventos.push({
         titulo,
