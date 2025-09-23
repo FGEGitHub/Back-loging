@@ -17,7 +17,7 @@ const { MessageMedia } = require("whatsapp-web.js");
 ///import { format } from "date-fns"; // si lo querés más cómodo
 ////solicitado== se suma al partido
 ////convocado,= s enevia a un juagdor la invitacion
-import personalidades from "./personalidades.json" assert { type: "json" };
+
 function detectarPorKeywords(texto) {
   const lower = texto.toLowerCase();
 
@@ -297,7 +297,7 @@ async function getPsicologoIdByTelefono(telefono) {
 
 /// 2. Analizar consulta con IA → JSON estructurado
 // =======================
-/* async function analizarConsultaTurismo(texto) {
+async function analizarConsultaTurismo(texto) {
   const prompt = `
 Eres un Licenciado en Turismo de Corrientes Capital, Argentina. Tambien un interprete de consultas, Tu tarea es interpretar consultas turísticas (incluso si están escritas con modismos o lenguaje coloquial).
 
@@ -346,7 +346,7 @@ Respuesta:
     return { intencion: "turismo_general" };
   }
 }
- */
+
 
 
 
@@ -1314,7 +1314,7 @@ client.on("message", async (message) => {
   }
 });
 
-/* 
+
 
 async function analizarConsultaTurismo(texto) {
   const prompt = `
@@ -1351,7 +1351,7 @@ Respuesta:
   } catch {
     return { intencion: "otra_cosa" };
   }
-} */
+}
 // 📌 Memoria temporal de eventos por usuario (teléfono)
 const memoriaEventos = {};
 
@@ -1524,21 +1524,6 @@ if (consulta.intencion === "chamame") {
   await message.reply(infoChamame);
   return;
 }
-
-  const persona = buscarPersonalidad(texto);
-  if (persona) {
-    const respuesta =
-      `👤 *${persona.nombre}*\n` +
-      `📝 ${persona.descripcion}\n` +
-      (persona.rol ? `📌 Rol: ${persona.rol}\n` : "") +
-      (persona.edad ? `🎂 Edad: ${persona.edad} años\n` : "");
-    await message.reply(respuesta);
-    return; // ✅ cortamos el flujo aquí
-  }
-
-
-
-
   // ================== SALUDO / OTRA COSA ==================
 if (consulta.intencion === "otra_cosa") {
   // 🔎 Buscar si coincide con un lugar específico
@@ -1935,26 +1920,6 @@ Respuesta:
 
 
 
-function buscarPersonalidad(texto) {
-  const normalizado = texto.toLowerCase();
-
-  return personalidades.find(p =>
-    normalizado.includes(p.nombre.toLowerCase().split(" ")[0]) || // primer nombre
-    normalizado.includes(p.nombre.toLowerCase())                  // nombre completo
-  );
-}
-
-// Uso en el flujo
-const persona = buscarPersonalidad(texto);
-if (persona) {
-  const respuesta =
-    `👤 *${persona.nombre}*\n` +
-    `📝 ${persona.descripcion}\n` +
-    (persona.rol ? `📌 Rol: ${persona.rol}\n` : "") +
-    (persona.edad ? `🎂 Edad: ${persona.edad} años\n` : "");
-  await message.reply(respuesta);
-  return;
-}
 
 ////////////////////
 
