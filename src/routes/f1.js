@@ -17,6 +17,7 @@ const { MessageMedia } = require("whatsapp-web.js");
 ///import { format } from "date-fns"; // si lo querés más cómodo
 ////solicitado== se suma al partido
 ////convocado,= s enevia a un juagdor la invitacion
+import personalidades from "./personalidades.json" assert { type: "json" };
 function detectarPorKeywords(texto) {
   const lower = texto.toLowerCase();
 
@@ -1359,10 +1360,11 @@ async function handleTourismAdvisor(numero, texto, message) {
 
 
 
-if (/^mas\s*info/i.test(normalizarTexto(texto))) {
+if (/^(mas\s*info|informacion|info)/i.test(normalizarTexto(texto))) {
   console.log("➡ Entra en MAS INFO");
 
-  const query = normalizarTexto(texto).replace(/^mas\s*info\s*/, "");
+  const query = normalizarTexto(texto)
+    .replace(/^(mas\s*info|informacion|info)\s*/, ""); // borra el prefijo
   console.log("query normalizado:", query);
 
   const eventosGuardados = memoriaEventos[numero] || [];
@@ -1376,7 +1378,8 @@ if (/^mas\s*info/i.test(normalizarTexto(texto))) {
     await message.reply("⚠️ No encontré un evento con ese nombre. Probá escribirlo de nuevo o pedir la lista de eventos.");
     return;
   }
- console.log("evento",evento)
+
+  console.log("evento", evento);
   const detalle = await getEventoDetalle(evento.enlace);
   if (!detalle) {
     await message.reply("⚠️ No pude obtener más información del evento.");
@@ -1384,7 +1387,8 @@ if (/^mas\s*info/i.test(normalizarTexto(texto))) {
   }
 
   await message.reply(
-    `🎶 *${detalle.titulo}*\n📅 ${detalle.fecha}\n\n${detalle.descripcion}\n\n🔗 ${evento.enlace}`
+    `🎶 *${detalle.titulo}*\n📅 ${detalle.fecha}\n\n${detalle.descripcion}`,
+    { media: { url: detalle.imagen } } // 👈 adjunta la imagen
   );
   return;
 }
@@ -1520,6 +1524,21 @@ if (consulta.intencion === "chamame") {
   await message.reply(infoChamame);
   return;
 }
+
+  const persona = buscarPersonalidad(texto);
+  if (persona) {
+    const respuesta =
+      `👤 *${persona.nombre}*\n` +
+      `📝 ${persona.descripcion}\n` +
+      (persona.rol ? `📌 Rol: ${persona.rol}\n` : "") +
+      (persona.edad ? `🎂 Edad: ${persona.edad} años\n` : "");
+    await message.reply(respuesta);
+    return; // ✅ cortamos el flujo aquí
+  }
+
+
+
+  
   // ================== SALUDO / OTRA COSA ==================
 if (consulta.intencion === "otra_cosa") {
   // 🔎 Buscar si coincide con un lugar específico
@@ -1916,6 +1935,26 @@ Respuesta:
 
 
 
+function buscarPersonalidad(texto) {
+  const normalizado = texto.toLowerCase();
+
+  return personalidades.find(p =>
+    normalizado.includes(p.nombre.toLowerCase().split(" ")[0]) || // primer nombre
+    normalizado.includes(p.nombre.toLowerCase())                  // nombre completo
+  );
+}
+
+// Uso en el flujo
+const persona = buscarPersonalidad(texto);
+if (persona) {
+  const respuesta =
+    `👤 *${persona.nombre}*\n` +
+    `📝 ${persona.descripcion}\n` +
+    (persona.rol ? `📌 Rol: ${persona.rol}\n` : "") +
+    (persona.edad ? `🎂 Edad: ${persona.edad} años\n` : "");
+  await message.reply(respuesta);
+  return;
+}
 
 ////////////////////
 
