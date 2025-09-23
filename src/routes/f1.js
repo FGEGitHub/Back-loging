@@ -297,7 +297,7 @@ async function getPsicologoIdByTelefono(telefono) {
 
 /// 2. Analizar consulta con IA → JSON estructurado
 // =======================
-async function analizarConsultaTurismo(texto) {
+/* async function analizarConsultaTurismo(texto) {
   const prompt = `
 Eres un Licenciado en Turismo de Corrientes Capital, Argentina. Tambien un interprete de consultas, Tu tarea es interpretar consultas turísticas (incluso si están escritas con modismos o lenguaje coloquial).
 
@@ -346,7 +346,7 @@ Respuesta:
     return { intencion: "turismo_general" };
   }
 }
-
+ */
 
 
 
@@ -1314,7 +1314,7 @@ client.on("message", async (message) => {
   }
 });
 
-
+/* 
 
 async function analizarConsultaTurismo(texto) {
   const prompt = `
@@ -1351,7 +1351,7 @@ Respuesta:
   } catch {
     return { intencion: "otra_cosa" };
   }
-}
+} */
 // 📌 Memoria temporal de eventos por usuario (teléfono)
 const memoriaEventos = {};
 
@@ -1538,7 +1538,7 @@ if (consulta.intencion === "chamame") {
 
 
 
-  
+
   // ================== SALUDO / OTRA COSA ==================
 if (consulta.intencion === "otra_cosa") {
   // 🔎 Buscar si coincide con un lugar específico
