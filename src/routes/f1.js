@@ -1524,21 +1524,6 @@ if (consulta.intencion === "chamame") {
   await message.reply(infoChamame);
   return;
 }
-
-  const persona = buscarPersonalidad(texto);
-  if (persona) {
-    const respuesta =
-      `👤 *${persona.nombre}*\n` +
-      `📝 ${persona.descripcion}\n` +
-      (persona.rol ? `📌 Rol: ${persona.rol}\n` : "") +
-      (persona.edad ? `🎂 Edad: ${persona.edad} años\n` : "");
-    await message.reply(respuesta);
-    return; // ✅ cortamos el flujo aquí
-  }
-
-
-
-  
   // ================== SALUDO / OTRA COSA ==================
 if (consulta.intencion === "otra_cosa") {
   // 🔎 Buscar si coincide con un lugar específico
@@ -1935,26 +1920,6 @@ Respuesta:
 
 
 
-function buscarPersonalidad(texto) {
-  const normalizado = texto.toLowerCase();
-
-  return personalidades.find(p =>
-    normalizado.includes(p.nombre.toLowerCase().split(" ")[0]) || // primer nombre
-    normalizado.includes(p.nombre.toLowerCase())                  // nombre completo
-  );
-}
-
-// Uso en el flujo
-const persona = buscarPersonalidad(texto);
-if (persona) {
-  const respuesta =
-    `👤 *${persona.nombre}*\n` +
-    `📝 ${persona.descripcion}\n` +
-    (persona.rol ? `📌 Rol: ${persona.rol}\n` : "") +
-    (persona.edad ? `🎂 Edad: ${persona.edad} años\n` : "");
-  await message.reply(respuesta);
-  return;
-}
 
 ////////////////////
 
