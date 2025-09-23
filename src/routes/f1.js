@@ -298,8 +298,7 @@ async function getPsicologoIdByTelefono(telefono) {
 // =======================
 async function analizarConsultaTurismo(texto) {
   const prompt = `
-Eres un Licenciado en Turismo de Corrientes, Argentina.
-Tu tarea es interpretar consultas turísticas (incluso si están escritas con modismos o lenguaje coloquial).
+Eres un Licenciado en Turismo de Corrientes Capital, Argentina. Tambien un interprete de consultas, Tu tarea es interpretar consultas turísticas (incluso si están escritas con modismos o lenguaje coloquial).
 
 Responde SOLO en JSON con la intención detectada.
 Si no queda claro, usa { "intencion": "turismo_general" }
@@ -310,10 +309,10 @@ Intenciones posibles:
 - "eventos_por_mes"
 - "eventos_por_rango"
 - "eventos_generales"
-- "carnaval": menciona corsos o carnavales de Corrientes.
-- "chamame": menciona festival del chamamé o fiesta nacional del chamamé.
-- "donde_comer" → cuando el usuario habla de comida, hambre, restaurantes, bares, chipá, asado, dónde almorzar o cenar.
-- "turismo_general"
+- "carnaval" → cuando se mencionan corsos o carnavales de Corrientes.
+- "chamame" → cuando se menciona el festival del chamamé o la fiesta nacional del chamamé.
+- "donde_comer" → cuando el usuario habla de comida, hambre, restaurantes, bares, chipá, asado, almorzar o cenar.
+- "turismo_general" → cuando el usuario pregunta por lugares, atractivos, islas, playas, plazas, costanera, río Paraná, museos u otros sitios turísticos.
 
 Ejemplos:
 Usuario: "Qué puedo hacer el 22 de septiembre en Corrientes"
@@ -324,6 +323,15 @@ Respuesta: { "intencion": "donde_comer" }
 
 Usuario: "Dónde se come buen chipá?"
 Respuesta: { "intencion": "donde_comer" }
+
+Usuario: "Conocés la isla Meza?"
+Respuesta: { "intencion": "turismo_general" }
+
+Usuario: "Qué tal la costanera de Corrientes?"
+Respuesta: { "intencion": "turismo_general" }
+
+Usuario: "Hay algún evento este fin de semana?"
+Respuesta: { "intencion": "proximos_eventos" }
 
 Usuario: "${texto}"
 Respuesta:
@@ -337,6 +345,7 @@ Respuesta:
     return { intencion: "turismo_general" };
   }
 }
+
 
 
 
