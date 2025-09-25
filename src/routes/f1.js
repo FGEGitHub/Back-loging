@@ -41,7 +41,7 @@ function buscarPersonaEnTexto(texto) {
 
   return null; // no encontró nada
 }
-const PROVIDER_ORDER = ["groq", "openai"]; // podes cambiar el orden o agregar más proveedores
+const PROVIDER_ORDER = ["deepseek", "groq", "openai"]; // podes cambiar el orden o agregar más proveedores
 const COOLDOWN_MS_BASE = 1000 * 60 * 2; // 2 minutos base de "enfriamiento" ante rate limit
 function detectarPorKeywords(texto) {
   const lower = texto.toLowerCase();
@@ -139,7 +139,7 @@ function isRateLimitError(err) {
 }
 
 // request para GROQ (OpenAI-compatible endpoint en groq)
-async function callGroq(model, messages, max_tokens = 500) {
+async function callGroq(model, messages, max_tokens = 1000) {
   if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY no configurada");
   const url = "https://api.groq.com/openai/v1/chat/completions";
   const payload = { model, messages, max_tokens };
@@ -154,7 +154,7 @@ async function callGroq(model, messages, max_tokens = 500) {
 }
 
 // request para OpenAI oficial
-async function callOpenAI(model, messages, max_tokens = 500) {
+async function callOpenAI(model, messages, max_tokens = 1000) {
   if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY no configurada");
   const url = "https://api.openai.com/v1/chat/completions";
   const payload = { model, messages, max_tokens };
@@ -169,14 +169,15 @@ async function callOpenAI(model, messages, max_tokens = 500) {
 }
 
 // wrapper que intenta llamar a un proveedor con retries
-async function tryCallProvider(provider, model, messages, max_tokens = 500) {
+async function tryCallProvider(provider, model, messages, max_tokens = 1000) {
   const maxRetries = 2;
   let attempt = 0;
   while (attempt <= maxRetries) {
     try {
-      if (provider === "groq") return await callGroq(model, messages, max_tokens);
-      if (provider === "openai") return await callOpenAI(model, messages, max_tokens);
-      throw new Error("Proveedor desconocido: " + provider);
+     if (provider === "groq") return await callGroq(model, messages, max_tokens);
+if (provider === "openai") return await callOpenAI(model, messages, max_tokens);
+if (provider === "deepseek") return await callDeepSeek(model, messages, max_tokens);
+throw new Error("Proveedor desconocido: " + provider);
     } catch (err) {
       attempt++;
       // Si es rate limit -> devolvemos explicitamente para que el caller pruebe otro provider
@@ -224,10 +225,33 @@ const storage = multer.diskStorage({
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
   },
 });
-
-const OPENROUTER_API_KEY = DEEPSEEK_API_KEY; // tu clave en .env
-const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-
+async function callDeepSeek(model, messages, max_tokens = 1000) {
+  if (!DEEPSEEK_API_KEY) throw new Error("DEEPSEEK_API_KEY no configurada");
+  const url = "https://api.deepseek.com/v1/chat/completions"; 
+  const payload = { model, messages, max_tokens };
+  const res = await axios.post(url, payload, {
+    headers: {
+      Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    timeout: 60000,
+  });
+  return res.data?.choices?.[0]?.message?.content;
+}
+const models = {
+  groq: { 
+    small: "llama-3.1-8b-instant", 
+    large: "llama-3.3-70b-versatile" 
+  },
+  openai: { 
+    small: "gpt-4o-mini", 
+    large: "gpt-4o" 
+  },
+  deepseek: {
+    small: "deepseek-chat",   // gratis, rápido
+    large: "deepseek-coder"   // más tokens
+  }
+};
 let cacheMonedas = {
   timestamp: 0,
   info: {}
@@ -255,90 +279,6 @@ async function obtenerValoresMonedas() {
   };
 }
 
-/* router.post("/preguntar", async (req, res) => {
-  try {
-    console.log("Cuerpo recibido:", req.body);
-
-    const historial = req.body?.mensajes || req.body?.texto || [];
-    console.log("Historial recibido:", historial);
-
-    if (!Array.isArray(historial) || historial.length === 0) {
-      return res.status(400).json({ error: "Historial inválido o vacío" });
-    }
-
-    const ultimaPregunta = historial[historial.length - 1]?.texto?.toLowerCase() || "";
-
-    // Keywords para detectar moneda
-    const keywordsDolar = ["dólar", "dolar", "usd", "dolar blue", "dólar blue", "ccl", "dólar turista"];
-    const esMoneda = keywordsDolar.some(k => ultimaPregunta.includes(k));
-
-    let infoMonedas = "";
-
-    if (esMoneda) {
-      const ahora = Date.now();
-
-      if (cacheMonedas.timestamp && ahora - cacheMonedas.timestamp < 5 * 60 * 1000) {
-        infoMonedas = cacheMonedas.infoStr;
-        console.log("Usando cache de monedas");
-      } else {
-        const valores = await obtenerValoresMonedas();
-
-        infoMonedas = 
-          `Dólar oficial: compra ${valores.oficial.compra}, venta ${valores.oficial.venta}.\n` +
-          `Dólar blue: compra ${valores.blue.compra}, venta ${valores.blue.venta}.\n` +
-          `Dólar CCL: compra ${valores.ccl.compra}, venta ${valores.ccl.venta}.\n` +
-          `Dólar turista: compra ${valores.turista.compra}, venta ${valores.turista.venta}.`;
-
-        cacheMonedas = { timestamp: ahora, infoStr: infoMonedas };
-        console.log("Cache de monedas actualizado");
-      }
-
-      // Si la pregunta es **solo sobre monedas**, devolvemos directamente
-      const soloMoneda = historial.length === 1 && esMoneda;
-      if (soloMoneda) {
-        return res.json({ respuesta: infoMonedas, infoMonedas });
-      }
-    }
-
-    // Construimos prompt para DeepSeek solo si hay algo más que procesar
-    const messages = [
-      {
-        role: "system",
-        content: "Eres un asesor financiero experto. Hablas con profesionalismo, claridad, calma y orientación práctica."
-      },
-      ...historial.slice(-10).map(m => ({
-        role: m.de === "usuario" ? "user" : "assistant",
-        content: (m.texto || "").trim()
-      })),
-      ...(infoMonedas ? [{ role: "system", content: `Información actual de monedas:\n${infoMonedas}` }] : [])
-    ];
-
-    const response = await axios.post(
-      OPENROUTER_URL,
-      {
-        model: "deepseek/deepseek-r1-0528",
-        messages,
-        max_tokens: 800
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json"
-        }
-      }
-    );
-
-    console.log("Respuesta de DeepSeek:", response.data);
-
-    const contenidoRespuesta = response.data?.choices?.[0]?.message?.content || "Sin respuesta";
-
-    res.json({ respuesta: contenidoRespuesta, infoMonedas });
-  } catch (error) {
-    console.error("Error en /preguntar:", error.response?.data || error.message);
-    res.status(500).json({ error: "Error interno al procesar la pregunta" });
-  }
-});
- */
 const providerCooldowns = {}; // { groq: unixTimestamp, openai: unixTimestamp }
 const historiales = {}; // si ya usabas historiales en otro módulo; adaptá
 async function moderateMessage(texto) {
@@ -350,7 +290,7 @@ async function moderateMessage(texto) {
         { role: "system", content: "Eres un moderador. Evalúa si el siguiente texto contiene violencia, odio, autolesiones o contenido inapropiado." },
         { role: "user", content: texto }
       ],
-      max_tokens: 200
+      max_tokens: 1000
     },
     { headers: { Authorization: `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" } }
   );
@@ -473,7 +413,7 @@ async function generateResponse(numero, texto, systemPersona = "", opts = {}) {
       }
       // elegimos modelo según complejidad
       const model = esCompleja ? (models[provider]?.large || models.groq.large) : (models[provider]?.small || models.groq.small);
-      const max_tokens = esCompleja ? (opts.max_tokens || 1200) : (opts.max_tokens || 500);
+      const max_tokens = esCompleja ? (opts.max_tokens || 1000) : (opts.max_tokens || 1000);
 
       console.log(`[generateResponse] intentando ${provider} con modelo ${model} (max_tokens=${max_tokens})`);
       const respuesta = await tryCallProvider(provider, model, messagesFinal, max_tokens);
@@ -526,15 +466,15 @@ async function getPsicologoIdByTelefono(telefono) {
 /// 2. Analizar consulta con IA → JSON estructurado
 // =======================
 async function analizarConsultaTurismo(texto) {
-    const keywordIntent = detectarPorKeywords(texto);
+/*     const keywordIntent = detectarPorKeywords(texto);
   if (keywordIntent) {
     return { intencion: keywordIntent };
-  }
+  } */
   const prompt = `
 Eres un Licenciado en Turismo de Corrientes Capital, Argentina. Tambien un interprete de consultas, Tu tarea es interpretar consultas turísticas (incluso si están escritas con modismos o lenguaje coloquial).
 
 Responde SOLO en JSON con la intención detectada.
-Si no queda claro, usa { "intencion": "turismo_general" }
+Si no queda claro, usa { "intencion": "otra_cosa" }
 
 Intenciones posibles:
 - "que_hacer_en_corrientes"
@@ -910,7 +850,7 @@ router.post("/preguntar", async (req, res) => {
           },
           { role: "user", content: ultimaPregunta }
         ],
-        max_tokens: 200
+        max_tokens: 1000
       },
       {
         headers: {
@@ -964,7 +904,7 @@ router.post("/preguntar", async (req, res) => {
       {
         model: modelo,
         messages,
-        max_tokens: 800
+        max_tokens: 1000
       },
       {
         headers: {
