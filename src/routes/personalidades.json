@@ -1,5 +1,4 @@
 [
-
   {
     "nombre": "Gustavo Valdés",
     "tipo": "Gobernador",
@@ -10,7 +9,7 @@
   {
     "nombre": "Hugo \"Cuqui\" Calvano",
     "tipo": "Político / Funcionario Municipal",
-    "descripcion": "Abogado, docente universitario. Secretario de Coordinación de Gobierno de la Municipalidad de Corrientes. Presidente de la Coalición Cívica ARI Corrientes, con militancia en causas sociales, ambiente, inclusión y derechos animales. Nació en Corrientes. ",
+    "descripcion": "Abogado, docente universitario. Secretario de Coordinación de Gobierno de la Municipalidad de Corrientes. Presidente de la Coalición Cívica ARI Corrientes, con militancia en causas sociales, ambiente, inclusión y derechos animales. Nació en Corrientes.",
     "fecha_nacimiento": null,
     "edad": null,
     "rol": "Secretario de Coordinación de Gobierno Municipal",

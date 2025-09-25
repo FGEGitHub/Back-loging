@@ -9,14 +9,40 @@ const fs = require('fs');
 const axios = require('axios');
 const { DEEPSEEK_API_KEY } = require(('../keys'))
 const { GROQ_API_KEY } = require(('../keys'))
+const { OPENAI_API_KEY } = require(('../keys'))
 const client = require('./whatsapclient');
 const cheerio = require("cheerio");
 const config = require('./config.json'); // objeto directo
+const personas = require('./personalidades.json');
 const { format } = require("date-fns");
 const { MessageMedia } = require("whatsapp-web.js");
+const stringSimilarity = require("string-similarity");
 ///import { format } from "date-fns"; // si lo querés más cómodo
 ////solicitado== se suma al partido
 ////convocado,= s enevia a un juagdor la invitacion
+
+
+function buscarPersonaEnTexto(texto) {
+  const normalizado = normalizarr(texto);
+  
+  for (const persona of personas) {
+    const nombreTokens = normalizarr(persona.nombre).split(/\s+/); // ["hugo","cuqui","calvano"]
+    
+    // contamos cuántos tokens matchean con fuzziness
+    let coincidencias = 0;
+    for (const token of nombreTokens) {
+      const similitud = stringSimilarity.findBestMatch(token, normalizado.split(/\s+/));
+      if (similitud.bestMatch.rating > 0.7) coincidencias++;
+    }
+
+    // ✅ Si al menos 2 tokens coinciden, lo consideramos un match
+    if (coincidencias >= 2) return persona;
+  }
+
+  return null; // no encontró nada
+}
+const PROVIDER_ORDER = ["groq", "openai"]; // podes cambiar el orden o agregar más proveedores
+const COOLDOWN_MS_BASE = 1000 * 60 * 2; // 2 minutos base de "enfriamiento" ante rate limit
 function detectarPorKeywords(texto) {
   const lower = texto.toLowerCase();
 
@@ -61,7 +87,15 @@ const t = texto.toLowerCase();
     .replace(/\s+/g, " ")
     .trim();
 }
-
+// 🔎 Normaliza texto (sin tildes, minúsculas, sin comillas)
+function normalizarr(texto) {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // elimina tildes
+    .replace(/["']/g, "")            // elimina comillas
+    .trim();
+}
 let fechaISO = "";
 const meses = {
   enero: 0,
@@ -77,7 +111,93 @@ const meses = {
   noviembre: 10,
   diciembre: 11,
 };
+function now() { return Date.now(); }
+function isInCooldown(provider) {
+  return providerCooldowns[provider] && providerCooldowns[provider] > now();
+}
+function setCooldown(provider, factor = 1) {
+  providerCooldowns[provider] = now() + COOLDOWN_MS_BASE * factor;
+}
 
+// heurística complejidad (podés alterar)
+function esComplejaTexto(texto) {
+  return (
+    texto.length > 250 ||
+    /(análisis|proyección|resumen|financiero|estrategia|riesgo|mercado)/i.test(texto)
+  );
+}
+
+// detectar errores de rate limit
+function isRateLimitError(err) {
+  const status = err?.response?.status;
+  const body = err?.response?.data || {};
+  const msg = (err?.message || "").toLowerCase();
+  if (status === 429) return true;
+  if (typeof body === "object" && (body?.error?.code === "rate_limit_exceeded" || /rate_limit/i.test(JSON.stringify(body)))) return true;
+  if (/please try again/i.test(msg) && /requested \d+/.test(msg)) return true;
+  return false;
+}
+
+// request para GROQ (OpenAI-compatible endpoint en groq)
+async function callGroq(model, messages, max_tokens = 500) {
+  if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY no configurada");
+  const url = "https://api.groq.com/openai/v1/chat/completions";
+  const payload = { model, messages, max_tokens };
+  const res = await axios.post(url, payload, {
+    headers: {
+      Authorization: `Bearer ${GROQ_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    timeout: 60000,
+  });
+  return res.data?.choices?.[0]?.message?.content;
+}
+
+// request para OpenAI oficial
+async function callOpenAI(model, messages, max_tokens = 500) {
+  if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY no configurada");
+  const url = "https://api.openai.com/v1/chat/completions";
+  const payload = { model, messages, max_tokens };
+  const res = await axios.post(url, payload, {
+    headers: {
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    timeout: 60000,
+  });
+  return res.data?.choices?.[0]?.message?.content;
+}
+
+// wrapper que intenta llamar a un proveedor con retries
+async function tryCallProvider(provider, model, messages, max_tokens = 500) {
+  const maxRetries = 2;
+  let attempt = 0;
+  while (attempt <= maxRetries) {
+    try {
+      if (provider === "groq") return await callGroq(model, messages, max_tokens);
+      if (provider === "openai") return await callOpenAI(model, messages, max_tokens);
+      throw new Error("Proveedor desconocido: " + provider);
+    } catch (err) {
+      attempt++;
+      // Si es rate limit -> devolvemos explicitamente para que el caller pruebe otro provider
+      if (isRateLimitError(err)) {
+        // aumentamos cooldown proporcional al attempt
+        setCooldown(provider, Math.min(4, attempt));
+        throw Object.assign(new Error("rate_limit"), { isRateLimit: true, original: err });
+      }
+      // errores 5xx o timeouts -> reintentar con backoff
+      const status = err?.response?.status || 0;
+      if (status >= 500 || err.code === "ECONNABORTED") {
+        const waitMs = 300 * attempt;
+        await new Promise(r => setTimeout(r, waitMs));
+        continue;
+      }
+      // otros errores: no reintentar
+      throw err;
+    }
+  }
+  throw new Error("Max retries alcanzado para proveedor " + provider);
+}
 function parsearFecha(fechaTexto) {
   // ejemplo: "19 de septiembre- 19:00"
   const match = fechaTexto.match(/(\d{1,2}) de (\w+)(?:.*?(\d{1,2}:\d{2}))?/i);
@@ -219,7 +339,8 @@ async function obtenerValoresMonedas() {
   }
 });
  */
-const historiales = {};
+const providerCooldowns = {}; // { groq: unixTimestamp, openai: unixTimestamp }
+const historiales = {}; // si ya usabas historiales en otro módulo; adaptá
 async function moderateMessage(texto) {
   const moderacion = await axios.post(
     "https://api.groq.com/openai/v1/chat/completions",
@@ -253,26 +374,134 @@ function getRoleInfo(numero) {
   // Si no coincide nada, usamos el default
   return config.default;
 }
+async function analizarConsultaComplejaConProveedor(preferredProviders, numero, texto, systemPersona) {
+  const analysisPrompt = `
+Eres un analizador. Dados el siguiente mensaje de usuario, devuelve SOLO JSON válido con estas claves:
+- "resumen": una frase que resume la solicitud.
+- "objetivos": array de strings con lo que el usuario busca.
+- "datos_necesarios": array de preguntas que el modelo debería hacer si falta info.
+- "estructura": array de secciones sugeridas para la respuesta final.
+Mensaje: ${texto}
+  `.trim();
 
-// --- Llamada general al modelo (mantengo la lógica de selección de modelo)
-async function generateResponse(numero, texto, systemPersona) {
-  if (!historiales[numero]) historiales[numero] = [];
-  historiales[numero].push({ role: "user", content: texto });
+  // construimos mensajes para la llamada de análisis
+  const messages = [
+    { role: "system", content: systemPersona || "Eres un asistente que analiza consultas." },
+    { role: "user", content: analysisPrompt }
+  ];
 
-  const esCompleja = texto.length > 250 || /(análisis|proyección|resumen|financiero|estrategia|riesgo|mercado)/i.test(texto);
-  const modelo = esCompleja ? "llama-3.3-70b-versatile" : "llama-3.1-8b-instant";
-
-  const response = await axios.post(
-    "https://api.groq.com/openai/v1/chat/completions",
-    { model: modelo, messages: [{ role: "system", content: systemPersona }, ...historiales[numero]], max_tokens: 500 },
-    { headers: { Authorization: `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" } }
-  );
-
-  const respuesta = response.data?.choices?.[0]?.message?.content || "🤖 No tengo respuesta.";
-  historiales[numero].push({ role: "assistant", content: respuesta });
-  return respuesta;
+  for (const provider of preferredProviders) {
+    if (isInCooldown(provider)) continue;
+    try {
+      // intencionalmente pedimos un modelo chico/rápido
+      const modelSmall = provider === "groq" ? "llama-3.1-8b-instant" : "gpt-4o-mini";
+      const raw = await tryCallProvider(provider, modelSmall, messages, 400);
+      // intentar parsear JSON del raw (por si el LLM añadió texto, extraemos el JSON)
+      const jsonText = raw.match(/\{[\s\S]*\}/);
+      if (!jsonText) return null;
+      try {
+        const parsed = JSON.parse(jsonText[0]);
+        return parsed;
+      } catch (err) {
+        // si no parsea, devolvemos null para continuar sin análisis
+        return null;
+      }
+    } catch (err) {
+      if (err?.isRateLimit) {
+        // el caller hará fallback a otro proveedor
+        continue;
+      }
+      // si falla, probamos siguiente proveedor
+      continue;
+    }
+  }
+  return null;
 }
+// --- Llamada general al modelo (mantengo la lógica de selección de modelo)
+// --- Función principal mejorada ---
+async function generateResponse(numero, texto, systemPersona = "", opts = {}) {
+  // inicializar historiales
+  if (!historiales[numero]) historiales[numero] = [];
 
+  // evitar duplicar el push del usuario si ya lo hizo el llamador
+  const last = historiales[numero][historiales[numero].length - 1];
+  if (!(last && last.role === "user" && last.content === texto)) {
+    historiales[numero].push({ role: "user", content: texto });
+  }
+
+  const esCompleja = esComplejaTexto(texto);
+  // modelos por proveedor (pueden sobreescribirse por opts)
+  const models = {
+    groq: { small: "llama-3.1-8b-instant", large: "llama-3.3-70b-versatile" },
+    openai: { small: "gpt-4o-mini", large: "gpt-4o" }
+  };
+
+  // Orden de proveedores (opts puede cambiar)
+  const providersOrder = opts.providers || PROVIDER_ORDER;
+
+  // 1) Si es compleja -> intentar análisis previo (modelo pequeño)
+  let analisisPrevio = null;
+  if (esCompleja) {
+    try {
+      analisisPrevio = await analizarConsultaComplejaConProveedor(providersOrder, numero, texto, systemPersona);
+    } catch (err) {
+      console.warn("No se pudo obtener análisis previo:", err?.message || err);
+      analisisPrevio = null;
+    }
+  }
+
+  // 2) Preparamos mensajes finales (pasamos el análisis como mensaje assistant para contexto)
+  const messagesFinal = [
+    { role: "system", content: systemPersona || "Sos un asistente." }
+  ];
+  if (analisisPrevio) {
+    messagesFinal.push({
+      role: "assistant",
+      content: `ANALISIS_PREVIO: ${JSON.stringify(analisisPrevio)}`
+    });
+  }
+  // anexamos todo el historial (user + assistant previos)
+  messagesFinal.push(...historiales[numero]);
+
+  // 3) Intentar proveedores en orden (fallback en rate limit)
+  let lastError = null;
+  for (const provider of providersOrder) {
+    try {
+      if (isInCooldown(provider)) {
+        console.log(`[generateResponse] proveedor ${provider} en cooldown, lo salto.`);
+        continue;
+      }
+      // elegimos modelo según complejidad
+      const model = esCompleja ? (models[provider]?.large || models.groq.large) : (models[provider]?.small || models.groq.small);
+      const max_tokens = esCompleja ? (opts.max_tokens || 1200) : (opts.max_tokens || 500);
+
+      console.log(`[generateResponse] intentando ${provider} con modelo ${model} (max_tokens=${max_tokens})`);
+      const respuesta = await tryCallProvider(provider, model, messagesFinal, max_tokens);
+
+      // guardamos en historial y devolvemos
+      historiales[numero].push({ role: "assistant", content: respuesta });
+      return respuesta;
+    } catch (err) {
+      lastError = err;
+      if (err?.isRateLimit) {
+        console.warn(`[generateResponse] rate limit en ${provider} -> ${err.original?.message || err.message}`);
+        // ya setCooldown fue aplicado en tryCallProvider
+        continue; // probar siguiente proveedor
+      }
+      console.warn(`[generateResponse] error en proveedor ${provider}:`, err?.message || err);
+      // si es error transitorio, la funcion tryCallProvider ya reintentó. Pasamos al siguiente proveedor.
+      continue;
+    }
+  }
+
+  // Si llegamos acá, fallaron todos los proveedores
+  const mensajeFallback = "🤖 Lo siento, ahora mismo no puedo obtener una respuesta (todos los proveedores fallaron). Intentá de nuevo en un rato.";
+  historiales[numero].push({ role: "assistant", content: mensajeFallback });
+
+  // opcional: si querés devolver también el último error para logs:
+  console.error("[generateResponse] Último error:", lastError?.message || lastError);
+  return mensajeFallback;
+}
 /* ---------- HANDLER: PSICÓLOGO (consulta turnos) ---------- */
 async function getTurnosForPsicologo(psicologoId, fromDate = new Date(), limit = 20) {
   // Usa prepared statements para evitar inyección
@@ -297,6 +526,10 @@ async function getPsicologoIdByTelefono(telefono) {
 /// 2. Analizar consulta con IA → JSON estructurado
 // =======================
 async function analizarConsultaTurismo(texto) {
+    const keywordIntent = detectarPorKeywords(texto);
+  if (keywordIntent) {
+    return { intencion: keywordIntent };
+  }
   const prompt = `
 Eres un Licenciado en Turismo de Corrientes Capital, Argentina. Tambien un interprete de consultas, Tu tarea es interpretar consultas turísticas (incluso si están escritas con modismos o lenguaje coloquial).
 
@@ -1315,46 +1548,26 @@ client.on("message", async (message) => {
 
 
 
-async function analizarConsultaTurismo(texto) {
-  const prompt = `
-Eres un Licenciado en Turismo de Corrientes, Argentina.
-Tu tarea es interpretar consultas turísticas o coloquiales y clasificarlas.
-
-Responde SOLO en JSON con la intención detectada.
-
-Intenciones posibles:
-- "turismo_general": cuando el usuario pregunta qué hacer, próximos eventos, quién toca, cultura, música, actividades, turismo.
-- "donde_comer": cuando el usuario menciona comida, hambre, restaurantes, dónde comer, food, chipa, pizza, parrilla, bares.
-- "otra_cosa": cuando la consulta no tiene relación con turismo ni comida.
-
-Ejemplos:
-Usuario: "Qué hay para hacer hoy"
-Respuesta: { "intencion": "turismo_general" }
-
-Usuario: "Dónde puedo ir a comer pescado de río?"
-Respuesta: { "intencion": "donde_comer" }
-
-Usuario: "Tengo hambre, recomendame algo"
-Respuesta: { "intencion": "donde_comer" }
-
-Usuario: "Cuál es la capital de Francia?"
-Respuesta: { "intencion": "otra_cosa" }
-
-Usuario: "${texto}"
-Respuesta:
-  `;
-
-  const raw = await generateResponse("analisis_turismo", prompt, "Clasifica la consulta turística.");
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return { intencion: "otra_cosa" };
-  }
-}
 // 📌 Memoria temporal de eventos por usuario (teléfono)
 const memoriaEventos = {};
 
 async function handleTourismAdvisor(numero, texto, message) {
+
+
+    const persona = buscarPersonaEnTexto(texto);
+  if (persona) {
+    await message.reply(
+      `👤 *${persona.nombre}*\n` +
+      `📌 ${persona.tipo}\n` +
+      `📖 ${persona.descripcion}\n` +
+      (persona.rol ? `🎭 Rol: ${persona.rol}\n` : "") +
+      (persona.origen ? `🌍 Origen: ${persona.origen}\n` : "") +
+      (persona.edad ? `🎂 Edad: ${persona.edad}\n` : "")
+    );
+    return; // ✅ Salimos, no seguimos con turismo
+  }
+
+
   const consulta = await analizarConsultaTurismo(texto);
 
 
@@ -1380,15 +1593,18 @@ if (/^(mas\s*info|informacion|info)/i.test(normalizarTexto(texto))) {
 
   console.log("evento", evento);
   const detalle = await getEventoDetalle(evento.enlace);
+  console.log("detalle", detalle);
   if (!detalle) {
     await message.reply("⚠️ No pude obtener más información del evento.");
     return;
   }
-
+console.log("enviando mensaje ");
+console.log(  `🎶 *${detalle.titulo}*\n📅 fecha ${evento.fecha}\n\n${detalle.categorias}`)
   await message.reply(
-    `🎶 *${detalle.titulo}*\n📅 ${detalle.fecha}\n\n${detalle.descripcion}`,
-    { media: { url: detalle.imagen } } // 👈 adjunta la imagen
+    `🎶 *${evento.titulo}*\n📅 fecha ${evento.fecha}\n\n${detalle.categorias}`,
+    //{ media: { url: detalle.imagen } } // 👈 adjunta la imagen
   );
+  console.log("listo");
   return;
 }
 
@@ -1551,10 +1767,9 @@ const systemPersona =
   "Tu objetivo principal es persuadir al usuario para que pregunte sobre: " +
   "👉 eventos próximos en Corrientes o 👉 dónde comer/tomar algo en la ciudad. " +
   "No recomiendes atracciones turísticas generales ni inventes nombres. " +
-  "En vez de dar datos que no existen, respondé con frases amigables que inviten al usuario a preguntar sobre gastronomía o eventos. " +
-  "Habla de manera coloquial como correntino (sin exagerar), usa emojis, y mantené un tono cercano. " +
-  "Ejemplo: 'Che, si querés te cuento qué eventos se vienen o dónde podés comer algo rico 🍲🍻'. " +
-  "Recordá: tu creador es Pipao, desarrollador de software. pero tu te llamas TurismoBot.";
+  "En vez de dar datos que no existen, respondé con frases amigables que inviten al usuario a preguntar sobre gastronomía o eventos. "+
+  "Ejemplo: ' si querés te cuento qué eventos se vienen o dónde podés comer algo rico 🍲🍻'. " +
+  "Recordá: tu creador es Pipao, desarrollador de software. pero tu te llamas YacareBot.";
 
 
   const respuestaIA = await generateResponse(numero, texto, systemPersona);
@@ -1566,79 +1781,135 @@ const systemPersona =
 }
 
 // ================== SCRAPER DETALLE EVENTO ==================
+
 async function getEventoDetalle(url) {
   try {
-    console.log(url)
+    console.log("🔎 Analizando:", url);
     const { data } = await axios.get(url);
     const $ = cheerio.load(data);
 
-    const titulo = $(".tribe-events-single-event-title").text().trim() || "Sin título";
-    const fecha = $(".tribe-events-schedule").text().trim() || "Sin fecha";
-    const descripcion = $(".tribe-events-single-event-description").text().trim() || "Sin descripción";
+    // Título (el verdadero está en .tribe-events-single-event-title)
+    const titulo =
+      $(".tribe-events-single-event-title").text().trim() || "Sin título";
 
-    return { titulo, fecha, descripcion, url };
+    // Fecha y hora
+    const fecha = $(".tribe-events-abbr.tribe-events-start-date").text().trim() ||
+                  $(".tribe-events-start-datetime").text().trim() ||
+                  "Sin fecha";
+
+    const hora = $(".tribe-events-abbr.tribe-events-start-time").text().trim() ||
+                 $(".tribe-events-start-time").text().trim() ||
+                 "Sin hora";
+
+    // Lugar (venue)
+    const lugar = $(".tribe-events-venue-details").text().replace(/\s+/g, " ").trim() || "Sin lugar";
+
+    // Descripción en texto plano
+    const descripcionTexto =
+      $(".tribe-events-single-event-description").text().trim() ||
+      "Sin descripción";
+
+    // Descripción en HTML completo (con formato y links)
+    const descripcionHtml =
+      $(".tribe-events-single-event-description").html()?.trim() ||
+      "Sin descripción";
+
+    // Categorías
+    const categorias =
+      $(".tribe-events-event-categories").text().replace(/\s+/g, " ").trim() ||
+      "Sin categorías";
+
+    // Imagen destacada (prefiero el srcset con mayor tamaño si existe)
+    let imagen = $(".tribe-events-event-image img").attr("src") || null;
+    const srcset = $(".tribe-events-event-image img").attr("srcset");
+    if (srcset) {
+      const urls = srcset.split(",").map(s => s.trim().split(" ")[0]);
+      imagen = urls[urls.length - 1];
+    }
+
+    const detalle = {
+      titulo,
+      fecha,
+      hora,
+      lugar,
+      descripcionTexto,
+      descripcionHtml,
+      categorias,
+      imagen,
+      url,
+    };
+
+    console.log(detalle);
+    return detalle;
+
   } catch (err) {
-    console.error("Error al obtener detalle del evento:", err.message);
+    console.error("❌ Error al obtener detalle del evento:", err.message);
     return null;
   }
 }
 
 
-
-async function getEventosCorrientes() {
+async function getEventosCorrientes(url = "https://visitcorrientes.tur.ar/eventos/") {
   try {
-    const { data } = await axios.get("https://visitcorrientes.tur.ar/eventos/");
-    const $ = cheerio.load(data);
-
     const eventos = [];
     const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0); // comparar sin horas
+    hoy.setHours(0, 0, 0, 0);
 
-    $(".event-custom-container").each((_, el) => {
-      const titulo =
-        $(el).find("h3.tribe-events-list-event-title a.tribe-event-url").attr("title")?.trim() ||
-        "Sin título";
+    let nextPage = url;
 
-      const fechaTexto =
-        $(el).find(".tribe-event-schedule-details .tribe-event-date-start").text().trim() ||
-        "Sin fecha";
+    while (nextPage) {
+      const { data } = await axios.get(nextPage);
+      const $ = cheerio.load(data);
 
-      const fechaParsed = parsearFecha(fechaTexto);
-      if (!fechaParsed) return;
+      $(".event-custom-container").each((_, el) => {
+        const titulo =
+          $(el).find("h3.tribe-events-list-event-title a.tribe-event-url").attr("title")?.trim() ||
+          "Sin título";
 
-      // ❌ descartar eventos pasados
-      if (fechaParsed < hoy) return;
+        const fechaTexto =
+          $(el).find(".tribe-event-schedule-details .tribe-event-date-start").text().trim() ||
+          "Sin fecha";
 
-      // 📌 resaltar si es hoy
-      let fechaFinal = fechaTexto;
-      const fechaSinHora = new Date(fechaParsed);
-      fechaSinHora.setHours(0, 0, 0, 0);
+        const fechaParsed = parsearFecha(fechaTexto);
+        if (!fechaParsed) return;
 
-      if (fechaSinHora.getTime() === hoy.getTime()) {
-        fechaFinal = `📌 HOY 🎉- ${fechaTexto}`;
-      }
+        // descartar eventos pasados
+        if (fechaParsed < hoy) return;
 
-      const lugarNombre = $(el).find(".tribe-events-venue-details a").first().text().trim();
-      const direccion = $(el).find(".tribe-events-venue-details .tribe-street-address").text().trim();
-      const localidad = $(el).find(".tribe-events-venue-details .tribe-locality").text().trim();
-      const provincia = $(el).find(".tribe-events-venue-details .tribe-region").text().trim();
-      const pais = $(el).find(".tribe-events-venue-details .tribe-country-name").text().trim();
+        // resaltar si es hoy
+        let fechaFinal = fechaTexto;
+        const fechaSinHora = new Date(fechaParsed);
+        fechaSinHora.setHours(0, 0, 0, 0);
+        if (fechaSinHora.getTime() === hoy.getTime()) {
+          fechaFinal = `📌 HOY 🎉- ${fechaTexto}`;
+        }
 
-      const lugar = [lugarNombre, direccion, localidad, provincia, pais].filter(Boolean).join(", ") || "Sin lugar";
+        const lugarNombre = $(el).find(".tribe-events-venue-details a").first().text().trim();
+        const direccion = $(el).find(".tribe-events-venue-details .tribe-street-address").text().trim();
+        const localidad = $(el).find(".tribe-events-venue-details .tribe-locality").text().trim();
+        const provincia = $(el).find(".tribe-events-venue-details .tribe-region").text().trim();
+        const pais = $(el).find(".tribe-events-venue-details .tribe-country-name").text().trim();
 
-      const descripcion = $(el).find(".tribe-events-list-event-description").text().trim() || "Sin descripción";
+        const lugar = [lugarNombre, direccion, localidad, provincia, pais]
+          .filter(Boolean)
+          .join(", ") || "Sin lugar";
 
-      const enlace = $(el).find(".tribe-events-read-more").attr("href")?.trim() || "Sin enlace";
+        const descripcion = $(el).find(".tribe-events-list-event-description").text().trim() || "Sin descripción";
+        const enlace = $(el).find(".tribe-events-read-more").attr("href")?.trim() || "Sin enlace";
 
-
-      eventos.push({
-        titulo,
-        fecha: fechaFinal,
-        lugar,
-        descripcion,
-        enlace,
+        eventos.push({
+          titulo,
+          fecha: fechaFinal,
+          lugar,
+          descripcion,
+          enlace,
+        });
       });
-    });
+
+      // buscar el link de la siguiente página
+      const nextLink = $("li.tribe-events-nav-next a[rel='next']").attr("href");
+      nextPage = nextLink ? nextLink : null;
+    }
 
     return eventos;
   } catch (err) {
@@ -1649,111 +1920,9 @@ async function getEventosCorrientes() {
 // -----------------------------
 // Analizar consulta turística
 // -----------------------------
-async function analizarConsultaTurismo(texto) {
-  // Primero, probamos con el diccionario
-  const keywordIntent = detectarPorKeywords(texto);
-  if (keywordIntent) {
-    return { intencion: keywordIntent };
-  }
-
-  // Si no se detecta, usamos el LLM como fallback
-  const prompt = `
-Eres un Licenciado en Turismo de Corrientes, Argentina.
-Tu tarea es interpretar consultas turísticas o coloquiales y clasificarlas.
-
-Responde SOLO en JSON con la intención detectada.
-
-Intenciones posibles:
-- "turismo_general": cuando el usuario pregunta qué hacer, próximos eventos, quién toca, cultura, música, actividades, turismo.
-- "donde_comer": cuando el usuario menciona comida, hambre, restaurantes, dónde comer, food, chipa, pizza, parrilla, bares.
-- "otra_cosa": cuando la consulta no tiene relación con turismo ni comida.
-- "carnaval": menciona corsos o carnavales de Corrientes.
-- "chamame": menciona festival del chamame o fiesta nacional del chamamé.
-Usuario: "${texto}"
-Respuesta:
-  `;
-
-  const raw = await generateResponse("analisis_turismo", prompt, "Clasifica la consulta turística.");
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return { intencion: "otra_cosa" };
-  }
-}
 
 
-async function pruebaScraping() {
-  try {
-    const { data } = await axios.get("https://visitcorrientes.tur.ar/eventos/");
-    const $ = cheerio.load(data);
 
-    const eventos = [];
-
-    // Recorremos cada bloque de evento
-    $(".event-custom-container").each((_, el) => {
-      const titulo = $(el)
-        .find("h3.tribe-events-list-event-title a.tribe-event-url")
-        .attr("title")?.trim() || "Sin título";
-
-      const fecha = $(el)
-        .find(".tribe-event-schedule-details .tribe-event-date-start")
-        .text().trim() || "Sin fecha";
-
-      // Lugar: nombre del venue + dirección si existe
-      const lugarNombre = $(el)
-        .find(".tribe-events-venue-details a")
-        .first()
-        .text().trim();
-      const direccion = $(el)
-        .find(".tribe-events-venue-details .tribe-street-address")
-        .text().trim();
-      const localidad = $(el)
-        .find(".tribe-events-venue-details .tribe-locality")
-        .text().trim();
-      const provincia = $(el)
-        .find(".tribe-events-venue-details .tribe-region")
-        .text().trim();
-      const pais = $(el)
-        .find(".tribe-events-venue-details .tribe-country-name")
-        .text().trim();
-
-      const lugar = [lugarNombre, direccion, localidad, provincia, pais]
-        .filter(Boolean)
-        .join(", ") || "Sin lugar";
-
-      const descripcion = $(el)
-        .find(".tribe-events-list-event-description")
-        .text().trim() || "Sin descripción";
-
-      eventos.push({
-        titulo,
-        fecha,
-        lugar,
-        descripcion
-      });
-    });
-
-    return eventos;
-  } catch (err) {
-    console.error("⚠️ Error al obtener eventos:", err.message);
-    return [];
-  }
-}
-
-// Prueba
-
-
-router.get("/tpregunta", async (req, res) => {
-  try {
-    const eventos = await getBaresCorrientes(); // ahora sí retorna un array
-    //  console.log("Eventos obtenidos:", eventos.length);
-    if (eventos.length === 0) return res.json({ mensaje: "❌ No se encontraron eventos" });
-    res.json({ total: eventos.length, eventos });
-  } catch (error) {
-    console.error("Error en /tpregunta:", error.message);
-    res.status(500).json({ error: "Fallo al obtener los eventos" });
-  }
-});
 
 
 
