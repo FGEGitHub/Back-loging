@@ -1,0 +1,3171 @@
+[
+  {
+    "id": 1,
+    "nombre": "Catedral de Corrientes",
+    "variantes": [
+      "Catedral de Corrientes", "Iglesia catedral", "Iglesia  plaza cabral"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 2,
+    "nombre": "Iglesia de la Cruz de los Milagros",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros", "Iglesia de la cruz", "Iglesia milagros",   "la cruz de los milagros", "cruz de los milagros"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 3,
+    "nombre": "Iglesia San Francisco",
+    "variantes": [
+      "Iglesia San Francisco", "Iglesia francisco", "San Francisco",  "iglesia san francisco de asis", "san francisco de asis"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 4,
+    "nombre": "Parroquia San Roque",
+    "variantes": [
+      "Parroquia San Roque"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 5,
+    "nombre": "Teatro Oficial Juan de Vera",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",  "Teatro Juan de Vera", "Teatro Vera", "Juan de Vera", "Teatro Oficial"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 6,
+    "nombre": "Teatro Flotante del Paraná",
+    "variantes": [
+      "Teatro Flotante del Paraná"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 7,
+    "nombre": "Avenida 3 de Abril",
+    "variantes": [
+      "Av. 3 de Abril"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 8,
+    "nombre": "Avenida Maipú",
+    "variantes": [
+      "Av. Maipú"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 9,
+    "nombre": "Avenida Independencia",
+    "variantes": [
+      "Av. Independencia"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 10,
+    "nombre": "Costanera de Corrientes",
+    "variantes": [
+      "Costanera de Corrientes"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 11,
+    "nombre": "Colegio Nacional Gral. San Martín",
+    "variantes": [
+      "Colegio Nacional Gral. San Martín"
+    ],
+    "tipo": "Escuela",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Escuela.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 12,
+    "nombre": "Escuela Normal Juan Pujol",
+    "variantes": [
+      "Escuela Normal Juan Pujol"
+    ],
+    "tipo": "Escuela",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Escuela.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 13,
+    "nombre": "Escuela Belgrano",
+    "variantes": [
+      "Escuela Belgrano"
+    ],
+    "tipo": "Escuela",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Escuela.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 14,
+    "nombre": "Parque Mitre",
+    "variantes": [
+      "Parque Mitre"
+    ],
+    "tipo": "Parque",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Parque.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 15,
+    "nombre": "Parque Cambá Cuá",
+    "variantes": [
+      "Parque Cambá Cuá"
+    ],
+    "tipo": "Parque",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Parque.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 16,
+    "nombre": "Parque Hipódromo",
+    "variantes": [
+      "Parque Hipódromo"
+    ],
+    "tipo": "Parque",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Parque.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 17,
+    "nombre": "Parque El Eucaliptal",
+    "variantes": [
+      "Parque El Eucaliptal"
+    ],
+    "tipo": "Parque",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Parque.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 18,
+    "nombre": "Plaza Vera",
+    "variantes": [
+      "Pza Vera"
+    ],
+    "tipo": "Plaza",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Plaza.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 19,
+    "nombre": "Plaza Cabral",
+    "variantes": [
+      "Pza Cabral"
+    ],
+    "tipo": "Plaza",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Plaza.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 20,
+    "nombre": "Plaza La Cruz",
+    "variantes": [
+      "Pza La Cruz"
+    ],
+    "tipo": "Plaza",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Plaza.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 21,
+    "nombre": "Plaza Libertad",
+    "variantes": [
+      "Pza Libertad"
+    ],
+    "tipo": "Plaza",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Plaza.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 22,
+    "nombre": "Plaza Belgrano",
+    "variantes": [
+      "Pza Belgrano"
+    ],
+    "tipo": "Plaza",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Plaza.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 23,
+    "nombre": "Museo de Bellas Artes",
+    "variantes": [
+      "Museo de Bellas Artes"
+    ],
+    "tipo": "Museo",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Museo.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 24,
+    "nombre": "Museo Histórico de Corrientes",
+    "variantes": [
+      "Museo Histórico de Corrientes"
+    ],
+    "tipo": "Museo",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Museo.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 25,
+    "nombre": "Museo de Ciencias Naturales Amado Bonpland",
+    "variantes": [
+      "Museo de Ciencias Naturales Amado Bonpland"
+    ],
+    "tipo": "Museo",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Museo.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 26,
+    "nombre": "Club Regatas Corrientes",
+    "variantes": [
+      "Club Regatas Corrientes"
+    ],
+    "tipo": "Club",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Club.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 27,
+    "nombre": "Club de Pesca",
+    "variantes": [
+      "Club de Pesca"
+    ],
+    "tipo": "Club",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Club.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 28,
+    "nombre": "Club San Martín",
+    "variantes": [
+      "Club San Martín"
+    ],
+    "tipo": "Club",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Club.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 29,
+    "nombre": "Playa Arazaty",
+    "variantes": [
+      "Playa Arazaty"
+    ],
+    "tipo": "Balneario",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Balneario.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 30,
+    "nombre": "Playa Molina Punta",
+    "variantes": [
+      "Playa Molina Punta"
+    ],
+    "tipo": "Balneario",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Balneario.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 31,
+    "nombre": "Playa Malvinas",
+    "variantes": [
+      "Playa Malvinas"
+    ],
+    "tipo": "Balneario",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Balneario.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Costanera de Corrientes",
+      "Plaza Vera",
+      "Puente General Belgrano"
+    ]
+  },
+  {
+    "id": 32,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 32",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 32"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 33,
+    "nombre": "Teatro Flotante del Paraná - Sector 33",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 33"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 34,
+    "nombre": "Avenida 3 de Abril - Sector 34",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 34"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 35,
+    "nombre": "Avenida Maipú - Sector 35",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 35"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 36,
+    "nombre": "Avenida Independencia - Sector 36",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 36"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 37,
+    "nombre": "Catedral de Corrientes - Sector 37",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 37"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 38,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 38",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 38"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 39,
+    "nombre": "Iglesia San Francisco - Sector 39",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 39"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 40,
+    "nombre": "Parroquia San Roque - Sector 40",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 40"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 41,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 41",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 41"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 42,
+    "nombre": "Teatro Flotante del Paraná - Sector 42",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 42"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 43,
+    "nombre": "Avenida 3 de Abril - Sector 43",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 43"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 44,
+    "nombre": "Avenida Maipú - Sector 44",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 44"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 45,
+    "nombre": "Avenida Independencia - Sector 45",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 45"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 46,
+    "nombre": "Catedral de Corrientes - Sector 46",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 46"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 47,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 47",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 47"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 48,
+    "nombre": "Iglesia San Francisco - Sector 48",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 48"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 49,
+    "nombre": "Parroquia San Roque - Sector 49",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 49"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 50,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 50",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 50"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 51,
+    "nombre": "Teatro Flotante del Paraná - Sector 51",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 51"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 52,
+    "nombre": "Avenida 3 de Abril - Sector 52",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 52"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 53,
+    "nombre": "Avenida Maipú - Sector 53",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 53"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 54,
+    "nombre": "Avenida Independencia - Sector 54",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 54"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 55,
+    "nombre": "Catedral de Corrientes - Sector 55",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 55"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 56,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 56",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 56"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 57,
+    "nombre": "Iglesia San Francisco - Sector 57",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 57"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 58,
+    "nombre": "Parroquia San Roque - Sector 58",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 58"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 59,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 59",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 59"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 60,
+    "nombre": "Teatro Flotante del Paraná - Sector 60",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 60"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 61,
+    "nombre": "Avenida 3 de Abril - Sector 61",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 61"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 62,
+    "nombre": "Avenida Maipú - Sector 62",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 62"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 63,
+    "nombre": "Avenida Independencia - Sector 63",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 63"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 64,
+    "nombre": "Catedral de Corrientes - Sector 64",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 64"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 65,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 65",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 65"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 66,
+    "nombre": "Iglesia San Francisco - Sector 66",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 66"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 67,
+    "nombre": "Parroquia San Roque - Sector 67",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 67"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 68,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 68",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 68"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 69,
+    "nombre": "Teatro Flotante del Paraná - Sector 69",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 69"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 70,
+    "nombre": "Avenida 3 de Abril - Sector 70",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 70"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 71,
+    "nombre": "Avenida Maipú - Sector 71",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 71"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 72,
+    "nombre": "Avenida Independencia - Sector 72",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 72"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 73,
+    "nombre": "Catedral de Corrientes - Sector 73",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 73"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 74,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 74",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 74"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 75,
+    "nombre": "Iglesia San Francisco - Sector 75",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 75"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 76,
+    "nombre": "Parroquia San Roque - Sector 76",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 76"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 77,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 77",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 77"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 78,
+    "nombre": "Teatro Flotante del Paraná - Sector 78",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 78"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 79,
+    "nombre": "Avenida 3 de Abril - Sector 79",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 79"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 80,
+    "nombre": "Avenida Maipú - Sector 80",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 80"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 81,
+    "nombre": "Avenida Independencia - Sector 81",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 81"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 82,
+    "nombre": "Catedral de Corrientes - Sector 82",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 82"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 83,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 83",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 83"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 84,
+    "nombre": "Iglesia San Francisco - Sector 84",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 84"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 85,
+    "nombre": "Parroquia San Roque - Sector 85",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 85"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 86,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 86",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 86"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 87,
+    "nombre": "Teatro Flotante del Paraná - Sector 87",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 87"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 88,
+    "nombre": "Avenida 3 de Abril - Sector 88",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 88"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 89,
+    "nombre": "Avenida Maipú - Sector 89",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 89"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 90,
+    "nombre": "Avenida Independencia - Sector 90",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 90"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 91,
+    "nombre": "Catedral de Corrientes - Sector 91",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 91"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 92,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 92",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 92"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 93,
+    "nombre": "Iglesia San Francisco - Sector 93",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 93"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 94,
+    "nombre": "Parroquia San Roque - Sector 94",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 94"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 95,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 95",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 95"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 96,
+    "nombre": "Teatro Flotante del Paraná - Sector 96",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 96"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 97,
+    "nombre": "Avenida 3 de Abril - Sector 97",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 97"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 98,
+    "nombre": "Avenida Maipú - Sector 98",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 98"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 99,
+    "nombre": "Avenida Independencia - Sector 99",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 99"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 100,
+    "nombre": "Catedral de Corrientes - Sector 100",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 100"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 101,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 101",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 101"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 102,
+    "nombre": "Iglesia San Francisco - Sector 102",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 102"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 103,
+    "nombre": "Parroquia San Roque - Sector 103",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 103"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 104,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 104",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 104"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 105,
+    "nombre": "Teatro Flotante del Paraná - Sector 105",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 105"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 106,
+    "nombre": "Avenida 3 de Abril - Sector 106",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 106"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 107,
+    "nombre": "Avenida Maipú - Sector 107",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 107"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 108,
+    "nombre": "Avenida Independencia - Sector 108",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 108"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 109,
+    "nombre": "Catedral de Corrientes - Sector 109",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 109"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 110,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 110",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 110"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 111,
+    "nombre": "Iglesia San Francisco - Sector 111",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 111"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 112,
+    "nombre": "Parroquia San Roque - Sector 112",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 112"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 113,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 113",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 113"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 114,
+    "nombre": "Teatro Flotante del Paraná - Sector 114",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 114"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 115,
+    "nombre": "Avenida 3 de Abril - Sector 115",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 115"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 116,
+    "nombre": "Avenida Maipú - Sector 116",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 116"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 117,
+    "nombre": "Avenida Independencia - Sector 117",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 117"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 118,
+    "nombre": "Catedral de Corrientes - Sector 118",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 118"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 119,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 119",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 119"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 120,
+    "nombre": "Iglesia San Francisco - Sector 120",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 120"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 121,
+    "nombre": "Parroquia San Roque - Sector 121",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 121"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 122,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 122",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 122"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 123,
+    "nombre": "Teatro Flotante del Paraná - Sector 123",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 123"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 124,
+    "nombre": "Avenida 3 de Abril - Sector 124",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 124"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 125,
+    "nombre": "Avenida Maipú - Sector 125",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 125"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 126,
+    "nombre": "Avenida Independencia - Sector 126",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 126"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 127,
+    "nombre": "Catedral de Corrientes - Sector 127",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 127"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 128,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 128",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 128"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 129,
+    "nombre": "Iglesia San Francisco - Sector 129",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 129"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 130,
+    "nombre": "Parroquia San Roque - Sector 130",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 130"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 131,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 131",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 131"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 132,
+    "nombre": "Teatro Flotante del Paraná - Sector 132",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 132"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 133,
+    "nombre": "Avenida 3 de Abril - Sector 133",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 133"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 134,
+    "nombre": "Avenida Maipú - Sector 134",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 134"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 135,
+    "nombre": "Avenida Independencia - Sector 135",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 135"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 136,
+    "nombre": "Catedral de Corrientes - Sector 136",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 136"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 137,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 137",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 137"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 138,
+    "nombre": "Iglesia San Francisco - Sector 138",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 138"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 139,
+    "nombre": "Parroquia San Roque - Sector 139",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 139"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 140,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 140",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 140"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 141,
+    "nombre": "Teatro Flotante del Paraná - Sector 141",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 141"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 142,
+    "nombre": "Avenida 3 de Abril - Sector 142",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 142"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 143,
+    "nombre": "Avenida Maipú - Sector 143",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 143"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 144,
+    "nombre": "Avenida Independencia - Sector 144",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 144"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 145,
+    "nombre": "Catedral de Corrientes - Sector 145",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 145"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 146,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 146",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 146"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 147,
+    "nombre": "Iglesia San Francisco - Sector 147",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 147"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 148,
+    "nombre": "Parroquia San Roque - Sector 148",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 148"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 149,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 149",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 149"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 150,
+    "nombre": "Teatro Flotante del Paraná - Sector 150",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 150"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 151,
+    "nombre": "Avenida 3 de Abril - Sector 151",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 151"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 152,
+    "nombre": "Avenida Maipú - Sector 152",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 152"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 153,
+    "nombre": "Avenida Independencia - Sector 153",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 153"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 154,
+    "nombre": "Catedral de Corrientes - Sector 154",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 154"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 155,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 155",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 155"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 156,
+    "nombre": "Iglesia San Francisco - Sector 156",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 156"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 157,
+    "nombre": "Parroquia San Roque - Sector 157",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 157"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 158,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 158",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 158"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 159,
+    "nombre": "Teatro Flotante del Paraná - Sector 159",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 159"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 160,
+    "nombre": "Avenida 3 de Abril - Sector 160",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 160"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 161,
+    "nombre": "Avenida Maipú - Sector 161",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 161"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 162,
+    "nombre": "Avenida Independencia - Sector 162",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 162"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 163,
+    "nombre": "Catedral de Corrientes - Sector 163",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 163"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 164,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 164",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 164"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 165,
+    "nombre": "Iglesia San Francisco - Sector 165",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 165"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 166,
+    "nombre": "Parroquia San Roque - Sector 166",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 166"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 167,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 167",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 167"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 168,
+    "nombre": "Teatro Flotante del Paraná - Sector 168",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 168"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 169,
+    "nombre": "Avenida 3 de Abril - Sector 169",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 169"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 170,
+    "nombre": "Avenida Maipú - Sector 170",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 170"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 171,
+    "nombre": "Avenida Independencia - Sector 171",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 171"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 172,
+    "nombre": "Catedral de Corrientes - Sector 172",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 172"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 173,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 173",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 173"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 174,
+    "nombre": "Iglesia San Francisco - Sector 174",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 174"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 175,
+    "nombre": "Parroquia San Roque - Sector 175",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 175"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 176,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 176",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 176"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 177,
+    "nombre": "Teatro Flotante del Paraná - Sector 177",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 177"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 178,
+    "nombre": "Avenida 3 de Abril - Sector 178",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 178"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 179,
+    "nombre": "Avenida Maipú - Sector 179",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 179"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 180,
+    "nombre": "Avenida Independencia - Sector 180",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 180"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 181,
+    "nombre": "Catedral de Corrientes - Sector 181",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 181"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 182,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 182",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 182"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 183,
+    "nombre": "Iglesia San Francisco - Sector 183",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 183"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 184,
+    "nombre": "Parroquia San Roque - Sector 184",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 184"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 185,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 185",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 185"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 186,
+    "nombre": "Teatro Flotante del Paraná - Sector 186",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 186"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 187,
+    "nombre": "Avenida 3 de Abril - Sector 187",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 187"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 188,
+    "nombre": "Avenida Maipú - Sector 188",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 188"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 189,
+    "nombre": "Avenida Independencia - Sector 189",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 189"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 190,
+    "nombre": "Catedral de Corrientes - Sector 190",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 190"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 191,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 191",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 191"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 192,
+    "nombre": "Iglesia San Francisco - Sector 192",
+    "variantes": [
+      "Iglesia San Francisco",
+      "Iglesia San Francisco sector 192"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 193,
+    "nombre": "Parroquia San Roque - Sector 193",
+    "variantes": [
+      "Parroquia San Roque",
+      "Parroquia San Roque sector 193"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 194,
+    "nombre": "Teatro Oficial Juan de Vera - Sector 194",
+    "variantes": [
+      "Teatro Oficial Juan de Vera",
+      "Teatro Oficial Juan de Vera sector 194"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 195,
+    "nombre": "Teatro Flotante del Paraná - Sector 195",
+    "variantes": [
+      "Teatro Flotante del Paraná",
+      "Teatro Flotante del Paraná sector 195"
+    ],
+    "tipo": "Teatro",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Teatro.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 196,
+    "nombre": "Avenida 3 de Abril - Sector 196",
+    "variantes": [
+      "Av. 3 de Abril",
+      "Avenida 3 de Abril sector 196"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 197,
+    "nombre": "Avenida Maipú - Sector 197",
+    "variantes": [
+      "Av. Maipú",
+      "Avenida Maipú sector 197"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 198,
+    "nombre": "Avenida Independencia - Sector 198",
+    "variantes": [
+      "Av. Independencia",
+      "Avenida Independencia sector 198"
+    ],
+    "tipo": "Avenida",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Avenida.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 199,
+    "nombre": "Catedral de Corrientes - Sector 199",
+    "variantes": [
+      "Catedral de Corrientes",
+      "Catedral de Corrientes sector 199"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  },
+  {
+    "id": 200,
+    "nombre": "Iglesia de la Cruz de los Milagros - Sector 200",
+    "variantes": [
+      "Iglesia de la Cruz de los Milagros",
+      "Iglesia de la Cruz de los Milagros sector 200"
+    ],
+    "tipo": "Iglesia",
+    "descripcion": "Lugar emblemático de Corrientes dentro de la categoría Iglesia.",
+    "ubicacion": "Corrientes Capital",
+    "cercanias": [
+      "Plaza Cabral",
+      "Parque Mitre",
+      "Avenida 3 de Abril"
+    ]
+  }
+]

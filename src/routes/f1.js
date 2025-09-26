@@ -14,6 +14,7 @@ const client = require('./whatsapclient');
 const cheerio = require("cheerio");
 const config = require('./config.json'); // objeto directo
 const personas = require('./personalidades.json');
+const lugaress = require('./lugares.json');
 const { format } = require("date-fns");
 const { MessageMedia } = require("whatsapp-web.js");
 const stringSimilarity = require("string-similarity");
@@ -22,6 +23,25 @@ const stringSimilarity = require("string-similarity");
 ////convocado,= s enevia a un juagdor la invitacion
 
 
+function buscarLugaresEnTexto(texto) {
+  const normalizado = normalizarr(texto);
+  
+  for (const lug of lugaress) {
+    const nombreTokens = normalizarr(lug.nombre).split(/\s+/); // ["hugo","cuqui","calvano"]
+    
+    // contamos cuántos tokens matchean con fuzziness
+    let coincidencias = 0;
+    for (const token of nombreTokens) {
+      const similitud = stringSimilarity.findBestMatch(token, normalizado.split(/\s+/));
+      if (similitud.bestMatch.rating > 0.7) coincidencias++;
+    }
+
+    // ✅ Si al menos 2 tokens coinciden, lo consideramos un match
+    if (coincidencias >= 2) return lug;
+  }
+
+  return null; // no encontró nada
+}
 function buscarPersonaEnTexto(texto) {
   const normalizado = normalizarr(texto);
   
@@ -41,6 +61,28 @@ function buscarPersonaEnTexto(texto) {
 
   return null; // no encontró nada
 }
+
+function buscarLugaresPorCategoria(texto) {
+  const normalizado = normalizarr(texto);
+
+  // Detectar categorías básicas
+  const categoriasPosibles = ["plaza", "iglesia", "museo", "parque", "monumento"];
+  const categoria = categoriasPosibles.find(cat =>
+    normalizado.includes(cat)
+  );
+
+  if (!categoria) return null; // no pidió una categoría
+
+  // Filtramos los lugares que coincidan con esa categoría
+  const resultados = lugaress.filter(lug =>
+    normalizarr(lug.tipo).includes(categoria)
+  );
+
+  return { categoria, resultados };
+}
+
+
+
 const PROVIDER_ORDER = ["deepseek", "groq", "openai"]; // podes cambiar el orden o agregar más proveedores
 const COOLDOWN_MS_BASE = 1000 * 60 * 2; // 2 minutos base de "enfriamiento" ante rate limit
 function detectarPorKeywords(texto) {
@@ -238,20 +280,7 @@ async function callDeepSeek(model, messages, max_tokens = 1000) {
   });
   return res.data?.choices?.[0]?.message?.content;
 }
-const models = {
-  groq: { 
-    small: "llama-3.1-8b-instant", 
-    large: "llama-3.3-70b-versatile" 
-  },
-  openai: { 
-    small: "gpt-4o-mini", 
-    large: "gpt-4o" 
-  },
-  deepseek: {
-    small: "deepseek-chat",   // gratis, rápido
-    large: "deepseek-coder"   // más tokens
-  }
-};
+
 let cacheMonedas = {
   timestamp: 0,
   info: {}
@@ -371,10 +400,20 @@ async function generateResponse(numero, texto, systemPersona = "", opts = {}) {
 
   const esCompleja = esComplejaTexto(texto);
   // modelos por proveedor (pueden sobreescribirse por opts)
-  const models = {
-    groq: { small: "llama-3.1-8b-instant", large: "llama-3.3-70b-versatile" },
-    openai: { small: "gpt-4o-mini", large: "gpt-4o" }
-  };
+const models = {
+  groq: { 
+    small: "llama-3.1-8b-instant", 
+    large: "llama-3.3-70b-versatile" 
+  },
+  openai: { 
+    small: "gpt-4o-mini", 
+    large: "gpt-4o" 
+  },
+  deepseek: {
+    small: "deepseek-chat",   // gratis, rápido
+    large: "deepseek-coder"   // más tokens
+  }
+};
 
   // Orden de proveedores (opts puede cambiar)
   const providersOrder = opts.providers || PROVIDER_ORDER;
@@ -1507,6 +1546,34 @@ async function handleTourismAdvisor(numero, texto, message) {
     return; // ✅ Salimos, no seguimos con turismo
   }
 
+const lugarrr = buscarLugaresEnTexto(texto);
+  if (lugarrr) {
+    await message.reply(
+      `👤 *${lugarrr.nombre}*\n` +
+      `📌 ${lugarrr.tipo}\n` +
+      `📖 ${lugarrr.descripcion}\n` +
+      (lugarrr.ubicacion ? `🎭 ubicacion: ${lugarrr.ubicacion}\n` : "") +
+      (lugarrr.cercanias ? `🌍 cercanias: ${lugarrr.cercanias}\n` : "") 
+    
+    );
+    return; // ✅ Salimos, no seguimos con turismo
+  }
+
+  const lugaresCategoria = buscarLugaresPorCategoria(texto);
+if (lugaresCategoria) {
+  if (!lugaresCategoria.resultados.length) {
+    await message.reply(`⚠️ No encontré lugares en la categoría *${lugaresCategoria.categoria}*.`);
+    return;
+  }
+
+  let respuesta = `📍 Lugares en la categoría *${lugaresCategoria.categoria}*:\n\n`;
+  lugaresCategoria.resultados.forEach((l, i) => {
+    respuesta += `${i + 1}. *${l.nombre}*\n_${l.descripcion}_\n\n`;
+  });
+
+  await message.reply(respuesta);
+  return;
+}
 
   const consulta = await analizarConsultaTurismo(texto);
 
@@ -1520,7 +1587,7 @@ if (/^(mas\s*info|informacion|info)/i.test(normalizarTexto(texto))) {
   console.log("query normalizado:", query);
 
   const eventosGuardados = memoriaEventos[numero] || [];
-  console.log("eventosGuardados:", eventosGuardados.map(e => e.titulo));
+  //console.log("eventosGuardados:", eventosGuardados.map(e => e.titulo));
 
   const evento = eventosGuardados.find(e =>
     normalizarTexto(e.titulo).includes(query)
@@ -1541,7 +1608,7 @@ if (/^(mas\s*info|informacion|info)/i.test(normalizarTexto(texto))) {
 console.log("enviando mensaje ");
 console.log(  `🎶 *${detalle.titulo}*\n📅 fecha ${evento.fecha}\n\n${detalle.categorias}`)
   await message.reply(
-    `🎶 *${evento.titulo}*\n📅 fecha ${evento.fecha}\n\n${detalle.categorias}`,
+    `🎶 *${evento.titulo}*\n ${evento.descripcion}*\n ${evento.descripcionHtml}*\n📅 fecha ${evento.fecha}\n ${detalle.lugar} \n${detalle.categorias}`,
     //{ media: { url: detalle.imagen } } // 👈 adjunta la imagen
   );
   console.log("listo");
@@ -1742,17 +1809,20 @@ async function getEventoDetalle(url) {
                  "Sin hora";
 
     // Lugar (venue)
-    const lugar = $(".tribe-events-venue-details").text().replace(/\s+/g, " ").trim() || "Sin lugar";
+    const lugar = $(".tribe-events-single-section-title").text().replace(/\s+/g, " ").trim() || "Sin lugar";
 
     // Descripción en texto plano
     const descripcionTexto =
-      $(".tribe-events-single-event-description").text().trim() ||
+      $(".html-div xdj266r x14z9mp xat24cr x1lziwak xexx8yu xyri2b x18d9i69 x1c1uobl x9f619 xjbqb8w x78zum5 x15mokao x1ga7v0g x16uus16 xbiv7yw x1uhb9sk x1plvlek xryxfnj x1c4vz4f x2lah0s xdt5ytf xqjyukv x1qjc9v5 x1oa3qoh x1nhvcw1").text().trim() ||
       "Sin descripción";
 
     // Descripción en HTML completo (con formato y links)
-    const descripcionHtml =
-      $(".tribe-events-single-event-description").html()?.trim() ||
-      "Sin descripción";
+
+        const descripcionHtml =
+      $(".x193iq5w xeuugli x13faqbe x1vvkbs xt0psk2 x1i0vuye xvs91rp xo1l8bm x5n08af x10wh9bi xpm28yp x8viiok x1o7cslx x126k92a").text().trim() ||
+      "Sin descripción extendida";
+
+
 
     // Categorías
     const categorias =
