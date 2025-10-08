@@ -1264,7 +1264,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
   curso_adic = curso_adic || "No";
   profesion = profesion || "No";
   agregar_whatsap= agregar_whatsap|| "No";
-
+  curso= curso|| "Barrio Sur";
   try {
     // Verificar si ya existe la persona
     let pers = await pool.query('SELECT * FROM personas WHERE dni = ?', [dni]);
