@@ -1305,7 +1305,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
         `INSERT INTO inscripciones_carnaval 
          ( fecha, dni_persona, id_persona, detalle,  curso,profesion,alumna_anterior,tiene_espacio,enseniar,curso_adic,agregar_whatsap)
          VALUES (?, ?, ?, ?, ?,?,?,?,?,?,?)`,
-        [ fecha, dni, pers[0]['id'], "Op oftalmologico octubre", "Barrio Sur",profesion,alumna_anterior,tiene_espacio,enseniar,"Barrio Sur",agregar_whatsap]
+        [ fecha, dni, pers[0]['id'], "Op oftalmologico octubre", curso,profesion,alumna_anterior,tiene_espacio,enseniar,"Barrio Sur",agregar_whatsap]
       );
 
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto';
