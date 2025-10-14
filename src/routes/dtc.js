@@ -4995,91 +4995,120 @@ router.post("/agregarturnocadia", async (req, res) => {
 
 }) */
   router.post("/agendarturno", async (req, res) => {
-    let { id, id_persona, nuevoUsuario, nombre, apellido,usuariodispositivo,agendadopor , observaciones} = req.body;
-    console.log(id, id_persona, nuevoUsuario, nombre, apellido,usuariodispositivo,agendadopor,observaciones)
-if(observaciones == undefined){
-  observaciones="No"
-}
-if(usuariodispositivo == undefined){
-  usuariodispositivo="No"
-}
-    try {
-        const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
-        const fecha = new Date().toLocaleDateString();
+  let {
+    id,
+    id_persona,
+    nuevoUsuario,
+    nombre,
+    apellido,
+    dni,
+    domicilio,
+    barrio,
+    usuariodispositivo,
+    agendadopor,
+    observaciones
+  } = req.body;
 
-        if (nuevoUsuario) { 
-            const insertResult = await pool.query(
-                'INSERT INTO dtc_personas_psicologa (nombre, apellido) VALUES (?, ?)',
-                [nombre, apellido]
-            );
-            id_persona = Number(insertResult.insertId);
-            usuariodispositivo="No"
-        }
+  console.log(id, id_persona, nuevoUsuario, nombre, apellido, dni, domicilio, barrio, usuariodispositivo, agendadopor, observaciones);
 
-      //  console.log(id, id_persona);
+  // Valores por defecto si no vienen del frontend
+  if (observaciones == undefined || observaciones === "") {
+    observaciones = "No determinado";
+  }
+  if (usuariodispositivo == undefined || usuariodispositivo === "") {
+    usuariodispositivo = "No";
+  }
+  if (dni == undefined || dni === "") {
+    dni = "No determinado";
+  }
+  if (domicilio == undefined || domicilio === "") {
+    domicilio = "No determinado";
+  }
+  if (barrio == undefined || barrio === "") {
+    barrio = "No determinado";
+  }
 
-        const profesionall = await pool.query(
-            'SELECT * FROM dtc_turnos JOIN (SELECT id AS idu, telefono, nombre FROM usuarios) AS sel ON dtc_turnos.id_psico = sel.idu WHERE id = ?',
-            [id]
-        );
-        personapsiq=""
-        if(usuariodispositivo=="Si"){
-           personapsiq = await pool.query('SELECT * FROM dtc_chicos WHERE id = ?', [id_persona]);
+  try {
+    const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
+    const fecha = new Date().toLocaleDateString();
 
-        }else{
-           personapsiq = await pool.query('SELECT * FROM dtc_personas_psicologa WHERE id = ?', [id_persona]);
-
-        }
-        const telefono = profesionall[0]?.telefono + '@c.us';
-
-        await pool.query(
-            'UPDATE dtc_turnos SET id_persona = ?, estado = "Agendado", hora = ?,usuariodispositivo=?,agendadopor=?,observaciones=? WHERE id = ?',
-            [id_persona, `${horaBuenosAires}-${fecha}`, usuariodispositivo,agendadopor,observaciones,id]
-        );
-
-        // Obtener turnos agendados y disponibles
-        const turnosOcupados = await pool.query(
-            'SELECT detalle FROM dtc_turnos WHERE estado = "Agendado" AND fecha = ?',
-            [profesionall[0]?.fecha]
-        );
-        const turnosDisponibles = await pool.query(
-            'SELECT detalle FROM dtc_turnos WHERE estado = "Disponible" AND fecha = ?',
-            [profesionall[0]?.fecha]
-        );
-
-        // Construcción del mensaje con los turnos ocupados y disponibles
-        let mensaje = `Hola ${profesionall[0]?.nombre}, de parte del DTC te notificamos que tenés un nuevo turno para el día ${profesionall[0]?.fecha} a las ${profesionall[0]?.detalle} del paciente ${personapsiq[0]?.nombre} ${personapsiq[0]?.apellido} con las siguientes observaciones: ${observaciones}`;
-        
-        if (turnosOcupados.length > 0) {
-            mensaje += '\n\nL los siguientes horarios tienes ocupados ese dia:';
-            turnosOcupados.forEach(turno => {
-                mensaje += `\n- ${turno.detalle}`;
-            });
-        }
-        
-        if (turnosDisponibles.length > 0) {
-            mensaje += '\n\nHorarios disponibles para ese día:';
-            turnosDisponibles.forEach(turno => {
-                mensaje += `\n- ${turno.detalle}`;
-            });
-        } else {
-            mensaje += '\n\nNo hay horarios disponibles para ese día.';
-        }
-
-        console.log(mensaje);
-        try {
-           await client.sendMessage(telefono, mensaje);
-        } catch (error) {
-            //console.log(error);
-        }
-
-        res.json('agendado');
-    } catch (error) {
-        console.error(error);
-        res.json('no agendado');
+    // Si es un usuario nuevo, lo insertamos en la tabla correspondiente
+    if (nuevoUsuario) {
+      const insertResult = await pool.query(
+        'INSERT INTO dtc_personas_psicologa (nombre, apellido, dni, domicilio, barrio, observaciones) VALUES (?, ?, ?, ?, ?, ?)',
+        [nombre, apellido, dni, domicilio, barrio, observaciones]
+      );
+      id_persona = Number(insertResult.insertId);
+      usuariodispositivo = "No";
     }
-});
 
+    // Obtener datos del turno y profesional
+    const profesionall = await pool.query(
+      'SELECT * FROM dtc_turnos JOIN (SELECT id AS idu, telefono, nombre FROM usuarios) AS sel ON dtc_turnos.id_psico = sel.idu WHERE id = ?',
+      [id]
+    );
+
+    let personapsiq = "";
+    if (usuariodispositivo == "Si") {
+      personapsiq = await pool.query('SELECT * FROM dtc_chicos WHERE id = ?', [id_persona]);
+    } else {
+      personapsiq = await pool.query('SELECT * FROM dtc_personas_psicologa WHERE id = ?', [id_persona]);
+    }
+
+    const telefono = profesionall[0]?.telefono + '@c.us';
+
+    // Actualizar el turno como agendado
+    await pool.query(
+      'UPDATE dtc_turnos SET id_persona = ?, estado = "Agendado", hora = ?, usuariodispositivo = ?, agendadopor = ?, observaciones = ? WHERE id = ?',
+      [id_persona, `${horaBuenosAires}-${fecha}`, usuariodispositivo, agendadopor, observaciones, id]
+    );
+
+    // Obtener turnos agendados y disponibles para ese día
+    const turnosOcupados = await pool.query(
+      'SELECT detalle FROM dtc_turnos WHERE estado = "Agendado" AND fecha = ?',
+      [profesionall[0]?.fecha]
+    );
+    const turnosDisponibles = await pool.query(
+      'SELECT detalle FROM dtc_turnos WHERE estado = "Disponible" AND fecha = ?',
+      [profesionall[0]?.fecha]
+    );
+
+    // Construir mensaje de WhatsApp
+    let mensaje = `Hola ${profesionall[0]?.nombre}, de parte del DTC te notificamos que tenés un nuevo turno para el día ${profesionall[0]?.fecha} a las ${profesionall[0]?.detalle} del paciente ${personapsiq[0]?.nombre} ${personapsiq[0]?.apellido}.`;
+
+    mensaje += `\n\n📋 Datos del paciente:\n🪪 DNI: ${personapsiq[0]?.dni || dni}\n🏠 Domicilio: ${personapsiq[0]?.domicilio || domicilio}\n🌆 Barrio: ${personapsiq[0]?.barrio || barrio}\n🗒️ Observaciones: ${observaciones}`;
+
+    if (turnosOcupados.length > 0) {
+      mensaje += '\n\n⏰ Horarios ocupados ese día:';
+      turnosOcupados.forEach(turno => {
+        mensaje += `\n- ${turno.detalle}`;
+      });
+    }
+
+    if (turnosDisponibles.length > 0) {
+      mensaje += '\n\n🕒 Horarios disponibles:';
+      turnosDisponibles.forEach(turno => {
+        mensaje += `\n- ${turno.detalle}`;
+      });
+    } else {
+      mensaje += '\n\nNo hay horarios disponibles para ese día.';
+    }
+
+    console.log(mensaje);
+
+    // Enviar mensaje por WhatsApp
+    try {
+      await client.sendMessage(telefono, mensaje);
+    } catch (error) {
+      console.log("Error al enviar mensaje:", error);
+    }
+
+    res.json('agendado');
+  } catch (error) {
+    console.error("Error en /agendarturno:", error);
+    res.json('no agendado');
+  }
+});
 
 /*
   router.post("/agendarturno", async (req, res) => {
