@@ -5484,8 +5484,8 @@ router.post("/ponerausenteclase", async (req, res) => {
   const { fecha } = req.body
   try {
   
-    const tunr = await pool.query('select * from dtc_turnos left join(select id as idp, nombre, apellido, dni from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where fecha=? and (usuariodispositivo is null or usuariodispositivo="No")', [fecha])
-    const tunr2 = await pool.query('select * from dtc_turnos join(select id as idp, nombre, apellido, dni from dtc_chicos) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where (fecha=?) and (usuariodispositivo="Si")', [fecha])
+    const tunr = await pool.query('select * from dtc_turnos left join(select id as idp, nombre, apellido, dni, domicilio, barrio from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where fecha=? and (usuariodispositivo is null or usuariodispositivo="No")', [fecha])
+    const tunr2 = await pool.query('select * from dtc_turnos join(select id as idp, nombre, apellido, dni, domicilio  from dtc_chicos) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where (fecha=?) and (usuariodispositivo="Si")', [fecha])
     const resultado = tunr.concat(tunr2);
 
     //usuarios = await pool.query("select * from dtc_personas_psicologa left join (select fecha, id_persona  from dtc_turnos  where fecha=?) as sel on dtc_personas_psicologa.id=sel.id_persona order by apellido ", [fecha])
@@ -5498,6 +5498,9 @@ SELECT
   p.apellido,
   t_max.fecha,
   u.nombrepsic,
+  p.dni,
+  p.domicilio,
+  p.barrio,
   'No' AS usuariodispositivo
 FROM dtc_personas_psicologa p
 LEFT JOIN (
@@ -5535,6 +5538,9 @@ SELECT
   c.apellido,
   t_max.fecha,
   u.nombrepsic,
+  c.dni,
+  c.domicilio,
+   'Si' AS barrio,
   'Si' AS usuariodispositivo
 FROM dtc_chicos c
 LEFT JOIN (
