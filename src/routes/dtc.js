@@ -962,6 +962,7 @@ router.get('/listadepersonaspsiq/', async (req, res) => {
         SELECT 
           dp.id,
           dp.nombre,
+          dp.dni,
           dp.apellido,
           'psicologa' AS tipo,
           COALESCE(sel.cantidadturnos, 0) AS cantidadturnos
@@ -982,6 +983,7 @@ router.get('/listadepersonaspsiq/', async (req, res) => {
           dc.id,
           dc.nombre,
           dc.apellido,
+         dc.dni,
           'chico' AS tipo,
           COALESCE(sel2.cantidadturnos, 0) AS cantidadturnos
         FROM dtc_chicos dc
@@ -995,11 +997,11 @@ router.get('/listadepersonaspsiq/', async (req, res) => {
         ) AS sel2
         ON dc.id = sel2.id_persona
       ) AS combinados
-      WHERE cantidadturnos > 0
-      ORDER BY cantidadturnos DESC, apellido
+
+      ORDER BY apellido
     `);
 
-    // Formateo de BigInt
+    // Formateo de BigInt       WHERE cantidadturnos > 0
     const chiquesFormatted = chiques.map(row => ({
       ...row,
       cantidadturnos: typeof row.cantidadturnos === 'bigint' ? Number(row.cantidadturnos) : row.cantidadturnos
