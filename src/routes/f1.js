@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { isLoggedIn, isLoggedInn, isLoggedInn2 } = require('../lib/auth') //proteger profile
-const pool = require('../database')
+const pool = require('../database4')
 const multer = require('multer')
 const path = require('path')
 const fse = require('fs').promises;
@@ -65,22 +65,34 @@ function buscarPersonaEnTexto(texto) {
 function buscarLugaresPorCategoria(texto) {
   const normalizado = normalizarr(texto);
 
-  // Detectar categorías básicas
-  const categoriasPosibles = ["plaza", "iglesia", "museo", "parque", "monumento"];
-  const categoria = categoriasPosibles.find(cat =>
+  // 🔹 Diccionario plural → singular
+  const categoriasPlural = {
+    "iglesias": "Iglesia",
+    "teatros": "Teatro",
+    "avenidas": "Avenida",
+    "escuelas": "Escuela",
+    "parques": "Parque",
+    "plazas": "Plaza",
+    "museos": "Museo",
+    "clubes": "Club",
+    "balnearios": "Balneario"
+  };
+
+  // 🔎 Buscar si el texto contiene alguna categoría plural
+  const categoriaPlural = Object.keys(categoriasPlural).find(cat =>
     normalizado.includes(cat)
   );
 
-  if (!categoria) return null; // no pidió una categoría
+  if (!categoriaPlural) return null; // no pidió una categoría plural
 
-  // Filtramos los lugares que coincidan con esa categoría
+  // Buscar en el JSON según tipo (singular)
+  const categoriaSingular = categoriasPlural[categoriaPlural];
   const resultados = lugaress.filter(lug =>
-    normalizarr(lug.tipo).includes(categoria)
+    normalizarr(lug.tipo) === normalizarr(categoriaSingular)
   );
 
-  return { categoria, resultados };
+  return { categoria: categoriaPlural, resultados };
 }
-
 
 
 const PROVIDER_ORDER = ["deepseek", "groq", "openai"]; // podes cambiar el orden o agregar más proveedores
@@ -1286,7 +1298,7 @@ router.post("/responderconvocatoriadirecta", async (req, res) => {
 
   try {
     await pool.query(
-      "UPDATE convocatoria_directa SET estado = ? WHERE id = ?",
+      "UPDATE convocatoria_directa SET estado = ?, visto ='No' WHERE id = ?",
       [nuevoEstado, id]
     );
 
