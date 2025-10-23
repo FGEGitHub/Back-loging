@@ -962,7 +962,6 @@ router.get('/listadepersonaspsiq/', async (req, res) => {
         SELECT 
           dp.id,
           dp.nombre,
-          dp.dni,
           dp.apellido,
           'psicologa' AS tipo,
           COALESCE(sel.cantidadturnos, 0) AS cantidadturnos
@@ -983,7 +982,6 @@ router.get('/listadepersonaspsiq/', async (req, res) => {
           dc.id,
           dc.nombre,
           dc.apellido,
-         dc.dni,
           'chico' AS tipo,
           COALESCE(sel2.cantidadturnos, 0) AS cantidadturnos
         FROM dtc_chicos dc
@@ -997,11 +995,11 @@ router.get('/listadepersonaspsiq/', async (req, res) => {
         ) AS sel2
         ON dc.id = sel2.id_persona
       ) AS combinados
-
-      ORDER BY apellido
+      WHERE cantidadturnos > 0
+      ORDER BY cantidadturnos DESC, apellido
     `);
 
-    // Formateo de BigInt       WHERE cantidadturnos > 0
+    // Formateo de BigInt
     const chiquesFormatted = chiques.map(row => ({
       ...row,
       cantidadturnos: typeof row.cantidadturnos === 'bigint' ? Number(row.cantidadturnos) : row.cantidadturnos
@@ -1235,7 +1233,7 @@ router.post('/listachiquesparainscribir/', async (req, res) => {
 
 
 
-
+/* 
 router.get('/listachiquesmomentaneo/', async (req, res) => {
   try {
     const calcularEdad = (fechaNacimiento) => {
@@ -1346,7 +1344,7 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
   }
 });
 
-
+ */
 
 router.get('/traermapa', (req, res) => {
   const kmlFilePath = path.join(__dirname, '../maps/mapadtc.kml');

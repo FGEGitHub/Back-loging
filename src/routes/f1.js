@@ -1265,12 +1265,12 @@ router.post("/traernotificaciones", async (req, res) => {
 
     // Verificar si ya existe
     const existe = await pool.query(
-      "SELECT * FROM sumadas  join ( select id as idp, id_creador  from partidos) as sel on sumadas.id_partido=idp WHERE id_creador = ? AND estado = ?",
+      "SELECT * FROM sumadas  join ( select id as idp, id_creador  from partidos) as sel on sumadas.id_partido=idp WHERE id_creador = ? AND (estado = ? or visto='No')",
       [id, "solicitado"]
     );
 
     const directas = await pool.query(
-      "SELECT * FROM convocatoria_directa  join (select id as idp, nombre, apodo from usuarios) as sel on convocatoria_directa.convocador_id=sel.idp WHERE jugador_id = ? AND estado = ?",
+      "SELECT * FROM convocatoria_directa  join (select id as idp, nombre, apodo from usuarios) as sel on convocatoria_directa.convocador_id=sel.idp WHERE jugador_id = ? AND (estado = ? or visto='No')",
       [id, "convocado"]
     );
 
@@ -1497,7 +1497,7 @@ router.post('/modificarJugador', async (req, res) => {
 //////////////////TURISMO
 
 
-client.on("message", async (message) => {
+/* client.on("message", async (message) => {
   try {
     if (!message || !message.body) return;
     const texto = message.body.trim();
@@ -1524,18 +1524,18 @@ client.on("message", async (message) => {
       await handleLegalAdvisor(numero, texto, message);
     } else if (roleInfo.type === "asistente_social") {
       await handleAsistenteSocial(numero, texto, message);
-    } */ else {
+    } else {
       // default -> LLM
       await handleTourismAdvisor(numero, texto, message);
       /*   const persona = roleInfo.persona || config.default.persona;
         const respuesta = await generateResponse(numero, texto, persona);
-        await message.reply(respuesta); */
+        await message.reply(respuesta); 
     }
   } catch (error) {
     console.error("Error procesando mensaje:", error.response?.data || error.message);
     await message.reply("⚠️ Hubo un error al procesar tu consulta.");
   }
-});
+}); */
 
 
 
