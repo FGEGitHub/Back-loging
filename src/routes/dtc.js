@@ -1233,7 +1233,7 @@ router.post('/listachiquesparainscribir/', async (req, res) => {
 
 
 
-/* 
+
 router.get('/listachiquesmomentaneo/', async (req, res) => {
   try {
     const calcularEdad = (fechaNacimiento) => {
@@ -1344,7 +1344,7 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
   }
 });
 
- */
+
 
 router.get('/traermapa', (req, res) => {
   const kmlFilePath = path.join(__dirname, '../maps/mapadtc.kml');
