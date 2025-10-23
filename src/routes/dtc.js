@@ -1395,7 +1395,7 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
 
     // --- NUEVAS CONSULTAS ESTADÍSTICAS ---
     const personasPsicologa = await pool.query('SELECT COUNT(*) AS cantidad FROM dtc_personas_psicologa');
-    const cantidadPsicologa = Number(personasPsicologa.cantidad) || 0;
+    const cantidadPsicologa = Number(personasPsicologa[0].cantidad) || 0;
 
     const conObraSocial = await pool.query(`
       SELECT COUNT(*) AS cantidad 
@@ -5094,45 +5094,60 @@ router.post("/agregarturnocadia", async (req, res) => {
     barrio,
     usuariodispositivo,
     agendadopor,
-    observaciones
+    observaciones,
+    obra_social,           // ✅ Nuevo campo
+    obra_social_cual       // ✅ Nuevo campo
   } = req.body;
 
-  console.log(id, id_persona, nuevoUsuario, nombre, apellido, dni, domicilio, barrio, usuariodispositivo, agendadopor, observaciones);
+  console.log(
+    id,
+    id_persona,
+    nuevoUsuario,
+    nombre,
+    apellido,
+    dni,
+    domicilio,
+    barrio,
+    usuariodispositivo,
+    agendadopor,
+    observaciones,
+    obra_social,
+    obra_social_cual
+  );
 
-  // Valores por defecto si no vienen del frontend
-  if (observaciones == undefined || observaciones === "") {
-    observaciones = "No determinado";
-  }
-  if (usuariodispositivo == undefined || usuariodispositivo === "") {
-    usuariodispositivo = "No";
-  }
-  if (dni == undefined || dni === "") {
-    dni = "No determinado";
-  }
-  if (domicilio == undefined || domicilio === "") {
-    domicilio = "No determinado";
-  }
-  if (barrio == undefined || barrio === "") {
-    barrio = "No determinado";
-  }
+  // ✅ Valores por defecto
+  if (!observaciones || observaciones.trim() === "") observaciones = "No determinado";
+  if (!usuariodispositivo || usuariodispositivo.trim() === "") usuariodispositivo = "No";
+  if (!dni || dni.trim() === "") dni = "No determinado";
+  if (!domicilio || domicilio.trim() === "") domicilio = "No determinado";
+  if (!barrio || barrio.trim() === "") barrio = "No determinado";
+  if (!obra_social || obra_social.trim() === "") obra_social = "No"; // por defecto "No"
+  if (!obra_social_cual || obra_social_cual.trim() === "") obra_social_cual = "Sin determinar";
 
   try {
     const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
     const fecha = new Date().toLocaleDateString();
 
-    // Si es un usuario nuevo, lo insertamos en la tabla correspondiente
+    // ✅ Si es un usuario nuevo, insertar en tabla con los nuevos campos
     if (nuevoUsuario) {
       const insertResult = await pool.query(
-        'INSERT INTO dtc_personas_psicologa (nombre, apellido, dni, domicilio, barrio, observaciones) VALUES (?, ?, ?, ?, ?, ?)',
-        [nombre, apellido, dni, domicilio, barrio, observaciones]
+        `INSERT INTO dtc_personas_psicologa 
+         (nombre, apellido, dni, domicilio, barrio, observaciones, obra_social, obra_social_cual) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [nombre, apellido, dni, domicilio, barrio, observaciones, obra_social, obra_social_cual]
       );
+
       id_persona = Number(insertResult.insertId);
       usuariodispositivo = "No";
     }
 
     // Obtener datos del turno y profesional
     const profesionall = await pool.query(
-      'SELECT * FROM dtc_turnos JOIN (SELECT id AS idu, telefono, nombre FROM usuarios) AS sel ON dtc_turnos.id_psico = sel.idu WHERE id = ?',
+      `SELECT * 
+       FROM dtc_turnos 
+       JOIN (SELECT id AS idu, telefono, nombre FROM usuarios) AS sel 
+       ON dtc_turnos.id_psico = sel.idu 
+       WHERE id = ?`,
       [id]
     );
 
@@ -5145,13 +5160,16 @@ router.post("/agregarturnocadia", async (req, res) => {
 
     const telefono = profesionall[0]?.telefono + '@c.us';
 
-    // Actualizar el turno como agendado
+    // ✅ Actualizar turno como agendado
     await pool.query(
-      'UPDATE dtc_turnos SET id_persona = ?, estado = "Agendado", hora = ?, usuariodispositivo = ?, agendadopor = ?, observaciones = ? WHERE id = ?',
+      `UPDATE dtc_turnos 
+       SET id_persona = ?, estado = "Agendado", hora = ?, usuariodispositivo = ?, 
+           agendadopor = ?, observaciones = ? 
+       WHERE id = ?`,
       [id_persona, `${horaBuenosAires}-${fecha}`, usuariodispositivo, agendadopor, observaciones, id]
     );
 
-    // Obtener turnos agendados y disponibles para ese día
+    // Obtener turnos agendados y disponibles
     const turnosOcupados = await pool.query(
       'SELECT detalle FROM dtc_turnos WHERE estado = "Agendado" AND fecha = ?',
       [profesionall[0]?.fecha]
@@ -5161,10 +5179,15 @@ router.post("/agregarturnocadia", async (req, res) => {
       [profesionall[0]?.fecha]
     );
 
-    // Construir mensaje de WhatsApp
+    // ✅ Construir mensaje
     let mensaje = `Hola ${profesionall[0]?.nombre}, de parte del DTC te notificamos que tenés un nuevo turno para el día ${profesionall[0]?.fecha} a las ${profesionall[0]?.detalle} del paciente ${personapsiq[0]?.nombre} ${personapsiq[0]?.apellido}.`;
 
     mensaje += `\n\n📋 Datos del paciente:\n🪪 DNI: ${personapsiq[0]?.dni || dni}\n🏠 Domicilio: ${personapsiq[0]?.domicilio || domicilio}\n🌆 Barrio: ${personapsiq[0]?.barrio || barrio}\n🗒️ Observaciones: ${observaciones}`;
+
+    // ✅ Agrega información de obra social si existe
+    if (personapsiq[0]?.obra_social && personapsiq[0]?.obra_social !== "No") {
+      mensaje += `\n🏥 Obra social: ${personapsiq[0]?.obra_social_cual || "Sin especificar"}`;
+    }
 
     if (turnosOcupados.length > 0) {
       mensaje += '\n\n⏰ Horarios ocupados ese día:';
@@ -5197,6 +5220,7 @@ router.post("/agregarturnocadia", async (req, res) => {
     res.json('no agendado');
   }
 });
+
 
 /*
   router.post("/agendarturno", async (req, res) => {
