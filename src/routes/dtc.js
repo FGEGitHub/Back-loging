@@ -963,6 +963,7 @@ router.get('/listadepersonaspsiq/', async (req, res) => {
           dp.id,
           dp.nombre,
           dp.apellido,
+          dp.dni,
           'psicologa' AS tipo,
           COALESCE(sel.cantidadturnos, 0) AS cantidadturnos
         FROM dtc_personas_psicologa dp
@@ -982,6 +983,7 @@ router.get('/listadepersonaspsiq/', async (req, res) => {
           dc.id,
           dc.nombre,
           dc.apellido,
+              dc.dni,
           'chico' AS tipo,
           COALESCE(sel2.cantidadturnos, 0) AS cantidadturnos
         FROM dtc_chicos dc
@@ -1233,7 +1235,7 @@ router.post('/listachiquesparainscribir/', async (req, res) => {
 
 
 
-
+/* 
 router.get('/listachiquesmomentaneo/', async (req, res) => {
   try {
     const calcularEdad = (fechaNacimiento) => {
@@ -1344,7 +1346,93 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
   }
 });
 
+ */
+router.get('/listachiquesmomentaneo/', async (req, res) => {
+  try {
+    const calcularEdad = (fechaNacimiento) => {
+      const hoy = new Date();
+      const [anio, mes, dia] = fechaNacimiento.split('-');
+      let edad = hoy.getFullYear() - anio;
+      const mesActual = hoy.getMonth() + 1;
+      const diaActual = hoy.getDate();
+      if (mesActual < mes || (mesActual === mes && diaActual < dia)) {
+        edad--;
+      }
+      return edad;
+    };
 
+    // Campos requeridos
+    const requiredFields = {
+      dni: 'DNI',
+      tel_responsable: 'Teléfono Responsable',
+      escuela: 'Escuela',
+      grado: 'Grado',
+      domicilio: 'Domicilio',
+      dato_escolar: 'Dato Escolar',
+      fecha_nacimiento: 'Fecha de Nacimiento'
+    };
+
+    // Datos principales
+    const chiques = await pool.query('SELECT * FROM dtc_chicos ORDER BY apellido');
+
+    const chiquesConFalta = chiques.map(chique => {
+      const faltantes = Object.keys(requiredFields).filter(field => {
+        const value = chique[field];
+        return !value || value.trim() === '' || value.trim().toLowerCase() === 'sin determinar';
+      });
+
+      const falta = faltantes.length > 0
+        ? faltantes.map(field => requiredFields[field]).join(', ')
+        : 'Completo';
+
+      let edad = '';
+      try {
+        edad = calcularEdad(chique.fecha_nacimiento);
+      } catch (error) {}
+
+      return { ...chique, falta, edad };
+    });
+
+    // --- NUEVAS CONSULTAS ESTADÍSTICAS ---
+    const personasPsicologa = await pool.query('SELECT COUNT(*) AS cantidad FROM dtc_personas_psicologa');
+    const cantidadPsicologa = Number(personasPsicologa.cantidad) || 0;
+
+    const conObraSocial = await pool.query(`
+      SELECT COUNT(*) AS cantidad 
+      FROM marketing.dtc_chicos 
+      WHERE obra_social IS NOT NULL AND obra_social <> 'No' AND obra_social <> 'Sin determinar'
+    `);
+    
+    const cantidadObraSocial = Number(conObraSocial[0].cantidad) || 0;
+//console.log(cantidadObraSocial)
+    const totalChicos = await pool.query(`SELECT COUNT(*) AS total FROM marketing.dtc_chicos`);
+    const totalUsuarios = Number(totalChicos[0].total) || 0;
+
+    const porcentajeObraSocial = totalUsuarios
+      ? ((cantidadObraSocial / totalUsuarios) * 100).toFixed(2)
+      : 0;
+
+    // Estadísticas generales
+    const estadisticas = {};
+    let total = 0;
+    for (const chico of chiquesConFalta) {
+      const key = chico.kid === 'Sin definir' ? 'sin_definir' : chico.kid;
+      estadisticas[key] = (estadisticas[key] || 0) + 1;
+      total++;
+    }
+
+    estadisticas.total = total;
+    estadisticas.psicologa = cantidadPsicologa;
+    estadisticas.promedio_obra_social = `${porcentajeObraSocial}%`;
+
+    // Respuesta final
+    res.json([chiquesConFalta, estadisticas]);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Ocurrió un error al procesar los datos definitivos' });
+  }
+});
 
 router.get('/traermapa', (req, res) => {
   const kmlFilePath = path.join(__dirname, '../maps/mapadtc.kml');
