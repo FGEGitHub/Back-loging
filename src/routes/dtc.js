@@ -2581,6 +2581,31 @@ router.post("/borraretapa", async (req, res) => {
   }
 
 })
+
+router.post("/cambiarestadopsico", async (req, res) => {
+  const { id, estado } = req.body;
+
+  try {
+    // Verificamos que los datos sean válidos
+    if (!id || estado === undefined) {
+      return res.status(400).json({ error: "Faltan datos requeridos (id o estado)" });
+    }
+
+    // Ejecutamos la consulta para actualizar el estado
+    await pool.query(
+      "UPDATE dtc_personas_psicologa SET estado = ? WHERE id = ?",
+      [estado, id]
+    );
+
+    res.json({ mensaje: "Estado actualizado correctamente" });
+  } catch (error) {
+    console.error("Error al cambiar estado:", error);
+    res.status(500).json({ error: "Error al cambiar el estado" });
+  }
+});
+
+
+
 router.post("/traerasistenciasdetaller", async (req, res) => {
   let { id_tallerista, id_usuario } = req.body
   let resp = await pool.query('select * from dtc_asistencia where id_tallerista=? and id_usuario=?', [id_tallerista, id_usuario])
