@@ -1350,6 +1350,7 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
 router.get('/listachiquesmomentaneo/', async (req, res) => {
   try {
     const calcularEdad = (fechaNacimiento) => {
+      if (!fechaNacimiento) return '';
       const hoy = new Date();
       const [anio, mes, dia] = fechaNacimiento.split('-');
       let edad = hoy.getFullYear() - anio;
@@ -1361,7 +1362,7 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
       return edad;
     };
 
-    // Campos requeridos
+    // Campos requeridos para verificar faltantes
     const requiredFields = {
       dni: 'DNI',
       tel_responsable: 'Teléfono Responsable',
@@ -1372,29 +1373,60 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
       fecha_nacimiento: 'Fecha de Nacimiento'
     };
 
-    // Datos principales
-    const chiques = await pool.query('SELECT * FROM dtc_chicos ORDER BY apellido');
+    // Trae todos los campos solicitados explícitamente
+    const chiques = await pool.query(`
+      SELECT 
+        id,
+        nombre,
+        apellido,
+        fecha_nacimiento,
+        observaciones,
+        primer_contacto,
+        primer_ingreso,
+        admision,
+        dni,
+        domicilio,
+        telefono,
+        autorizacion_imagen,
+        fotoc_dni,
+        fotoc_responsable,
+        tel_responsable,
+        visita_social,
+        egreso,
+        aut_retirar,
+        dato_escolar,
+        kid,
+        obra_social,
+        obra_social_cual,
+        escuela,
+        grado,
+        fines,
+        hora_merienda
+      FROM marketing.dtc_chicos
+      ORDER BY apellido
+    `);
 
-    const chiquesConFalta = chiques.map(chique => {
-      const faltantes = Object.keys(requiredFields).filter(field => {
+    // Genera la lista con faltantes y edades
+    const chiquesConFalta = chiques.map((chique) => {
+      const faltantes = Object.keys(requiredFields).filter((field) => {
         const value = chique[field];
         return !value || value.trim() === '' || value.trim().toLowerCase() === 'sin determinar';
       });
 
-      const falta = faltantes.length > 0
-        ? faltantes.map(field => requiredFields[field]).join(', ')
-        : 'Completo';
+      const falta =
+        faltantes.length > 0
+          ? faltantes.map((field) => requiredFields[field]).join(', ')
+          : 'Completo';
 
-      let edad = '';
-      try {
-        edad = calcularEdad(chique.fecha_nacimiento);
-      } catch (error) {}
+      const edad = calcularEdad(chique.fecha_nacimiento);
 
       return { ...chique, falta, edad };
     });
 
-    // --- NUEVAS CONSULTAS ESTADÍSTICAS ---
-    const personasPsicologa = await pool.query('SELECT COUNT(*) AS cantidad FROM dtc_personas_psicologa');
+    // --- Estadísticas ---
+    const personasPsicologa = await pool.query(
+      'SELECT COUNT(*) AS cantidad FROM dtc_personas_psicologa'
+    );
     const cantidadPsicologa = Number(personasPsicologa[0].cantidad) || 0;
 
     const conObraSocial = await pool.query(`
@@ -1402,17 +1434,18 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
       FROM marketing.dtc_chicos 
       WHERE obra_social IS NOT NULL AND obra_social <> 'No' AND obra_social <> 'Sin determinar'
     `);
-    
     const cantidadObraSocial = Number(conObraSocial[0].cantidad) || 0;
-//console.log(cantidadObraSocial)
-    const totalChicos = await pool.query(`SELECT COUNT(*) AS total FROM marketing.dtc_chicos`);
+
+    const totalChicos = await pool.query(`
+      SELECT COUNT(*) AS total FROM marketing.dtc_chicos
+    `);
     const totalUsuarios = Number(totalChicos[0].total) || 0;
 
     const porcentajeObraSocial = totalUsuarios
       ? ((cantidadObraSocial / totalUsuarios) * 100).toFixed(2)
       : 0;
 
-    // Estadísticas generales
+    // --- Estadísticas por KID ---
     const estadisticas = {};
     let total = 0;
     for (const chico of chiquesConFalta) {
@@ -1425,9 +1458,8 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
     estadisticas.psicologa = cantidadPsicologa;
     estadisticas.promedio_obra_social = `${porcentajeObraSocial}%`;
 
-    // Respuesta final
+    // --- Respuesta final ---
     res.json([chiquesConFalta, estadisticas]);
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Ocurrió un error al procesar los datos definitivos' });
