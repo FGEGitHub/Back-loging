@@ -997,7 +997,7 @@ router.get('/listadepersonaspsiq/', async (req, res) => {
         ) AS sel2
         ON dc.id = sel2.id_persona
       ) AS combinados
-      WHERE cantidadturnos > 0
+     
       ORDER BY cantidadturnos DESC, apellido
     `);
 
@@ -3088,7 +3088,6 @@ router.post("/nuevaclasetaller", async (req, res) => {
 })
 router.post("/nuevapersonapsiq", async (req, res) => {
   let { nombre, apellido, fecha_nacimiento, observaciones, primer_ingreso, dni, domicilio, telefono, obra_social, obra_social_cual } = req.body
-  console.log(nombre, apellido, fecha_nacimiento, observaciones, primer_ingreso, dni, domicilio, telefono)
 
   try {
     if (observaciones == undefined) {
@@ -3110,7 +3109,7 @@ router.post("/nuevapersonapsiq", async (req, res) => {
       obra_social_cual = "Sin asignar"
     }
     await pool.query('insert dtc_personas_psicologa  set nombre=?,apellido=?,fecha_nacimiento=?,observaciones=?,primer_ingreso=?,dni=?,domicilio=?,telefono=?,obra_social=?, obra_social_cual=?', [nombre, apellido, fecha_nacimiento, observaciones, primer_ingreso, dni, domicilio, telefono, obra_social, obra_social_cual])
-
+console.log('hehco')
     res.json('Agregado')
   } catch (error) {
     console.log(error)
