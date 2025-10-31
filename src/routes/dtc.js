@@ -1707,6 +1707,84 @@ router.get('/obtenerinfodecursos/:id', async (req, res) => {
     nombres_kids: String(row.nombres_kids) // Asegurarte de que es una cadena
   })));
 }) */
+
+router.get('/cumpleanosdia/:fecha', async (req, res) => {
+  try {
+    const fechaParam = req.params.fecha; // Ejemplo: 01102025
+    if (!/^\d{8}$/.test(fechaParam)) {
+      return res.status(400).send('<h3>Formato de fecha inválido. Usa ddmmyyyy</h3>');
+    }
+
+    // Extraer día, mes y año
+    const dia = fechaParam.substring(0, 2);
+    const mes = fechaParam.substring(2, 4);
+    const anio = fechaParam.substring(4, 8);
+
+    const fechaMySQL = `${anio}-${mes}-${dia}`;
+
+    // Buscar cumpleañeros del mes
+    const cumpleMesQuery = `
+      SELECT nombre, apellido 
+      FROM marketing.dtc_chicos
+      WHERE MONTH(fecha_nacimiento) = ?
+    `;
+    const cumpleMes = await pool.query(cumpleMesQuery, [mes]);
+
+    // Buscar asistencias del día
+    const asistenciaQuery = `
+      SELECT c.nombre, c.apellido
+      FROM marketing.dtc_asistencia a
+      JOIN marketing.dtc_chicos c ON a.id_usuario = c.id
+      WHERE DATE(a.fecha) = ?
+    `;
+    const asistencias = await pool.query(asistenciaQuery, [fechaMySQL]);
+
+    // Render simple en HTML
+    res.send(`
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Cumpleaños y Asistencias</title>
+          <style>
+            body { font-family: Arial, sans-serif; background: #f5f5f5; color: #333; padding: 20px; }
+            h1 { text-align: center; }
+            .seccion { background: white; padding: 15px; margin: 20px 0; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+            ul { list-style: none; padding-left: 0; }
+            li { margin: 5px 0; padding: 5px; border-bottom: 1px solid #ddd; }
+          </style>
+        </head>
+        <body>
+          <h1>📅 Resultados del ${dia}/${mes}/${anio}</h1>
+
+          <div class="seccion">
+            <h2>🎂 Cumpleaños del mes (${mes})</h2>
+            ${
+              cumpleMes.length > 0
+                ? `<ul>${cumpleMes.map(c => `<li>${c.nombre} ${c.apellido}</li>`).join('')}</ul>`
+                : `<p>No hay cumpleaños registrados este mes.</p>`
+            }
+          </div>
+
+          <div class="seccion">
+            <h2>✅ Asistencias del día (${dia}/${mes}/${anio})</h2>
+            ${
+              asistencias.length > 0
+                ? `<ul>${asistencias.map(a => `<li>${a.nombre} ${a.apellido}</li>`).join('')}</ul>`
+                : `<p>No hubo asistencias registradas en esta fecha.</p>`
+            }
+          </div>
+        </body>
+      </html>
+    `);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('<h3>Error al procesar la solicitud.</h3>');
+  }
+});
+
+
+
   router.get('/obtenerinfodecursos/:id', async (req, res) => {
     const id = req.params.id;
 
