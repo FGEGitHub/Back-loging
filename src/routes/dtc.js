@@ -3876,6 +3876,69 @@ const confirm = await pool.query('select * from dtc_turnos where estado="Agendad
 
 })
 
+function convertirBigInt(obj) {
+  if (Array.isArray(obj)) {
+    return obj.map(convertirBigInt);
+  } else if (obj && typeof obj === 'object') {
+    const nuevo = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (typeof value === 'bigint') {
+        nuevo[key] = Number(value); // o String(value) si el número puede ser muy grande
+      } else if (typeof value === 'object') {
+        nuevo[key] = convertirBigInt(value);
+      } else {
+        nuevo[key] = value;
+      }
+    }
+    return nuevo;
+  }
+  return obj;
+}
+
+
+
+router.get('/traertodoslosturnospsiq', async (req, res) => {
+  try {
+    const todos = await pool.query(`
+      SELECT dtc_turnos.*, sel.nombre AS nombre_psico 
+      FROM dtc_turnos 
+      JOIN (SELECT id AS idu, nombre FROM usuarios) AS sel 
+      ON dtc_turnos.id_psico = sel.idu
+    `);
+
+    const agrupados = await pool.query(`
+      SELECT 
+        YEAR(STR_TO_DATE(fecha, '%Y-%m-%d')) AS anio,
+        MONTH(STR_TO_DATE(fecha, '%Y-%m-%d')) AS mes_num,
+        DATE_FORMAT(STR_TO_DATE(fecha, '%Y-%m-%d'), '%M') AS mes_nombre,
+        COUNT(*) AS cantidad
+      FROM dtc_turnos
+      WHERE fecha REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
+      GROUP BY YEAR(STR_TO_DATE(fecha, '%Y-%m-%d')), MONTH(STR_TO_DATE(fecha, '%Y-%m-%d')), DATE_FORMAT(STR_TO_DATE(fecha, '%Y-%m-%d'), '%M')
+      ORDER BY anio DESC, mes_num DESC
+    `);
+
+    const resumen = agrupados.map(r => {
+      const mesNombre = r.mes_nombre
+        ? r.mes_nombre.charAt(0).toUpperCase() + r.mes_nombre.slice(1)
+        : 'Sin fecha';
+      return {
+        mes: `${mesNombre} ${r.anio || ''}`,
+        cantidad: r.cantidad
+      };
+    });
+console.log(todos.length, resumen.length)
+    // 🔧 Convertir BigInt antes de responder
+    res.json(convertirBigInt({ todos, resumen }));
+
+  } catch (error) {
+    console.error('Error en /traertodoslosturnospsiq:', error);
+    res.status(500).json({ error: 'Error al obtener los turnos' });
+  }
+});
+
+
+
 router.get('/traercitastodoscadia/', async (req, res) => {
   const id = req.params.id
 
