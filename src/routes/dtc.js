@@ -829,6 +829,25 @@ router.get('/traerclasestaller2/:id', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener las clases' });
   }
 });
+
+
+
+router.post('/asignarOficioAChico/', async (req, res) => {
+
+    const { id_oficio, id_usuario } = req.body;
+  try {
+    await pool.query(
+      "UPDATE dtc_oficios SET id_usuario = ? WHERE id = ?",
+      [id_usuario, id_oficio]
+    );
+    res.json({ message: "Asignación realizada" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al asignar chico" });
+  }
+
+})
+
 router.post('/agregarAlumnoFines/', async (req, res) => {
   const { nombre, apellido, dni, fecha_nacimiento } = req.body;
   
@@ -2731,11 +2750,15 @@ if(resp.length==0){
 router.get("/traaeroficios", async (req, res) => {
   try {
     let resp = await pool.query(`
-      SELECT dtc_oficios.*, 
-             dtc_pdf_oficios.id AS expediente_id, 
-             dtc_pdf_oficios.ubicacion AS expediente_archivo 
-      FROM dtc_oficios 
+      SELECT 
+        dtc_oficios.*, 
+        dtc_pdf_oficios.id AS expediente_id, 
+        dtc_pdf_oficios.ubicacion AS expediente_archivo,
+        dtc_chicos.nombre AS nombre_chico,
+        dtc_chicos.apellido AS apellido_chico
+      FROM dtc_oficios
       LEFT JOIN dtc_pdf_oficios ON dtc_oficios.id = dtc_pdf_oficios.id_oficio
+      LEFT JOIN dtc_chicos ON dtc_oficios.id_usuario = dtc_chicos.id
     `);
 
     // Agrupar los expedientes bajo su respectivo oficio
@@ -2751,6 +2774,9 @@ router.get("/traaeroficios", async (req, res) => {
           solicitud: row.solicitud,
           oficio: row.oficio,
           fecha: row.fecha,
+          id_usuario: row.id_usuario,
+          nombre: row.nombre_chico,
+          apellido: row.apellido_chico,
           expedientes: []
         };
       }
@@ -2772,6 +2798,7 @@ router.get("/traaeroficios", async (req, res) => {
     res.status(500).json({ message: "Error al traer los oficios" });
   }
 });
+
 
 
 // Ruta para subir el archivo y guardar en la base de datos
@@ -2881,6 +2908,98 @@ router.post("/nuevooficio", async (req, res) => {
       });
     }
 
+    let idUsuario = campos.id_usuario || null;
+
+    // 🔸 Si no hay id_usuario, pero hay datos de nuevo usuario:
+    if (!idUsuario && (campos.nombre || campos.apellido || campos.dni)) {
+      if (!campos.nombre || !campos.apellido || !campos.dni) {
+        return res.status(400).json({
+          error: "Faltan datos obligatorios para crear usuario (nombre, apellido, dni)",
+          tipo: "CamposIncompletos"
+        });
+      }
+
+      const sqlUsuario = `
+        INSERT INTO dtc_chicos (nombre, apellido, dni, tel)
+        VALUES (?, ?, ?, ?)
+      `;
+      const [resultUsuario] = await pool.query(sqlUsuario, [
+        campos.nombre,
+        campos.apellido,
+        campos.dni,
+        campos.tel || null
+      ]);
+
+      idUsuario = resultUsuario.insertId; // guardamos el nuevo ID
+      console.log("Usuario nuevo creado con id:", idUsuario);
+    }
+
+    if (!idUsuario) {
+      return res.status(400).json({
+        error: "Debe seleccionar o crear un usuario antes de guardar el oficio",
+        tipo: "UsuarioRequerido"
+      });
+    }
+
+    // 🔸 Creamos el oficio con el id_usuario correcto
+    const datosOficio = {
+      expediente: campos.expediente || "",
+      juzgado: campos.juzgado || "",
+      causa: campos.causa || "",
+      solicitud: campos.solicitud || "",
+      oficio: campos.oficio || "",
+      fecha: campos.fecha || null,
+      id_usuario: idUsuario
+    };
+
+    const columnas = Object.keys(datosOficio).join(", ");
+    const valores = Object.values(datosOficio);
+    const placeholders = valores.map(() => "?").join(", ");
+
+    const sql = `INSERT INTO dtc_oficios (${columnas}) VALUES (${placeholders})`;
+    await pool.query(sql, valores);
+
+    res.json({
+      mensaje: "Oficio guardado correctamente",
+      id_usuario: idUsuario
+    });
+
+  } catch (error) {
+    console.error("Error al guardar el oficio:", error);
+
+    let tipoError = "ErrorDesconocido";
+
+    if (error.code === 'ER_BAD_FIELD_ERROR') {
+      tipoError = "CampoInexistente";
+    } else if (error.code === 'ER_DUP_ENTRY') {
+      tipoError = "ValorDuplicado";
+    } else if (error.code === 'ER_NO_SUCH_TABLE') {
+      tipoError = "TablaInexistente";
+    } else if (error.code === 'PROTOCOL_CONNECTION_LOST' || error.code === 'ECONNREFUSED') {
+      tipoError = "ConexionBD";
+    }
+
+    res.status(500).json({
+      error: "No se pudo guardar el oficio",
+      tipo: tipoError,
+      detalle: error.message
+    });
+  }
+});
+
+
+/* router.post("/nuevooficio", async (req, res) => {
+  try {
+    const campos = req.body;
+    console.log("Datos recibidos:", campos);
+
+    if (Object.keys(campos).length === 0) {
+      return res.status(400).json({ 
+        error: "No se enviaron datos", 
+        tipo: "DatosVacíos" 
+      });
+    }
+
     const columnas = Object.keys(campos).join(", ");
     const valores = Object.values(campos);
     const placeholders = valores.map(() => "?").join(", ");
@@ -2913,7 +3032,7 @@ router.post("/nuevooficio", async (req, res) => {
       detalle: error.message // Esto ayuda a debuggear en desarrollo
     });
   }
-});
+}); */
 
 
 //////actualizar 
