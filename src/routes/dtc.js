@@ -2920,7 +2920,7 @@ router.post("/nuevooficio", async (req, res) => {
       }
 
       const sqlUsuario = `
-        INSERT INTO dtc_chicos (nombre, apellido, dni, tel)
+        INSERT INTO dtc_chicos (nombre, apellido, dni, telefono)
         VALUES (?, ?, ?, ?)
       `;
       const [resultUsuario] = await pool.query(sqlUsuario, [
