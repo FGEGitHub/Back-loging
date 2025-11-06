@@ -2923,7 +2923,7 @@ router.post("/nuevooficio", async (req, res) => {
         INSERT INTO dtc_chicos (nombre, apellido, dni, telefono)
         VALUES (?, ?, ?, ?)
       `;
-      const [resultUsuario] = await pool.query(sqlUsuario, [
+      const resultUsuario = await pool.query(sqlUsuario, [
         campos.nombre,
         campos.apellido,
         campos.dni,
@@ -2961,7 +2961,7 @@ router.post("/nuevooficio", async (req, res) => {
 
     res.json({
       mensaje: "Oficio guardado correctamente",
-      id_usuario: idUsuario
+      
     });
 
   } catch (error) {
