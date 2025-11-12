@@ -831,6 +831,23 @@ router.get('/traerclasestaller2/:id', async (req, res) => {
 });
 
 
+// Borra solo un expediente
+router.post("/borrarexpediente", async (req, res) => {
+  try {
+    const { id } = req.body;
+    if (!id) {
+      return res.status(400).json({ error: "Falta el parámetro 'id'" });
+    }
+
+    // Borrar el expediente del expediente principal
+    await pool.query("DELETE FROM dtc_pdf_oficios WHERE id = ?", [id]);
+
+    res.json({ success: true, message: "Expediente eliminado correctamente" });
+  } catch (error) {
+    console.error("Error al borrar expediente:", error);
+    res.status(500).json({ error: "Error interno al borrar el expediente" });
+  }
+});
 
 router.post("/borraroficio", async (req, res) => {
   try {

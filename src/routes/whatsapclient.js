@@ -40,6 +40,6 @@ client.on('disconnected', (reason) => {
 });
 
 // Inicializar cliente
-client.initialize();
+//client.initialize();
 
 module.exports = client;
