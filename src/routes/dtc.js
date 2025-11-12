@@ -832,6 +832,28 @@ router.get('/traerclasestaller2/:id', async (req, res) => {
 
 
 
+router.post("/borraroficio", async (req, res) => {
+  try {
+    const { id } = req.body;
+console.log(id)
+    if (!id) {
+      return res.status(400).json({ error: "Falta el parámetro 'id'" });
+    }
+
+    // Primero borramos los PDFs asociados
+    await pool.query("DELETE FROM dtc_pdf_oficios WHERE id_oficio = ?", [id]);
+
+    // Luego borramos el oficio principal
+    await pool.query("DELETE FROM dtc_oficios WHERE id = ?", [id]);
+
+    res.json({ success: true, message: "Oficio y sus PDFs eliminados correctamente" });
+  } catch (error) {
+    console.error("Error al borrar oficio:", error);
+    res.status(500).json({ error: "Error interno al borrar el oficio" });
+  }
+});
+
+
 router.post('/asignarOficioAChico/', async (req, res) => {
 
     const { id_oficio, id_usuario } = req.body;
@@ -3038,52 +3060,57 @@ router.post("/nuevooficio", async (req, res) => {
 //////actualizar 
 router.post("/actualizaroficio", async (req, res) => {
   try {
-      const { id, juzgado, causa, solicitud, fecha } = req.body;
-      console.log(id, juzgado, causa, solicitud, fecha);
+    const { id, juzgado, causa, solicitud, fecha, oficio, expediente } = req.body;
 
-      if (!id) {
-          return res.status(400).json({ error: "El ID del oficio es obligatorio." });
-      }
+    if (!id) {
+      return res.status(400).json({ error: "El ID del oficio es obligatorio." });
+    }
 
-      // Construimos dinámicamente la consulta según los campos proporcionados
-      let updateFields = [];
-      let values = [];
+    let updateFields = [];
+    let values = [];
 
-      if (juzgado) {
-          updateFields.push("juzgado = ?");
-          values.push(juzgado);
-      }
-      if (causa) {
-          updateFields.push("causa = ?");
-          values.push(causa);
-      }
-      if (solicitud) {
-          updateFields.push("solicitud = ?");
-          values.push(solicitud);
-      }
-      if (fecha) {
-          updateFields.push("fecha = ?");
-          values.push(fecha);
-      }
+    if (juzgado !== undefined) {
+      updateFields.push("juzgado = ?");
+      values.push(juzgado);
+    }
+    if (causa !== undefined) {
+      updateFields.push("causa = ?");
+      values.push(causa);
+    }
+    if (solicitud !== undefined) {
+      updateFields.push("solicitud = ?");
+      values.push(solicitud);
+    }
+    if (fecha !== undefined) {
+      updateFields.push("fecha = ?");
+      values.push(fecha);
+    }
+    if (oficio !== undefined) {
+      updateFields.push("oficio = ?");
+      values.push(oficio);
+    }
+    if (expediente !== undefined) {
+      updateFields.push("expediente = ?");
+      values.push(expediente);
+    }
 
-      if (updateFields.length === 0) {
-          return res.status(400).json({ error: "No se enviaron campos para actualizar." });
-      }
+    if (updateFields.length === 0) {
+      return res.status(400).json({ error: "No se enviaron campos para actualizar." });
+    }
 
-      values.push(id); // Agregamos el ID al final para el WHERE
+    values.push(id);
 
-      const query = `UPDATE dtc_oficios SET ${updateFields.join(", ")} WHERE id = ?`;
+    const query = `UPDATE dtc_oficios SET ${updateFields.join(", ")} WHERE id = ?`;
+    const result = await pool.query(query, values);
 
-      const result = await pool.query(query, values);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "No se encontró el oficio o no hubo cambios." });
+    }
 
-      if (result.affectedRows === 0) {
-          return res.status(404).json({ error: "No se encontró el oficio o no hubo cambios." });
-      }
-
-      res.json({ message: "Oficio actualizado con éxito" });
+    res.json({ message: "Oficio actualizado con éxito" });
   } catch (error) {
-      console.error("Error al actualizar el oficio:", error);
-      res.status(500).json({ error: "Error interno del servidor" });
+    console.error("Error al actualizar el oficio:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
