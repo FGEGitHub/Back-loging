@@ -5695,34 +5695,41 @@ const parseFechaa = (fechaOriginal) => {
   return `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
 };
 router.post("/ponerpresenteingreso", async (req, res) => {
-let { fecha, id, id_tallerista } = req.body;
-console.log('fechapre',fecha)
-fecha = parseFechaa(fecha);
+  let { fecha, id, id_tallerista } = req.body;
+
+  console.log('fechapre', fecha);
+
+
+
   const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
-console.log('fechadesp',fecha)
+
+  console.log('fechadesp', fecha);
   console.log("La hora actual en Buenos Aires es:", horaBuenosAires);
-  
-  id_tallerista = 238
 
-  const existe = await pool.query('select * from dtc_asistencia where id_usuario=? and fecha =? and id_tallerista=?', [id, fecha, id_tallerista])
-  let era
-  console.log(existe)
+  id_tallerista = 238;
+
+  const existe = await pool.query(
+    'select * from dtc_asistencia where id_usuario=? and fecha=? and id_tallerista=?',
+    [id, fecha, id_tallerista]
+  );
+
+  let era;
+
   if (existe.length > 0) {
-    await pool.query('delete  from  dtc_asistencia where id = ?', [existe[0]['id']])
-    era = "puesto Ausente"
-
-
+    await pool.query('delete from dtc_asistencia where id = ?', [existe[0].id]);
+    era = "puesto Ausente";
   } else {
-    await pool.query('insert into dtc_asistencia set fecha=?, id_usuario=?,id_tallerista=?,hora=?', [fecha, id, id_tallerista, horaBuenosAires])
-    era = "puesto Presente"
-    console.log('puesto Presente')
-
+    await pool.query(
+      'insert into dtc_asistencia set fecha=?, id_usuario=?, id_tallerista=?, hora=?',
+      [fecha, id, id_tallerista, horaBuenosAires]
+    );
+    era = "puesto Presente";
   }
 
-  res.json(era)
+  res.json(era);
+});
 
 
-})
 
 router.post("/ponerpresenteclase2", async (req, res) => {
   let { id_clase, id_usuario } = req.body;
