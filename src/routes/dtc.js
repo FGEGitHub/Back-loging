@@ -1405,7 +1405,7 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
 });
 
  */
-router.get('/listachiquesmomentaneo/', async (req, res) => {
+router.get('/listachiquesmomentaneo/', async (req, res) => { 
   try {
     const calcularEdad = (fechaNacimiento) => {
       if (!fechaNacimiento) return '';
@@ -1420,7 +1420,6 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
       return edad;
     };
 
-    // Campos requeridos para verificar faltantes
     const requiredFields = {
       dni: 'DNI',
       tel_responsable: 'Teléfono Responsable',
@@ -1431,40 +1430,17 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
       fecha_nacimiento: 'Fecha de Nacimiento'
     };
 
-    // Trae todos los campos solicitados explícitamente
     const chiques = await pool.query(`
       SELECT 
-        id,
-        nombre,
-        apellido,
-        fecha_nacimiento,
-        observaciones,
-        primer_contacto,
-        primer_ingreso,
-        admision,
-        dni,
-        domicilio,
-        telefono,
-        autorizacion_imagen,
-        fotoc_dni,
-        fotoc_responsable,
-        tel_responsable,
-        visita_social,
-        egreso,
-        aut_retirar,
-        dato_escolar,
-        kid,
-        obra_social,
-        obra_social_cual,
-        escuela,
-        grado,
-        fines,
-        hora_merienda
+        id, nombre, apellido, fecha_nacimiento, observaciones, primer_contacto,
+        primer_ingreso, admision, dni, domicilio, telefono, autorizacion_imagen,
+        fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso,
+        aut_retirar, dato_escolar, kid, obra_social, obra_social_cual,
+        escuela, grado, fines, hora_merienda
       FROM marketing.dtc_chicos
       ORDER BY apellido
     `);
 
-    // Genera la lista con faltantes y edades
     const chiquesConFalta = chiques.map((chique) => {
       const faltantes = Object.keys(requiredFields).filter((field) => {
         const value = chique[field];
@@ -1481,31 +1457,58 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
       return { ...chique, falta, edad };
     });
 
-    // --- Estadísticas ---
+    // -----------------------
+    //   ESTADISTICAS
+    // -----------------------
+
     const personasPsicologa = await pool.query(
       'SELECT COUNT(*) AS cantidad FROM dtc_personas_psicologa'
     );
-    const cantidadPsicologa = Number(personasPsicologa[0].cantidad) || 0;
+    const totalPsicologa = Number(personasPsicologa[0].cantidad) || 0;
 
+    // Psicóloga con obra social
+    const obraPsicologa = await pool.query(`
+      SELECT COUNT(*) AS cantidad 
+      FROM dtc_personas_psicologa
+      WHERE obra_social IS NOT NULL 
+        AND obra_social <> 'No' 
+        AND obra_social <> 'Sin determinar'
+    `);
+    const cantidadObraPsicologa = Number(obraPsicologa[0].cantidad) || 0;
+
+    // Chicos con obra social
     const conObraSocial = await pool.query(`
       SELECT COUNT(*) AS cantidad 
       FROM marketing.dtc_chicos 
-      WHERE obra_social IS NOT NULL AND obra_social <> 'No' AND obra_social <> 'Sin determinar'
+      WHERE obra_social IS NOT NULL 
+        AND obra_social <> 'No' 
+        AND obra_social <> 'Sin determinar'
     `);
-    const cantidadObraSocial = Number(conObraSocial[0].cantidad) || 0;
+    const cantidadObraChicos = Number(conObraSocial[0].cantidad) || 0;
 
     const totalChicos = await pool.query(`
       SELECT COUNT(*) AS total FROM marketing.dtc_chicos
     `);
     const totalUsuarios = Number(totalChicos[0].total) || 0;
 
-    const porcentajeObraSocial = totalUsuarios
-      ? ((cantidadObraSocial / totalUsuarios) * 100).toFixed(2)
+    const porcentajeChicos = totalUsuarios
+      ? ((cantidadObraChicos / totalUsuarios) * 100).toFixed(2)
       : 0;
 
-    // --- Estadísticas por KID ---
+    const porcentajePsicologa = totalPsicologa
+      ? ((cantidadObraPsicologa / totalPsicologa) * 100).toFixed(2)
+      : 0;
+
+    const totalGlobal = totalUsuarios + totalPsicologa;
+    const totalConObraGlobal = cantidadObraChicos + cantidadObraPsicologa;
+
+    const porcentajeGlobal = totalGlobal
+      ? ((totalConObraGlobal / totalGlobal) * 100).toFixed(2)
+      : 0;
+
     const estadisticas = {};
     let total = 0;
+
     for (const chico of chiquesConFalta) {
       const key = chico.kid === 'Sin definir' ? 'sin_definir' : chico.kid;
       estadisticas[key] = (estadisticas[key] || 0) + 1;
@@ -1513,17 +1516,57 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
     }
 
     estadisticas.total = total;
-    estadisticas.psicologa = cantidadPsicologa;
-    estadisticas.promedio_obra_social = `${porcentajeObraSocial}%`;
+    estadisticas.psicologa = totalPsicologa;
 
-    // --- Respuesta final ---
-    res.json([chiquesConFalta, estadisticas]);
+    estadisticas.promedio_obra_social_chicos = `${porcentajeChicos}%`;
+    estadisticas.promedio_obra_social_psicologa = `${porcentajePsicologa}%`;
+    estadisticas.promedio_obra_social = `${porcentajeGlobal}%`;
+
+    // -----------------------------------
+    //   DETALLE DE OBRA SOCIAL (NUEVO)
+    // -----------------------------------
+
+    const obrasChicos = await pool.query(`
+      SELECT obra_social_cual AS obra, COUNT(*) AS cantidad
+      FROM marketing.dtc_chicos
+      WHERE obra_social_cual IS NOT NULL 
+        AND obra_social_cual <> 'No' 
+        AND obra_social_cual <> 'Sin determinar'
+      GROUP BY obra_social_cual
+      ORDER BY cantidad DESC
+    `);
+
+    const obrasPsicologa = await pool.query(`
+      SELECT obra_social_cual AS obra, COUNT(*) AS cantidad
+      FROM dtc_personas_psicologa
+      WHERE obra_social_cual IS NOT NULL 
+        AND obra_social_cual <> 'No' 
+        AND obra_social_cual <> 'Sin determinar'
+      GROUP BY obra_social_cual
+      ORDER BY cantidad DESC
+    `);
+
+    // Estructura final para el frontend
+    const detalleObras = {
+      chicos: obrasChicos,
+      psicologa: obrasPsicologa
+    };
+console.log(detalleObras)
+res.json(
+  toJSONSafe([chiquesConFalta, estadisticas, detalleObras])
+);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Ocurrió un error al procesar los datos definitivos' });
   }
 });
-
+function toJSONSafe(obj) {
+  return JSON.parse(
+    JSON.stringify(obj, (key, value) =>
+      typeof value === 'bigint' ? Number(value) : value
+    )
+  );
+}
 router.get('/traermapa', (req, res) => {
   const kmlFilePath = path.join(__dirname, '../maps/mapadtc.kml');
 
