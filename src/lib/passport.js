@@ -508,7 +508,7 @@ passport.use('local.signupcl', new LocalStrategy({
     passReqToCallback: 'true'
 }, async (req, usuario, password, done) => {
     
-    const { nombre, mail, tel,nivel,dni } = req.body
+    const { nombre,nivel } = req.body
     //  const razon = await pool.query('Select razon from clientes where cuil_cuit like  ?', [cuil_cuit]) seleccionar razon
 
 
@@ -530,13 +530,14 @@ passport.use('local.signupcl', new LocalStrategy({
     //fin transformar 
     try {  
       
-        const verif  = await pool.query('select * from usuarios where usuario = ?',[usuario])
+        const verif  = await pool5.query('select * from usuarios where usuario = ?',[usuario])
         if (verif.length>0){
-            req.flash('message', 'error, usuario existente')
+            return ('message', 'error, usuario existente')
         }else{
         newUser.password = await helpers.encryptPassword(password)
         try {
-            const result = await pool.query('INSERT INTO usuarios  set password=?, usuario=?,nivel=?', [newUser.password, usuario,nivel])
+       
+            const result = await pool5.query('INSERT INTO usuarios  set password=?, usuario=?,nivel=?', [newUser.password, usuario, 1])
             
             newUser.id = result.insertId// porque newuser no tiene el id
            

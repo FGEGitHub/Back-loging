@@ -95,7 +95,12 @@ res.json([enviar,resumen])
     failureFlash:true
 
 }))
+  router.post('/signupcl',passport.authenticate('local.signupcl', {
+    successRedirect: '/exitosignup',
+    failureRedirect:'/noexito',
+    failureFlash:true
 
+}))
 
 router.post('/registroemprendedora',passport.authenticate('local.registroemprendedora', {
   successRedirect: '/exitosignup',
