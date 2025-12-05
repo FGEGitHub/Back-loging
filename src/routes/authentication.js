@@ -52,12 +52,34 @@ router.post('/signupf1', (req, res, next) => {
   })(req, res, next);
 });
 
+router.post('/signupcl', (req, res, next) => {
+  passport.authenticate('local.signupcl', (err, user, info) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Error del servidor.' });
+    }
+    if (!user) {
+      return res.status(400).json({ message: info.message || 'Registro fallido.' });
+    }
+    // Si se quiere iniciar sesión automáticamente después de registrar
+    req.logIn(user, (err) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error al iniciar sesión después del registro.' });
+      }
+      return res.status(200).json({ message: 'Registrado exitosamente.', user });
+    });
+  })(req, res, next);
+});
+
+
+
 router.post('/signupcv', passport.authenticate('local.signup', {
     successRedirect: '/exitosignup',
     failureRedirect:'/noexito',
     failureFlash:true
 
 }))
+
 router.post('/signinf1', passport.authenticate('local.signinf1', { failureRedirect: '/noexito' }),
   function(req, res) {
     console.log(req.user)
@@ -83,7 +105,31 @@ router.post('/signinf1', passport.authenticate('local.signinf1', { failureRedire
 }
   
   );
-
+router.post('/signincl', passport.authenticate('local.signinf1', { failureRedirect: '/noexito' }),
+  function(req, res) {
+    console.log(req.user)
+    const userFoRToken ={
+        id :req.user.id,
+        usuario: req.user.usuario,
+        nivel:req.user.nivel,
+       
+     
+    }
+ 
+    const token = jwt.sign(userFoRToken, 'clin123',{ expiresIn: 60*60*24*7})
+    console.log(req.user)
+    res.send({
+        id :req.user.id,
+        usuario: req.user.usuario,
+        nivel: req.user.nivel,
+       
+        token,
+      
+        
+    } )
+}
+  
+  );
 router.post('/signupcv', passport.authenticate('local.signup', {
     successRedirect: '/exitosignup',
     failureRedirect:'/noexito',
