@@ -1264,7 +1264,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
   curso_adic = curso_adic || "No";
   profesion = profesion || "No";
   agregar_whatsap= agregar_whatsap|| "No";
-  curso= curso|| "Barrio Sur";
+  curso= curso|| "Barrio San Roque dic/2025";
   try {
     // Verificar si ya existe la persona
     let pers = await pool.query('SELECT * FROM personas WHERE dni = ?', [dni]);
@@ -1291,7 +1291,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
     // Verificar si ya está inscripta
     const yainsc = await pool.query(
       'SELECT * FROM inscripciones_carnaval WHERE id_persona = ? AND id > 590 AND detalle = ?',
-      [pers[0]['id'], "Op oftalmologico Noviembre 2025"]
+      [pers[0]['id'], "Op oftalmologico Diciembre 2025"]
     );
 
     let mensaje = '';
@@ -1305,7 +1305,7 @@ router.post("/enviarinscripcioncarnaval", async (req, res) => {
         `INSERT INTO inscripciones_carnaval 
          ( fecha, dni_persona, id_persona, detalle,  curso,profesion,alumna_anterior,tiene_espacio,enseniar,curso_adic,agregar_whatsap)
          VALUES (?, ?, ?, ?, ?,?,?,?,?,?,?)`,
-        [ fecha, dni, pers[0]['id'], "Op oftalmologico Noviembre 2025", curso,profesion,alumna_anterior,tiene_espacio,enseniar,curso_adic,agregar_whatsap]
+        [ fecha, dni, pers[0]['id'], "Op oftalmologico Diciembre 2025", curso,profesion,alumna_anterior,tiene_espacio,enseniar,curso_adic,agregar_whatsap]
       );
 
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto';
