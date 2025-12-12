@@ -470,38 +470,48 @@ passport.use('local.signinf1', new LocalStrategy({
     }
 }))
 
-passport.use('local.signincl', new LocalStrategy({
-    usernameField: 'usuario', // usuario es el nombre que recibe del hbs
+
+
+passport.use('local.signincli', new LocalStrategy({
+    usernameField: 'usuario',
     passwordField: 'password',
-    passReqToCallback: 'true' // para recibir mas datos 
+    passReqToCallback: true  // <--- debe ser boolean, no string
+}, 
+async (req, usuario, password, done) => {
 
-}, async (req, usuario, password, done) => {  // que es lo que va a hacer 
-    const rows = await pool5.query('SELECT * FROM usuarios WHERE usuario = ?', [usuario])
-    if (rows.length > 0) {
-        const usuario = rows[0]
-       
-        const validPassword = await helpers.matchPassword(password, usuario.password)
-       
-        if (validPassword) {
-           
-  /*      const userFoRToken = {
-                id: usuario.id,
-                usuario: usuario.cuil_cuit,
-                nivel: usuario.nivel
-            }
-            const token = jwt.sign(userFoRToken, 'fideicomisocs121', { expiresIn: 60 * 60 * 24 * 7 })
-            res.send({ id: req.usuario.id,cuil_cuit: req.usuario.cuil_cuit,token, nivel: req.usuario.nivel})  */
-            done(null, usuario, req.flash('success', 'Welcome' )) // done termina, null el error, user lo pasa para serializar
-          
-        } else {
-            done(null, false, req.flash('message', 'Pass incorrecta')) // false para no avanzar
+    try {
+        console.log("➡️ Iniciando login de usuario:", usuario);
+
+        const rows = await pool5.query(
+            'SELECT * FROM usuarios WHERE usuario = ?', 
+            [usuario]
+        );
+
+        console.log("📌 Resultado DB:", rows);
+
+        if (rows.length === 0) {
+            console.log("❌ Usuario no existe");
+            return done(null, false, req.flash('message', 'El nombre de usuario no existe'));
         }
-    } else {
-        return done(null, false, req.flash('message', 'EL nombre de cuil/cuit no existe'))
+
+        const user = rows[0];
+
+        const validPassword = await helpers.matchPassword(password, user.password);
+
+        if (!validPassword) {
+            console.log("❌ Contraseña incorrecta");
+            return done(null, false, req.flash('message', 'Contraseña incorrecta'));
+        }
+
+        console.log("✅ Login correcto:", user.usuario);
+        return done(null, user, req.flash('success', 'Bienvenido'));
+
+    } catch (error) {
+        console.error("🔥 ERROR en local.signincli:", error);
+        return done(error);
     }
-}))
 
-
+}));
 passport.use('local.signupcl', new LocalStrategy({
     usernameField: 'usuario',
     passwordField: 'password',

@@ -105,9 +105,14 @@ router.post('/signinf1', passport.authenticate('local.signinf1', { failureRedire
 }
   
   );
-router.post('/signincl', passport.authenticate('local.signinf1', { failureRedirect: '/noexito' }),
+
+  
+router.post('/signincl', (req, res, next) => {
+    console.log("➡️ POST /signincl BODY:", req.body);
+    next();
+}, passport.authenticate('local.signincli', { failureRedirect: '/noexito' }),
   function(req, res) {
-    console.log(req.user)
+   
     const userFoRToken ={
         id :req.user.id,
         usuario: req.user.usuario,
@@ -117,7 +122,7 @@ router.post('/signincl', passport.authenticate('local.signinf1', { failureRedire
     }
  
     const token = jwt.sign(userFoRToken, 'clin123',{ expiresIn: 60*60*24*7})
-    console.log(req.user)
+
     res.send({
         id :req.user.id,
         usuario: req.user.usuario,
@@ -177,8 +182,8 @@ router.get('/exitosignup',(req,res)=>{
 })
 
 router.get('/noexito',(req,res)=>{
-    console.log("req.algo")
-    console.log(req.rtaa)
+ 
+    
     res.send('Sin Exito')
 })
 

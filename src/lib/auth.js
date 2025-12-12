@@ -157,6 +157,32 @@ module.exports = {
     }
     return res.redirect('/profile')
 
-    }
+    },
+        isLoggedInncli(req,res, next){
+        
+        //
+        const authorization = req.get('authorization')
+        let token =null
+       
+        if (authorization && authorization.startsWith('Bearer')){
+           
+            token = authorization.substring(7) 
+        }
+        let decodedToken = {}
+        
+        try{
+             decodedToken = jwt.verify(token, 'clin123')
+           
+        }catch{}
+      
+        if (!token || !decodedToken.id){
+            console.log('error token')
+            return res.send('error login')
+        }
+      
+       // res.send(decodedToken.cuil_cuit)
+        
+        next()
+    },
 
 }
