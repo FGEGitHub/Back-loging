@@ -3,7 +3,7 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const path = require('path');
 
 // Definís un directorio fijo para guardar la sesión
-const sessionPath = path.join(__dirname, 'sesion_whatsapp');
+const sessionPath = path.join(__dirname, 'sesion_whatsappp');
 
 const client = new Client({
     authStrategy: new LocalAuth({
