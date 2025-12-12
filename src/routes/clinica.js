@@ -37,7 +37,26 @@ router.get('/traerpacientes',isLoggedInncli, async (req, res) => {
 
 })
 
+router.get('/traerturnos', isLoggedInncli, async (req, res) => {
+  try {
+    const turnos = await pool.query(`
+      SELECT 
+        t.*, 
+        p.nombre,
+        p.apellido,
+        p.dni,
+        p.id AS id_pacientee
+      FROM turnos t
+      LEFT JOIN pacientes p ON t.id_paciente = p.id
+      ORDER BY t.hora ASC, p.dni ASC
+    `);
 
+    res.json(turnos);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Error al traer turnos' });
+  }
+});
 router.post('/crearturno', isLoggedInncli, async (req, res) => {
     try {
         const {
