@@ -37,6 +37,44 @@ router.get('/traerpacientes',isLoggedInncli, async (req, res) => {
 
 })
 
+
+router.post('/crearturno', isLoggedInncli, async (req, res) => {
+    try {
+        const {
+            id_paciente,
+            fecha,
+            hora,
+            profesional,
+            motivo,
+            observaciones
+        } = req.body;
+
+        const sql = `
+            INSERT INTO turnos
+            (id_paciente, fecha, hora,  motivo, observaciones)
+            VALUES (?, ?, ?, ?, ?)
+        `;
+
+        const values = [
+            id_paciente || null,
+            fecha || null,
+            hora || null,
+       
+            motivo || null,
+            observaciones || null
+        ];
+
+        const resultado = await pool.query(sql, values);
+
+        res.json("Turno creado correctamente");
+
+    } catch (error) {
+        console.error("Error al crear turno:", error);
+        res.status(500).json({ ok: false, error: "Error en el servidor" });
+    }
+});
+
+
 router.post('/agregarPersona', isLoggedInncli, async (req, res) => {
     try {
         const {
@@ -82,10 +120,11 @@ router.post('/agregarPersona', isLoggedInncli, async (req, res) => {
 
 router.get('/datospaciente/:id', async (req, res) => {
   const id = req.params.id
-  const chiques = await pool.query('select * from pacientes where id =?', [id])
-  try {
-    
-    res.json([chiques, "imagenBase64", ["vincuos"]])
+  try {  const chiques = await pool.query('select * from pacientes where id =?', [id])
+
+      const turnos = await pool.query('select * from turnos where id_paciente =?', [id])
+
+    res.json([chiques, "imagenBase64", turnos])
   } catch (error) {
     console.log(error)
     res.json([])
