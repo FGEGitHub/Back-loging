@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+/src/routes/sesion_whatsapp
+/src/routes/sesion_whatsappp
 /keys
 /.pnp
 .pnp.js
@@ -9,5 +11,5 @@
 /.package-lock.json
 /.package.json
 /.wwebjs_cache
-/src/.imagenesvenderoras
+/src/imagenesvenderoras
 
