@@ -142,10 +142,13 @@ router.post('/agregarPersona', isLoggedInncli, async (req, res) => {
       nombre,
       apellido,
       dni,
+      genero,
       fecha_nacimiento,
       fecha_ingreso,
       telefono,
-      direccion
+      direccion,
+      obra_social,
+      numero_afiliado
     } = req.body;
 
     if (!dni) {
@@ -160,42 +163,54 @@ router.post('/agregarPersona', isLoggedInncli, async (req, res) => {
 
     if (existe.length > 0) {
       return res.json({
-  "ok": false,
-  "msg": "Ya existe un paciente con ese DNI"
-});
+        ok: false,
+        msg: "Ya existe un paciente con ese DNI"
+      });
     }
 
-    // ➕ Insertar si no existe
+    // ➕ Insertar paciente
     const sql = `
       INSERT INTO pacientes 
-      (nombre, apellido, dni, fecha_nacimiento, fecha_ingreso, telefono, direccion)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      (
+        nombre,
+        apellido,
+        dni,
+        genero,
+        fecha_nacimiento,
+        fecha_ingreso,
+        telefono,
+        direccion,
+        obra_social,
+        numero_afiliado
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const values = [
       nombre || null,
       apellido || null,
       dni,
+      genero || null,
       fecha_nacimiento || null,
       fecha_ingreso || null,
       telefono || null,
-      direccion || null
+      direccion || null,
+      obra_social || null,
+      numero_afiliado || null
     ];
 
-    const resultado = await pool.query(sql, values);
+    await pool.query(sql, values);
 
     res.json({
       ok: true,
-      msg: 'Paciente agregado correctamente',
-      
+      msg: 'Paciente agregado correctamente'
     });
 
   } catch (error) {
     console.error('Error al agregar paciente:', error);
-    res.status(500).json('Error al agregar paciente:');
+    res.status(500).json('Error al agregar paciente');
   }
 });
-
 
 router.get('/datospaciente/:id', async (req, res) => {
   const id = req.params.id
@@ -217,6 +232,7 @@ router.get('/traerTurnoDetalle/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
+    // 1️⃣ Traer turno + paciente
     const rows = await pool.query(
       `SELECT 
          t.*,
@@ -238,7 +254,22 @@ router.get('/traerTurnoDetalle/:id', async (req, res) => {
       return res.status(404).json({ message: 'Turno no encontrado' });
     }
 
-    // Devuelvo un objeto limpio
+    // 2️⃣ Traer consultas asociadas al turno
+    const consultas = await pool.query(
+      `SELECT * FROM consultas WHERE id_turno = ?`,
+      [id]
+    );
+
+    // 3️⃣ Tomar la primera consulta si existe
+    const consulta = consultas.length > 0
+      ? {
+          motivo: consultas[0].motivo,
+          evolucion: consultas[0].evolucion,
+          tratamiento: consultas[0].tratamiento,
+        }
+      : null;
+
+    // 4️⃣ Respuesta final
     res.json({
       turno: {
         id: rows[0].id,
@@ -256,7 +287,8 @@ router.get('/traerTurnoDetalle/:id', async (req, res) => {
         telefono: rows[0].telefono,
         direccion: rows[0].direccion,
         fecha_nacimiento: rows[0].fecha_nacimiento,
-      }
+      },
+      consulta
     });
 
   } catch (error) {
@@ -320,7 +352,7 @@ router.post('/guardarConsulta', async (req, res) => {
 
   try {
     // 1️⃣ Buscar el id_paciente desde el turno
-    const [turnoRows] = await pool.query(
+    const turnoRows = await pool.query(
       'SELECT id_paciente FROM turnos WHERE id = ?',
       [id_turno]
     );
@@ -332,7 +364,7 @@ router.post('/guardarConsulta', async (req, res) => {
     const id_paciente = turnoRows[0].id_paciente;
 
     // 2️⃣ Verificar si ya existe consulta para ese turno
-    const [consultaExistente] = await pool.query(
+    const consultaExistente = await pool.query(
       'SELECT id FROM consultas WHERE id_turno = ?',
       [id_turno]
     );
