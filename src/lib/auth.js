@@ -159,7 +159,7 @@ module.exports = {
 
     },
         isLoggedInncli(req,res, next){
-        
+            console.log('tokencli')
         //
         const authorization = req.get('authorization')
         let token =null
@@ -169,7 +169,7 @@ module.exports = {
             token = authorization.substring(7) 
         }
         let decodedToken = {}
-        
+        console.log(authorization)
         try{
              decodedToken = jwt.verify(token, 'clin123')
            
