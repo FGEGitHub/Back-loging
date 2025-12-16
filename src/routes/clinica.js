@@ -14,7 +14,7 @@ const axios = require('axios');
 
 
 
-router.get('/traerusuario/:cuil_cuit',isLoggedInncli, async (req, res) => {
+router.get('/traerusuario/:cuil_cuit', async (req, res) => {
     cuil_cuit = req.params.cuil_cuit
    console.log(cuil_cuit)
     const usuario = await pool.query('select * from usuarios where usuario= ? ', [cuil_cuit])
