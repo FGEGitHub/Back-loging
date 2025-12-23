@@ -1017,6 +1017,7 @@ router.get('/listadepersonaspsiq/', async (req, res) => {
   try {
     const chiques = await pool.query(`
       SELECT * FROM (
+        /* Psicóloga */
         SELECT 
           dp.id,
           dp.nombre,
@@ -1033,15 +1034,17 @@ router.get('/listadepersonaspsiq/', async (req, res) => {
           WHERE usuariodispositivo = 'No'
           GROUP BY id_persona
         ) AS sel
-        ON dp.id = sel.id_persona
+          ON dp.id = sel.id_persona
+        WHERE dp.psico = 'Si'
 
         UNION ALL
 
+        /* Chico */
         SELECT 
           dc.id,
           dc.nombre,
           dc.apellido,
-              dc.dni,
+          dc.dni,
           'chico' AS tipo,
           COALESCE(sel2.cantidadturnos, 0) AS cantidadturnos
         FROM dtc_chicos dc
@@ -1053,16 +1056,19 @@ router.get('/listadepersonaspsiq/', async (req, res) => {
           WHERE usuariodispositivo = 'Si'
           GROUP BY id_persona
         ) AS sel2
-        ON dc.id = sel2.id_persona
+          ON dc.id = sel2.id_persona
+        WHERE dc.psico = 'Si'
       ) AS combinados
-     
       ORDER BY cantidadturnos DESC, apellido
     `);
 
     // Formateo de BigInt
     const chiquesFormatted = chiques.map(row => ({
       ...row,
-      cantidadturnos: typeof row.cantidadturnos === 'bigint' ? Number(row.cantidadturnos) : row.cantidadturnos
+      cantidadturnos:
+        typeof row.cantidadturnos === 'bigint'
+          ? Number(row.cantidadturnos)
+          : row.cantidadturnos
     }));
 
     const env = {
@@ -1441,28 +1447,13 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
       ORDER BY apellido
     `);
 
-    const chiquesConFalta = chiques.map((chique) => {
-      const faltantes = Object.keys(requiredFields).filter((field) => {
-        const value = chique[field];
-        return !value || value.trim() === '' || value.trim().toLowerCase() === 'sin determinar';
-      });
-
-      const falta =
-        faltantes.length > 0
-          ? faltantes.map((field) => requiredFields[field]).join(', ')
-          : 'Completo';
-
-      const edad = calcularEdad(chique.fecha_nacimiento);
-
-      return { ...chique, falta, edad };
-    });
 
     // -----------------------
     //   ESTADISTICAS
     // -----------------------
 
     const personasPsicologa = await pool.query(
-      'SELECT COUNT(*) AS cantidad FROM dtc_chicos'
+      'SELECT COUNT(*) AS cantidad FROM dtc_chicos where psico="Si"'
     );
     const totalPsicologa = Number(personasPsicologa[0].cantidad) || 0;
 
@@ -1470,7 +1461,7 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
     const obraPsicologa = await pool.query(`
       SELECT COUNT(*) AS cantidad 
       FROM dtc_chicos
-      WHERE obra_social IS NOT NULL 
+       where psico="Si" and obra_social IS NOT NULL 
         AND obra_social <> 'No' 
         AND obra_social <> 'Sin determinar'
     `);
@@ -1480,7 +1471,7 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
     const conObraSocial = await pool.query(`
       SELECT COUNT(*) AS cantidad 
       FROM marketing.dtc_chicos 
-      WHERE obra_social IS NOT NULL 
+      WHERE  psico is null and  obra_social IS NOT NULL 
         AND obra_social <> 'No' 
         AND obra_social <> 'Sin determinar'
     `);
@@ -1509,7 +1500,7 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
     const estadisticas = {};
     let total = 0;
 
-    for (const chico of chiquesConFalta) {
+    for (const chico of chiques) {
       const key = chico.kid === 'Sin definir' ? 'sin_definir' : chico.kid;
       estadisticas[key] = (estadisticas[key] || 0) + 1;
       total++;
@@ -1529,7 +1520,7 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
     const obrasChicos = await pool.query(`
       SELECT obra_social_cual AS obra, COUNT(*) AS cantidad
       FROM marketing.dtc_chicos
-      WHERE obra_social_cual IS NOT NULL 
+      WHERE psico is null and  obra_social_cual IS NOT NULL 
         AND obra_social_cual <> 'No' 
         AND obra_social_cual <> 'Sin determinar'
       GROUP BY obra_social_cual
@@ -1539,7 +1530,7 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
     const obrasPsicologa = await pool.query(`
       SELECT obra_social_cual AS obra, COUNT(*) AS cantidad
       FROM dtc_chicos
-      WHERE obra_social_cual IS NOT NULL 
+      WHERE  psico ="Si" and obra_social_cual IS NOT NULL 
         AND obra_social_cual <> 'No' 
         AND obra_social_cual <> 'Sin determinar'
       GROUP BY obra_social_cual
@@ -1551,9 +1542,9 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
       chicos: obrasChicos,
       psicologa: obrasPsicologa
     };
-console.log(detalleObras)
+
 res.json(
-  toJSONSafe([chiquesConFalta, estadisticas, detalleObras])
+  toJSONSafe([chiques, estadisticas, detalleObras])
 );
   } catch (error) {
     console.error(error);
