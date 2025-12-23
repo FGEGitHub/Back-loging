@@ -594,7 +594,7 @@ const asistencias2025 = await pool.query(`
 
 
 // cantidad de pacientes
- const pacientes = await pool.query('select * from dtc_personas_psicologa')
+ const pacientes = await pool.query('select * from dtc_chicos')
 /* const pacientes = await pool.query(`
   SELECT id
 
@@ -692,7 +692,7 @@ router.get('/tablaprestacionesa/:id', async (req, res) => {
 router.get('/traerturnosdepsico/:id', async (req, res) => {
   let id = req.params.id
   try {
-    const clas = await pool.query(' select * from  dtc_turnos left  join (select id as ida, nombre, apellido from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.ida where id_psico= ?  order by id desc', [id])
+    const clas = await pool.query(' select * from  dtc_turnos left  join (select id as ida, nombre, apellido from dtc_chicos) as sel on dtc_turnos.id_persona=sel.ida where id_psico= ?  order by id desc', [id])
    
     res.json(clas)
   } catch (error) {
@@ -1024,7 +1024,7 @@ router.get('/listadepersonaspsiq/', async (req, res) => {
           dp.dni,
           'psicologa' AS tipo,
           COALESCE(sel.cantidadturnos, 0) AS cantidadturnos
-        FROM dtc_personas_psicologa dp
+        FROM dtc_chicos dp
         LEFT JOIN (
           SELECT 
             id_persona, 
@@ -1462,14 +1462,14 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
     // -----------------------
 
     const personasPsicologa = await pool.query(
-      'SELECT COUNT(*) AS cantidad FROM dtc_personas_psicologa'
+      'SELECT COUNT(*) AS cantidad FROM dtc_chicos'
     );
     const totalPsicologa = Number(personasPsicologa[0].cantidad) || 0;
 
     // Psicóloga con obra social
     const obraPsicologa = await pool.query(`
       SELECT COUNT(*) AS cantidad 
-      FROM dtc_personas_psicologa
+      FROM dtc_chicos
       WHERE obra_social IS NOT NULL 
         AND obra_social <> 'No' 
         AND obra_social <> 'Sin determinar'
@@ -1538,7 +1538,7 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
 
     const obrasPsicologa = await pool.query(`
       SELECT obra_social_cual AS obra, COUNT(*) AS cantidad
-      FROM dtc_personas_psicologa
+      FROM dtc_chicos
       WHERE obra_social_cual IS NOT NULL 
         AND obra_social_cual <> 'No' 
         AND obra_social_cual <> 'Sin determinar'
@@ -2218,9 +2218,9 @@ router.get('/traerproximosturnos/:id', async (req, res) => {
 
   try {
     const turnosss = await pool.query(
-      `SELECT dtc_turnos.*, dtc_personas_psicologa.id AS idp, dtc_personas_psicologa.nombre, dtc_personas_psicologa.apellido
+      `SELECT dtc_turnos.*, dtc_chicos.id AS idp, dtc_chicos.nombre, dtc_chicos.apellido
        FROM dtc_turnos  
-       JOIN dtc_personas_psicologa ON dtc_turnos.id_persona = dtc_personas_psicologa.id
+       JOIN dtc_chicos ON dtc_turnos.id_persona = dtc_chicos.id
        WHERE dtc_turnos.id_psico = ? 
        AND STR_TO_DATE(dtc_turnos.fecha, '%Y-%m-%d') >= CURDATE()`, 
       [id]
@@ -2240,7 +2240,7 @@ router.get('/traerproximosturnos/:id', async (req, res) => {
 
 router.get('/datosdepersonapsi/:id', async (req, res) => {
   const id = req.params.id
-  const chiques = await pool.query('select * from dtc_personas_psicologa where id =?', [id])
+  const chiques = await pool.query('select * from dtc_chicos where id =?', [id])
 
 const turnosss = await pool.query('select * from dtc_turnos  where id_persona =?', [id])
 
@@ -2529,7 +2529,7 @@ router.post("/modificarusuariopsiq", async (req, res) => {
 
     // Construir la consulta dinámica
     const setQuery = columnas.map((key) => `${key} = ?`).join(", ");
-    const query = `UPDATE dtc_personas_psicologa SET ${setQuery} WHERE id = ?`;
+    const query = `UPDATE dtc_chicos SET ${setQuery} WHERE id = ?`;
 
     valores.push(id); // Agregar el ID al final de los valores
 
@@ -2804,7 +2804,7 @@ router.post("/cambiarestadopsico", async (req, res) => {
 
     // Ejecutamos la consulta para actualizar el estado
     await pool.query(
-      "UPDATE dtc_personas_psicologa SET estado = ? WHERE id = ?",
+      "UPDATE dtc_chicos SET estado = ? WHERE id = ?",
       [estado, id]
     );
 
@@ -3449,7 +3449,7 @@ router.post("/nuevapersonapsiq", async (req, res) => {
         if (obra_social_cual == undefined) {
       obra_social_cual = "Sin asignar"
     }
-    await pool.query('insert dtc_personas_psicologa  set nombre=?,apellido=?,fecha_nacimiento=?,observaciones=?,primer_ingreso=?,dni=?,domicilio=?,telefono=?,obra_social=?, obra_social_cual=?', [nombre, apellido, fecha_nacimiento, observaciones, primer_ingreso, dni, domicilio, telefono, obra_social, obra_social_cual])
+    await pool.query('insert dtc_chicos  set nombre=?,apellido=?,fecha_nacimiento=?,observaciones=?,primer_ingreso=?,dni=?,domicilio=?,telefono=?,obra_social=?, obra_social_cual=?', [nombre, apellido, fecha_nacimiento, observaciones, primer_ingreso, dni, domicilio, telefono, obra_social, obra_social_cual])
 console.log('hehco')
     res.json('Agregado')
   } catch (error) {
@@ -4221,7 +4221,7 @@ router.get('/traerasitenciasociales', async (req, res) => {
       FROM dtc_asistencias_sociales AS das
       LEFT JOIN usuarios AS u ON das.id_trabajador = u.id
       LEFT JOIN dtc_chicos AS dc ON das.id_usuario = dc.id
-      LEFT JOIN dtc_personas_psicologa AS dpp 
+      LEFT JOIN dtc_chicos AS dpp 
         ON das.id_usuario = dpp.id 
         AND das.usuariodispositivo = 'No'
       ORDER BY das.fecha_referencia DESC
@@ -4252,7 +4252,7 @@ router.get('/traerasitenciasociales', async (req, res) => {
       LEFT JOIN dtc_chicos AS sel3 
         ON dtc_asistencias_sociales.id_usuario = sel3.id
         AND dtc_asistencias_sociales.usuariodispositivo = 'Si'
-      LEFT JOIN dtc_personas_psicologa AS sel4 
+      LEFT JOIN dtc_chicos AS sel4 
         ON dtc_asistencias_sociales.id_usuario = sel4.id
         AND dtc_asistencias_sociales.usuariodispositivo = 'No'
     `;
@@ -4267,7 +4267,7 @@ router.get('/traerasitenciasociales', async (req, res) => {
 */
 router.get('/traerinformes', async (req, res) => {
 
-  const existe = await pool.query('select * from dtc_informes_psic left join (select  id as idu, nombre from usuarios)as sel on dtc_informes_psic.id_trabajador=sel.idu left join (select id as idch, nombre as nombree, apellido from dtc_personas_psicologa) as sel3 on dtc_informes_psic.id_usuario=sel3.idch')//presentes
+  const existe = await pool.query('select * from dtc_informes_psic left join (select  id as idu, nombre from usuarios)as sel on dtc_informes_psic.id_trabajador=sel.idu left join (select id as idch, nombre as nombree, apellido from dtc_chicos) as sel3 on dtc_informes_psic.id_usuario=sel3.idch')//presentes
   //todos
 
   res.json(existe)
@@ -5380,7 +5380,7 @@ router.post("/borrarusuariodtcpsiq", async (req, res) => {
   const { id } = req.body
 
   try {
-    await pool.query('delete  from  dtc_personas_psicologa where id = ?', [id])
+    await pool.query('delete  from  dtc_chicos where id = ?', [id])
     res.json('Usuario borrado')
   } catch (error) {
     console.log(error)
@@ -5534,7 +5534,7 @@ router.post("/agregarturnocadia", async (req, res) => {
     // ✅ Si es un usuario nuevo, insertar en tabla con los nuevos campos
     if (nuevoUsuario) {
       const insertResult = await pool.query(
-        `INSERT INTO dtc_personas_psicologa 
+        `INSERT INTO dtc_chicos 
          (nombre, apellido, dni, domicilio, barrio, observaciones, obra_social, obra_social_cual) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [nombre, apellido, dni, domicilio, barrio, observaciones, obra_social, obra_social_cual]
@@ -5558,7 +5558,7 @@ router.post("/agregarturnocadia", async (req, res) => {
     if (usuariodispositivo == "Si") {
       personapsiq = await pool.query('SELECT * FROM dtc_chicos WHERE id = ?', [id_persona]);
     } else {
-      personapsiq = await pool.query('SELECT * FROM dtc_personas_psicologa WHERE id = ?', [id_persona]);
+      personapsiq = await pool.query('SELECT * FROM dtc_chicos WHERE id = ?', [id_persona]);
     }
 
     const telefono = profesionall[0]?.telefono + '@c.us';
@@ -5634,9 +5634,9 @@ router.post("/agregarturnocadia", async (req, res) => {
         const fecha = new Date().toLocaleDateString();
 
         if (nuevoUsuario) { 
-          // Insertar nuevo usuario en dtc_personas_psicologa
+          // Insertar nuevo usuario en dtc_chicos
           const insertResult = await pool.query(
-              'INSERT INTO dtc_personas_psicologa (nombre, apellido) VALUES (?, ?)',
+              'INSERT INTO dtc_chicos (nombre, apellido) VALUES (?, ?)',
               [nombre, apellido]
           );
           id_persona = Number(insertResult.insertId); // Convertir BigInt a número
@@ -5648,7 +5648,7 @@ router.post("/agregarturnocadia", async (req, res) => {
             'SELECT * FROM dtc_turnos JOIN (SELECT id AS idu, telefono, nombre FROM usuarios) AS sel ON dtc_turnos.id_psico = sel.idu WHERE id = ?',
             [id]
         );
-        const personapsiq = await pool.query('SELECT * FROM dtc_personas_psicologa WHERE id = ?', [id_persona]);
+        const personapsiq = await pool.query('SELECT * FROM dtc_chicos WHERE id = ?', [id_persona]);
 
         const telefono = profesionall[0]?.telefono + '@c.us';
 
@@ -6002,15 +6002,15 @@ router.post("/ponerausenteclase", async (req, res) => {
 
 
 
- router.post("/traertodoslosturnosfecha", async (req, res) => {
+/*  router.post("/traertodoslosturnosfecha", async (req, res) => {
   const { fecha } = req.body
   try {
   
-    const tunr = await pool.query('select * from dtc_turnos left join(select id as idp, nombre, apellido, dni, domicilio, barrio from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where fecha=? and (usuariodispositivo is null or usuariodispositivo="No")', [fecha])
+    const tunr = await pool.query('select * from dtc_turnos left join(select id as idp, nombre, apellido, dni, domicilio, barrio from dtc_chicos) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where fecha=? and (usuariodispositivo is null or usuariodispositivo="No")', [fecha])
     const tunr2 = await pool.query('select * from dtc_turnos join(select id as idp, nombre, apellido, dni, domicilio  from dtc_chicos) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where (fecha=?) and (usuariodispositivo="Si")', [fecha])
     const resultado = tunr.concat(tunr2);
 
-    //usuarios = await pool.query("select * from dtc_personas_psicologa left join (select fecha, id_persona  from dtc_turnos  where fecha=?) as sel on dtc_personas_psicologa.id=sel.id_persona order by apellido ", [fecha])
+    //usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_persona  from dtc_turnos  where fecha=?) as sel on dtc_chicos.id=sel.id_persona order by apellido ", [fecha])
     //usuarios2 = await pool.query("select * from dtc_chicos left join (select fecha, id_persona , id_psico from dtc_turnos  where fecha=? and  (usuariodispositivo='Si') ) as sel on dtc_chicos.id=sel.id_persona l ", [fecha])
    
     const usuarios = await pool.query(`
@@ -6024,7 +6024,7 @@ SELECT
   p.domicilio,
   p.barrio,
   'No' AS usuariodispositivo
-FROM dtc_personas_psicologa p
+FROM dtc_chicos p
 LEFT JOIN (
     SELECT id_persona, id_psico, MAX(fecha) as fecha
     FROM dtc_turnos
@@ -6104,9 +6104,69 @@ ORDER BY apellido;
   }
 }) 
 
+   */
+ router.post("/traertodoslosturnosfecha", async (req, res) => {
+  const { fecha } = req.body
+  try {
   
+    const tunr = await pool.query('select * from dtc_turnos left join(select id as idp, nombre, apellido, dni, domicilio, barrio from dtc_chicos) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where fecha=? and (usuariodispositivo is null or usuariodispositivo="No")', [fecha])
+    const tunr2 = await pool.query('select * from dtc_turnos join(select id as idp, nombre, apellido, dni, domicilio  from dtc_chicos) as sel on dtc_turnos.id_persona=sel.idp left join(select id as idu, nombre as nombrepsiq from usuarios) as sel2 on dtc_turnos.id_psico=sel2.idu where (fecha=?) and (usuariodispositivo="Si")', [fecha])
+    const resultado = tunr.concat(tunr2);
+
+    //usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_persona  from dtc_turnos  where fecha=?) as sel on dtc_chicos.id=sel.id_persona order by apellido ", [fecha])
+    //usuarios2 = await pool.query("select * from dtc_chicos left join (select fecha, id_persona , id_psico from dtc_turnos  where fecha=? and  (usuariodispositivo='Si') ) as sel on dtc_chicos.id=sel.id_persona l ", [fecha])
+   
+    const usuarios = await pool.query(`
+SELECT 
+  p.id,
+  p.nombre,
+  p.apellido,
+  t_max.fecha,
+  u.nombrepsic,
+  p.dni,
+  p.domicilio,
+  p.barrio,
+  'No' AS usuariodispositivo
+FROM dtc_chicos p
+LEFT JOIN (
+    SELECT id_persona, id_psico, MAX(fecha) as fecha
+    FROM dtc_turnos
+    WHERE usuariodispositivo = 'No'
+    GROUP BY id_persona, id_psico
+) t_max ON p.id = t_max.id_persona
+LEFT JOIN (
+    SELECT id as idu, nombre as nombrepsic
+    FROM usuarios
+) u ON t_max.id_psico = u.idu
+WHERE NOT EXISTS (
+    SELECT 1 FROM (
+        SELECT id_persona, id_psico, COUNT(*) as cantidad
+        FROM dtc_turnos
+        WHERE usuariodispositivo = 'No'
+        GROUP BY id_persona, id_psico
+    ) t2
+    WHERE t2.id_persona = t_max.id_persona
+      AND t2.id_psico != t_max.id_psico
+      AND t2.cantidad > (
+          SELECT COUNT(*) FROM dtc_turnos t3
+          WHERE t3.id_persona = t_max.id_persona
+            AND t3.id_psico = t_max.id_psico
+            AND t3.usuariodispositivo = 'No'
+      )
+)
 
 
+`);
+
+      
+    res.json([resultado, usuarios,usuarios])
+  } catch (error) {
+    console.log(error)
+    res.json(['Error', 'error'])
+  }
+}) 
+
+  
 
 
 router.post('/agregarvariasfechas', async (req, res) => {
@@ -6226,7 +6286,7 @@ router.get("/traertodoslosturnosaprobac", async (req, res) => {
 
 
   try {
-    const tunr = await pool.query('select * from dtc_turnos join(select id as idp, nombre, apellido, dni from dtc_personas_psicologa) as sel on dtc_turnos.id_persona=sel.idp')
+    const tunr = await pool.query('select * from dtc_turnos join(select id as idp, nombre, apellido, dni from dtc_chicos) as sel on dtc_turnos.id_persona=sel.idp')
     const pendientes = await pool.query('select * from dtc_turnos  where estado="pendiente"')
     console.log(tunr)
     console.log('traertodoslosturnosaprobac')
@@ -6260,7 +6320,7 @@ router.get("/nivelar", async (req, res) => {
 router.get("/listatodosdeldtc", async (req, res) => {
   try {
     const listadtc = await pool.query("SELECT * FROM dtc_chicos");
-    const listapsiq = await pool.query("SELECT * FROM dtc_personas_psicologa"); // Cambia esto si es otra tabla
+    const listapsiq = await pool.query("SELECT * FROM dtc_chicos"); // Cambia esto si es otra tabla
 
     const resultado = [...listadtc, ...listapsiq];
 
@@ -6312,8 +6372,8 @@ router.post("/traerpresentesdeactividad", async (req, res) => {
   const { fecha, id } = req.body
   console.log(fecha)
 
-  prod = await pool.query("select * from dtc_turnos join (select id as idc, nombre, apellido,dni from dtc_personas_psicologa ) as sel on dtc_turnos.id_persona=sel.idc where fecha=?  order by apellido", [fecha])
-  usuarios = await pool.query("select * from dtc_personas_psicologa left join (select fecha, id_persona  from dtc_turnos  where fecha=?) as sel on dtc_personas_psicologa.id=sel.id_persona ", [fecha])
+  prod = await pool.query("select * from dtc_turnos join (select id as idc, nombre, apellido,dni from dtc_chicos ) as sel on dtc_turnos.id_persona=sel.idc where fecha=?  order by apellido", [fecha])
+  usuarios = await pool.query("select * from dtc_chicos left join (select fecha, id_persona  from dtc_turnos  where fecha=?) as sel on dtc_chicos.id=sel.id_persona ", [fecha])
 
   res.json([prod, usuarios, {}])
 
@@ -6331,7 +6391,7 @@ router.post("/traerparaturnos", async (req, res) => {
       GROUP_CONCAT(DISTINCT CONCAT(nombre, ' ', apellido) ORDER BY apellido) AS usuarios,
       dni
     FROM dtc_turnos 
-    JOIN (SELECT id AS idc, nombre, apellido, dni FROM dtc_personas_psicologa) AS sel 
+    JOIN (SELECT id AS idc, nombre, apellido, dni FROM dtc_chicos) AS sel 
     ON dtc_turnos.id_persona = sel.idc 
     WHERE fecha = ? 
     ORDER BY apellido`, [fecha]);
@@ -6342,14 +6402,14 @@ router.post("/traerparaturnos", async (req, res) => {
       nombre, 
       apellido, 
       GROUP_CONCAT(DISTINCT sel.fecha ORDER BY sel.fecha) AS fechas_sin_turno
-    FROM dtc_personas_psicologa 
+    FROM dtc_chicos 
     LEFT JOIN (
       SELECT fecha, id_persona  
       FROM dtc_turnos 
       WHERE fecha = ? AND usuariodispositivo IS NULL
     ) AS sel 
-    ON dtc_personas_psicologa.id = sel.id_persona
-    GROUP BY dtc_personas_psicologa.id`, [fecha]);
+    ON dtc_chicos.id = sel.id_persona
+    GROUP BY dtc_chicos.id`, [fecha]);
 
   res.json([prod, usuarios, {}]);
 });
