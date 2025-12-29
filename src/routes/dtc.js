@@ -1296,7 +1296,162 @@ router.post('/listachiquesparainscribir/', async (req, res) => {
   }
 });
 
+router.post('/relacionar', async (req, res) => {
+  const { iddestino, arreglo } = req.body;
 
+  if (!iddestino || !Array.isArray(arreglo) || arreglo.length === 0) {
+    return res.status(400).json({
+      ok: false,
+      message: "Datos incompletos"
+    });
+  }
+
+  let conn;
+  let huboCambiosPsico = false;
+  const logs = [];
+
+  try {
+    conn = await pool.getConnection();
+    await conn.beginTransaction();
+
+    for (const rawId of arreglo) {
+
+      const id = Number(rawId);
+      if (!Number.isInteger(id) || id === iddestino) continue;
+
+      // 1️⃣ dtc_turnos (AFECTA psico)
+      const turnos = await conn.query(
+        `
+        UPDATE dtc_turnos
+        SET id_persona = ?
+        WHERE id_persona IS NOT NULL
+          AND CAST(id_persona AS CHAR) = ?
+        `,
+        [iddestino, String(id)]
+      );
+
+      if (turnos.affectedRows > 0) {
+        huboCambiosPsico = true;
+        logs.push(`dtc_turnos: ${turnos.affectedRows} (id ${id} → ${iddestino})`);
+      }
+
+      // 2️⃣ dtc_informes_psic (AFECTA psico)
+      const informes = await conn.query(
+        `
+        UPDATE dtc_informes_psic
+        SET id_usuario = ?
+        WHERE id_usuario IS NOT NULL
+          AND CAST(id_usuario AS CHAR) = ?
+        `,
+        [iddestino, String(id)]
+      );
+
+      if (informes.affectedRows > 0) {
+        huboCambiosPsico = true;
+        logs.push(`dtc_informes_psic: ${informes.affectedRows} (id ${id} → ${iddestino})`);
+      }
+
+      // 3️⃣ dtc_asistencia (NO afecta psico)
+      const asistencia = await conn.query(
+        `
+        UPDATE dtc_asistencia
+        SET id_usuario = ?
+        WHERE id_usuario IS NOT NULL
+          AND CAST(id_usuario AS CHAR) = ?
+        `,
+        [iddestino, String(id)]
+      );
+
+      if (asistencia.affectedRows > 0) {
+        logs.push(`dtc_asistencia: ${asistencia.affectedRows} (id ${id} → ${iddestino})`);
+      }
+
+      // 4️⃣ dtc_asistencia_clase (NO afecta psico)
+      const asistenciaClase = await conn.query(
+        `
+        UPDATE dtc_asistencia_clase
+        SET id_usuario = ?
+        WHERE id_usuario IS NOT NULL
+          AND CAST(id_usuario AS CHAR) = ?
+        `,
+        [iddestino, String(id)]
+      );
+
+      if (asistenciaClase.affectedRows > 0) {
+        logs.push(`dtc_asistencia_clase: ${asistenciaClase.affectedRows} (id ${id} → ${iddestino})`);
+      }
+
+      // 5️⃣ dtc_cursado (NO afecta psico)
+      const usuarios = await conn.query(
+        `
+        UPDATE dtc_cursado
+        SET id_chico = ?
+        WHERE id_chico IS NOT NULL
+          AND CAST(id_chico AS CHAR) = ?
+        `,
+        [iddestino, String(id)]
+      );
+
+      if (usuarios.affectedRows > 0) {
+        logs.push(`dtc_cursado: ${usuarios.affectedRows} (id ${id} → ${iddestino})`);
+      }
+    }
+
+    // 6️⃣ Marcar psico SOLO si hubo cambios en turnos o informes
+    if (huboCambiosPsico) {
+      await conn.query(
+        `
+        UPDATE dtc_chicos
+        SET psico = 'Si'
+        WHERE id = ?
+        `,
+        [iddestino]
+      );
+
+      logs.push(`dtc_chicos: psico = 'Si' (id ${iddestino})`);
+    }
+
+    // 7️⃣ Eliminar chicos relacionados (los del array)
+    const idsEliminar = arreglo
+      .map(Number)
+      .filter(id => Number.isInteger(id) && id !== iddestino);
+
+    if (idsEliminar.length > 0) {
+      const resultDelete = await conn.query(
+        `
+        DELETE FROM dtc_chicos
+        WHERE id IN (${idsEliminar.map(() => '?').join(',')})
+        `,
+        idsEliminar
+      );
+
+      logs.push(`dtc_chicos: eliminados ${resultDelete.affectedRows} registros`);
+    }
+
+    await conn.commit();
+
+    console.log("===== RELACIONAR CHICOS =====");
+    logs.forEach(l => console.log(l));
+    console.log("============================");
+
+    res.json({
+      ok: true,
+      message: "Relación realizada correctamente",
+      cambios: logs
+    });
+
+  } catch (error) {
+    if (conn) await conn.rollback();
+    console.error("❌ Error al relacionar:", error);
+
+    res.status(500).json({
+      ok: false,
+      message: "Error interno al relacionar chicos"
+    });
+  } finally {
+    if (conn) conn.release();
+  }
+});
 
 
 /* 
