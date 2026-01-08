@@ -1,4 +1,4 @@
-if (typeof File === 'undefined') { global.File = class {}; }
+//if (typeof File === 'undefined') { global.File = class {}; }
 const express = require('express')
 const morgan = require('morgan')
 const path = require('path')
