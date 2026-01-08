@@ -36,26 +36,12 @@ app.set('view engine', '.hbs')
 
 //middlwares
 
-/* app.use(session({
-    secret: 'faztmysqlnodesession',
-    resave: false,
-    saveUninitialized: false,
-    store: new MySQLStore(database)
-})) */
 app.use('/imagenesvendedoras', express.static('imagenesvendedoras'));
 
 
 
   
   // Agregar la sesión a la configuración de Express
-  app.use(session({
-    secret: 'my_secret_',
-    resave: false,
-    saveUninitialized: false,
-    store: new MariaDBStore(database)
-
-}))
-
 
 
 
