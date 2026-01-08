@@ -12,7 +12,7 @@ const axios = require('axios');
 ////solicitado== se suma al partido
 ////convocado,= s enevia a un juagdor la invitacion
 
-
+ 
 
 router.get('/traerusuario/:cuil_cuit', async (req, res) => {
     cuil_cuit = req.params.cuil_cuit
