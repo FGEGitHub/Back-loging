@@ -2973,7 +2973,7 @@ if(resp.length==0){
 
   res.json([resp])
 })
-
+/* 
 
 router.get("/traaeroficios", async (req, res) => {
   try {
@@ -3027,8 +3027,78 @@ router.get("/traaeroficios", async (req, res) => {
   }
 });
 
+ */
+router.get("/traaeroficios", async (req, res) => {
+  try {
+    let resp = await pool.query(`
+      SELECT 
+        dtc_oficios.*, 
+        dtc_pdf_oficios.id AS expediente_id, 
+        dtc_pdf_oficios.ubicacion AS expediente_archivo,
+        dtc_chicos.nombre AS nombre_chico,
+        dtc_chicos.apellido AS apellido_chico
+      FROM dtc_oficios
+      LEFT JOIN dtc_pdf_oficios ON dtc_oficios.id = dtc_pdf_oficios.id_oficio
+      LEFT JOIN dtc_chicos ON dtc_oficios.id_usuario = dtc_chicos.id
+      ORDER BY dtc_oficios.fecha ASC
+    `);
 
+    let oficiosMap = {};
 
+    resp.forEach(row => {
+      if (!oficiosMap[row.id]) {
+        const anio = row.fecha ? row.fecha.toString().slice(0, 4) : null;
+
+        oficiosMap[row.id] = {
+          id: row.id,
+          expediente: row.expediente,
+          juzgado: row.juzgado,
+          causa: row.causa,
+          solicitud: row.solicitud,
+          oficio: row.oficio,
+          fecha: row.fecha,
+          anio,
+          id_usuario: row.id_usuario,
+          nombre: row.nombre_chico,
+          apellido: row.apellido_chico,
+          expedientes: []
+        };
+      }
+
+      if (row.expediente_id) {
+        oficiosMap[row.id].expedientes.push({
+          id: row.expediente_id,
+          archivo: row.expediente_archivo
+        });
+      }
+    });
+
+    // Convertimos a array
+    let resultado = Object.values(oficiosMap);
+
+    // 🔹 Agrupar por año
+    let porAnio = {};
+
+    resultado.forEach(oficio => {
+      if (!porAnio[oficio.anio]) {
+        porAnio[oficio.anio] = [];
+      }
+      porAnio[oficio.anio].push(oficio);
+    });
+
+    // 🔹 Asignar id_anio correlativo por año
+    Object.keys(porAnio).forEach(anio => {
+      porAnio[anio].forEach((oficio, index) => {
+        oficio.id_anio = index + 1;
+      });
+    });
+
+    res.json([resultado]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al traer los oficios" });
+  }
+});
 // Ruta para subir el archivo y guardar en la base de datos
 router.post("/subirexpediente", upload.single("archivo"), async (req, res) => {
   try {
