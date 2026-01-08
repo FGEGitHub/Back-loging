@@ -34,13 +34,11 @@ app.set('view engine', '.hbs')
 
 
 //middlwares
-
-/* app.use(session({
+app.use(session({
     secret: 'faztmysqlnodesession',
     resave: false,
-    saveUninitialized: false,
-    store: new MySQLStore(database)
-})) */
+    saveUninitialized: false
+}));
 app.use('/imagenesvendedoras', express.static('imagenesvendedoras'));
 
 
