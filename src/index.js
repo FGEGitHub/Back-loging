@@ -2,11 +2,11 @@
 const express = require('express')
 const morgan = require('morgan')
 const path = require('path')
-const flash = require ('connect-flash')
+const flash = require('connect-flash')
 const session = require('express-session')
 //const MySQLStore = require('express-mysql-session')
 const MariaDBStore = require('express-mysql-session')(session);
-const {database} = require('./keys')
+const { database } = require('./keys')
 const passport = require('passport')
 const cors = require("cors");
 const jwt = require('jsonwebtoken')
@@ -23,11 +23,11 @@ const pool = require('./database')
 //inicializacion
 const app = express()
 require('./lib/passport')
-app.set('key',keys.key)
+app.set('key', keys.key)
 
 //settings
 
-app.set('port',  4000)
+app.set('port', 4000)
 //app.enableCors({ origin: "*" })
 
 app.set('view engine', '.hbs')
@@ -45,40 +45,22 @@ app.use('/imagenesvendedoras', express.static('imagenesvendedoras'));
 
 
 
-  
-  // Agregar la sesión a la configuración de Express
-  app.use(session({
-    secret: 'my_secret_',
-    resave: false,
-    saveUninitialized: false,
-    store: new MariaDBStore(database)
-
-}))
-
-
-
-
-
-
-
-
-
 
 app.use(flash())
 app.use(morgan('dev'))
-app.use(express.urlencoded({extended:false})) // para recibir datos de formularios
+app.use(express.urlencoded({ extended: false })) // para recibir datos de formularios
 app.use(express.json())
 app.use(passport.initialize())
 app.use(passport.session())
 
 
- const corsOptions ={
-    origin:'*',
+const corsOptions = {
+    origin: '*',
     methods: ['GET', 'POST', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials:true,            //access-control-allow-credentials:true
-    optionSuccessStatus:200
-} 
+    credentials: true,            //access-control-allow-credentials:true
+    optionSuccessStatus: 200
+}
 
 
 app.use(cors(corsOptions));
@@ -115,12 +97,12 @@ app.use(`/f1`, require('./routes/f1'))
 
 
 //public  
-app.use(express.static(path.join(__dirname, 'public') ))
+app.use(express.static(path.join(__dirname, 'public')))
 
 
 //start 
-app.listen(app.get('port'), async ()=>{
+app.listen(app.get('port'), async () => {
     console.log(`server onport`, app.get('port'))
-  
+
 })
 
