@@ -54,14 +54,14 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 
+
 const corsOptions = {
     origin: '*',
     methods: ['GET', 'POST', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,            //access-control-allow-credentials:true
-    optionSuccessStatus: 200
-}
-
+    credentials: true,
+    optionsSuccessStatus: 200
+};
 
 app.use(cors(corsOptions));
 //globalvariables
