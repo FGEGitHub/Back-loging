@@ -51,7 +51,7 @@ app.use(morgan('dev'))
 app.use(express.urlencoded({ extended: false })) // para recibir datos de formularios
 app.use(express.json())
 app.use(passport.initialize())
-app.use(passport.session())
+//app.use(passport.session())
 
 
 
