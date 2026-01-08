@@ -17,6 +17,8 @@ const axios = require('axios');
 router.get('/traerusuario/:cuil_cuit', async (req, res) => {
     cuil_cuit = req.params.cuil_cuit
    console.log(cuil_cuit)
+
+
     const usuario = await pool.query('select * from usuarios where usuario= ? ', [cuil_cuit])
    
     res.json(usuario)
@@ -150,7 +152,16 @@ router.post('/agregarPersona', isLoggedInncli, async (req, res) => {
       obra_social,
       numero_afiliado
     } = req.body;
-
+console.log(nombre,
+      apellido,
+      dni,
+      genero,
+      fecha_nacimiento,
+      fecha_ingreso,
+      telefono,
+      direccion,
+      obra_social,
+      numero_afiliado)
     if (!dni) {
       return res.status(400).json('El DNI es obligatorio');
     }
