@@ -152,16 +152,7 @@ router.post('/agregarPersona', isLoggedInncli, async (req, res) => {
       obra_social,
       numero_afiliado
     } = req.body;
-console.log(nombre,
-      apellido,
-      dni,
-      genero,
-      fecha_nacimiento,
-      fecha_ingreso,
-      telefono,
-      direccion,
-      obra_social,
-      numero_afiliado)
+
     if (!dni) {
       return res.status(400).json('El DNI es obligatorio');
     }
