@@ -42,15 +42,7 @@ app.set('view engine', '.hbs')
 app.use('/imagenesvendedoras', express.static('imagenesvendedoras'));
 
 
-const sessionStore = new MariaDBStore({
-    host: 'localhost',
-    port: 3306,
-   // user: 'root',
-   // password: 'root',
-    user: 'admin',
-    password: '11235',
-    database: 'marketing'
-  });
+
   
   // Agregar la sesión a la configuración de Express
   app.use(session({
@@ -115,6 +107,7 @@ app.use(`/carnavales`, require('./routes/carnavales'))
 app.use(`/vendedoras`, require('./routes/vendedoras'))
 app.use(`/doneu`, require('./routes/doneu'))
 app.use(`/f1`, require('./routes/f1'))
+app.use(`/clinica`, require('./routes/clinica'))
 //app.use(`/links`, require('./routes/links'))
 
 
