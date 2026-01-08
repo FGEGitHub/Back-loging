@@ -1,3 +1,4 @@
+if (typeof File === 'undefined') { global.File = class {}; }
 const express = require('express')
 const morgan = require('morgan')
 const path = require('path')
@@ -11,6 +12,7 @@ const cors = require("cors");
 const jwt = require('jsonwebtoken')
 const keys = require('./keys')
 ///
+var https = require('https'); var fs = require('fs'); const PUERTO = 4000;
 const pool = require('./database')
 
 
