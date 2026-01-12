@@ -220,7 +220,8 @@ router.get('/datospaciente/:id', async (req, res) => {
 
       const turnos = await pool.query('select * from turnos where id_paciente =?', [id])
 
-    res.json([chiques, "imagenBase64", turnos])
+     const consultas = await pool.query('select * from turnos where id_paciente =?', [id])
+    res.json([chiques, "imagenBase64", turnos, consultas])
   } catch (error) {
     console.log(error)
     res.json([])
@@ -338,48 +339,81 @@ router.post('/borrarpaciente', isLoggedInncli, async (req, res) => {
   }
 });
 
-
 router.post('/guardarConsulta', async (req, res) => {
   const {
     id_turno,
+    id_paciente,
     motivo,
     evolucion,
     tratamiento,
     fecha
   } = req.body;
 
-  if (!id_turno) {
-    return res.status(400).json({ message: 'Falta id_turno' });
-  }
-
   try {
-    // 1️⃣ Buscar el id_paciente desde el turno
-    const turnoRows = await pool.query(
-      'SELECT id_paciente FROM turnos WHERE id = ?',
-      [id_turno]
-    );
 
-    if (turnoRows.length === 0) {
-      return res.status(404).json({ message: 'Turno no encontrado' });
+    // Normalizamos turno
+    const turnoValido = id_turno && id_turno !== "sin_turno";
+
+    // 🔹 Si no hay id_paciente y hay turno → buscar paciente
+    let pacienteFinal = id_paciente;
+
+    if (!pacienteFinal && turnoValido) {
+      const turnoRows = await pool.query(
+        'SELECT id_paciente FROM turnos WHERE id = ?',
+        [id_turno]
+      );
+
+      if (turnoRows.length === 0) {
+        return res.status(404).json({ message: 'Turno no encontrado' });
+      }
+
+      pacienteFinal = turnoRows[0].id_paciente;
     }
 
-    const id_paciente = turnoRows[0].id_paciente;
+    if (!pacienteFinal) {
+      return res.status(400).json({ message: 'Falta id_paciente' });
+    }
 
-    // 2️⃣ Verificar si ya existe consulta para ese turno
+    // =====================================
+    // 🔹 CASO 1 → CONSULTA SIN TURNO
+    // =====================================
+    if (!turnoValido) {
+
+      await pool.query(
+        `INSERT INTO consultas
+         (id_paciente, motivo, evolucion, tratamiento, fecha)
+         VALUES (?, ?, ?, ?, ?)`,
+        [
+          pacienteFinal,
+          motivo,
+          evolucion,
+          tratamiento,
+          fecha || new Date()
+        ]
+      );
+
+      return res.json({ ok: true, creada: "sin_turno" });
+    }
+
+    // =====================================
+    // 🔹 CASO 2 → CONSULTA CON TURNO
+    // =====================================
+
+    // Verifico si ya hay consulta para ese turno
     const consultaExistente = await pool.query(
       'SELECT id FROM consultas WHERE id_turno = ?',
       [id_turno]
     );
 
     if (consultaExistente.length === 0) {
-      // 3️⃣ Crear consulta
+      // Insert
       await pool.query(
         `INSERT INTO consultas
          (id_turno, id_paciente, motivo, evolucion, tratamiento, fecha)
          VALUES (?, ?, ?, ?, ?, ?)`,
         [
           id_turno,
-          id_paciente,
+          pacienteFinal,
           motivo,
           evolucion,
           tratamiento,
@@ -387,11 +421,11 @@ router.post('/guardarConsulta', async (req, res) => {
         ]
       );
     } else {
-      // 4️⃣ Actualizar consulta existente
+      // Update
       await pool.query(
         `UPDATE consultas
-         SET motivo = ?, evolucion = ?, tratamiento = ?, fecha = ?
-         WHERE id_turno = ?`,
+         SET motivo=?, evolucion=?, tratamiento=?, fecha=?
+         WHERE id_turno=?`,
         [
           motivo,
           evolucion,
@@ -402,21 +436,20 @@ router.post('/guardarConsulta', async (req, res) => {
       );
     }
 
-    // 5️⃣ Marcar turno como Atendido
+    // Marco turno atendido
     await pool.query(
-      `UPDATE turnos
-       SET estado = 'Atendido'
-       WHERE id = ?`,
+      `UPDATE turnos SET estado='Atendido' WHERE id=?`,
       [id_turno]
     );
 
-    res.json({ ok: true });
+    res.json({ ok: true, creada: "con_turno" });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error al guardar consulta' });
   }
 });
+
 
 
 module.exports = router
