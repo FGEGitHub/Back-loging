@@ -39,6 +39,29 @@ router.get('/traerpacientes',isLoggedInncli, async (req, res) => {
 
 })
 
+
+router.get('/traerTurnosDisponibles', isLoggedInncli, async (req, res) => {
+  try {
+    const turnos = await pool.query(`
+      SELECT 
+        t.*, 
+  
+        p.dni,
+        p.id AS id_pacientee
+      FROM turnos t
+      LEFT JOIN pacientes p ON t.id_paciente = p.id
+      where t.baja="No" 
+      ORDER BY t.hora ASC, p.dni ASC
+    `);
+
+    res.json(turnos);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Error al traer turnos' });
+  }
+});
+
+
 router.get('/traerturnos', isLoggedInncli, async (req, res) => {
   try {
     const turnos = await pool.query(`
@@ -450,6 +473,132 @@ router.post('/guardarConsulta', async (req, res) => {
   }
 });
 
+
+router.post('/nuevoturnodisp',  async (req, res) => {
+  try {
+    let { fecha, hora, observaciones } = req.body;
+console.log(fecha, hora, observaciones )
+    // Validaciones mínimas
+    if (!fecha || !hora) {
+      return res.status(400).json({ message: "Fecha y hora son obligatorias" });
+    }
+
+    // Si observaciones viene vacío → texto por defecto
+    if (!observaciones || observaciones.trim() === "") {
+      observaciones = "Sin observaciones";
+    }
+
+    const sql = `
+      INSERT INTO turnos
+      (fecha, hora, observaciones)
+      VALUES (?, ?, ?)
+    `;
+
+    await pool.query(sql, [fecha, hora, observaciones]);
+
+    res.json({ message: "Turno creado correctamente" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al crear turno" });
+  }
+});
+
+router.post('/agendarapaciente',  async (req, res) => {
+  try {
+    const { id_turno, id_paciente, categoria } = req.body;
+
+    // Validaciones básicas
+    if (!id_turno || !id_paciente || !categoria) {
+      return res.status(400).json({ 
+        message: "Faltan datos obligatorios" 
+      });
+    }
+
+    // Verificar que el turno exista
+    const [turno] = await pool.query(
+      "SELECT id FROM turnos WHERE id = ?",
+      [id_turno]
+    );
+
+    if (turno.length === 0) {
+      return res.status(404).json({ message: "Turno no encontrado" });
+    }
+
+    // Actualizar turno con paciente y categoría
+    const sql = `
+      UPDATE turnos
+      SET id_paciente = ?, categoria = ?
+      WHERE id = ?
+    `;
+
+    await pool.query(sql, [id_paciente, categoria, id_turno]);
+
+    res.json({ message: "Paciente agendado correctamente" });
+
+  } catch (error) {
+    console.error("Error en agendarapaciente:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
+
+
+router.post("/solicitarturno", async (req, res) => {
+  try {
+    const { id_turno, nombre, dni, telefono, categoria } = req.body;
+console.log( id_turno, nombre, dni, telefono, categoria   )
+    if (!id_turno || !nombre || !dni || !telefono || !categoria) {
+      return res.status(400).json({ message: "Faltan datos" });
+    }
+
+    // 1. Verificar si paciente ya existe por DNI
+    const existe = await pool.query(
+      "SELECT id FROM pacientes WHERE dni = ?",
+      [dni]
+    );
+
+    let id_paciente;
+
+    if (existe.length > 0) {
+      id_paciente = existe[0].id;
+    } else {
+      // 2. Crear nuevo paciente
+      const nuevo = await pool.query(
+        "INSERT INTO pacientes (nombre, dni, telefono) VALUES (?, ?, ?)",
+        [nombre, dni, telefono]
+      );
+      id_paciente = nuevo.insertId;
+    }
+
+    // 3. Verificar que el turno exista y esté libre
+    const turno = await pool.query(
+      "SELECT id, id_paciente FROM turnos WHERE id = ?",
+      [id_turno]
+    );
+
+    if (turno.length === 0) {
+      return res.status(404).json({ message: "Turno no encontrado" });
+    }
+
+    if (turno[0].id_paciente) {
+      return res.status(409).json({ message: "Turno ya ocupado" });
+    }
+
+    // 4. Actualizar turno
+    await pool.query(
+      `UPDATE turnos 
+       SET id_paciente = ?, categoria = ?, estado = 'solicitado'
+       WHERE id = ?`,
+      [id_paciente, categoria, id_turno]
+    );
+
+    res.json({ message: "Solicitud enviada correctamente" });
+
+  } catch (error) {
+    console.error("Error solicitarturno:", error);
+    res.status(500).json({ message: "Error del servidor" });
+  }
+});
 
 
 module.exports = router
