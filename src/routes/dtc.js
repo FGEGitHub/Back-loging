@@ -2350,8 +2350,8 @@ router.get('/datosdechique/:id', async (req, res) => {
     
     
     const clasesinscrip = await pool.query('select * from dtc_cursado join(select id as idu, mail from usuarios ) as sel on dtc_cursado.id_curso=sel.idu where id_chico =? order by mail , dia', [id])
-
-    res.json([chiques, imagenBase64, vinculos,clasesinscrip])
+const turnosss = await pool.query('select * from dtc_turnos  where id_persona =?', [id])
+    res.json([chiques, imagenBase64, vinculos,clasesinscrip, turnosss])
   } catch (error) {
     console.log(error)
     res.json([])
