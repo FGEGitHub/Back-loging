@@ -1,27 +1,53 @@
-const express = require('express')
-const router = express.Router()
-const { isLoggedIn, isLoggedInn, isLoggedInn2, isLoggedInn5 } = require('../lib/auth') //proteger profile
-const pool = require('../database')
-const multer = require('multer')
-const XLSX = require('xlsx')
-const path = require('path')
-const passport = require('passport')
- const client= require('./whatsapclient');
-const puppeteer = require('puppeteer');
+import express from "express";
+const router = express.Router();
 
+import {
+  isLoggedIn,
+  isLoggedInn,
+  isLoggedInn2,
+  isLoggedInn5
+} from "../lib/auth.js";
+
+import pool from "../database.js";
+import multer from "multer";
+import XLSX from "xlsx";
+import path from "path";
+import passport from "passport";
+import puppeteer from "puppeteer";
+
+import client from "./whatsapclient.js";
+
+// 👉 reemplazo de __dirname en ESM
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ==============================
+// Multer disk storage
+// ==============================
 const diskstorage = multer.diskStorage({
-    destination: path.join(__dirname, '../Excel'),
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-inscrip-' + file.originalname)
+  destination: path.join(__dirname, "../Excel"),
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-inscrip-" + file.originalname);
+  }
+});
 
-    }
-}) //para que almacene temporalmente la imagen
+// subida a disco
 const fileUpload = multer({
-    storage: diskstorage,
+  storage: diskstorage
+}).single("image");
 
-}).single('image')
+// subida en memoria
+const upload = multer({
+  storage: multer.memoryStorage()
+});
 
-const upload = multer({ storage: multer.memoryStorage() });
+export {
+  router,
+  fileUpload,
+  upload
+};
+
 
 // router.post("/enviardnis", upload.single("archivo"), async (req, res) => {
 //   try {
@@ -4569,4 +4595,4 @@ router.post('/subirpruebaescuelas', fileUpload, async (req, res, done) => {
 
 
 })
-module.exports = router
+export default router;

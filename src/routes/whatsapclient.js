@@ -1,20 +1,29 @@
-const qrcode = require('qrcode-terminal');
-const { Client, LocalAuth } = require('whatsapp-web.js');
-const path = require('path');
+import qrcode from "qrcode-terminal";
+import pkg from "whatsapp-web.js"; // 👈 importar TODO el paquete
+import path from "path";
+import { fileURLToPath } from "url";
 
-// Definís un directorio fijo para guardar la sesión
-const sessionPath = path.join(__dirname, 'sesion_whatsappp');
+const { Client, LocalAuth } = pkg;
+
+// __dirname en ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Directorio fijo para guardar la sesión
+const sessionPath = path.join(__dirname, "sesion_whatsappp");
 
 const client = new Client({
-    authStrategy: new LocalAuth({
-        clientId: "cliente_unico",  // Si querés manejar varios, cambiás el nombre
-        dataPath: sessionPath       // 👈 acá se guarda la sesión
-    }),
-    puppeteer: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        // executablePath: '/path/to/chrome' // opcional
-    }
+  authStrategy: new LocalAuth({
+    clientId: "cliente_unico",   // si querés múltiples clientes, cambiás esto
+    dataPath: sessionPath        // 👈 acá se guarda la sesión
+  }),
+  puppeteer: {
+    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    // executablePath: "/path/to/chrome" // opcional
+  }
 });
+
+
 
 client.isReady = false;
 
@@ -40,6 +49,6 @@ client.on('disconnected', (reason) => {
 });
 
 // Inicializar cliente
-client.initialize();
+//client.initialize();
 
-module.exports = client;
+export default client; 

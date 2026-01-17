@@ -1,8 +1,14 @@
-const express = require('express')
-const router = express.Router()
-const passport= require('passport')
-const pool = require('../database')
-const {isLoggedIn,isLoggedInn,isLoggedInn2, } = require('../lib/auth')
+import express from "express";
+const router = express.Router();
+
+import passport from "passport";
+import pool from "../database.js";
+
+import {
+  isLoggedIn,
+  isLoggedInn,
+  isLoggedInn2
+} from "../lib/auth.js";
 
 router.get('/todos/', async (req, res) => {
    
@@ -129,5 +135,4 @@ router.post('/borrarusuario', async (req, res) => {
 
 })
 
-
-module.exports = router
+export default router;

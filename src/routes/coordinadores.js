@@ -1,8 +1,11 @@
-const express = require('express')
-const router = express.Router()
-const passport = require('passport')
-const pool = require('../database')
-const { isLoggedInn } = require('../lib/auth')
+import express from "express";
+const router = express.Router();
+import pool from "../database.js";
+import {
+  isLoggedIn,
+  isLoggedInn,
+  isLoggedInn2
+} from "../lib/auth.js";
 
 
 
@@ -208,6 +211,4 @@ enviar.push(nuevo)
   
   })
 
-
-
-  module.exports = router
+export default router;

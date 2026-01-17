@@ -1,13 +1,9 @@
-const express = require ('express')
-const res = require('express/lib/response')
-const router = express.Router()
-const passport= require('passport')
-//const {isLoggedIn,isLoggedInn,isLoggedInn2, isNotLoggedIn} = require('../lib/auth') //proteger profile
-//const isClient = require('../lib/authusuario') ----->>>>  Para Rol 
-const pool = require('../database')
+import express from "express";
+const router = express.Router();
 
-const jwt = require('jsonwebtoken')
-
+import passport from "passport";
+import pool from "../database.js";
+import jwt from "jsonwebtoken";
 
 router.all('*', function(req, res, next){
     res.header("Access-Control-Allow-Origin", "*")
@@ -330,4 +326,4 @@ res.json(rows)
 
 })
 
-module.exports= router
+export default router;

@@ -1,11 +1,21 @@
-const express = require('express')
-const router = express.Router()
-const { isLoggedIn, isLoggedInn, isLoggedInn2 } = require('../lib/auth') //proteger profile
-const pool = require('../database')
-const caregorizar = require('./funciones/caregorizar')
-const consultarcupos = require('./funciones/cantidadocupado.')
-const XLSX = require('xlsx')
-const path = require('path')
+import express from "express";
+const router = express.Router();
+
+import {
+  isLoggedIn,
+  isLoggedInn,
+  isLoggedInn2
+} from "../lib/auth.js";
+
+import pool from "../database.js";
+
+//import caregorizar from "./funciones/caregorizar.js";
+import { asignarcategoria } from "./funciones/caregorizar.js";
+
+import { cantidadcategoriaporcurso } from "./funciones/cantidadocupado..js";
+import XLSX from "xlsx";
+import path from "path";
+
 
 ////////////
 
@@ -679,8 +689,7 @@ router.get('/preinscriptas/', async (req, res) => {
 
   try {
 
-    inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join (select id_inscripcion, id_turno from cursado) as sel2 on inscripciones.id=sel2.id_inscripcion  join (select id as idc, descripcion from turnos) as sel5 on sel2.id_turno=sel5.idc left join (select id as idu, nombre as nombrecall from usuarios) as sel4 on inscripciones.id_call=sel4.idu where edicion=3 and estado="Preasignada"')
-console.log(inscriptos.length)
+   const inscriptos = await pool.query('select * from inscripciones join (select dni, nombre, apellido,categoria, participante_anterior, trabajo, hijos, tipo_trabajo,tel,tel2 from personas) as sel on inscripciones.dni_persona=sel.dni join (select id_inscripcion, id_turno from cursado) as sel2 on inscripciones.id=sel2.id_inscripcion  join (select id as idc, descripcion from turnos) as sel5 on sel2.id_turno=sel5.idc left join (select id as idu, nombre as nombrecall from usuarios) as sel4 on inscripciones.id_call=sel4.idu where edicion=3 and estado="Preasignada"')
 
 
     res.json([inscriptos])
@@ -836,10 +845,10 @@ router.get('/incriptas2da/', async (req, res) => {
   }
 
   res.json([inscriptos, deuda_exigible, datos33]) */
-  inscriptos = await pool.query('select * from inscripciones_carnaval join (select dni, nombre, apellido,categoria,id as idp,tel,tel2, barrio from personas) as sel on inscripciones_carnaval.id_persona=sel.idp where id>590')
+const  inscriptos = await pool.query('select * from inscripciones_carnaval join (select dni, nombre, apellido,categoria,id as idp,tel,tel2, barrio from personas) as sel on inscripciones_carnaval.id_persona=sel.idp where id>590')
   
-  deuda_exigible = []
-  datos33={}
+let  deuda_exigible = []
+ let datos33={}
     res.json([inscriptos, deuda_exigible, datos33])
 
 })
@@ -1725,7 +1734,7 @@ router.get('/inscribirauddddto/', async (req, res) => {
 
     persona = await pool.query('select * from personas where dni =?', inscripciones[ii]['dni_persona'])
 
-    cat = await caregorizar.asignarcategoria(persona) //// trae la categoria
+    cat = await asignarcategoria(persona) //// trae la categoria
     turnoaux = inscripciones[ii]['horario']
 
 
@@ -1757,7 +1766,7 @@ router.get('/inscribirauddddto/', async (req, res) => {
         console.log(turno.length)
         for (iiii in turno) {
           if (!bandera) {
-            haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, inscripciones[ii]['uno'], criterios[criterios.length - 1][cat], turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
+            haycupo = await cantidadcategoriaporcurso(cat, inscripciones[ii]['uno'], criterios[criterios.length - 1][cat], turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
 
             if (haycupo) {
 
@@ -1800,7 +1809,7 @@ router.get('/inscribirauddddto/', async (req, res) => {
 
 
     persona = await pool.query('select * from personas where dni =?', listadef[ii]['dni_persona'])
-    cat = await caregorizar.asignarcategoria(persona) //// trae la categoria
+    cat = await asignarcategoria(persona) //// trae la categoria
     turnoaux = inscripciones[ii]['horario']
 
 
@@ -1821,7 +1830,7 @@ router.get('/inscribirauddddto/', async (req, res) => {
       if (turno.length > 0) {
         for (iiii in turno) {
           if (!bandera) {
-            haycupo = await consultarcupos.cantidadcategoriaporcurso(cat, listadef[ii]['dos'], criterios[criterios.length - 1][cat], turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
+            haycupo = await cantidadcategoriaporcurso(cat, listadef[ii]['dos'], criterios[criterios.length - 1][cat], turno[iiii]['id'])//// envia categoria y la id del curso devuelve si hay cupo 
 
 
             if (haycupo) {
@@ -1858,9 +1867,9 @@ router.get('/inscribirauddddto/', async (req, res) => {
 router.get('/listaaclaracioncriterios/', async (req, res) => {
 
 
-  criterios = await pool.query(' select * from criterios ')
+  const criterios = await pool.query(' select * from criterios ')
 
-  tabla = [
+ const  tabla = [
     {
       Categoria: "1.1.1",
       Aclaracion: "Uno",
@@ -1940,7 +1949,7 @@ router.get('/listaaclaracioncriterios/', async (req, res) => {
 
 router.get('/listacriterios/', async (req, res) => {
 
-  criterios = await pool.query('select * from criterios')
+  const criterios = await pool.query('select * from criterios')
 
   res.json([criterios[criterios.length - 1]])
 })
@@ -1956,8 +1965,11 @@ router.get('/listacursos/', async (req, res) => {
   const cursos = await pool.query(' select id from cursos')
   //recorremos los cursos 
 
-  listadef = []
-
+  let listadef = []
+let cantidad = []
+let turnosss = []
+let cursado = []
+let Obj = {}
   /////// inicio carga de prioridad 1
   for (ii in cursos) {
 
@@ -2159,4 +2171,4 @@ router.get('/actualizarcursado/', async (req, res) => {
 
 
 
-module.exports = router
+export default router;

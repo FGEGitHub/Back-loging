@@ -1,26 +1,45 @@
-const express = require('express')
-const router = express.Router()
-const { isLoggedIn, isLoggedInn, isLoggedInn2, isLoggedInn4 } = require('../lib/auth') //proteger profile
-const pool = require('../database')
-const { parse, startOfWeek, format } = require('date-fns');
-const { es } = require('date-fns/locale');
-const multer = require('multer')
-const path = require('path')
-const fse = require('fs').promises;
-const fs = require('fs');
-const moment = require('moment-timezone');
-const xlsx = require('xlsx');
-const xml2js = require('xml2js');
-const cron = require('node-cron');
-const kmlFilePath = path.join(__dirname, '../maps/mapadtc.kml');
-const kmlFilePath2 = path.join(__dirname, '../maps/entregas.kml');
+import express from "express";
+const router = express.Router();
 
+import {
+  isLoggedIn,
+  isLoggedInn,
+  isLoggedInn2,
+  isLoggedInn4
+} from "../lib/auth.js";
 
- ////////////whatapweb
- const qrcode = require('qrcode-terminal');
- const  client = require('./whatsapclient');
- const puppeteer = require('puppeteer-core');
+import pool from "../database.js";
 
+import { parse, startOfWeek, format } from "date-fns";
+import { es } from "date-fns/locale";
+
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import fse from "fs/promises";
+
+import moment from "moment-timezone";
+import xlsx from "xlsx";
+import xml2js from "xml2js";
+import cron from "node-cron";
+
+import qrcode from "qrcode-terminal";
+import client from "./whatsapclient.js";
+import puppeteer from "puppeteer-core";
+
+import { fileURLToPath } from "url";
+
+/* ================================
+   __dirname en ESM
+================================ */
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+/* ================================
+   Paths KML
+================================ */
+const kmlFilePath = path.join(__dirname, "../maps/mapadtc.kml");
+const kmlFilePath2 = path.join(__dirname, "../maps/entregas.kml");
 
 
 //client.initialize();
@@ -4975,7 +4994,7 @@ router.get('/traertalleres/', async (req, res) => {
   try {
     // Obtiene todos los usuarios con nivel 26
     const existe = await pool.query('SELECT * FROM usuarios WHERE nivel = 26');
-    enviar = [];
+    let enviar = [];
 
     // Obtiene la fecha actual
     const fechaActual = new Date();
@@ -5028,7 +5047,7 @@ router.get('/traterpsicologos2/', async (req, res) => {
   try {
     // Obtiene todos los usuarios con nivel 26
     const existe = await pool.query('SELECT * FROM usuarios WHERE nivel = 24');
-    enviar = [];
+    let enviar = [];
 
     // Obtiene la fecha actual
     const fechaActual = new Date();
@@ -5151,152 +5170,185 @@ console.log(resultados)
   }
 });
 
-
 router.post("/traerestadisticas", async (req, res) => {
-  let { fecha } = req.body
-  ///presentes mensuales 
-  fecha = fecha.fecha
- 
-  // Divide la fecha usando el guión ('-') como separador
-  let [dia, mes, año] = fecha.split('-');
-  if (dia.length == 1) {
-    diacumple = "0" + dia
-  } else { diacumple = dia }
-  if (mes.length == 1) {
-    mescumple = "0" + mes
-  } else { mescumple = mes }
-  console.log("'_%" + mescumple + "-" + diacumple + "'")
-  const cumple = await pool.query('select * from dtc_chicos where fecha_nacimiento like ?', ["%" + mescumple + "-" + diacumple])
-  console.log("cumple", cumple)
-  if (mes == 1) {
-    mesanterior = 12
-    anioanterior = año - 1
+  let { fecha } = req.body;
+
+  // presentes mensuales
+  fecha = fecha.fecha;
+
+  let mescumple = "";
+  let diacumple = "";
+  let mesanterior = "";
+  let anioanterior = "";
+
+  // Divide la fecha
+  let [dia, mes, anio] = fecha.split("-");
+
+  if (dia.length === 1) diacumple = "0" + dia;
+  else diacumple = dia;
+
+  if (mes.length === 1) mescumple = "0" + mes;
+  else mescumple = mes;
+
+  const cumple = await pool.query(
+    "SELECT * FROM dtc_chicos WHERE fecha_nacimiento LIKE ?",
+    [`%${mescumple}-${diacumple}`]
+  );
+
+  if (Number(mes) === 1) {
+    mesanterior = 12;
+    anioanterior = Number(anio) - 1;
   } else {
-    mesanterior = mes - 1
-    anioanterior = año
+    mesanterior = Number(mes) - 1;
+    anioanterior = Number(anio);
   }
 
-  const presentes_totales = await pool.query('SELECT * FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? and id_tallerista=238', [mes, año])
-  const presentes_totales_reales = await pool.query('SELECT distinct(id_usuario) FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? and id_tallerista=238', [mes, año])
-  presentes_totales_reales_mespasado = await pool.query('SELECT distinct(id_usuario) FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? and id_tallerista=238', [mesanterior, anioanterior])
+  const presentes_totales = await pool.query(
+    'SELECT * FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND id_tallerista = 238',
+    [mes, anio]
+  );
 
-  const date = parse(fecha, 'dd-MM-yyyy', new Date());
+  const presentes_totales_reales = await pool.query(
+    'SELECT DISTINCT(id_usuario) FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND id_tallerista = 238',
+    [mes, anio]
+  );
 
-  // const fecha2=  parse(date, 'dd-MM-yyyy', new Date());
+  const presentes_totales_reales_mespasado = await pool.query(
+    'SELECT DISTINCT(id_usuario) FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND id_tallerista = 238',
+    [mesanterior, anioanterior]
+  );
 
-  //console.log("lunes:", startOfWeek(date, { weekStartsOn: 1 }) )
-  const fechaFormateada = format(startOfWeek(date, { weekStartsOn: 1 }), 'd-M-yyyy', { locale: es });
-  console.log('fechalnes', fechaFormateada)
-  ///cantidad de presentes al lunes
-  let cantp = await pool.query('select * from dtc_asistencia where fecha =?', fechaFormateada)
-  let estasemana = [cantp.length]
-  let fechaaux = fechaFormateada
+  const date = parse(fecha, "dd-MM-yyyy", new Date());
+
+  const fechaFormateada = format(
+    startOfWeek(date, { weekStartsOn: 1 }),
+    "d-M-yyyy",
+    { locale: es }
+  );
+
+  let cantp = await pool.query(
+    "SELECT * FROM dtc_asistencia WHERE fecha = ?",
+    fechaFormateada
+  );
+
+  const estasemana = [cantp.length];
+  let fechaaux = fechaFormateada;
 
   while (fechaaux !== fecha) {
+    let [diaStr, mesStr, anioStr] = fechaaux.split("-");
+    const d = parseInt(diaStr);
+    const m = parseInt(mesStr) - 1;
+    const a = parseInt(anioStr);
 
-    [diaStr, mesStr, anioStr] = fechaaux.split('-');
-    dia = parseInt(diaStr);
-    mes = parseInt(mesStr) - 1; // Los meses en JavaScript son de 0 a 11
-    anio = parseInt(anioStr);
-
-    // Crear un objeto Date con la fecha parseada
-    fechaw = new Date(anio, mes, dia);
-
-    // Sumar un día
+    const fechaw = new Date(a, m, d);
     fechaw.setDate(fechaw.getDate() + 1);
 
-    // Obtener los valores de la nueva fecha
-    nuevoDia = fechaw.getDate();
-    nuevoMes = fechaw.getMonth() + 1; // Los meses en JavaScript son de 0 a 11, por lo que sumamos 1
-    nuevoAnio = fechaw.getFullYear();
-    // Formatear la nueva fecha a d-m-yyyy
+    const nuevoDia = fechaw.getDate();
+    const nuevoMes = fechaw.getMonth() + 1;
+    const nuevoAnio = fechaw.getFullYear();
+
     fechaaux = `${nuevoDia}-${nuevoMes}-${nuevoAnio}`;
 
-    let cantp = await pool.query('select * from dtc_asistencia where fecha =?', fechaaux)
-    estasemana.push(cantp.length)
-    // Código a ejecutar repetidamente mientras la condición sea verdadera
+    cantp = await pool.query(
+      "SELECT * FROM dtc_asistencia WHERE fecha = ?",
+      fechaaux
+    );
+
+    estasemana.push(cantp.length);
   }
 
-  ///////// ARRANCA TRANSFORMACION FECHA PSADA
+  // semana pasada
   const fechaconvertidora = new Date(date);
-
   fechaconvertidora.setDate(fechaconvertidora.getDate() - 7);
-  //console.log(fechaconvertidora) //bien
-  let fechaHaceUnaSemana = fechaconvertidora.toISOString().split('T')[0];
 
-  // Convertir la fecha a formato deseado: YYYY-M-D
-  const fechaconvertidoraaux = new Date(fechaHaceUnaSemana);
+  let fechaHaceUnaSemana = fechaconvertidora
+    .toISOString()
+    .split("T")[0];
 
+  const lunespasado = format(
+    startOfWeek(fechaHaceUnaSemana, { weekStartsOn: 1 }),
+    "d-M-yyyy",
+    { locale: es }
+  );
 
+  let [aa, mm, dd] = fechaHaceUnaSemana.split("-");
+  if (dd[0] === "0") dd = dd[1];
+  if (mm[0] === "0") mm = mm[1];
 
-  const lunespasado = format(startOfWeek(fechaHaceUnaSemana, { weekStartsOn: 1 }), 'd-M-yyyy', { locale: es });
+  fechaHaceUnaSemana = `${dd}-${mm}-${aa}`;
 
-  const [añoo, messs, diaa] = fechaHaceUnaSemana.split('-');
-  let diaaa = diaa
-  let messss = messs
-  if (diaa[0] == 0) {
-    diaaa = diaa[1]
-  }
-  if (messs[0] == 0) {
-    messss = messs[1]
-  }
-  fechaHaceUnaSemana = diaaa + '-' + messss + '-' + añoo
+  const pres_Semanal = await pool.query(
+    'SELECT * FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") BETWEEN STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(?, "%d-%m-%Y") AND id_tallerista = 238',
+    [fechaFormateada, fecha]
+  );
 
-  // const presentes_totales_semana = await pool.query('SELECT * FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? and id_tallerista=238',[mess,años])
-  //const presentes_totales_reales_semana = await pool.query('SELECT distinct(id_usuario) FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? and id_tallerista=238',[mess,años])
-  const pres_Semanal = await pool.query('SELECT * FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") >= STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(fecha, "%d-%m-%Y") <= STR_TO_DATE(?, "%d-%m-%Y") and id_tallerista=238 ', [fechaFormateada, fecha]);
-  const pres_Semanal_real = await pool.query('SELECT distinct(id_usuario) FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") >= STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(fecha, "%d-%m-%Y") <= STR_TO_DATE(?, "%d-%m-%Y") and id_tallerista=238 ', [fechaFormateada, fecha]);
+  const pres_Semanal_real = await pool.query(
+    'SELECT DISTINCT(id_usuario) FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") BETWEEN STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(?, "%d-%m-%Y") AND id_tallerista = 238',
+    [fechaFormateada, fecha]
+  );
 
-  const pres_Semanapasada = await pool.query('SELECT * FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") >= STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(fecha, "%d-%m-%Y") <= STR_TO_DATE(?, "%d-%m-%Y") and id_tallerista=238 ', [lunespasado, fechaHaceUnaSemana]);
-  const pres_Semanal_real_semanapasada = await pool.query('SELECT distinct(id_usuario) FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") >= STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(fecha, "%d-%m-%Y") <= STR_TO_DATE(?, "%d-%m-%Y") and id_tallerista=238 ', [lunespasado, fechaHaceUnaSemana]);
+  const pres_Semanapasada = await pool.query(
+    'SELECT * FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") BETWEEN STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(?, "%d-%m-%Y") AND id_tallerista = 238',
+    [lunespasado, fechaHaceUnaSemana]
+  );
 
-  cantp = await pool.query('select * from dtc_asistencia where fecha =?', lunespasado)
-  semanapasada = [cantp.length]
-  fechaaux = lunespasado
+  const pres_Semanal_real_semanapasada = await pool.query(
+    'SELECT DISTINCT(id_usuario) FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") BETWEEN STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(?, "%d-%m-%Y") AND id_tallerista = 238',
+    [lunespasado, fechaHaceUnaSemana]
+  );
+
+  cantp = await pool.query(
+    "SELECT * FROM dtc_asistencia WHERE fecha = ?",
+    lunespasado
+  );
+
+  const semanapasada = [cantp.length];
+  fechaaux = lunespasado;
+
   while (fechaaux !== fechaHaceUnaSemana) {
+    let [diaStr, mesStr, anioStr] = fechaaux.split("-");
+    const d = parseInt(diaStr);
+    const m = parseInt(mesStr) - 1;
+    const a = parseInt(anioStr);
 
-    [diaStr, mesStr, anioStr] = fechaaux.split('-');
-    dia = parseInt(diaStr);
-    mes = parseInt(mesStr) - 1; // Los meses en JavaScript son de 0 a 11
-    anio = parseInt(anioStr);
-
-    // Crear un objeto Date con la fecha parseada
-    fechaw = new Date(anio, mes, dia);
-
-    // Sumar un día
+    const fechaw = new Date(a, m, d);
     fechaw.setDate(fechaw.getDate() + 1);
 
-    // Obtener los valores de la nueva fecha
-    nuevoDia = fechaw.getDate();
-    nuevoMes = fechaw.getMonth() + 1; // Los meses en JavaScript son de 0 a 11, por lo que sumamos 1
-    nuevoAnio = fechaw.getFullYear();
-    // Formatear la nueva fecha a d-m-yyyy
+    const nuevoDia = fechaw.getDate();
+    const nuevoMes = fechaw.getMonth() + 1;
+    const nuevoAnio = fechaw.getFullYear();
+
     fechaaux = `${nuevoDia}-${nuevoMes}-${nuevoAnio}`;
-    let cantp = await pool.query('select * from dtc_asistencia where fecha =?', fechaaux)
-    semanapasada.push(cantp.length)
-    // Código a ejecutar repetidamente mientras la condición sea verdadera
+
+    cantp = await pool.query(
+      "SELECT * FROM dtc_asistencia WHERE fecha = ?",
+      fechaaux
+    );
+
+    semanapasada.push(cantp.length);
   }
+
   const estad = {
     presentes_totales: presentes_totales.length,
     presentes_totales_reales: presentes_totales_reales.length,
-    presentes_totales_reales_mespasado: presentes_totales_reales_mespasado.length,
+    presentes_totales_reales_mespasado:
+      presentes_totales_reales_mespasado.length,
     presentes_totales_semana: pres_Semanal.length,
     presentes_totales_reales_semana: pres_Semanal_real.length,
     pres_Semanapasada: pres_Semanapasada.length,
-    pres_Semanal_real_semanapasada: pres_Semanal_real_semanapasada.length,
+    pres_Semanal_real_semanapasada:
+      pres_Semanal_real_semanapasada.length,
     semana: estasemana,
-    semanapasada: semanapasada,
-    cumple: cumple
+    semanapasada,
+    cumple,
+  };
 
-  }
-
-  res.json([estad])
-})
+  res.json([estad]);
+});
 
 
 router.post("/nuevaetapacadia", async (req, res) => {
   let { fecha, descripcion, expediente, id_usuario, titulo, etapa, proyecto } = req.body
-  console.log(fecha, descripcion, expediente, id_usuario, titulo,etapa, proyecto )
   if (titulo == undefined) {
     titulo = "Sin completar"
   }
@@ -5349,7 +5401,10 @@ router.post("/traercumples", async (req, res) => {
   let { fecha } = req.body
   ///presentes mensuales 
   fecha = fecha
-  console.log(fecha)
+  let diacumple = ""
+  let mescumple = ""
+ let mesanterior = ""
+ let anioanterior = ""
   // Divide la fecha usando el guión ('-') como separador
   let [dia, mes, año] = fecha.split('-');
   if (dia.length == 1) {
@@ -6642,7 +6697,6 @@ router.post("/traerparaturnoscadia", async (req, res) => {
 })
 router.post("/traerpresentes", async (req, res) => {
   const { fecha, id } = req.body
-console.log(fecha)
   const usua = await pool.query('select * from usuarios where id=?', [id])
 
   let prod = []
@@ -6684,14 +6738,14 @@ console.log(fecha)
 
 
   }
-  raciones = await pool.query("select sum(racion) from dtc_asistencia  where fecha=? and id_tallerista=238", [fecha])
-  premerienda = await pool.query("select sum(premerienda) from dtc_asistencia  where fecha=? and id_tallerista=238", [fecha])
+  const raciones = await pool.query("select sum(racion) from dtc_asistencia  where fecha=? and id_tallerista=238", [fecha])
+  const premerienda = await pool.query("select sum(premerienda) from dtc_asistencia  where fecha=? and id_tallerista=238", [fecha])
  
-  prod1 = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? and sel.kid='kid1' order by apellido", [fecha, 238])
-  prod2 = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? and sel.kid='kid2'order by apellido", [fecha, 238])
-  prod3 = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? and sel.kid='kid3'order by apellido", [fecha, 238])
+  const prod1 = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? and sel.kid='kid1' order by apellido", [fecha, 238])
+  const prod2 = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? and sel.kid='kid2'order by apellido", [fecha, 238])
+ const  prod3 = await pool.query("select * from dtc_asistencia join (select id as idc, nombre, apellido,dni,kid from dtc_chicos ) as sel on dtc_asistencia.id_usuario=sel.idc where fecha=? and id_tallerista=? and sel.kid='kid3'order by apellido", [fecha, 238])
 
-  ext = await pool.query('select * from dtc_chicos where dato_escolar="Horario extendido"')
+  const ext = await pool.query('select * from dtc_chicos where dato_escolar="Horario extendido"')
 //console.log(usuarios)
   res.json([prod, usuarios, { kid1: prod1.length, kid2: prod2.length, kid3: prod3.length, horario: ext.length }, raciones[0]['sum(racion)'],premerienda[0]['sum(premerienda)']])
 
@@ -6848,5 +6902,5 @@ router.post("/borrarlegajo", async (req, res) => {
  
 
 
-module.exports = router
+export default router;
 

@@ -1,6 +1,6 @@
-const express = require('express')
-const router = express.Router()
-const pool = require('../database')
+import express from "express";
+const router = express.Router();
+import pool from "../database.js";
 
 
 /// borrar despues
@@ -239,4 +239,4 @@ res.json(['error'])
 })
 
 
-module.exports = router
+export default router;

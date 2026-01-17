@@ -1,106 +1,123 @@
-//if (typeof File === 'undefined') { global.File = class {}; }
-const express = require('express')
-const morgan = require('morgan')
-const path = require('path')
-const flash = require('connect-flash')
-const session = require('express-session')
-//const MySQLStore = require('express-mysql-session')
-const MariaDBStore = require('express-mysql-session')(session);
-const { database } = require('./keys')
-const passport = require('passport')
-const cors = require("cors");
-const jwt = require('jsonwebtoken')
-const keys = require('./keys')
-///
-var https = require('https'); var fs = require('fs'); const PUERTO = 4000;
-const pool = require('./database')
+// if (typeof File === "undefined") { global.File = class {}; }
+
+import express from "express";
+import morgan from "morgan";
+import path from "path";
+import flash from "connect-flash";
+import session from "express-session";
+import MariaDBStoreFactory from "express-mysql-session";
+import passport from "passport";
+import cors from "cors";
 
 
-////   
+import { fileURLToPath } from "url";
 
+// ==============================
+// __dirname en ESM
+// ==============================
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
+// ==============================
+// Config / DB / Keys
+// ==============================
 
-//inicializacion
-const app = express()
-require('./lib/passport')
-app.set('key', keys.key)
+// ==============================
+// Passport config
+// ==============================
+import "./lib/passport.js";
 
-//settings
+// ==============================
+// App init
+// ==============================
+const app = express();
+const PUERTO = 4000;
 
-app.set('port', 4000)
-//app.enableCors({ origin: "*" })
+//app.set("key", keys.key);
+app.set("port", PUERTO);
+app.set("view engine", ".hbs");
 
-app.set('view engine', '.hbs')
-
-
-//middlwares
-app.use(session({
-    secret: 'faztmysqlnodesession',
+// ==============================
+// Middlewares
+// ==============================
+app.use(
+  session({
+    secret: "faztmysqlnodesession",
     resave: false,
     saveUninitialized: false
-}));
-app.use('/imagenesvendedoras', express.static('imagenesvendedoras'));
+  })
+);
 
+app.use("/imagenesvendedoras", express.static("imagenesvendedoras"));
 
+app.use(flash());
+app.use(morgan("dev"));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(passport.initialize());
 
-
-app.use(flash())
-app.use(morgan('dev'))
-app.use(express.urlencoded({ extended: false })) // para recibir datos de formularios
-app.use(express.json())
-app.use(passport.initialize())
-//app.use(passport.session())
-
-
-
+// ==============================
+// CORS
+// ==============================
 const corsOptions = {
-    origin: '*',
-    methods: ['GET', 'POST', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-    optionsSuccessStatus: 200
+  origin: "*",
+  methods: ["GET", "POST", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
-//globalvariables
-/* app.use((req,res,next)=>{
-    app.locals.success = req.flash('success')
-    app.locals.success = req.flash('message')
-    app.locals.user = req.user
-    next();
-}) */
 
+// ==============================
+// Routes
+// ==============================
+import indexRoutes from "./routes/index.js";
+import authRoutes from "./routes/authentication.js";
+import dtcRoutes from "./routes/dtc.js";
+import personasRoutes from "./routes/personas.js";
+import cursosRoutes from "./routes/cursos.js";
+import novedadesRoutes from "./routes/novedades.js";
+import inscripcionesRoutes from "./routes/inscripciones.js";
+import tareasRoutes from "./routes/tareas.js";
+import administracionRoutes from "./routes/administracion.js";
+import encargadosRoutes from "./routes/encargados.js";
+import turnosRoutes from "./routes/turnos.js";
+import coordinadoresRoutes from "./routes/coordinadores.js";
+import fiscalizacionRoutes from "./routes/fiscalizacion.js";
+import carnavalesRoutes from "./routes/carnavales.js";
+import vendedorasRoutes from "./routes/vendedoras.js";
+import doneuRoutes from "./routes/doneu.js";
+import f1Routes from "./routes/f1.js";
+import clinicaRoutes from "./routes/clinica.js";
 
-//routes
-app.use(require('./routes/index'))
-app.use(require('./routes/authentication'))
-app.use(`/dtc`, require('./routes/dtc'))
-app.use(`/personas`, require('./routes/personas'))
-app.use(`/cursos`, require('./routes/cursos'))
-app.use(`/novedades`, require('./routes/novedades'))
-app.use(`/inscripciones`, require('./routes/inscripciones'))
-app.use(`/tareas`, require('./routes/tareas'))
-app.use(`/administracion`, require('./routes/administracion'))
-app.use(`/encargados`, require('./routes/encargados'))
-app.use(`/turnos`, require('./routes/turnos'))
-app.use(`/coordinadores`, require('./routes/coordinadores'))
-app.use(`/fiscalizacion`, require('./routes/fiscalizacion'))
-app.use(`/carnavales`, require('./routes/carnavales'))
-app.use(`/vendedoras`, require('./routes/vendedoras'))
-app.use(`/doneu`, require('./routes/doneu'))
-app.use(`/f1`, require('./routes/f1'))
-app.use(`/clinica`, require('./routes/clinica'))
-//app.use(`/links`, require('./routes/links'))
+app.use(indexRoutes);
+app.use(authRoutes);
+app.use("/dtc", dtcRoutes);
+app.use("/personas", personasRoutes);
+app.use("/cursos", cursosRoutes);
+app.use("/novedades", novedadesRoutes);
+app.use("/inscripciones", inscripcionesRoutes);
+app.use("/tareas", tareasRoutes);
+app.use("/administracion", administracionRoutes);
+app.use("/encargados", encargadosRoutes);
+app.use("/turnos", turnosRoutes);
+app.use("/coordinadores", coordinadoresRoutes);
+app.use("/fiscalizacion", fiscalizacionRoutes);
+app.use("/carnavales", carnavalesRoutes);
+app.use("/vendedoras", vendedorasRoutes);
+app.use("/doneu", doneuRoutes);
+app.use("/f1", f1Routes);
+app.use("/clinica", clinicaRoutes);
 
+// ==============================
+// Public
+// ==============================
+app.use(express.static(path.join(__dirname, "public")));
 
-
-//public  
-app.use(express.static(path.join(__dirname, 'public')))
-
-
-//start 
-app.listen(app.get('port'), async () => {
-    console.log(`server onport`, app.get('port'))
-
-})
-
+// ==============================
+// Start server
+// ==============================
+app.listen(app.get("port"), () => {
+  console.log("✅ Server on port", app.get("port"));
+});

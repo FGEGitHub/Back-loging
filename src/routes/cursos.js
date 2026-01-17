@@ -1,8 +1,12 @@
-const express = require('express')
-const router = express.Router()
-const { isLoggedIn, isLoggedInn, isLoggedInn2, isLoggedInn4 } = require('../lib/auth') //proteger profile
-const pool = require('../database')
-
+import express from "express";
+const router = express.Router();
+import pool from "../database.js";
+import {
+  isLoggedIn,
+  isLoggedInn,
+  isLoggedInn2,
+  isLoggedInn4
+} from "../lib/auth.js";
 
 router.get('/preinscriptascall/:id', async (req, res) => {
   const id = req.params.id
@@ -1075,5 +1079,4 @@ router.post("/ausente", async (req, res) => {
 })
 
 
-
-module.exports = router
+export default router;

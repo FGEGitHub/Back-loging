@@ -1,7 +1,6 @@
-const express = require('express')
-const router = express.Router()
-const passport = require('passport')
-const pool = require('../database')
+import express from "express";
+const router = express.Router();
+import pool from "../database.js";
 
 
 
@@ -330,4 +329,4 @@ router.post("/confirmaciondellamado", async (req, res) => {
 })
 
 
-module.exports = router
+export default router;

@@ -1,21 +1,65 @@
-const express = require('express')
-const router = express.Router()
-const { isLoggedInncli } = require('../lib/auth') //proteger profile
-const pool = require('../database5')
-const multer = require('multer')
-const path = require('path')
-const fse = require('fs').promises;
-const fs = require('fs');
-const axios = require('axios');
+import express from "express";
+const router = express.Router();
 
-///import { format } from "date-fns"; // si lo querés más cómodo
-////solicitado== se suma al partido
-////convocado,= s enevia a un juagdor la invitacion
+import { isLoggedInncli } from "../lib/auth.js";
+import pool from "../database5.js";
+
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import fse from "fs/promises";
+import axios from "axios";
+
+
+import { Preference, MercadoPagoConfig } from "mercadopago";
+import { MP_ACCESS_TOKEN } from "../keys.js";
+
+const client = new MercadoPagoConfig({
+  accessToken: MP_ACCESS_TOKEN,
+});
+
+router.post("/crear-preferencia", async (req, res) => {
+  try {
+    const preference = new Preference(client);
+
+    const result = await preference.create({
+      body: {
+        items: [
+          {
+            title: "Consulta Clínica",
+            quantity: 1,
+            unit_price: 5000,
+            currency_id: "ARS",
+          },
+        ],
+        back_urls: {
+          success: "http://localhost:3000/success",
+          failure: "http://localhost:3000/failure",
+          pending: "http://localhost:3000/pending",
+        },
+        auto_return: "approved",
+      },
+    });
+
+    res.json({ id: result.id });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error Mercado Pago" });
+  }
+});
+
+router.post("/webhook", express.json(), (req, res) => {
+  console.log(req.body);
+  res.sendStatus(200);
+});
+
+
+
 
  
 
 router.get('/traerusuario/:cuil_cuit', async (req, res) => {
-    cuil_cuit = req.params.cuil_cuit
+    const cuil_cuit = req.params.cuil_cuit
    console.log(cuil_cuit)
 
 
@@ -30,8 +74,7 @@ router.get('/traerusuario/:cuil_cuit', async (req, res) => {
 
 
 router.get('/traerpacientes',isLoggedInncli, async (req, res) => {
-    cuil_cuit = req.params.cuil_cuit
-   console.log(cuil_cuit)
+const    cuil_cuit = req.params.cuil_cuit
     const usuario = await pool.query('select * from pacientes where baja="No" ')
    
     res.json(usuario)
@@ -600,5 +643,4 @@ console.log( id_turno, nombre, dni, telefono, categoria   )
   }
 });
 
-
-module.exports = router
+export default router;

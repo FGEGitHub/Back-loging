@@ -1,10 +1,10 @@
-const passport = require('passport')
-const LocalStrategy = require('passport-local').Strategy
-const pool = require('../database')
-const helpers = require('../lib/helpers')
-const pool4 = require('../database4')
-const pool5 = require('../database5')
+import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
 
+import pool from "../database.js";
+import helpers from "../lib/helpers.js";
+import pool4 from "../database4.js";
+import pool5 from "../database5.js";
 
 
 

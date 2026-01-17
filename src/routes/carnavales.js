@@ -1,8 +1,8 @@
-const express = require('express')
-const router = express.Router()
-const passport = require('passport')
-const pool = require('../database')
-const { isLoggedInn } = require('../lib/auth')
+import express from "express";
+const router = express.Router();
+import pool from "../database.js";
+
+
 
 
 
@@ -285,4 +285,4 @@ res.json('realizado')
       })
 
 
-module.exports = router
+export default router;

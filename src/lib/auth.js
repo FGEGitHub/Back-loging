@@ -1,188 +1,92 @@
-const jwt = require("jsonwebtoken")
-module.exports = {
+import jwt from "jsonwebtoken";
 
+// =======================
+// Helper para verificar token
+// =======================
+function verifyToken(req, secret) {
+  const authorization = req.get("authorization");
+  if (!authorization || !authorization.startsWith("Bearer ")) {
+    return null;
+  }
 
+  const token = authorization.substring(7);
 
-    isLoggedInn(req,res, next){
-        
-        //
-        const authorization = req.get('authorization')
-        let token =null
-       
-        if (authorization && authorization.startsWith('Bearer')){
-           
-            token = authorization.substring(7) 
-        }
-        let decodedToken = {}
-        
-        try{
-             decodedToken = jwt.verify(token, 'fideicomisocs121')
-           
-        }catch{}
-      
-        if (!token || !decodedToken.id){
-            console.log('error token')
-            return res.send('error login')
-        }
-      
-       // res.send(decodedToken.cuil_cuit)
-        
-        next()
-    },
+  try {
+    return jwt.verify(token, secret);
+  } catch {
+    return null;
+  }
+}
 
-    isLoggedInn2(req,res, next){
-        
-        //
-        const authorization = req.get('authorization')
-        
-        let token =null
-        console.log('authorization2')
-        console.log(authorization)
-        if (authorization && authorization.startsWith('Bearer')){
-          
-            token = authorization.substring(7) 
-        }
-        let decodedToken = {}
-        
-        try{
-             decodedToken = jwt.verify(token, 'fideicomisocs121')
-            
-           
-        }catch{}
-      
-        if (!token || !decodedToken.id || (decodedToken.nivel !=2) ){
-            console.log('error token')
-            return res.send('error login')
-        }
-      
-       // res.send(decodedToken.cuil_cuit)
-        
-        next()
-    },
-    isLoggedInn5(req,res, next){
-        
-        //
-        const authorization = req.get('authorization')
-        
-        let token =null
-        console.log('authorization2')
-        console.log(authorization)
-        if (authorization && authorization.startsWith('Bearer')){
-          
-            token = authorization.substring(7) 
-        }
-        let decodedToken = {}
-        
-        try{
-             decodedToken = jwt.verify(token, 'fideicomisocs121')
-             console.log('5')
-           
-        }catch{}
-      
-        if (!token || !decodedToken.id || (decodedToken.nivel !=5) ){
-            console.log('error token')
-            return res.send('error login')
-        }
-      
-       // res.send(decodedToken.cuil_cuit)
-        
-        next()
-    },
+// =======================
+// Middlewares
+// =======================
+export function isLoggedInn(req, res, next) {
+  const decodedToken = verifyToken(req, "fideicomisocs121");
 
-    isLoggedInn4(req,res, next){
-       
-        //
-        const authorization = req.get('authorization')
-        let token =null
-  
-        if (authorization && authorization.startsWith('Bearer')){
-            console.log('entraa')
-            token = authorization.substring(7) 
-        }
-        let decodedToken = {}
-        
-        try{
-             decodedToken = jwt.verify(token, 'fideicomisocs121')
-             console.log(decodedToken)
-           
-        }catch{}
-    console.log(decodedToken)
-        if (!token || !decodedToken.id || (decodedToken.nivel !=4 && decodedToken.nivel !=2 && decodedToken.nivel !=3 ) ){
-            console.log('error token')
-            return res.send('error login')
-        }
-      
-       // res.send(decodedToken.cuil_cuit)
-        
-        next()
-    },
-    isLoggedInn5(req,res, next){
-      
-        //
-        const authorization = req.get('authorization')
-        let token =null
-        console.log('authorization4')
-        console.log(authorization)
-        if (authorization && authorization.startsWith('Bearer')){
-            console.log('entraa')
-            token = authorization.substring(7) 
-        }
-        let decodedToken = {}
-        
-        try{
-             decodedToken = jwt.verify(token, 'fideicomisocs121')
-             console.log(decodedToken)
-           
-        }catch{}
-      
-        if (!token || !decodedToken.id || (decodedToken.nivel !=5 ) ){
-            console.log('error token')
-            return res.send('error login')
-        }
-      
-       // res.send(decodedToken.cuil_cuit)
-        
-        next()
-    },
+  if (!decodedToken?.id) {
+    return res.status(401).send("error login");
+  }
 
-    isLoggedIn(req,res, next){
-        if (req.isAuthenticated()) {     /// isathenticated metodo de pasport
-            return next()   //si existe esta seccion continua con el codigo
-        }
-        return res.redirect('/signin') //si no esta logueado 
-    },
-    isNotLoggedIn(req,res, next){
-        if (!req.isAuthenticated()) {    
-            return next()
-    }
-    return res.redirect('/profile')
+  next();
+}
 
-    },
-        isLoggedInncli(req,res, next){
-            console.log('tokencli')
-        //
-        const authorization = req.get('authorization')
-        let token =null
-       
-        if (authorization && authorization.startsWith('Bearer')){
-           
-            token = authorization.substring(7) 
-        }
-        let decodedToken = {}
-        console.log(authorization)
-        try{
-             decodedToken = jwt.verify(token, 'clin123')
-           
-        }catch{}
-      
-        if (!token || !decodedToken.id){
-            console.log('error token')
-            return res.send('error login')
-        }
-      
-       // res.send(decodedToken.cuil_cuit)
-        
-        next()
-    },
+export function isLoggedInn2(req, res, next) {
+  const decodedToken = verifyToken(req, "fideicomisocs121");
 
+  if (!decodedToken?.id || decodedToken.nivel !== 2) {
+    return res.status(401).send("error login");
+  }
+
+  next();
+}
+
+export function isLoggedInn4(req, res, next) {
+  const decodedToken = verifyToken(req, "fideicomisocs121");
+
+  if (
+    !decodedToken?.id ||
+    ![2, 3, 4].includes(decodedToken.nivel)
+  ) {
+    return res.status(401).send("error login");
+  }
+
+  next();
+}
+
+export function isLoggedInn5(req, res, next) {
+  const decodedToken = verifyToken(req, "fideicomisocs121");
+
+  if (!decodedToken?.id || decodedToken.nivel !== 5) {
+    return res.status(401).send("error login");
+  }
+
+  next();
+}
+
+export function isLoggedInncli(req, res, next) {
+  const decodedToken = verifyToken(req, "clin123");
+
+  if (!decodedToken?.id) {
+    return res.status(401).send("error login");
+  }
+
+  next();
+}
+
+// =======================
+// Passport
+// =======================
+export function isLoggedIn(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  return res.redirect("/signin");
+}
+
+export function isNotLoggedIn(req, res, next) {
+  if (!req.isAuthenticated()) {
+    return next();
+  }
+  return res.redirect("/profile");
 }

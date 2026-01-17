@@ -1,22 +1,36 @@
-const express = require('express')
-const router = express.Router()
-const { isLoggedIn, isLoggedInn, isLoggedInn2, isLoggedInn4 } = require('../lib/auth') //proteger profile
-const pool = require('../database')
-const pool2 = require('../database2')
-const XLSX = require('xlsx')
-const caregorizar = require('./funciones/caregorizar')
-const multer = require('multer')
-const path = require('path')
-const fs = require('fs')
+import express from "express";
+const router = express.Router();
 
+import {
+  isLoggedIn,
+  isLoggedInn,
+  isLoggedInn2,
+  isLoggedInn4
+} from "../lib/auth.js";
+
+import pool from "../database.js";
+import pool2 from "../database2.js"
+
+import XLSX from "xlsx";
+import { asignarcategoria } from "./funciones/caregorizar.js";
+
+
+import multer from "multer";
+import path from "path";
+import { fileURLToPath } from "url";
+
+import fs from "fs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const diskstorage = multer.diskStorage({
-  destination: path.join(__dirname, '../Excel'),
+  destination: path.join(__dirname, "../Excel"),
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-inscrip-' + file.originalname)
-
+    cb(null, `${Date.now()}-inscrip-${file.originalname}`);
   }
-}) //para que almacene temporalmente la imagen
+});
+
 const fileUpload = multer({
   storage: diskstorage,
 
@@ -289,7 +303,7 @@ router.post('/subirexcel', upload.single('excel'), async (req, res) => {
               novedades = sheetData[property]['¿Te gustaría recibir novedades de nuevos cursos y/o actividades que llevemos adelante desde nuestro espacio?']
             }
             idp = await pool.query('select * from personas where dni =?', [dni])
-            cat = await caregorizar.asignarcategoria(idp)
+            cat = await asignarcategoria(idp)
 
             await pool.query('update personas set categoria=?, tipo_empleo=?, mail=?, participante_feria=?, recibir_novedades=?,direccion =?,barrio=?,fecha_nac=?, tel=?, tel2=?,participante_anterior=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,hijos=? where dni = ?', [cat, tipo_empleo, mail, participante_feria, recibir_novedades, direccion, barrio, fecha_nac, tel, tel2, participante_anterior, nivel_secundario, trabajo, tipo_trabajo, hijos, aux])
 
@@ -391,7 +405,7 @@ router.post('/subirexcel', upload.single('excel'), async (req, res) => {
               novedades = sheetData[property]['¿Te gustaría recibir novedades de nuevos cursos y/o actividades que llevemos adelante desde nuestro espacio?']
             }
             let idp = await pool.query('select * from personas where dni =?', [dni])
-            cat = await caregorizar.asignarcategoria(idp)
+            cat = await asignarcategoria(idp)
 
             await pool.query('INSERT INTO personas set categoria=?,tipo_empleo=?, mail=?, participante_feria=?, recibir_novedades=?, nombre=?,apellido=?,dni=?,direccion=?,barrio=?,fecha_nac=?,tel=?, tel2=?,participante_anterior=?, nivel_secundario=?, trabajo=?,tipo_trabajo=?,hijos=?', [cat, tipo_empleo, mail, participante_feria, recibir_novedades, nombre, apellido, dni, direccion, barrio, fecha_nac, tel, tel2, participante_anterior, nivel_secundario, trabajo, tipo_trabajo, hijos]);
           }
@@ -630,7 +644,7 @@ router.post('/subirexcel', upload.single('excel'), async (req, res) => {
             dni = sheetData[property]['D.N.I.']
           }
           let idp = await pool.query('select * from personas where dni =?', [dni])
-          cat = await caregorizar.asignarcategoria(idp)
+          cat = await asignarcategoria(idp)
           console.log(cat)
           await pool.query('update personas set categoria=? where dni =?', [cat, dni])
 
@@ -790,7 +804,7 @@ router.get('/categorizarpersonas', async (req, res) => {
   const etc2 = await pool.query('select * from inscripciones where edicion=3  and estado="Inscripta"')
   for (ii in etc2) {
     etc = await pool.query('select * from personas where dni=? ', [etc2[ii]['dni_persona']])
-    cat = await caregorizar.asignarcategoria(etc)
+    cat = await asignarcategoria(etc)
 
     await pool.query('update personas set categoria=? where dni =?', [cat, etc2[ii]['dni_persona']])
 
@@ -851,7 +865,7 @@ res.json('listo')
   console.log(uno,dos,tres,cuatro,cinco,seis,siete,ocho,nueve,diez,once)
   for (ii in etc2) {
      etc = await pool.query('select * from personas where dni=? ',[etc2[ii]['dni_persona']])
-    cat = await caregorizar.asignarcategoria([etc[0]])
+    cat = await asignarcategoria([etc[0]])
    await pool.query('update personas set categoria=? where dni =?',[cat,etc2[ii]['dni_persona']])
 
    switch (cat) {
@@ -945,7 +959,7 @@ router.get('/categorizarpersonastodas', async (req, res) => {
   etc = await pool.query('select * from personas')
   for (ii in etc) {
 
-    cat = await caregorizar.asignarcategoria([etc[ii]])
+    cat = await asignarcategoria([etc[ii]])
     await pool.query('update personas set categoria=? where dni =?', [cat, etc[ii]['dni']])
 
 
@@ -1050,7 +1064,7 @@ router.get('/datosusuarioporid/:dni', async (req, res) => {
   }
 
 
-  cat = await caregorizar.asignarcategoria(etc)
+  cat = await asignarcategoria(etc)
 
   criterios = await pool.query(' select * from criterios ')
   porcentaje = criterios[criterios.length - 1][cat]
@@ -1422,14 +1436,14 @@ router.post("/enviarinscripcion", async (req, res) => {
   try {
     let pers = await pool.query('select * from personas where dni =?', [dni])
     if (pers.length > 0) {
-      cat = await caregorizar.asignarcategoria(pers)
+      cat = await asignarcategoria(pers)
 
       await pool.query('update personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?, categoria=?,participante_feria=? where dni=? ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, cat, participante_feria, dni])
     } else {
 
       await pool.query('insert into personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?,participante_feria = ? ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, participante_feria])
       pers = await pool.query('select * from personas where dni =?', [dni])
-      cat = await caregorizar.asignarcategoria(pers)
+      cat = await asignarcategoria(pers)
 
       await pool.query('update personas set categoria=? where id=? ', [cat, pers[0]['id']])
 
@@ -1442,7 +1456,7 @@ router.post("/enviarinscripcion", async (req, res) => {
     }
     else {
       fecha = (new Date(Date.now()))
-      cat = await caregorizar.asignarcategoria(pers)
+      cat = await asignarcategoria(pers)
       await pool.query('insert into inscripciones set fecha=?,dni_persona=?, uno=?,dos=?,motivacion=?,id_persona=?,edicion=?', [fecha, dni, prioridad1, prioridad2, motivacion, pers[0]['id'], 6])
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto'
     }
@@ -1491,14 +1505,14 @@ router.post("/enviarinscripcion2", async (req, res) => {
   try {
     let pers = await pool.query('select * from personas where dni =?', [dni])
     if (pers.length > 0) {
-      cat = await caregorizar.asignarcategoria(pers)
+      cat = await asignarcategoria(pers)
 
       await pool.query('update personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?, categoria=?,participante_feria=?  where dni=? ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, cat, participante_feria, dni])
     } else {
 
       await pool.query('insert into personas set fecha_nac=?, nombre=?, apellido=?, dni=?, tel=?, tel2=?, mail=?,direccion=?,barrio=?,nivel_secundario=?,trabajo=?,tipo_trabajo=?,tipo_empleo=?,hijos=?,cantidad_hijos=?,participante_anterior=?,participante_feria=?  ', [fecha_nac, nombre, apellido, dni, tel, tel2, mail, direccion, barrio, nivel_secundario, trabajo, tipo_trabajo, tipo_empleo, hijos, cantidad_hijos, participante_anterior, participante_feria])
       pers = await pool.query('select * from personas where dni =?', [dni])
-      cat = await caregorizar.asignarcategoria(pers)
+      cat = await asignarcategoria(pers)
 
       await pool.query('update personas set categoria=? where id=? ', [cat, pers[0]['id']])
 
@@ -1511,7 +1525,7 @@ router.post("/enviarinscripcion2", async (req, res) => {
     }
     else {
       fecha = (new Date(Date.now()))
-      cat = await caregorizar.asignarcategoria(pers)
+      cat = await asignarcategoria(pers)
       console.log(uno, dos)
       await pool.query('insert into inscripciones set uno=?,dos=?, fecha=?,dni_persona=?,emprendimiento=?,motivacion=?,id_persona=?,edicion=?', [uno, dos, fecha, dni, emprendimiento, motivacion, pers[0]['id'], 6])
       mensaje = 'Inscripcion realizada, te pedimos que aguardes contacto'
@@ -1583,7 +1597,7 @@ router.post("/inscribir", isLoggedInn2, async (req, res) => {
 
   tur = await pool.query('select * from turnos where id =?', [id_turno])
   id_curso = tur[0]['id_curso']
-  cat = await caregorizar.asignarcategoria(persona)
+  cat = await asignarcategoria(persona)
 
   ////////////
   try {
@@ -1907,7 +1921,7 @@ router.get('/cargarcursos111', async (req, res) => {
 router.get('/prueba/:dni', async (req, res) => {
   const dni = req.params.dni
   etc = await pool.query('select * from personas where dni=? ', [dni])
-  cat = await caregorizar.asignarcategoria([etc[0]])
+  cat = await asignarcategoria([etc[0]])
   res.send(cat)
 })
 
@@ -2279,4 +2293,4 @@ router.post('/subirexceltelefonos', upload.single('excel'), async (req, res) => 
 })
 
 
-module.exports = router
+export default router;

@@ -1,52 +1,45 @@
+import pool from "../../database.js";
 
+export async function cantidadcategoriaporcurso(
+  categoria,
+  id_curso,
+  porcentaje_creiterio,
+  id_turno
+) {
+  let haylugar = true;
 
-const express = require('express')
-const router = express.Router()
-const pool = require('../../database')
+  // Personas anotadas en ese turno y categoría
+  const cursado = await pool.query(
+    "SELECT * FROM cursado WHERE id_turno = ? AND categoria = ?",
+    [id_turno, categoria]
+  );
 
+  // Cupo real del curso (cantidad de turnos * 44)
+  let cuporeal = await pool.query(
+    "SELECT * FROM turnos WHERE id_curso = ?",
+    [id_curso]
+  );
 
-async function cantidadcategoriaporcurso(categoria, id_curso, porcentaje_creiterio, id_turno) {
+  cuporeal = cuporeal.length * 44; // ⚠️ cambiar a 25 si corresponde
 
-    haylugar = true
+  // Validación por porcentaje
+  if ((cuporeal * porcentaje_creiterio) / 100 < cursado.length + 1) {
+    haylugar = false;
+  } else {
+    // Validación por límite absoluto del turno
+    const curs = await pool.query(
+      `SELECT *
+       FROM cursado
+       JOIN (SELECT id AS idturno FROM turnos) t
+         ON cursado.id_turno = t.idturno
+       WHERE cursado.id_turno = ?`,
+      [id_turno]
+    );
 
-
-///
-   // cupo = await pool.query('select count(*) from turnos where id_curso = ? ', [id_curso])
-    
-    //const cursado = await pool.query('select *, id as idcursado from cursado  join (select *, id as idcurso from cursos ) as selec1 on cursado.id_curso=selec1.idcurso  where cursado.id_curso= ? and  categoria =?', [id_curso, categoria])
-    ////cursado son los anotados con esa caracteristicas
-    const cursado = await pool.query('select * from cursado  where cursado.id_turno= ? and  categoria =?', [id_turno, categoria])
-
-    cuporeal = await pool.query('select * from turnos where id_curso=?', [id_curso])
-
-
-
-
-
-        cuporeal = cuporeal.length*44///////////////cambiar a 25
-        ///comparacion de si el cupo / cursado.length es para ver si agedando sobrepasa
-      
-       
-        if ((cuporeal * porcentaje_creiterio / 100) < (cursado.length + 1)) {////////+1 par aque se llene ante el redondeo
-            haylugar = false
-        }else{
-
-      ////////preguntar horario antes o despues
-      const curs = await pool.query('select * from cursado  join (select id as idturno from turnos) as select1  on cursado.id_turno=select1.idturno where cursado.id_turno=?', [id_turno])
-     
-      if ( 44 <= (curs.length )) {////////+1 par aque se llene ante el redondeo
-        haylugar = false
+    if (curs.length >= 44) {
+      haylugar = false;
     }
+  }
 
-
-        }
-
-
-
-    return haylugar
-
+  return haylugar;
 }
-
-
-
-exports.cantidadcategoriaporcurso = cantidadcategoriaporcurso

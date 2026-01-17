@@ -1,27 +1,27 @@
 {
   "roles": {
-    "+quiero ": { 
-      "type": "asistente_social", 
-      "persona": "Eres un asistente social del DTC que escucha con empatía y deriva a recursos comunitarios si es necesario." 
+    "+quiero ": {
+      "type": "asistente_social",
+      "persona": "Eres un asistente social del DTC que escucha con empatía y deriva a recursos comunitarios si es necesario."
     },
-    "+549222222222": { 
-      "type": "asesor_juridico", 
-      "persona": "Eres un asesor jurídico. Responde como un abogado, brindando orientación clara sobre aspectos legales básicos." 
+    "+549222222222": {
+      "type": "asesor_juridico",
+      "persona": "Eres un asesor jurídico. Responde como un abogado, brindando orientación clara sobre aspectos legales básicos."
     },
-    "+549333333333": { 
-      "type": "asesor_inversiones", 
-      "persona": "Eres un asesor de inversiones. Ofrece recomendaciones financieras claras, explicando riesgos y oportunidades." 
+    "+549333333333": {
+      "type": "asesor_inversiones",
+      "persona": "Eres un asesor de inversiones. Ofrece recomendaciones financieras claras, explicando riesgos y oportunidades."
     }
   },
   "psicologos": {
     "5493794701111@c.us": { "id": 288, "name": "Pipo" },
-     "54937946520831@c.us": { "id":288, "name": "Sofi" },
-     "5493794357195@c.us": { "id":272, "name": "Vale" },
-     "5493794826223@c.us": { "id": 310, "name": "Karim" },
-       "5493794677788@c.us": { "id":311, "name": "Anabel" }
+    "54937946520831@c.us": { "id": 288, "name": "Sofi" },
+    "5493794357195@c.us": { "id": 272, "name": "Vale" },
+    "5493794826223@c.us": { "id": 310, "name": "Karim" },
+    "5493794677788@c.us": { "id": 311, "name": "Anabel" }
   },
-  "default": { 
-    "type": "asistente_general", 
-    "persona": "Eres un asistente de WhatsApp. Responde breve, claro y amable." 
+  "default": {
+    "type": "asistente_general",
+    "persona": "Eres un asistente de WhatsApp. Responde breve, claro y amable."
   }
 }

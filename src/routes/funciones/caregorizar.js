@@ -1,144 +1,59 @@
+import express from "express";
 
 
-const express = require('express')
-const router = express.Router()
-const pool = require('../../database')
-
-
-async function asignarcategoria(persona) {
-
+export async function asignarcategoria(persona) {
   let categoria = 'cero'
+
   try {
+    const p = persona[0]
 
-    
-      if ((persona[0]['participante_anterior'] == "Sí") || (persona[0]['participante_anterior'] == "Si")) {
+    const participoAntes =
+      p.participante_anterior === "Sí" || p.participante_anterior === "Si"
 
-        /// 
-        if ((persona[0]['hijos'] == "0") || (persona[0]['hijos'] == null) || (persona[0]['hijos'] == "No")|| (persona[0]['hijos'] == "nn")) {
+    const noTieneHijos =
+      p.hijos === "0" ||
+      p.hijos === null ||
+      p.hijos === "No" ||
+      p.hijos === "nn"
 
-          ///tiene hijos
-          //  porcentaje_real=35.1
-          if (persona[0]['trabajo'] === "Si" || persona[0]['trabajo'] === "Si") {
+    const trabaja = p.trabajo === "Si"
+    const trabajoFormal = p.tipo_trabajo === "Formal" || p.tipo_trabajo === "FORMAL"
 
-            if ((persona[0]['tipo_trabajo'] === "Formal") || (persona[0]['tipo_trabajo'] === "FORMAL")  ) {
-
-              categoria = "doce"
-
-            } else {
-
-              categoria = "once"
-            }
-
-
-          } else {
-            ///No trabaja 90%
-
-            categoria = "diez"
-
-
-
-          }
+    if (participoAntes) {
+      // PARTICIPÓ ANTERIORMENTE
+      if (noTieneHijos) {
+        if (trabaja) {
+          categoria = trabajoFormal ? "doce" : "once"
         } else {
-          ///22%  Notiene hijos
-          //  porcentaje_real=9.9
-
-          if (persona[0]['trabajo'] === "Si" || persona[0]['trabajo'] === "Si") {
-
-            if((persona[0]['tipo_trabajo'] === "Formal") || (persona[0]['tipo_trabajo'] === "FORMAL")  )  {
-
-              categoria = "nueve"
-
-            } else {
-
-              categoria = "ocho"
-            }
-
-
-          } else {
-            ///No trabaja 90%
-
-            categoria = "siete"
-
-
-
-          }
-
-
-
+          categoria = "diez"
         }
-
-
-
       } else {
-
-
-        ///////////////////////NO PARTICIPARON 
-        ////55% 
-
-        //   porcentaje_real=55
-        if ((persona[0]['hijos'] == "0") || (persona[0]['hijos'] == null) || (persona[0]['hijos'] == "No")) {
-
-          ///78% tiene hijos
-          //  porcentaje_real=35.1
-          if (persona[0]['trabajo'] === "Si" || persona[0]['trabajo'] === "Si") {
-
-            if ((persona[0]['tipo_trabajo'] === "Formal") || (persona[0]['tipo_trabajo'] === "FORMAL")  ) {
-
-              categoria = "seis"
-
-            } else {
-
-              categoria = "cinco"
-            }
-
-
-          } else {
-            ///No trabaja 90%
-
-            categoria = "cuatro"
-
-
-
-          }
+        if (trabaja) {
+          categoria = trabajoFormal ? "nueve" : "ocho"
         } else {
-          ///22%  Notiene hijos
-          //  porcentaje_real=9.9
-
-          if (persona[0]['trabajo'] === "Si" || persona[0]['trabajo'] === "Si") {
-
-            if ((persona[0]['tipo_trabajo'] === "Formal") || (persona[0]['tipo_trabajo'] === "FORMAL")  ) {
-
-              categoria = "tres"
-
-            } else {
-
-              categoria = "dos"
-            }
-
-
-          } else {
-            ///No trabaja 90%
-
-            categoria = "uno"
-
-
-
-          }
-
-
-
+          categoria = "siete"
         }
-
       }
-    
-
+    } else {
+      // NO PARTICIPÓ ANTERIORMENTE
+      if (noTieneHijos) {
+        if (trabaja) {
+          categoria = trabajoFormal ? "seis" : "cinco"
+        } else {
+          categoria = "cuatro"
+        }
+      } else {
+        if (trabaja) {
+          categoria = trabajoFormal ? "tres" : "dos"
+        } else {
+          categoria = "uno"
+        }
+      }
+    }
   } catch (error) {
-
+    // se mantiene vacío como en tu versión original
   }
-  return categoria
 
+  return categoria
 }
 
-
-
-exports.asignarcategoria = asignarcategoria

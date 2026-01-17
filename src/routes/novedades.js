@@ -1,8 +1,14 @@
-const express = require('express')
-const router = express.Router()
-const { isLoggedIn,isLoggedInn, isLoggedInn2  } = require('../lib/auth') //proteger profile
-const pool = require('../database')
-const puppeteer = require('puppeteer');
+import express from "express";
+const router = express.Router();
+
+import {
+  isLoggedIn,
+  isLoggedInn,
+  isLoggedInn2
+} from "../lib/auth.js";
+
+import pool from "../database.js";
+import puppeteer from "puppeteer";
 //const xlsx = require('xlsx');
 //const path = require('path');
 
@@ -863,5 +869,4 @@ Gaby Gauna Concejal`;
     }
 });
 
-
-module.exports = router
+export default router;

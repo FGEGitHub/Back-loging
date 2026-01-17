@@ -1,23 +1,37 @@
-const express = require('express')
-const router = express.Router()
-const { isLoggedIn, isLoggedInn, isLoggedInn2 } = require('../lib/auth') //proteger profile
-const pool = require('../database4')
-const multer = require('multer')
-const path = require('path')
-const fse = require('fs').promises;
-const fs = require('fs');
-const axios = require('axios');
-const { DEEPSEEK_API_KEY } = require(('../keys'))
-const { GROQ_API_KEY } = require(('../keys'))
-const { OPENAI_API_KEY } = require(('../keys'))
-const client = require('./whatsapclient');
-const cheerio = require("cheerio");
-const config = require('./config.json'); // objeto directo
-const personas = require('./personalidades.json');
-const lugaress = require('./lugares.json');
-const { format } = require("date-fns");
-const { MessageMedia } = require("whatsapp-web.js");
-const stringSimilarity = require("string-similarity");
+import express from "express";
+const router = express.Router();
+
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
+import { isLoggedIn, isLoggedInn, isLoggedInn2 } from "../lib/auth.js";
+import pool from "../database4.js";
+
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import fse from "fs/promises";
+import axios from "axios";
+
+import {
+  DEEPSEEK_API_KEY,
+  GROQ_API_KEY,
+  OPENAI_API_KEY
+} from "../keys.js";
+
+import client from "./whatsapclient.js";
+
+import * as cheerio from "cheerio";
+
+const config = require("./config.json");
+const personas = require("./personalidades.json");
+const lugaress = require("./lugares.json");
+
+import { format } from "date-fns";
+//import { MessageMedia } from "whatsapp-web.js";
+import stringSimilarity from "string-similarity";
+
+
 ///import { format } from "date-fns"; // si lo querés más cómodo
 ////solicitado== se suma al partido
 ////convocado,= s enevia a un juagdor la invitacion
@@ -272,13 +286,7 @@ function parsearFecha(fechaTexto) {
 
   return new Date(año, mes, dia, hora, min);
 }
-const storage = multer.diskStorage({
-  destination: path.join(__dirname, '../imagenesvendedoras'),
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  },
-});
+
 async function callDeepSeek(model, messages, max_tokens = 1000) {
   if (!DEEPSEEK_API_KEY) throw new Error("DEEPSEEK_API_KEY no configurada");
   const url = "https://api.deepseek.com/v1/chat/completions"; 
@@ -2075,43 +2083,9 @@ async function getBaresCorrientes() {
 }
 
 
-async function detectarCategoriaComida(texto) {
-  const prompt = `
-Eres un asistente turístico de Corrientes.
-El usuario dice: "${texto}"
-Tu tarea es detectar si pide un tipo de comida o lugar específico.
-
-Responde SOLO en JSON con:
-- "categoria": una de ["parrilla", "pizzería", "bar", "cervecería", "regional", "gourmet", "otro"]
-
-Ejemplos:
-Usuario: "quiero comer pizza" -> { "categoria": "pizzería" }
-Usuario: "donde hay un bar" -> { "categoria": "bar" }
-Usuario: "quiero tomar cerveza" -> { "categoria": "cervecería" }
-Usuario: "quiero tomar birra" -> { "categoria": "cervecería" }
-Usuario: "quiero tomar vino" -> { "categoria": "cervecería" }
-Usuario: "quiero tomar alcohol" -> { "categoria": "cervecería" }
-Usuario: "quiero salir a tomar algo" -> { "categoria": "bar" }
-Usuario: "quiero comer asado" -> { "categoria": "parrilla" }
-Usuario: "quiero cenar comida típica" -> { "categoria": "regional" }
-Usuario: "tengo hambre" -> { "categoria": "otro" }
-
-Usuario: "${texto}"
-Respuesta:
-  `;
-
-  try {
-    const raw = await generateResponse("categoria_comida", prompt, "Clasificación de categoría de comida");
-    return JSON.parse(raw);
-  } catch {
-    return { categoria: "otro" };
-  }
-}
-
 
 
 
 ////////////////////
 
-
-module.exports = router
+export default router;

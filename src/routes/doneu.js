@@ -1,12 +1,17 @@
-const express = require('express')
-const router = express.Router()
-const { isLoggedIn, isLoggedInn, isLoggedInn2, isLoggedInn4 } = require('../lib/auth') //proteger profile
-const pool = require('../database2')
-//const pool2 = require('../database')
-const nodemailer = require('nodemailer');
-//const bodyParser = require('body-parser');
-//const xlsx = require("xlsx");
-//const path = require("path");
+import express from "express";
+const router = express.Router();
+
+import {
+  isLoggedIn,
+  isLoggedInn,
+  isLoggedInn2,
+  isLoggedInn4
+} from "../lib/auth.js";
+
+import pool from "../database2.js";
+// import pool2 from "../database.js";
+
+import nodemailer from "nodemailer";
 router.get("/traerlotes", async (req, res) => {
 
     try {
@@ -524,5 +529,4 @@ router.post("/determinarmapa1bosques", async (req, res) => {
   }
 }); */
 
-module.exports = router
-
+export default router;

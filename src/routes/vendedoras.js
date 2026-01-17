@@ -1,23 +1,41 @@
-const express = require('express')
-const router = express.Router()
-const { isLoggedIn, isLoggedInn, isLoggedInn2 } = require('../lib/auth') //proteger profile
-const pool = require('../database')
-const multer = require('multer')
-const path = require('path')
-const fse = require('fs').promises;
-const fs = require('fs');
+import express from "express";
+const router = express.Router();
 
+import {
+  isLoggedIn,
+  isLoggedInn,
+  isLoggedInn2
+} from "../lib/auth.js";
 
+import pool from "../database.js";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import fse from "fs/promises";
+
+// 🔁 __dirname en ESM
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ==============================
+// Multer storage
+// ==============================
 const storage = multer.diskStorage({
-  destination: path.join(__dirname, '../imagenesvendedoras'),
+  destination: path.join(__dirname, "../imagenesvendedoras"),
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  },
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(
+      null,
+      file.fieldname +
+        "-" +
+        uniqueSuffix +
+        path.extname(file.originalname)
+    );
+  }
 });
 
 const upload = multer({ storage });
-
 
 
 
@@ -912,4 +930,6 @@ router.post("/modificarganancia", (req, res) => {
     res.json("Ganancia actualizada correctamente");
   });
 });
-module.exports = router
+
+export default router;
+export { upload };
