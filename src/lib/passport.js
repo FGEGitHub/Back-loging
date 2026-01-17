@@ -466,7 +466,7 @@ passport.use('local.signinf1', new LocalStrategy({
             done(null, false, req.flash('message', 'Pass incorrecta')) // false para no avanzar
         }
     } else {
-        return done(null, false, req.flash('message', 'EL nombre de cuil/cuit no existe'))
+        return done(null, false, 'Bienvenido')
     }
 }))
 
@@ -491,7 +491,7 @@ async (req, usuario, password, done) => {
 
         if (rows.length === 0) {
             console.log("❌ Usuario no existe");
-            return done(null, false, req.flash('message', 'El nombre de usuario no existe'));
+            return done(null, false,'Bienvenido');
         }
 
         const user = rows[0];
@@ -500,11 +500,11 @@ async (req, usuario, password, done) => {
 
         if (!validPassword) {
             console.log("❌ Contraseña incorrecta");
-            return done(null, false, req.flash('message', 'Contraseña incorrecta'));
+            return done(null, false, 'Bienvenido');
         }
 
         console.log("✅ Login correcto:", user.usuario);
-        return done(null, user, req.flash('success', 'Bienvenido'));
+        return done(null, user, 'Bienvenido');
 
     } catch (error) {
         console.error("🔥 ERROR en local.signincli:", error);
@@ -565,7 +565,7 @@ passport.use('local.signupcl', new LocalStrategy({
 
     } catch (error) {
         console.log(error)
-        req.flash('message', 'error,algo sucedio ')
+       // req.flash('message', 'error,algo sucedio ')
 
     }
 
