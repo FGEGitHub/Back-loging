@@ -32,12 +32,12 @@ router.post("/crear-preferencia", async (req, res) => {
             currency_id: "ARS",
           },
         ],
-        back_urls: {
-          success: "http://localhost:3000/success",
-          failure: "http://localhost:3000/failure",
-          pending: "http://localhost:3000/pending",
-        },
-        auto_return: "approved",
+ back_urls: {
+  success: "https://unideographic-deborah-winnable.ngrok-free.dev/clinica/success",
+  failure: "https://unideographic-deborah-winnable.ngrok-free.dev/clinica/failure",
+  pending: "https://unideographic-deborah-winnable.ngrok-free.dev/clinica/pending",
+},
+auto_return: "approved",
       },
     });
 
@@ -48,62 +48,9 @@ router.post("/crear-preferencia", async (req, res) => {
   }
 });
 
-router.post("/webhook", async (req, res) => {
-  try {
-    // Mercado Pago manda info mínima
-    const paymentId = req.body?.data?.id;
-
-    if (!paymentId) {
-      return res.sendStatus(200);
-    }
-
-    // 🔍 Consultar pago real a Mercado Pago
-    const pago = await axios.get(
-      `https://api.mercadopago.com/v1/payments/${paymentId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
-        },
-      }
-    );
-
-    const {
-      status,
-      external_reference,
-      transaction_amount,
-      currency_id,
-    } = pago.data;
-
-    console.log("Pago recibido:", pago.data);
-
-    // external_reference = id_turno
-   /* if (status === "approved") {
-      await pool.query(
-        `UPDATE turnos 
-         SET estado = 'confirmado'
-         WHERE id = ?`,
-        [external_reference]
-      );
-
-      // opcional: guardar pago
-       await pool.query(
-        `INSERT INTO pagos (payment_id, turno_id, monto, moneda, estado)
-         VALUES (?, ?, ?, ?, ?)`,
-        [
-          paymentId,
-          external_reference,
-          transaction_amount,
-          currency_id,
-          status,
-        ]
-      );
-    } */
-
-    res.sendStatus(200);
-  } catch (error) {
-    console.error("Error webhook Mercado Pago:", error);
-    res.sendStatus(500);
-  }
+router.post("/webhook", (req, res) => {
+  console.log("WEBHOOK RECIBIDO:", req.body);
+  res.sendStatus(200);
 });
 
 
@@ -686,7 +633,7 @@ router.post("/solicitarturno", async (req, res) => {
     ); */
 
     // 4. Crear preferencia de pago
-    const preference = new Preference(mpClient);
+const preference = new Preference(client);
 
     const result = await preference.create({
       body: {
@@ -699,19 +646,20 @@ router.post("/solicitarturno", async (req, res) => {
           },
         ],
         external_reference: String(id_turno), // MUY IMPORTANTE
-        back_urls: {
-          success: "http://localhost:3000/clinica/success",
-          failure: "http://localhost:3000/clinica/failure",
-          pending: "http://localhost:3000/clinica/pending",
-        },
-        auto_return: "approved",
+        notification_url: "https://unideographic-deborah-winnable.ngrok-free.dev/webhook",
+     back_urls: {
+  success: "https://unideographic-deborah-winnable.ngrok-free.dev/clinica/success",
+  failure: "https://unideographic-deborah-winnable.ngrok-free.dev/clinica/failure",
+  pending: "https://unideographic-deborah-winnable.ngrok-free.dev/clinica/pending",
+},
+auto_return: "approved",
       },
     });
 
     // 5. Responder con link de pago
     res.json({
       message: "Turno reservado, pendiente de pago",
-      pago_url: result.init_point,
+   pago_url: result.sandbox_init_point,
       preference_id: result.id,
     });
 
