@@ -48,11 +48,63 @@ router.post("/crear-preferencia", async (req, res) => {
   }
 });
 
-router.post("/webhook", express.json(), (req, res) => {
-  console.log(req.body);
-  res.sendStatus(200);
-});
+router.post("/webhook", async (req, res) => {
+  try {
+    // Mercado Pago manda info mínima
+    const paymentId = req.body?.data?.id;
 
+    if (!paymentId) {
+      return res.sendStatus(200);
+    }
+
+    // 🔍 Consultar pago real a Mercado Pago
+    const pago = await axios.get(
+      `https://api.mercadopago.com/v1/payments/${paymentId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
+        },
+      }
+    );
+
+    const {
+      status,
+      external_reference,
+      transaction_amount,
+      currency_id,
+    } = pago.data;
+
+    console.log("Pago recibido:", pago.data);
+
+    // external_reference = id_turno
+   /* if (status === "approved") {
+      await pool.query(
+        `UPDATE turnos 
+         SET estado = 'confirmado'
+         WHERE id = ?`,
+        [external_reference]
+      );
+
+      // opcional: guardar pago
+       await pool.query(
+        `INSERT INTO pagos (payment_id, turno_id, monto, moneda, estado)
+         VALUES (?, ?, ?, ?, ?)`,
+        [
+          paymentId,
+          external_reference,
+          transaction_amount,
+          currency_id,
+          status,
+        ]
+      );
+    } */
+
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("Error webhook Mercado Pago:", error);
+    res.sendStatus(500);
+  }
+});
 
 
 
@@ -585,16 +637,15 @@ router.post('/agendarapaciente',  async (req, res) => {
   }
 });
 
-
 router.post("/solicitarturno", async (req, res) => {
   try {
     const { id_turno, nombre, dni, telefono, categoria } = req.body;
-console.log( id_turno, nombre, dni, telefono, categoria   )
+
     if (!id_turno || !nombre || !dni || !telefono || !categoria) {
       return res.status(400).json({ message: "Faltan datos" });
     }
 
-    // 1. Verificar si paciente ya existe por DNI
+    // 1. Verificar / crear paciente
     const existe = await pool.query(
       "SELECT id FROM pacientes WHERE dni = ?",
       [dni]
@@ -605,7 +656,6 @@ console.log( id_turno, nombre, dni, telefono, categoria   )
     if (existe.length > 0) {
       id_paciente = existe[0].id;
     } else {
-      // 2. Crear nuevo paciente
       const nuevo = await pool.query(
         "INSERT INTO pacientes (nombre, dni, telefono) VALUES (?, ?, ?)",
         [nombre, dni, telefono]
@@ -613,7 +663,7 @@ console.log( id_turno, nombre, dni, telefono, categoria   )
       id_paciente = nuevo.insertId;
     }
 
-    // 3. Verificar que el turno exista y esté libre
+    // 2. Verificar turno
     const turno = await pool.query(
       "SELECT id, id_paciente FROM turnos WHERE id = ?",
       [id_turno]
@@ -627,15 +677,43 @@ console.log( id_turno, nombre, dni, telefono, categoria   )
       return res.status(409).json({ message: "Turno ya ocupado" });
     }
 
-    // 4. Actualizar turno
-    await pool.query(
+    // 3. Reservar turno (estado pendiente de pago)
+/*     await pool.query(
       `UPDATE turnos 
-       SET id_paciente = ?, categoria = ?, estado = 'solicitado'
+       SET id_paciente = ?, categoria = ?, estado = 'pendiente_pago'
        WHERE id = ?`,
       [id_paciente, categoria, id_turno]
-    );
+    ); */
 
-    res.json({ message: "Solicitud enviada correctamente" });
+    // 4. Crear preferencia de pago
+    const preference = new Preference(mpClient);
+
+    const result = await preference.create({
+      body: {
+        items: [
+          {
+            title: "Consulta Clínica",
+            quantity: 1,
+            unit_price: 5000,
+            currency_id: "ARS",
+          },
+        ],
+        external_reference: String(id_turno), // MUY IMPORTANTE
+        back_urls: {
+          success: "http://localhost:3000/clinica/success",
+          failure: "http://localhost:3000/clinica/failure",
+          pending: "http://localhost:3000/clinica/pending",
+        },
+        auto_return: "approved",
+      },
+    });
+
+    // 5. Responder con link de pago
+    res.json({
+      message: "Turno reservado, pendiente de pago",
+      pago_url: result.init_point,
+      preference_id: result.id,
+    });
 
   } catch (error) {
     console.error("Error solicitarturno:", error);
