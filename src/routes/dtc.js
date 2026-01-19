@@ -2351,6 +2351,7 @@ router.get('/obtenerinfodecursostodos', async (req, res) => {
 router.get('/datosdechique/:id', async (req, res) => {
   const id = req.params.id
   const chiques = await pool.query('select * from dtc_chicos where id =?', [id])
+  let imagenBase64 = ""
   try {
     if (chiques[0]['foto'] === null) {
       imagenBase64 = null
@@ -2448,7 +2449,7 @@ router.get('/traerasistencia/:id', async (req, res) => {
 router.get('/traerfoto/:id', async (req, res) => {
   const id = req.params.id
   const productosdeunapersona = await pool.query('select * from dtc_legajos where id =?', [id])
-  rutaImagen = path.join(__dirname, '../imagenesvendedoras', productosdeunapersona[0]['ubicacion']);
+  let rutaImagen = path.join(__dirname, '../imagenesvendedoras', productosdeunapersona[0]['ubicacion']);
   imagenBase64 = ""
   if (productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 3] + productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 2] + productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 1] === "pdf") {
     imagenBase64 = rutaImagen
@@ -2468,7 +2469,7 @@ router.get('/listadelegajos/:id', async (req, res) => {
   const id = req.params.id
 
   const productosdeunapersona = await pool.query('select * from dtc_legajos where id_usuario =?', [id])
-  enviar = []
+  let enviar = []
   //  tareas = await pool.query('select * from producto_venta where id_usuario=? ',[id])
   let rutaImagen
   /*  for (i in productosdeunapersona) {
