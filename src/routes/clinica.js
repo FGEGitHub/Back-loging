@@ -4,12 +4,9 @@ const router = express.Router();
 import { isLoggedInncli } from "../lib/auth.js";
 import pool from "../database5.js";
 
-import multer from "multer";
-import path from "path";
-import fs from "fs";
-import fse from "fs/promises";
-import axios from "axios";
 
+
+import { Payment } from "mercadopago";
 
 import { Preference, MercadoPagoConfig } from "mercadopago";
 import { MP_ACCESS_TOKEN } from "../keys.js";
@@ -48,9 +45,35 @@ auto_return: "approved",
   }
 });
 
-router.post("/webhook", (req, res) => {
-  console.log("WEBHOOK RECIBIDO:", req.body);
-  res.sendStatus(200);
+router.post("/webhook", async (req, res) => {
+  try {
+    const { type, data } = req.body;
+
+    if (type === "payment") {
+      const paymentId = data.id;
+
+      const payment = new Payment(client);
+      const pago = await payment.get({ id: paymentId });
+
+      if (pago.status === "approved") {
+        const id_turno = pago.external_reference;
+
+        await pool.query(
+          `UPDATE turnos 
+           SET estado = 'confirmado'
+           WHERE id = ?`,
+          [id_turno]
+        );
+
+        console.log("✅ Turno confirmado:", id_turno);
+      }
+    }
+
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("Error webhook:", error);
+    res.sendStatus(500);
+  }
 });
 
 
@@ -82,7 +105,7 @@ const    cuil_cuit = req.params.cuil_cuit
 })
 
 
-router.get('/traerTurnosDisponibles', isLoggedInncli, async (req, res) => {
+router.get('/traerTurnosDisponibles',  async (req, res) => {
   try {
     const turnos = await pool.query(`
       SELECT 
@@ -641,7 +664,7 @@ const preference = new Preference(client);
           {
             title: "Consulta Clínica",
             quantity: 1,
-            unit_price: 5000,
+            unit_price: 2000,
             currency_id: "ARS",
           },
         ],
@@ -655,7 +678,6 @@ const preference = new Preference(client);
 auto_return: "approved",
       },
     });
-
     // 5. Responder con link de pago
     res.json({
       message: "Turno reservado, pendiente de pago",
