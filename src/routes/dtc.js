@@ -2352,6 +2352,7 @@ router.get('/datosdechique/:id', async (req, res) => {
   const id = req.params.id
   const chiques = await pool.query('select * from dtc_chicos where id =?', [id])
   let imagenBase64 = ""
+  let rutaImagen = ""
   try {
     if (chiques[0]['foto'] === null) {
       imagenBase64 = null
