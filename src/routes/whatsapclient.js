@@ -14,12 +14,10 @@ const sessionPath = path.join(__dirname, "sesion_whatsappp");
 
 const client = new Client({
   authStrategy: new LocalAuth({
-    clientId: "cliente_unico",   // si querés múltiples clientes, cambiás esto
-    dataPath: sessionPath        // 👈 acá se guarda la sesión
+    dataPath: './src/routes/sesion_whatsapp'
   }),
   puppeteer: {
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
-    // executablePath: "/path/to/chrome" // opcional
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   }
 });
 
@@ -49,6 +47,6 @@ client.on('disconnected', (reason) => {
 });
 
 // Inicializar cliente
-client.initialize();
+//client.initialize();
 
 export default client; 
