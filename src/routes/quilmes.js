@@ -223,15 +223,7 @@ router.get("/traersocios", async (req, res) => {
   try {
     const rows = await pool.query(`
       SELECT 
-        id,
-        nombre,
-        apellido,
-        dni,
-        genero,
-        fecha_nacimiento,
-        fecha_ingreso,
-        telefono,
-        direccion
+       *
         
       FROM socios
       ORDER BY apellido ASC, nombre ASC
@@ -248,5 +240,26 @@ router.get("/traersocios", async (req, res) => {
   }
 });
 
+router.get("/traersocio/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const rows = await pool.query(`
+      SELECT 
+       *
+        
+      FROM socios
+      where id=?
+      ORDER BY apellido ASC, nombre ASC
+    `, [id] 
+    );
+    res.json(rows);
 
+  } catch (error) {
+    console.error("Error al traer socios:", error);
+    res.status(500).json({
+      ok: false,
+      message: "Error al obtener socios"
+    });
+  }
+});
 export default router;
