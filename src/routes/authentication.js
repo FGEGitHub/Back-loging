@@ -21,6 +21,12 @@ router.post('/signup', passport.authenticate('local.signup', {
     failureFlash:true
 
 }))
+router.post('/signupqui', passport.authenticate('local.signupqui', {
+    successRedirect: '/exitosignup',
+    failureRedirect:'/noexito',
+    failureFlash:true
+
+}))
 router.post('/signupde', passport.authenticate('local.signupde', {
     successRedirect: '/exitosignup',
     failureRedirect:'/noexito',
@@ -102,7 +108,31 @@ router.post('/signinf1', passport.authenticate('local.signinf1', { failureRedire
   
   );
 
+  router.post('/signinqui', passport.authenticate('local.signinqui', { failureRedirect: '/noexito' }),
+  function(req, res) {
+    console.log(req.user)
+    const userFoRToken ={
+        id :req.user.id,
+        usuario: req.user.usuario,
+        nivel:req.user.nivel,
+       
+     
+    }
+ 
+    const token = jwt.sign(userFoRToken, 'fideicomisocs121',{ expiresIn: 60*60*24*7})
+    console.log(req.user)
+    res.send({
+        id :req.user.id,
+        usuario: req.user.usuario,
+        nivel: req.user.nivel,
+       
+        token,
+      
+        
+    } )
+}
   
+  );
 router.post('/signincl', (req, res, next) => {
     console.log("➡️ POST /signincl BODY:", req.body);
     next();
