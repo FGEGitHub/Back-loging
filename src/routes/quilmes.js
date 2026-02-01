@@ -60,6 +60,108 @@ router.get("/crear-usuario", async (req, res) => {
   }
 });
 
+router.get("/crear-usuario-profes", async (req, res) => {
+  try {
+    const usuario = "profes";
+    const nivel = 1;   
+    const password = "quilmes2026";
+
+
+    if (!usuario || !password) {
+      return res.status(400).json({
+        ok: false,
+        message: "Email y password son obligatorios"
+      });
+    }
+
+    // 1️⃣ Verificar si ya existe
+    const existe = await pool.query(
+      "SELECT id FROM usuarios WHERE usuario = ?",
+      [usuario]
+    );
+
+    if (existe.length > 0) {
+      return res.status(409).json({
+        ok: false,
+        message: "El usuario ya existe"
+      });
+    }
+
+    // 2️⃣ Hashear contraseña
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+
+    // 3️⃣ Insertar usuario
+    const result = await pool.query(
+      "INSERT INTO usuarios (nivel, password, usuario) VALUES (?, ?, ?)",
+      [nivel, passwordHash, usuario]
+    );
+
+    res.status(201).json({
+      ok: true,
+      message: "Usuario creado",
+      userId: result.insertId
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      ok: false,
+      message: "Error del servidor"
+    });
+  }
+});
+router.get("/crear-usuario-club", async (req, res) => {
+  try {
+    const usuario = "club";
+    const nivel = 2;   
+    const password = "quilmesadmin2026";
+
+
+    if (!usuario || !password) {
+      return res.status(400).json({
+        ok: false,
+        message: "Email y password son obligatorios"
+      });
+    }
+
+    // 1️⃣ Verificar si ya existe
+    const existe = await pool.query(
+      "SELECT id FROM usuarios WHERE usuario = ?",
+      [usuario]
+    );
+
+    if (existe.length > 0) {
+      return res.status(409).json({
+        ok: false,
+        message: "El usuario ya existe"
+      });
+    }
+
+    // 2️⃣ Hashear contraseña
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+
+    // 3️⃣ Insertar usuario
+    const result = await pool.query(
+      "INSERT INTO usuarios (nivel, password, usuario) VALUES (?, ?, ?)",
+      [nivel, passwordHash, usuario]
+    );
+
+    res.status(201).json({
+      ok: true,
+      message: "Usuario creado",
+      userId: result.insertId
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      ok: false,
+      message: "Error del servidor"
+    });
+  }
+});
 
 router.post("/actualizarsocio", async (req, res) => {
   const { id, ...datos } = req.body;
@@ -309,4 +411,15 @@ router.get("/traersocio/:id", async (req, res) => {
     });
   }
 });
+
+router.get("/traercuotas/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const rows = await pool.query(`select * from cuotas where id_socio=?`, [id] );
+    res.json(rows); 
+  } catch (error) {
+    console.error("Error al traer socios:", error);
+    res.status(500).json()
+  }}
+)
 export default router;
