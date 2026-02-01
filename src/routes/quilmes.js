@@ -432,16 +432,28 @@ console.log(tiene_tutor);
     });
   }
 });
-
-
 router.get("/traersocios", async (req, res) => {
   try {
     const rows = await pool.query(`
       SELECT 
-       *
-        
-      FROM socios
-      ORDER BY apellido ASC, nombre ASC
+        s.*,
+
+        c.mes  AS ultimaCuotaMes,
+        c.anio AS ultimaCuotaAnio
+
+      FROM socios s
+
+      LEFT JOIN cuotas c
+        ON c.id_socio = s.id
+        AND (c.anio, c.mes) = (
+          SELECT c2.anio, c2.mes
+          FROM cuotas c2
+          WHERE c2.id_socio = s.id
+          ORDER BY c2.anio DESC, c2.mes DESC
+          LIMIT 1
+        )
+
+      ORDER BY s.apellido ASC, s.nombre ASC
     `);
 
     res.json(rows);
