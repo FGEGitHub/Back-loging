@@ -308,7 +308,7 @@ router.post("/agregarsocio", async (req, res) => {
       tiene_tutor,
       tutor_nombre,
       tutor_dni,
-      tutor_telefono,
+      tutor_tel,
       tutor_email,
       vinculo,
 
@@ -328,7 +328,7 @@ router.post("/agregarsocio", async (req, res) => {
       fecha_inscripcion,
       obs_internas
     } = req.body;
-
+console.log(tiene_tutor);
     /* ===============================
        VALIDACIONES OBLIGATORIAS
     ================================ */
@@ -338,12 +338,8 @@ router.post("/agregarsocio", async (req, res) => {
       !nombre 
  
     ) {
-      return res.status(400).json({
-        ok: false,
-        message: "Faltan datos obligatorios"
-      });
+      return res.status(400).json("Faltan datos obligatorios");
     }
-
     /* ===============================
        VALIDAR DNI ÚNICO
     ================================ */
@@ -353,12 +349,8 @@ router.post("/agregarsocio", async (req, res) => {
     );
 
     if (dniExiste.length > 0) {
-      return res.status(400).json({
-        ok: false,
-        message: "El DNI ya se encuentra registrado"
-      });
+      return res.status(400).json("El DNI ya se encuentra registrado");
     }
-
     /* ===============================
        INSERT
     ================================ */
@@ -377,6 +369,7 @@ router.post("/agregarsocio", async (req, res) => {
         telefono,
         email,
         direccion_barrio,
+        tiene_tutor,
         tutor_nombre,
         tutor_dni,
         tutor_tel,
@@ -392,7 +385,7 @@ router.post("/agregarsocio", async (req, res) => {
         profesor_carga,
         fecha_inscripcion,
         obs_internas
-      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
     `;
 
     const valores = [
@@ -409,9 +402,10 @@ router.post("/agregarsocio", async (req, res) => {
       telefono || null,
       email || null,
       direccion || null,
+      tiene_tutor || false,
       tiene_tutor ? tutor_nombre : null,
       tiene_tutor ? tutor_dni : null,
-      tiene_tutor ? tutor_telefono : null,
+      tiene_tutor ? tutor_tel : null,
       tiene_tutor ? tutor_email : null,
       tiene_tutor ? vinculo : null,
       apto_medico || null,
@@ -422,7 +416,7 @@ router.post("/agregarsocio", async (req, res) => {
       autorizacion_imagen || null,
       autorizacion_viajes || null,
       profesor_carga || null,
-      fecha_inscripcion || new Date(),
+      fecha_inscripcion || new Date().toISOString().split("T")[0],
       obs_internas || null
     ];
 
