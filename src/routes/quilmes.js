@@ -61,6 +61,53 @@ router.get("/crear-usuario", async (req, res) => {
 });
 
 
+router.post("/actualizarsocio", async (req, res) => {
+  const { id, ...datos } = req.body;
+
+  if (!id) {
+    return res.status(400).json({
+      mensaje: "ID requerido"
+    });
+  }
+
+  if (!datos || Object.keys(datos).length === 0) {
+    return res.status(400).json({
+      mensaje: "No hay campos para actualizar"
+    });
+  }
+
+  try {
+    const campos = [];
+    const valores = [];
+
+    Object.entries(datos).forEach(([campo, valor]) => {
+      campos.push(`${campo} = ?`);
+      valores.push(valor);
+    });
+
+    valores.push(id);
+
+    const sql = `
+      UPDATE socios
+      SET ${campos.join(", ")}
+      WHERE id = ?
+    `;
+
+    await pool.query(sql, valores);
+
+    res.json("Socio actualizado correctamente"
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      mensaje: "Error al actualizar socio"
+    });
+  }
+
+}
+);
+
+
 router.post("/agregarsocio", async (req, res) => {
   try {
     const {
