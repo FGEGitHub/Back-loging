@@ -210,6 +210,78 @@ router.post("/actualizarsocio", async (req, res) => {
 );
 
 
+router.post("/pagarcuota", async (req, res) => {
+  try {
+    const {
+      socio_id,
+      mes,
+      anio,
+      fecha_pago,
+      medio
+    } = req.body;
+    /* ================= VALIDACIONES ================= */
+
+    if (!socio_id || !mes || !anio) {
+      return res.status(400).json({
+        ok: false,
+        msg: "id_socio, mes y anio son obligatorios",
+      });
+    }
+
+    if (mes < 1 || mes > 12) {
+      return res.status(400).json({
+        ok: false,
+        msg: "Mes inválido (1 a 12)",
+      });
+    }
+
+    /* ================= VERIFICAR SI YA EXISTE ================= */
+
+    const existe = await pool.query(
+      `SELECT id FROM cuotas 
+       WHERE id_socio = ? AND mes = ? AND anio = ?`,
+      [socio_id, mes, anio]
+    );
+
+    if (existe.length > 0) {
+      return res.status(409).json({
+        ok: false,
+        msg: "Esta cuota ya está registrada",
+      });
+    }
+
+    /* ================= INSERT ================= */
+
+    const result = await pool.query(
+      `INSERT INTO cuotas
+      (id_socio, mes, anio, fecha, medio)
+      VALUES (?, ?, ?, ?, ?)`,
+      [
+        socio_id,
+        mes,
+        anio,
+        fecha_pago || null,
+        medio || null,
+      ]
+    );
+
+    /* ================= OK ================= */
+
+    res.status(201).json("Cuota registrada correctamente");
+
+  } catch (error) {
+    console.error("Error pagarcuota:", error);
+
+    res.status(500).json({
+      ok: false,
+      msg: "Error interno del servidor",
+    });
+  }
+});
+
+
+
+
 router.post("/agregarsocio", async (req, res) => {
   try {
     const {
