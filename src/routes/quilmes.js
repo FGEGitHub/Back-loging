@@ -467,6 +467,44 @@ router.get("/traersocios", async (req, res) => {
   }
 });
 
+
+
+router.get("/traercuotastodas", async (req, res) => {
+  try {
+    const rows = await pool.query(`
+      SELECT
+        c.*,
+
+        s.nombre,
+        s.apellido,
+        s.disciplina,
+        s.categoria
+
+      FROM cuotas c
+
+      JOIN socios s
+        ON c.id_socio = s.id
+
+      ORDER BY 
+        c.anio DESC,
+        c.mes DESC,
+        s.apellido ASC
+    `);
+
+    res.json(rows);
+
+  } catch (error) {
+    console.error("Error al traer cuotas:", error);
+
+    res.status(500).json({
+      ok: false,
+      message: "Error al obtener cuotas"
+    });
+  }
+});
+
+
+
 router.get("/traersocio/:id", async (req, res) => {
   try {
     const { id } = req.params;
