@@ -8,7 +8,7 @@ import pool from "../database6.js";
 import bcrypt from "bcryptjs";
 
 
-router.get("/crear-usuario", async (req, res) => {
+/* router.get("/crear-usuario", async (req, res) => {
   try {
     const usuario = "pipo";
     const nivel = 1;   
@@ -159,6 +159,29 @@ router.get("/crear-usuario-club", async (req, res) => {
     res.status(500).json({
       ok: false,
       message: "Error del servidor"
+    });
+  }
+}); */
+router.delete("/eliminarsocio/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await pool.query(
+      "DELETE FROM socios WHERE id = ?",
+      [id]
+    );
+
+    res.json({
+      ok: true,
+      msg: "Socio eliminado correctamente"
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      ok: false,
+      msg: "Error al eliminar socio"
     });
   }
 });
