@@ -1,4 +1,4 @@
-// if (typeof File === "undefined") { global.File = class {}; }
+if (typeof File === "undefined") { global.File = class {}; }
 
 import express from "express";
 import morgan from "morgan";
