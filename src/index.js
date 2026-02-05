@@ -59,13 +59,11 @@ app.use(passport.initialize());
 // ==============================
 // CORS
 // ==============================
-const corsOptions = {
+app.use(cors({
   origin: "*",
-  methods: ["GET", "POST", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-  optionsSuccessStatus: 200
-};
+  credentials: false
+}));
+
 
 app.use(cors(corsOptions));
 
