@@ -47,6 +47,6 @@ client.on('disconnected', (reason) => {
 });
 
 // Inicializar cliente
-//client.initialize();
+client.initialize();
 
 export default client; 
