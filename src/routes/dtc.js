@@ -2736,59 +2736,59 @@ router.post("/modificarusuario", async (req, res) => {
     escuela,
     grado,
     fines,
-    obra_social,          // nuevo campo
-    obra_social_cual      // nuevo campo
+    obra_social,
+    obra_social_cual,
+    sexo,
+    hijos
   } = req.body;
 
-  console.log(
-    id,
-    nombre,
-    apellido,
-    fecha_nacimiento,
-    observaciones,
-    primer_contacto,
-    primer_ingreso,
-    admision,
-    dni,
-    domicilio,
-    telefono,
-    autorizacion_imagen,
-    fotoc_dni,
-    fotoc_responsable,
-    tel_responsable,
-    visita_social,
-    egreso,
-    aut_retirar,
-    dato_escolar,
-    hora_merienda,
-    obra_social,
-    obra_social_cual
-  );
+  console.log("Modificando usuario ID:", id);
 
   try {
-    if (observaciones == undefined) {
-      observaciones = "Sin observaciones";
-    }
-    if (fecha_nacimiento == undefined) {
-      fecha_nacimiento = "Sin asignar";
-    }
-    if (talle == undefined) {
-      talle = "Sin asignar";
-    }
-    if (obra_social == undefined) {
-      obra_social = "Sin determinar";
-    }
-    if (obra_social_cual == undefined) {
-      obra_social_cual = "Sin asignar";
+
+    // 🔹 Valores por defecto
+    if (!observaciones) observaciones = "Sin observaciones";
+    if (!fecha_nacimiento) fecha_nacimiento = "Sin asignar";
+    if (!talle) talle = "Sin asignar";
+    if (!obra_social) obra_social = "Sin determinar";
+    if (!obra_social_cual) obra_social_cual = "Sin asignar";
+    if (!sexo) sexo = "Sin determinar";
+
+    // 🔹 Normalizar hijos
+    if (!hijos || hijos === "" || hijos === "0") {
+      hijos = "No";
     }
 
     await pool.query(
       `UPDATE dtc_chicos 
-       SET nombre=?, apellido=?, fecha_nacimiento=?, observaciones=?, primer_contacto=?, 
-           primer_ingreso=?, admision=?, dni=?, domicilio=?, telefono=?, autorizacion_imagen=?, 
-           fotoc_dni=?, fotoc_responsable=?, tel_responsable=?, visita_social=?, egreso=?, 
-           aut_retirar=?, dato_escolar=?, hora_merienda=?, kid=?, escuela=?, grado=?, fines=?, 
-           talle=?, obra_social=?, obra_social_cual=? 
+       SET nombre=?, 
+           apellido=?, 
+           fecha_nacimiento=?, 
+           observaciones=?, 
+           primer_contacto=?, 
+           primer_ingreso=?, 
+           admision=?, 
+           dni=?, 
+           domicilio=?, 
+           telefono=?, 
+           autorizacion_imagen=?, 
+           fotoc_dni=?, 
+           fotoc_responsable=?, 
+           tel_responsable=?, 
+           visita_social=?, 
+           egreso=?, 
+           aut_retirar=?, 
+           dato_escolar=?, 
+           hora_merienda=?, 
+           kid=?, 
+           escuela=?, 
+           grado=?, 
+           fines=?, 
+           talle=?, 
+           obra_social=?, 
+           obra_social_cual=?,
+           sexo=?,
+           hijos=?
        WHERE id=?`,
       [
         nombre,
@@ -2817,49 +2817,20 @@ router.post("/modificarusuario", async (req, res) => {
         talle,
         obra_social,
         obra_social_cual,
-        id,
+        sexo,
+        hijos,
+        id
       ]
     );
 
     res.json("Modificado");
+
   } catch (error) {
     console.log(error);
     res.json("No modificado");
   }
 });
 
-
-
-router.post("/eliminarhorario", async (req, res) => {
-  let { id } = req.body
-
-  try {
-
-
-    await pool.query('delete from dtc_cursado  where id=?', [id])
-
-    res.json('Borrado')
-  } catch (error) {
-    console.log(error)
-    res.json('No Borrado')
-  }
-
-})
-router.post("/borrarturnocadia", async (req, res) => {
-  let { id } = req.body
-
-  try {
-
-
-    await pool.query('delete from cadia_turnos  where id=?', [id])
-
-    res.json('Borrado')
-  } catch (error) {
-    console.log(error)
-    res.json('No Borrado')
-  }
-
-})
 router.post("/borrarturno", async (req, res) => {
   let { id } = req.body
   console.log(id)
@@ -3525,54 +3496,68 @@ router.post("/nuevochique", async (req, res) => {
     grado,
     fines,
     obra_social,
-    obra_social_cual
+    obra_social_cual,
+    sexo,
+  tiene_hijos,
+  cantidad_hijos
   } = req.body;
 
   try {
+    let hijos;
     // Valores por defecto
     if (!observaciones) observaciones = "Sin observaciones";
     if (!fecha_nacimiento) fecha_nacimiento = "Sin asignar";
     if (!talle) talle = "Sin asignar";
     if (!obra_social) obra_social = "Sin asignar";
     if (!obra_social_cual) obra_social_cual = "Sin asignar";
+   
 
+if (!tiene_hijos || !cantidad_hijos) {
+  hijos = "No";
+} else {
+  hijos = cantidad_hijos;
+}
+ if (!hijos) hijos = "No";
     // Si el DNI está sin determinar
     if (dni === "Sin determinar") {
       await pool.query(
-        `INSERT INTO dtc_chicos 
-        (nombre, apellido, fecha_nacimiento, observaciones, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, 
-        autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, 
-        hora_merienda, escuela, grado, fines, kid, talle, obra_social, obra_social_cual)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-        [
-          nombre,
-          apellido,
-          fecha_nacimiento,
-          observaciones,
-          primer_contacto,
-          primer_ingreso,
-          admision,
-          dni,
-          domicilio,
-          telefono,
-          autorizacion_imagen,
-          fotoc_dni,
-          fotoc_responsable,
-          tel_responsable,
-          visita_social,
-          egreso,
-          aut_retirar,
-          dato_escolar,
-          hora_merienda,
-          escuela,
-          grado,
-          fines,
-          kid,
-          talle,
-          obra_social,
-          obra_social_cual
-        ]
-      );
+  `INSERT INTO dtc_chicos 
+  (nombre, apellido, fecha_nacimiento, observaciones, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, 
+  autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, 
+  hora_merienda, escuela, grado, fines, kid, talle, obra_social, obra_social_cual, sexo, hijos)
+  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+  [
+    nombre,
+    apellido,
+    fecha_nacimiento,
+    observaciones,
+    primer_contacto,
+    primer_ingreso,
+    admision,
+    dni,
+    domicilio,
+    telefono,
+    autorizacion_imagen,
+    fotoc_dni,
+    fotoc_responsable,
+    tel_responsable,
+    visita_social,
+    egreso,
+    aut_retirar,
+    dato_escolar,
+    hora_merienda,
+    escuela,
+    grado,
+    fines,
+    kid,
+    talle,
+    obra_social,
+    obra_social_cual,
+    sexo,
+    hijos
+  ]
+);
+
       res.json("Agregado");
     } else {
       // Si ya existe el DNI, no se agrega
@@ -3583,40 +3568,42 @@ router.post("/nuevochique", async (req, res) => {
       if (yahay.length > 0) {
         res.json("Error, DNI ya registrado");
       } else {
-        await pool.query(
-          `INSERT INTO dtc_chicos 
-          (nombre, apellido, fecha_nacimiento, observaciones, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, 
-          autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, 
-          hora_merienda, escuela, grado, fines, talle, obra_social, obra_social_cual)
-          VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-          [
-            nombre,
-            apellido,
-            fecha_nacimiento,
-            observaciones,
-            primer_contacto,
-            primer_ingreso,
-            admision,
-            dni,
-            domicilio,
-            telefono,
-            autorizacion_imagen,
-            fotoc_dni,
-            fotoc_responsable,
-            tel_responsable,
-            visita_social,
-            egreso,
-            aut_retirar,
-            dato_escolar,
-            hora_merienda,
-            escuela,
-            grado,
-            fines,
-            talle,  
-            obra_social,
-            obra_social_cual
-          ]
-        );
+       await pool.query(
+  `INSERT INTO dtc_chicos 
+  (nombre, apellido, fecha_nacimiento, observaciones, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, 
+  autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, 
+  hora_merienda, escuela, grado, fines, talle, obra_social, obra_social_cual, sexo, hijos)
+  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+  [
+    nombre,
+    apellido,
+    fecha_nacimiento,
+    observaciones,
+    primer_contacto,
+    primer_ingreso,
+    admision,
+    dni,
+    domicilio,
+    telefono,
+    autorizacion_imagen,
+    fotoc_dni,
+    fotoc_responsable,
+    tel_responsable,
+    visita_social,
+    egreso,
+    aut_retirar,
+    dato_escolar,
+    hora_merienda,
+    escuela,
+    grado,
+    fines,
+    talle,
+    obra_social,
+    obra_social_cual,
+    sexo,
+    hijos
+  ]
+);
 
         res.json("Agregado");
       }
