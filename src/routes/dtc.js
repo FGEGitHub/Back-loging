@@ -2812,7 +2812,7 @@ router.post("/modificarusuario", async (req, res) => {
         hora_merienda,
         kid,
         escuela,
-        grado,
+        grado, 
         fines,
         talle,
         obra_social,
