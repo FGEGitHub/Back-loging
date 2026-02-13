@@ -1588,10 +1588,13 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
 router.get('/listachiquesmomentaneo/', async (req, res) => { 
   try {
 
+    // -----------------------
+    // CALCULAR EDAD EN JS (para enviar a frontend)
+    // -----------------------
     const calcularEdad = (fechaNacimiento) => {
-      if (!fechaNacimiento) return '';
+      if (!fechaNacimiento) return null;
       const hoy = new Date();
-      const [anio, mes, dia] = fechaNacimiento.split('-');
+      const [anio, mes, dia] = fechaNacimiento.split('-').map(Number);
       let edad = hoy.getFullYear() - anio;
       const mesActual = hoy.getMonth() + 1;
       const diaActual = hoy.getDate();
@@ -1620,16 +1623,20 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
         primer_ingreso, admision, dni, domicilio, telefono, autorizacion_imagen,
         fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso,
         aut_retirar, dato_escolar, kid, obra_social, obra_social_cual,
-        escuela, grado, fines, hora_merienda,  hijos, sexo, psico
+        escuela, grado, fines, hora_merienda, hijos, sexo, psico
       FROM marketing.dtc_chicos
       ORDER BY apellido
     `);
 
+    // AGREGAR EDAD A CADA CHICO
+    for (const chico of chiques) {
+      chico.edad = calcularEdad(chico.fecha_nacimiento);
+    }
+
     // -----------------------
-    //   ESTADISTICAS
+    // ESTADISTICAS OBRA SOCIAL
     // -----------------------
 
-    // Psicóloga
     const personasPsicologa = await pool.query(`
       SELECT COUNT(*) AS cantidad 
       FROM marketing.dtc_chicos 
@@ -1637,7 +1644,6 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
     `);
     const totalPsicologa = Number(personasPsicologa[0].cantidad) || 0;
 
-    // Psicóloga con obra social
     const obraPsicologa = await pool.query(`
       SELECT COUNT(*) AS cantidad 
       FROM marketing.dtc_chicos
@@ -1648,7 +1654,6 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
     `);
     const cantidadObraPsicologa = Number(obraPsicologa[0].cantidad) || 0;
 
-    // Chicos con obra social
     const conObraSocial = await pool.query(`
       SELECT COUNT(*) AS cantidad 
       FROM marketing.dtc_chicos 
@@ -1659,14 +1664,12 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
     `);
     const cantidadObraChicos = Number(conObraSocial[0].cantidad) || 0;
 
-    // Total chicos
     const totalChicos = await pool.query(`
       SELECT COUNT(*) AS total 
       FROM marketing.dtc_chicos
     `);
     const totalUsuarios = Number(totalChicos[0].total) || 0;
 
-    // Porcentajes
     const porcentajeChicos = totalUsuarios
       ? ((cantidadObraChicos / totalUsuarios) * 100).toFixed(2)
       : 0;
@@ -1683,18 +1686,69 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
       : 0;
 
     // -----------------------
-    //   NUEVAS ESTADISTICAS
+    // ESTADISTICAS POR EDAD Y SEXO (OPCIÓN A SQL)
     // -----------------------
 
-    // Mujeres
+    // TOTAL PERSONAS
+    const totalPersonasEdad = await pool.query(`
+      SELECT COUNT(*) AS cantidad FROM marketing.dtc_chicos
+    `);
+    const cantidadTotal = Number(totalPersonasEdad[0].cantidad) || 0;
+
+    // TOTAL MUJERES
     const mujeres = await pool.query(`
       SELECT COUNT(*) AS cantidad 
       FROM marketing.dtc_chicos
-      WHERE sexo IN ('F', 'Femenino', 'Mujer')
+      WHERE sexo IN ('F','Femenino','Mujer')
     `);
     const totalMujeres = Number(mujeres[0].cantidad) || 0;
 
-    // Personas con hijos (hijos != No, != 0)
+    // MUJERES < 16
+    const mujeresMenores16 = await pool.query(`
+      SELECT COUNT(*) AS cantidad
+      FROM marketing.dtc_chicos
+      WHERE sexo IN ('F','Femenino','Mujer')
+      AND TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) < 16
+    `);
+    const totalMujeresMenores16 = Number(mujeresMenores16[0].cantidad) || 0;
+
+    // MUJERES >= 16
+    const mujeresMayores16 = await pool.query(`
+      SELECT COUNT(*) AS cantidad
+      FROM marketing.dtc_chicos
+      WHERE sexo IN ('F','Femenino','Mujer')
+      AND TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) >= 16
+    `);
+    const totalMujeresMayores16 = Number(mujeresMayores16[0].cantidad) || 0;
+
+    // HOMBRES >= 16
+    const hombresMayores16 = await pool.query(`
+      SELECT COUNT(*) AS cantidad
+      FROM marketing.dtc_chicos
+      WHERE sexo IN ('M','Masculino','Hombre')
+      AND TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) >= 16
+    `);
+    const totalHombresMayores16 = Number(hombresMayores16[0].cantidad) || 0;
+
+    // TOTAL MENORES 16
+    const totalMenores16 = await pool.query(`
+      SELECT COUNT(*) AS cantidad
+      FROM marketing.dtc_chicos
+      WHERE TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) < 16
+    `);
+    const cantidadMenores16 = Number(totalMenores16[0].cantidad) || 0;
+
+    // TOTAL MAYORES 16
+    const totalMayores16 = await pool.query(`
+      SELECT COUNT(*) AS cantidad
+      FROM marketing.dtc_chicos
+      WHERE TIMESTAMPDIFF(YEAR, fecha_nacimiento, CURDATE()) >= 16
+    `);
+    const cantidadMayores16 = Number(totalMayores16[0].cantidad) || 0;
+
+    // -----------------------
+    // PERSONAS CON HIJOS
+    // -----------------------
     const conHijos = await pool.query(`
       SELECT COUNT(*) AS cantidad
       FROM marketing.dtc_chicos
@@ -1705,7 +1759,6 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
     `);
     const totalConHijos = Number(conHijos[0].cantidad) || 0;
 
-    // Suma total de hijos (solo valores numéricos)
     const sumaHijos = await pool.query(`
       SELECT SUM(CAST(hijos AS UNSIGNED)) AS total_hijos
       FROM marketing.dtc_chicos
@@ -1714,9 +1767,8 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
     const totalHijos = Number(sumaHijos[0].total_hijos) || 0;
 
     // -----------------------
-    //   ESTADISTICAS POR KID
+    // ESTADISTICAS POR KID
     // -----------------------
-
     const estadisticas = {};
     let total = 0;
 
@@ -1726,22 +1778,29 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
       total++;
     }
 
+    // BASE
     estadisticas.total = total;
     estadisticas.psicologa = totalPsicologa;
-
     estadisticas.promedio_obra_social_chicos = `${porcentajeChicos}%`;
     estadisticas.promedio_obra_social_psicologa = `${porcentajePsicologa}%`;
     estadisticas.promedio_obra_social = `${porcentajeGlobal}%`;
 
-    // nuevas stats
-    estadisticas.mujeres = totalMujeres;
+    // HIJOS
     estadisticas.con_hijos = totalConHijos;
     estadisticas.total_hijos = totalHijos;
+
+    // 🔥 EDAD Y SEXO
+    estadisticas.cantidad_total = cantidadTotal;
+    estadisticas.cantidad_mujeres = totalMujeres;
+    estadisticas.mujeres_menores_16 = totalMujeresMenores16;
+    estadisticas.mujeres_mayores_16 = totalMujeresMayores16;
+    estadisticas.hombres_mayores_16 = totalHombresMayores16;
+    estadisticas.total_menores_16 = cantidadMenores16;
+    estadisticas.total_mayores_16 = cantidadMayores16;
 
     // -----------------------
     // DETALLE OBRA SOCIAL
     // -----------------------
-
     const obrasChicos = await pool.query(`
       SELECT obra_social_cual AS obra, COUNT(*) AS cantidad
       FROM marketing.dtc_chicos
@@ -1773,7 +1832,7 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Ocurrió un error al procesar los datos definitivos' });
+    res.status(500).json({ error: 'Ocurrió un error al procesar los datos' });
   }
 });
 
