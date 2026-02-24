@@ -3140,7 +3140,15 @@ router.get("/traaeroficios", async (req, res) => {
   try {
     let resp = await pool.query(`
       SELECT 
-        dtc_oficios.*, 
+        dtc_oficios.id,
+        dtc_oficios.expediente,
+        dtc_oficios.juzgado,
+        dtc_oficios.causa,
+        dtc_oficios.solicitud,
+        dtc_oficios.oficio,
+        dtc_oficios.fecha,
+        dtc_oficios.fuero, -- ✅ CAMPO FUERO
+        dtc_oficios.id_usuario,
         dtc_pdf_oficios.id AS expediente_id, 
         dtc_pdf_oficios.ubicacion AS expediente_archivo,
         dtc_chicos.nombre AS nombre_chico,
@@ -3165,6 +3173,7 @@ router.get("/traaeroficios", async (req, res) => {
           solicitud: row.solicitud,
           oficio: row.oficio,
           fecha: row.fecha,
+          fuero: row.fuero, // ✅ AGREGADO
           anio,
           id_usuario: row.id_usuario,
           nombre: row.nombre_chico,
@@ -3173,6 +3182,7 @@ router.get("/traaeroficios", async (req, res) => {
         };
       }
 
+      // Agregar expedientes
       if (row.expediente_id) {
         oficiosMap[row.id].expedientes.push({
           id: row.expediente_id,
@@ -3202,8 +3212,9 @@ router.get("/traaeroficios", async (req, res) => {
     });
 
     res.json([resultado]);
+
   } catch (error) {
-    console.error(error);
+    console.error("Error traer oficios:", error);
     res.status(500).json({ message: "Error al traer los oficios" });
   }
 });
