@@ -5287,179 +5287,154 @@ console.log(resultados)
 });
 
 router.post("/traerestadisticas", async (req, res) => {
-  let { fecha } = req.body;
+  try {
+    let { fecha } = req.body;
+    fecha = fecha.fecha;
 
-  // presentes mensuales
-  fecha = fecha.fecha;
+    let mescumple = "";
+    let diacumple = "";
+    let mesanterior = "";
+    let anioanterior = "";
 
-  let mescumple = "";
-  let diacumple = "";
-  let mesanterior = "";
-  let anioanterior = "";
+    let [dia, mes, anio] = fecha.split("-");
 
-  // Divide la fecha
-  let [dia, mes, anio] = fecha.split("-");
+    diacumple = dia.length === 1 ? "0" + dia : dia;
+    mescumple = mes.length === 1 ? "0" + mes : mes;
 
-  if (dia.length === 1) diacumple = "0" + dia;
-  else diacumple = dia;
-
-  if (mes.length === 1) mescumple = "0" + mes;
-  else mescumple = mes;
-
-  const cumple = await pool.query(
-    "SELECT * FROM dtc_chicos WHERE fecha_nacimiento LIKE ?",
-    [`%${mescumple}-${diacumple}`]
-  );
-
-  if (Number(mes) === 1) {
-    mesanterior = 12;
-    anioanterior = Number(anio) - 1;
-  } else {
-    mesanterior = Number(mes) - 1;
-    anioanterior = Number(anio);
-  }
-
-  const presentes_totales = await pool.query(
-    'SELECT * FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND id_tallerista = 238',
-    [mes, anio]
-  );
-
-  const presentes_totales_reales = await pool.query(
-    'SELECT DISTINCT(id_usuario) FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND id_tallerista = 238',
-    [mes, anio]
-  );
-
-  const presentes_totales_reales_mespasado = await pool.query(
-    'SELECT DISTINCT(id_usuario) FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND YEAR(STR_TO_DATE(fecha, "%d-%m-%Y")) = ? AND id_tallerista = 238',
-    [mesanterior, anioanterior]
-  );
-
-  const date = parse(fecha, "dd-MM-yyyy", new Date());
-
-  const fechaFormateada = format(
-    startOfWeek(date, { weekStartsOn: 1 }),
-    "d-M-yyyy",
-    { locale: es }
-  );
-
-  let cantp = await pool.query(
-    "SELECT * FROM dtc_asistencia WHERE fecha = ?",
-    fechaFormateada
-  );
-
-  const estasemana = [cantp.length];
-  let fechaaux = fechaFormateada;
-
-  while (fechaaux !== fecha) {
-    let [diaStr, mesStr, anioStr] = fechaaux.split("-");
-    const d = parseInt(diaStr);
-    const m = parseInt(mesStr) - 1;
-    const a = parseInt(anioStr);
-
-    const fechaw = new Date(a, m, d);
-    fechaw.setDate(fechaw.getDate() + 1);
-
-    const nuevoDia = fechaw.getDate();
-    const nuevoMes = fechaw.getMonth() + 1;
-    const nuevoAnio = fechaw.getFullYear();
-
-    fechaaux = `${nuevoDia}-${nuevoMes}-${nuevoAnio}`;
-
-    cantp = await pool.query(
-      "SELECT * FROM dtc_asistencia WHERE fecha = ?",
-      fechaaux
+    // 🎂 Cumpleaños
+    const cumple = await pool.query(
+      "SELECT * FROM dtc_chicos WHERE fecha_nacimiento LIKE ?",
+      [`%${mescumple}-${diacumple}`]
     );
 
-    estasemana.push(cantp.length);
-  }
+    // Mes anterior
+    if (Number(mes) === 1) {
+      mesanterior = 12;
+      anioanterior = Number(anio) - 1;
+    } else {
+      mesanterior = Number(mes) - 1;
+      anioanterior = Number(anio);
+    }
 
-  // semana pasada
-  const fechaconvertidora = new Date(date);
-  fechaconvertidora.setDate(fechaconvertidora.getDate() - 7);
-
-  let fechaHaceUnaSemana = fechaconvertidora
-    .toISOString()
-    .split("T")[0];
-
-  const lunespasado = format(
-    startOfWeek(fechaHaceUnaSemana, { weekStartsOn: 1 }),
-    "d-M-yyyy",
-    { locale: es }
-  );
-
-  let [aa, mm, dd] = fechaHaceUnaSemana.split("-");
-  if (dd[0] === "0") dd = dd[1];
-  if (mm[0] === "0") mm = mm[1];
-
-  fechaHaceUnaSemana = `${dd}-${mm}-${aa}`;
-
-  const pres_Semanal = await pool.query(
-    'SELECT * FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") BETWEEN STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(?, "%d-%m-%Y") AND id_tallerista = 238',
-    [fechaFormateada, fecha]
-  );
-
-  const pres_Semanal_real = await pool.query(
-    'SELECT DISTINCT(id_usuario) FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") BETWEEN STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(?, "%d-%m-%Y") AND id_tallerista = 238',
-    [fechaFormateada, fecha]
-  );
-
-  const pres_Semanapasada = await pool.query(
-    'SELECT * FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") BETWEEN STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(?, "%d-%m-%Y") AND id_tallerista = 238',
-    [lunespasado, fechaHaceUnaSemana]
-  );
-
-  const pres_Semanal_real_semanapasada = await pool.query(
-    'SELECT DISTINCT(id_usuario) FROM dtc_asistencia WHERE STR_TO_DATE(fecha, "%d-%m-%Y") BETWEEN STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(?, "%d-%m-%Y") AND id_tallerista = 238',
-    [lunespasado, fechaHaceUnaSemana]
-  );
-
-  cantp = await pool.query(
-    "SELECT * FROM dtc_asistencia WHERE fecha = ?",
-    lunespasado
-  );
-
-  const semanapasada = [cantp.length];
-  fechaaux = lunespasado;
-
-  while (fechaaux !== fechaHaceUnaSemana) {
-    let [diaStr, mesStr, anioStr] = fechaaux.split("-");
-    const d = parseInt(diaStr);
-    const m = parseInt(mesStr) - 1;
-    const a = parseInt(anioStr);
-
-    const fechaw = new Date(a, m, d);
-    fechaw.setDate(fechaw.getDate() + 1);
-
-    const nuevoDia = fechaw.getDate();
-    const nuevoMes = fechaw.getMonth() + 1;
-    const nuevoAnio = fechaw.getFullYear();
-
-    fechaaux = `${nuevoDia}-${nuevoMes}-${nuevoAnio}`;
-
-    cantp = await pool.query(
-      "SELECT * FROM dtc_asistencia WHERE fecha = ?",
-      fechaaux
+    // 📊 Presentes mes
+    const presentes_totales = await pool.query(
+      'SELECT * FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha,"%d-%m-%Y"))=? AND YEAR(STR_TO_DATE(fecha,"%d-%m-%Y"))=? AND id_tallerista=238',
+      [mes, anio]
     );
 
-    semanapasada.push(cantp.length);
+    const presentes_totales_reales = await pool.query(
+      'SELECT DISTINCT(id_usuario) FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha,"%d-%m-%Y"))=? AND YEAR(STR_TO_DATE(fecha,"%d-%m-%Y"))=? AND id_tallerista=238',
+      [mes, anio]
+    );
+
+    const presentes_totales_reales_mespasado = await pool.query(
+      'SELECT DISTINCT(id_usuario) FROM dtc_asistencia WHERE MONTH(STR_TO_DATE(fecha,"%d-%m-%Y"))=? AND YEAR(STR_TO_DATE(fecha,"%d-%m-%Y"))=? AND id_tallerista=238',
+      [mesanterior, anioanterior]
+    );
+
+    // 📅 Semana actual
+    const date = parse(fecha, "dd-MM-yyyy", new Date());
+    const fechaFormateada = format(startOfWeek(date, { weekStartsOn: 1 }), "d-M-yyyy");
+
+    let cantp = await pool.query("SELECT * FROM dtc_asistencia WHERE fecha = ?", [fechaFormateada]);
+    const estasemana = [cantp.length];
+    let fechaaux = fechaFormateada;
+
+    while (fechaaux !== fecha) {
+      let [d, m, a] = fechaaux.split("-");
+      const fechaw = new Date(a, m - 1, d);
+      fechaw.setDate(fechaw.getDate() + 1);
+
+      fechaaux = `${fechaw.getDate()}-${fechaw.getMonth() + 1}-${fechaw.getFullYear()}`;
+      cantp = await pool.query("SELECT * FROM dtc_asistencia WHERE fecha = ?", [fechaaux]);
+      estasemana.push(cantp.length);
+    }
+
+    // 📅 Semana pasada
+    const fechaconvertidora = new Date(date);
+    fechaconvertidora.setDate(fechaconvertidora.getDate() - 7);
+    let fechaHaceUnaSemana = fechaconvertidora.toISOString().split("T")[0];
+
+    const lunespasado = format(startOfWeek(fechaHaceUnaSemana, { weekStartsOn: 1 }), "d-M-yyyy");
+
+    let [aa, mm, dd] = fechaHaceUnaSemana.split("-");
+    if (dd[0] === "0") dd = dd[1];
+    if (mm[0] === "0") mm = mm[1];
+    fechaHaceUnaSemana = `${dd}-${mm}-${aa}`;
+
+    const pres_Semanal = await pool.query(
+      'SELECT * FROM dtc_asistencia WHERE STR_TO_DATE(fecha,"%d-%m-%Y") BETWEEN STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(?, "%d-%m-%Y") AND id_tallerista=238',
+      [fechaFormateada, fecha]
+    );
+
+    const pres_Semanal_real = await pool.query(
+      'SELECT DISTINCT(id_usuario) FROM dtc_asistencia WHERE STR_TO_DATE(fecha,"%d-%m-%Y") BETWEEN STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(?, "%d-%m-%Y") AND id_tallerista=238',
+      [fechaFormateada, fecha]
+    );
+
+    const pres_Semanapasada = await pool.query(
+      'SELECT * FROM dtc_asistencia WHERE STR_TO_DATE(fecha,"%d-%m-%Y") BETWEEN STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(?, "%d-%m-%Y") AND id_tallerista=238',
+      [lunespasado, fechaHaceUnaSemana]
+    );
+
+    const pres_Semanal_real_semanapasada = await pool.query(
+      'SELECT DISTINCT(id_usuario) FROM dtc_asistencia WHERE STR_TO_DATE(fecha,"%d-%m-%Y") BETWEEN STR_TO_DATE(?, "%d-%m-%Y") AND STR_TO_DATE(?, "%d-%m-%Y") AND id_tallerista=238',
+      [lunespasado, fechaHaceUnaSemana]
+    );
+
+    // Semana pasada gráfico
+    cantp = await pool.query("SELECT * FROM dtc_asistencia WHERE fecha = ?", [lunespasado]);
+    const semanapasada = [cantp.length];
+    fechaaux = lunespasado;
+
+    while (fechaaux !== fechaHaceUnaSemana) {
+      let [d, m, a] = fechaaux.split("-");
+      const fechaw = new Date(a, m - 1, d);
+      fechaw.setDate(fechaw.getDate() + 1);
+
+      fechaaux = `${fechaw.getDate()}-${fechaw.getMonth() + 1}-${fechaw.getFullYear()}`;
+      cantp = await pool.query("SELECT * FROM dtc_asistencia WHERE fecha = ?", [fechaaux]);
+      semanapasada.push(cantp.length);
+    }
+
+    // =======================
+    // 🔥 BLOQUE OTRAS (FIX BIGINT)
+    // =======================
+    const totalChicos = await pool.query("SELECT COUNT(*) total FROM dtc_chicos");
+    const enTratamiento = await pool.query(
+      "SELECT COUNT(*) total FROM dtc_chicos WHERE psico = 'Si'"
+    );
+    const judicializados = await pool.query(
+      "SELECT COUNT(*) total FROM dtc_oficios WHERE id_usuario IS NOT NULL"
+    );
+
+    const otras = {
+      cantidad_usuarios: Number(totalChicos[0].total),
+      cantidad_tratamiento: Number(enTratamiento[0].total),
+      cantidad_judicializados: Number(judicializados[0].total),
+    };
+    // =======================
+
+    const estad = {
+      presentes_totales: presentes_totales.length,
+      presentes_totales_reales: presentes_totales_reales.length,
+      presentes_totales_reales_mespasado: presentes_totales_reales_mespasado.length,
+      presentes_totales_semana: pres_Semanal.length,
+      presentes_totales_reales_semana: pres_Semanal_real.length,
+      pres_Semanapasada: pres_Semanapasada.length,
+      pres_Semanal_real_semanapasada: pres_Semanal_real_semanapasada.length,
+      semana: estasemana,
+      semanapasada,
+      cumple,
+    };
+
+console.log(estad, otras)
+    res.json([ estad, otras ]);
+
+  } catch (error) {
+    console.error("ERROR traerestadisticas:", error);
+    res.status(500).json({ error: "Error en estadísticas" });
   }
-
-  const estad = {
-    presentes_totales: presentes_totales.length,
-    presentes_totales_reales: presentes_totales_reales.length,
-    presentes_totales_reales_mespasado:
-      presentes_totales_reales_mespasado.length,
-    presentes_totales_semana: pres_Semanal.length,
-    presentes_totales_reales_semana: pres_Semanal_real.length,
-    pres_Semanapasada: pres_Semanapasada.length,
-    pres_Semanal_real_semanapasada:
-      pres_Semanal_real_semanapasada.length,
-    semana: estasemana,
-    semanapasada,
-    cumple,
-  };
-
-  res.json([estad]);
 });
 
 
