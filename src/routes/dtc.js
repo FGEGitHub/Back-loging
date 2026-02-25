@@ -5401,20 +5401,49 @@ router.post("/traerestadisticas", async (req, res) => {
     // 🔥 BLOQUE OTRAS (FIX BIGINT)
     // =======================
     const totalChicos = await pool.query("SELECT COUNT(*) total FROM dtc_chicos");
-    const enTratamiento = await pool.query(
-      "SELECT COUNT(*) total FROM dtc_chicos WHERE psico = 'Si'"
-    );
-    const judicializados = await pool.query(
-      "SELECT COUNT(*) total FROM dtc_oficios WHERE id_usuario IS NOT NULL"
-    );
+    const enTratamiento = await pool.query("SELECT COUNT(*) total FROM dtc_chicos WHERE psico='Si'");
+    const judicializados = await pool.query("SELECT COUNT(*) total FROM dtc_oficios WHERE id_usuario IS NOT NULL");
+
+    const fines = 50; // si después querés lo traemos de BD
+
+    const cantidad_usuarios = Number(totalChicos[0].total) || 0;
+    const cantidad_tratamiento = Number(enTratamiento[0].total) || 0;
+    const cantidad_judicializados = Number(judicializados[0].total) || 0;
+
+    const total_general = cantidad_usuarios + fines;
 
     const otras = {
-      cantidad_usuarios: Number(totalChicos[0].total),
-      cantidad_tratamiento: Number(enTratamiento[0].total),
-      cantidad_judicializados: Number(judicializados[0].total),
+      cantidad_usuarios,
+      cantidad_tratamiento,
+      cantidad_judicializados,
+      fines,
+      total_general,
     };
-    // =======================
 
+    // =======================
+    // 🥧 OTRAS2 PARA GRAFICO TORTA
+    // =======================
+    const enTratamientoReal = cantidad_tratamiento - cantidad_judicializados;
+    const sinTratamiento = total_general - cantidad_tratamiento;
+
+  // =======================
+// 🧑‍🏭 TRABAJO SOCIAL GROUP BY
+// =======================
+const trabajoSocial = await pool.query(`
+  SELECT trabajo, COUNT(*) cantidad 
+  FROM dtc_asistencia_sociales
+  GROUP BY trabajo
+`);
+
+// FIX BIGINT → Number()
+const otras2 = trabajoSocial.map(t => ({
+  name: t.trabajo || "Sin dato",
+  value: Number(t.cantidad)
+}));
+
+    // =======================
+    // 📊 ESTADISTICAS
+    // =======================
     const estad = {
       presentes_totales: presentes_totales.length,
       presentes_totales_reales: presentes_totales_reales.length,
@@ -5428,8 +5457,14 @@ router.post("/traerestadisticas", async (req, res) => {
       cumple,
     };
 
-console.log(estad, otras)
-    res.json([ estad, otras ]);
+       console.log("OTRAS2:", otras);
+    console.log("OTRAS2:", otras2);
+
+    res.json([
+      estad,
+      otras,
+      otras2,
+    ]);
 
   } catch (error) {
     console.error("ERROR traerestadisticas:", error);
