@@ -5431,7 +5431,7 @@ router.post("/traerestadisticas", async (req, res) => {
 // =======================
 const trabajoSocial = await pool.query(`
   SELECT trabajo, COUNT(*) cantidad 
-  FROM dtc_asistencia_sociales
+  FROM dtc_asistencias_sociales
   GROUP BY trabajo
 `);
 
