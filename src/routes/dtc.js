@@ -5606,18 +5606,29 @@ console.log(id, titulo, detalle, fecha_referencia  )
 
 
 router.post("/modificarasist", async (req, res) => {
-  const { id, titulo, detalle, fecha_referencia  } = req.body
-console.log(id, titulo, detalle, fecha_referencia  )
+  const { id, titulo, detalle, fecha_referencia, trabajo, a_completar } = req.body;
+
   try {
-    await pool.query('update dtc_asistencias_sociales  set titulo=?, detalle=?, fecha_referencia=? where id=?', [titulo, detalle, fecha_referencia, id])
-    res.json('realizado')
+    const campos = [];
+    const valores = [];
+
+    if (titulo !== undefined) { campos.push("titulo=?"); valores.push(titulo); }
+    if (detalle !== undefined) { campos.push("detalle=?"); valores.push(detalle); }
+    if (fecha_referencia !== undefined) { campos.push("fecha_referencia=?"); valores.push(fecha_referencia); }
+    if (trabajo !== undefined) { campos.push("trabajo=?"); valores.push(trabajo); }
+
+    valores.push(id);
+
+    const sql = `UPDATE dtc_asistencias_sociales SET ${campos.join(", ")} WHERE id=?`;
+
+    await pool.query(sql, valores);
+
+    res.json("realizado");
   } catch (error) {
-    console.log(error)
-    res.json('No realizado')
+    console.log(error);
+    res.json("No realizado");
   }
-
-
-})
+});
 router.post('/modificaretapa', async (req, res) => {
   const { id, titulo, fecha, estado, descripcion, fecha_fin,proyectar } = req.body;
 console.log( id, titulo, fecha, estado, descripcion, fecha_fin,proyectar )
