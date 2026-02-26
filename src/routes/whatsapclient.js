@@ -43,7 +43,9 @@ client.on('auth_failure', (message) => {
 });
 
 client.on('disconnected', (reason) => {
-    console.log('⚠️ Cliente desconectado:', reason);
+  console.log('Cliente desconectado:', reason);
+  client.destroy();
+  client.initialize();
 });
 
 // Inicializar cliente
