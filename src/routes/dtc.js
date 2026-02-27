@@ -402,7 +402,63 @@ function convertirFechaTexto(fechaTexto) {
 }
 
 
+////////////INICIO  MAPAS
+router.get('/puntos', async (req, res) => {
+  try {
 
+    const rows = await pool.query(
+      `SELECT 
+          id,
+          titulo,
+          categoria,
+          observaciones,
+          lat,
+          lng,
+          color,
+          icono
+       FROM marketing.dtc_puntos_mapa
+       WHERE estado = 1`
+    );
+
+    res.json(rows);
+
+  } catch (error) {
+    console.error("Error al traer puntos:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+router.post('/crearpuntos', async (req, res) => {
+  try {
+
+    const { titulo, categoria, observaciones, lat, lng } = req.body;
+console.log(titulo, categoria, observaciones, lat, lng)
+    if (!titulo || !categoria || !lat || !lng) {
+      return res.status(400).json({ error: "Faltan datos obligatorios" });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO marketing.dtc_puntos_mapa
+        (titulo, categoria, observaciones, lat, lng)
+       VALUES (?, ?, ?, ?, ?)`,
+      [titulo, categoria, observaciones || null, lat, lng]
+    );
+
+    const nuevoPunto = await pool.query(
+      `SELECT * FROM marketing.puntos_mapa WHERE id = ?`,
+      [result.insertId]
+    );
+
+    res.status(201).json(nuevoPunto[0]);
+
+  } catch (error) {
+    console.error("Error al crear punto:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+
+////////////FIN MAPAS
 router.get('/cargar-excel', async (req, res) => {
 
   rutaImagen = path.join(__dirname, './leer.xlsx');
@@ -1863,7 +1919,7 @@ router.get('/traermapa', (req, res) => {
 
 router.post('/actualizarmapa', async (req, res) => {
   const { updatedKml } = req.body;
-
+console.log("🚀 ~ file: dtc.js:333 ~ router.post ~ updatedKml:", updatedKml)
   if (!updatedKml) {
     return res.status(400).json({ error: 'No se proporcionó contenido para el archivo KML.' });
   }
@@ -4245,23 +4301,33 @@ router.post("/nuevoinformepsiq", upload.single("archivo"), async (req, res) => {
 
 
 router.post("/nuevaintervencion", upload.single("archivo"), async (req, res) => {
-  let { detalle, id_usuario, titulo, id_trabajador, fecha_referencia, usuariodispositivo} = req.body;
+  let { detalle, id_usuario, titulo, id_trabajador, fecha_referencia, usuariodispositivo, trabajo } = req.body;
   let ubicacion = req.file ? path.basename(req.file.path) : "no"; // Asigna "no" si no hay archivo
 
   const fechaActual = new Date();
   const fechaFormateada = fechaActual.toISOString().slice(0, 19).replace('T', ' ');
 
   try {
-    await pool.query(
-      'INSERT INTO dtc_asistencias_sociales (id_usuario, id_trabajador, titulo, detalle, fecha_carga, ubicacion,fecha_referencia,usuariodispositivo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [id_usuario, id_trabajador, titulo, detalle, fechaFormateada, ubicacion, fecha_referencia,usuariodispositivo]
-    );
+    // Construimos los campos y valores de forma dinámica
+    const campos = ['id_usuario', 'id_trabajador', 'titulo', 'detalle', 'fecha_carga', 'ubicacion', 'fecha_referencia', 'usuariodispositivo'];
+    const valores = [id_usuario, id_trabajador, titulo, detalle, fechaFormateada, ubicacion, fecha_referencia, usuariodispositivo];
+
+    if (trabajo !== undefined && trabajo !== "") {
+      campos.push('trabajo');       // agregamos la columna
+      valores.push(trabajo);        // agregamos el valor
+    }
+
+    const sql = `INSERT INTO dtc_asistencias_sociales (${campos.join(', ')}) VALUES (${campos.map(() => '?').join(', ')})`;
+
+    await pool.query(sql, valores);
+
     res.json({ message: "Intervención creada con éxito" });
   } catch (error) {
     console.error('Error al crear la intervención:', error);
     res.status(500).json({ error: 'Error al crear la intervención' });
   }
 });
+
 
 router.post("/nuevacosa", upload.single("archivo"), async (req, res) => {
   // Desestructuración de los datos del cuerpo, asignando valores por defecto si faltan
