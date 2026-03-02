@@ -408,16 +408,18 @@ router.get('/puntos', async (req, res) => {
 
     const rows = await pool.query(
       `SELECT 
-          id,
-          titulo,
-          categoria,
-          observaciones,
-          lat,
-          lng,
-          color,
-          icono
-       FROM marketing.dtc_puntos_mapa
-       WHERE estado = 1`
+          p.id,
+          COALESCE(a.titulo, p.titulo) AS titulo,
+          p.categoria,
+          p.observaciones,
+          p.lat,
+          p.lng,
+          p.color,
+          p.icono
+       FROM marketing.dtc_puntos_mapa p
+       LEFT JOIN marketing.dtc_asistencias_sociales a 
+         ON p.id_asistencia = a.id
+       WHERE p.estado = 1`
     );
 
     res.json(rows);
@@ -427,25 +429,33 @@ router.get('/puntos', async (req, res) => {
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
-
 router.post('/crearpuntos', async (req, res) => {
   try {
 
-    const { titulo, categoria, observaciones, lat, lng } = req.body;
-console.log(titulo, categoria, observaciones, lat, lng)
+    const { titulo, categoria, observaciones, lat, lng, id_asistencia } = req.body;
+
+    console.log(titulo, categoria, observaciones, lat, lng, id_asistencia);
+
     if (!titulo || !categoria || !lat || !lng) {
       return res.status(400).json({ error: "Faltan datos obligatorios" });
     }
 
     const result = await pool.query(
       `INSERT INTO marketing.dtc_puntos_mapa
-        (titulo, categoria, observaciones, lat, lng)
-       VALUES (?, ?, ?, ?, ?)`,
-      [titulo, categoria, observaciones || null, lat, lng]
+        (titulo, categoria, observaciones, lat, lng, id_asistencia)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        titulo,
+        categoria,
+        observaciones || null,
+        lat,
+        lng,
+        id_asistencia || null
+      ]
     );
 
-    const nuevoPunto = await pool.query(
-      `SELECT * FROM marketing.puntos_mapa WHERE id = ?`,
+    const [nuevoPunto] = await pool.query(
+      `SELECT * FROM marketing.dtc_puntos_mapa WHERE id = ?`,
       [result.insertId]
     );
 
