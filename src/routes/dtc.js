@@ -432,29 +432,48 @@ router.get('/puntos', async (req, res) => {
 router.post('/crearpuntos', async (req, res) => {
   try {
 
-    const { titulo, categoria, observaciones, lat, lng, id_asistencia } = req.body;
+    const { 
+      titulo, 
+      categoria, 
+      observaciones, 
+      lat, 
+      lng, 
+      id_asistencia,
+      id_chique 
+    } = req.body;
 
-    console.log(titulo, categoria, observaciones, lat, lng, id_asistencia);
+    console.log(
+      titulo, 
+      categoria, 
+      observaciones, 
+      lat, 
+      lng, 
+      id_asistencia,
+      id_chique
+    );
 
     if (!titulo || !categoria || !lat || !lng) {
-      return res.status(400).json({ error: "Faltan datos obligatorios" });
+      return res.status(400).json({ 
+        error: "Faltan datos obligatorios" 
+      });
     }
 
     const result = await pool.query(
       `INSERT INTO marketing.dtc_puntos_mapa
-        (titulo, categoria, observaciones, lat, lng, id_asistencia)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+        (titulo, categoria, observaciones, lat, lng, id_asistencia, id_chique)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         titulo,
         categoria,
         observaciones || null,
         lat,
         lng,
-        id_asistencia || null
+        id_asistencia || null,
+        id_chique || null
       ]
     );
 
-    const [nuevoPunto] = await pool.query(
+    const nuevoPunto = await pool.query(
       `SELECT * FROM marketing.dtc_puntos_mapa WHERE id = ?`,
       [result.insertId]
     );
@@ -463,6 +482,36 @@ router.post('/crearpuntos', async (req, res) => {
 
   } catch (error) {
     console.error("Error al crear punto:", error);
+    res.status(500).json({ 
+      error: "Error interno del servidor" 
+    });
+  }
+});
+
+
+
+router.delete('/borrarpunto/:id', async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "ID requerido" });
+    }
+
+    const result = await pool.query(
+      `DELETE FROM marketing.dtc_puntos_mapa WHERE id = ?`,
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Punto no encontrado" });
+    }
+
+    res.status(200).json({ message: "Punto eliminado correctamente" });
+
+  } catch (error) {
+    console.error("Error al eliminar punto:", error);
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
