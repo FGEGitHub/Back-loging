@@ -455,7 +455,7 @@ console.log(tiene_tutor);
     });
   }
 });
-router.get("/traersocios", async (req, res) => {
+/* router.get("/traersocios", async (req, res) => {
   try {
     const rows = await pool.query(`
       SELECT 
@@ -489,8 +489,54 @@ router.get("/traersocios", async (req, res) => {
     });
   }
 });
+ */
+router.get("/traersocios", async (req, res) => {
+  try {
 
+    const rows = await pool.query(`
 
+      SELECT 
+        s.*,
+
+        c.id AS cuota_id,
+        c.mes,
+        c.anio,
+        c.fecha,
+        c.medio,
+
+        CASE 
+          WHEN (c.anio, c.mes) = (
+            SELECT c2.anio, c2.mes
+            FROM cuotas c2
+            WHERE c2.id_socio = s.id
+            ORDER BY c2.anio DESC, c2.mes DESC
+            LIMIT 1
+          )
+          THEN true
+          ELSE false
+        END AS es_ultima_cuota
+
+      FROM socios s
+
+      LEFT JOIN cuotas c
+        ON c.id_socio = s.id
+
+      ORDER BY s.apellido ASC, s.nombre ASC, c.anio DESC, c.mes DESC
+
+    `);
+console.log(rows);
+console.log(rows.length)
+    res.json(rows);
+
+  } catch (error) {
+    console.error("Error al traer socios:", error);
+
+    res.status(500).json({
+      ok: false,
+      message: "Error al obtener socios"
+    });
+  }
+});
 
 router.get("/traercuotastodas", async (req, res) => {
   try {
