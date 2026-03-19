@@ -6028,6 +6028,7 @@ router.post("/agregarturnocadia", async (req, res) => {
     dni,
     domicilio,
     barrio,
+    telefonoo, 
     usuariodispositivo,
     agendadopor,
     observaciones,
@@ -6059,6 +6060,8 @@ router.post("/agregarturnocadia", async (req, res) => {
   if (!barrio || barrio.trim() === "") barrio = "No determinado";
   if (!obra_social || obra_social.trim() === "") obra_social = "No"; // por defecto "No"
   if (!obra_social_cual || obra_social_cual.trim() === "") obra_social_cual = "Sin determinar";
+    if (!telefonoo || telefonoo.trim() === "") telefonoo = "Sin determinar";
+
 
   try {
     const horaBuenosAires = moment().tz('America/Argentina/Buenos_Aires').format('HH:mm:ss');
@@ -6068,9 +6071,9 @@ router.post("/agregarturnocadia", async (req, res) => {
     if (nuevoUsuario) {
       const insertResult = await pool.query(
         `INSERT INTO dtc_chicos 
-         (nombre, apellido, dni, domicilio, barrio, observaciones, obra_social, obra_social_cual) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [nombre, apellido, dni, domicilio, barrio, observaciones, obra_social, obra_social_cual]
+         (nombre, apellido, dni, domicilio, barrio, observaciones, obra_social, obra_social_cual, telefono) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [nombre, apellido, dni, domicilio, barrio, observaciones, obra_social, obra_social_cual, telefonoo]
       );
 
       id_persona = Number(insertResult.insertId);
