@@ -6147,12 +6147,19 @@ router.post("/agregarturnocadia", async (req, res) => {
     console.log(mensaje);
 
     // Enviar mensaje por WhatsApp
-    try {
-      await client.sendMessage(telefono, mensaje);
-    } catch (error) {
-      console.log("Error al enviar mensaje:", error);
-    }
+try {
+  if (!client.isReady) {
+    console.log("WhatsApp no listo");
+    return;
+  }
 
+
+
+  await client.sendMessage(telefono, mensaje);
+
+} catch (error) {
+  console.log("Error enviando:", error.message);
+}
     res.json('agendado');
   } catch (error) {
     console.error("Error en /agendarturno:", error);
