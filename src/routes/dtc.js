@@ -24,7 +24,7 @@ import xml2js from "xml2js";
 import cron from "node-cron";
 
 import qrcode from "qrcode-terminal";
-import client from "./whatsapclient.js";
+import { sendWhatsappMessage } from "./whatsapclient.js";
 import puppeteer from "puppeteer-core";
 
 import { fileURLToPath } from "url";
@@ -3086,7 +3086,7 @@ if(turrnoo[0].id_persona != undefined){
 
     console.log(mensaje);
     try {
-      await client.sendMessage(telefono, mensaje);
+      await sendWhatsappMessage(telefono, mensaje);
     } catch (error) {
       console.log(error);
     }
@@ -6148,14 +6148,11 @@ router.post("/agregarturnocadia", async (req, res) => {
 
     // Enviar mensaje por WhatsApp
 try {
-  if (!client.isReady) {
-    console.log("WhatsApp no listo");
-    return;
-  }
+  
 
 
 
-  await client.sendMessage(telefono, mensaje);
+  await sendWhatsappMessage(telefono, mensaje);
 
 } catch (error) {
   console.log("Error enviando:", error.message);
