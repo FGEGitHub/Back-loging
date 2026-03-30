@@ -5,8 +5,9 @@ const { Client, LocalAuth } = pkg;
 
 let client = null;
 let initializing = false;
-let checking = false;
 let restarting = false;
+let checking = false;
+let sending = false;
 
 function createClient() {
   const newClient = new Client({
@@ -49,13 +50,21 @@ function createClient() {
       const state = await newClient.getState();
       console.log("🟢 Estado inicial:", state);
     } catch {}
+
+    try {
+      if (newClient.pupBrowser) {
+        newClient.pupBrowser.on("disconnected", () => {
+          console.log("⚠️ Navegador Puppeteer desconectado");
+          restartClient();
+        });
+      }
+    } catch {}
   });
 
   newClient.on("change_state", (state) => {
     console.log("🔄 Estado:", state);
 
     if (
-      state === "CONFLICT" ||
       state === "UNPAIRED" ||
       state === "UNPAIRED_IDLE" ||
       state === "DISCONNECTED"
@@ -81,12 +90,14 @@ function createClient() {
 
 async function restartClient() {
   if (restarting) return;
-  restarting = true;
 
+  restarting = true;
   console.log("♻️ Reiniciando cliente WhatsApp...");
 
   try {
     if (client) {
+      client.isReady = false;
+
       try {
         client.removeAllListeners();
       } catch {}
@@ -102,20 +113,22 @@ async function restartClient() {
   client = null;
 
   setTimeout(() => {
+    restarting = false;
     startClient();
   }, 5000);
 }
 
 async function startClient() {
   if (initializing) return;
+
   initializing = true;
 
   try {
+    console.log("🚀 Inicializando WhatsApp...");
+
     client = createClient();
 
-    console.log("🚀 Inicializando WhatsApp...");
     await client.initialize();
-
   } catch (err) {
     console.log("❌ Error iniciando WhatsApp:", err.message);
 
@@ -137,15 +150,45 @@ export function isClientReady() {
 
 export async function sendWhatsappMessage(number, message) {
   try {
+    if (sending) {
+      return {
+        ok: false,
+        error: "Hay otro mensaje enviándose"
+      };
+    }
+
+    sending = true;
+
     if (!client || !client.isReady) {
       throw new Error("WhatsApp no listo");
+    }
+
+    const state = await client.getState().catch(() => null);
+
+    if (!state || state !== "CONNECTED") {
+      throw new Error(`WhatsApp no conectado (${state})`);
+    }
+
+    if (!client.pupPage || client.pupPage.isClosed()) {
+      throw new Error("Página de WhatsApp cerrada");
     }
 
     const chatId = number.includes("@c.us")
       ? number
       : `${number}@c.us`;
 
-    const result = await client.sendMessage(chatId, message);
+    console.log(`📨 Enviando mensaje a ${chatId}`);
+
+    const result = await Promise.race([
+      client.sendMessage(chatId, message),
+      new Promise((_, reject) =>
+        setTimeout(() => {
+          reject(new Error("Timeout enviando mensaje"));
+        }, 30000)
+      )
+    ]);
+
+    console.log("✅ Mensaje enviado");
 
     return {
       ok: true,
@@ -157,7 +200,9 @@ export async function sendWhatsappMessage(number, message) {
     if (
       err.message.includes("detached Frame") ||
       err.message.includes("Session closed") ||
-      err.message.includes("Execution context was destroyed")
+      err.message.includes("Execution context was destroyed") ||
+      err.message.includes("Target closed") ||
+      err.message.includes("Página de WhatsApp cerrada")
     ) {
       restartClient();
     }
@@ -166,29 +211,34 @@ export async function sendWhatsappMessage(number, message) {
       ok: false,
       error: err.message
     };
+  } finally {
+    sending = false;
   }
 }
 
 setInterval(async () => {
   if (checking) return;
+
   checking = true;
 
   try {
-    if (!client || !client.isReady) {
-      checking = false;
-      return;
-    }
+    if (!client || !client.isReady) return;
 
-    const state = await client.getState();
+    const state = await client.getState().catch(() => null);
 
     console.log("🟢 WhatsApp activo:", state);
 
     if (
-      state === "CONFLICT" ||
+      !state ||
       state === "UNPAIRED" ||
       state === "UNPAIRED_IDLE" ||
       state === "DISCONNECTED"
     ) {
+      restartClient();
+    }
+
+    if (!client.pupPage || client.pupPage.isClosed()) {
+      console.log("⚠️ Página cerrada");
       restartClient();
     }
   } catch (err) {
@@ -197,7 +247,8 @@ setInterval(async () => {
     if (
       err.message.includes("detached Frame") ||
       err.message.includes("Session closed") ||
-      err.message.includes("Execution context was destroyed")
+      err.message.includes("Execution context was destroyed") ||
+      err.message.includes("Target closed")
     ) {
       restartClient();
     }
