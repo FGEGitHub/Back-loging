@@ -15,7 +15,7 @@ import path from "path";
 import passport from "passport";
 import puppeteer from "puppeteer";
 
-import client from "./whatsapclient.js";
+//import client from "./whatsapclient.js";
 
 // 👉 reemplazo de __dirname en ESM
 import { fileURLToPath } from "url";
@@ -3516,7 +3516,7 @@ router.post("/volverapaso3", async (req, res) => {
       `${resultadoReasignacion}.\n` +
       `Por favor, si está en el grupo, sacalo.\nMuchas gracias por tu colaboración.`;
 console.log("Mensaje a enviar:", mensaje);
-  await client.sendMessage(numeroFormateado, mensaje);
+  //await client.sendMessage(numeroFormateado, mensaje);
 
     res.json({ mensaje: "Realizado", resultadoReasignacion });
 
@@ -3727,7 +3727,7 @@ router.post("/asignarmesaafiscal", async (req, res) => {
 numerodemesa = await pool.query('select * from mesas_fiscales where id = ?', [mesa]);
 const personasa = await pool.query('select * from personas_fiscalizacion where dni = ?', [dni]);
             const mensaje = 'Hola! Te informamos que tienes un fiscal nuevo \n'+personasa[0]['nombre']+' '+personasa[0]['apellido'][0]+'.. asignado para la escuela ' + escc[0].nombre + ' con el numero de mesa ' + numerodemesa[0].numero + '. \n Por favor, contacta al fiscal para coordinar detalles. \n Muchas gracias por tu colaboración.';
-         await client.sendMessage(numeroFormateado, mensaje);
+       //  await client.sendMessage(numeroFormateado, mensaje);
            console.log('mensaje enviado')
         } catch (error) {
            console.log(error);

@@ -19,7 +19,7 @@ import {
   OPENAI_API_KEY
 } from "../keys.js";
 
-import client from "./whatsapclient.js";
+//import client from "./whatsapclient.js";
 
 import * as cheerio from "cheerio";
 
