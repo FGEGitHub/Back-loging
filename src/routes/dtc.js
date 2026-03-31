@@ -2378,7 +2378,7 @@ router.get('/cumpleanosdia/:fecha', async (req, res) => {
 
   
   
-
+/* 
   router.get('/obtenerinfodecursostodos', async (req, res) => {
     const dias = ["lunes", "martes", "miércoles", "jueves", "viernes"];
     const dias307 = ["martes", "jueves", "viernes"];
@@ -2456,7 +2456,9 @@ router.get('/cumpleanosdia/:fecha', async (req, res) => {
       res.status(500).json({ error: "Error al obtener los datos de la base de datos" });
     }
   });
-  
+   */
+
+
   
   router.get('/informaciondeinscriptos', async (req, res) => {
     try {
@@ -2577,7 +2579,131 @@ router.get('/obtenerinfodecursostodos', async (req, res) => {
 
 */ 
 
+router.get('/obtenerinfodecursostodos', async (req, res) => {
+  try {
+    // Cursos habilitados
+    const idsCursos = [266, 240, 304, 306, 265, 307, 308, 309];
 
+    // Obtener los datos base de los cursos
+    const cursos = await pool.query(
+      `SELECT id AS id_curso, mail AS nombre_curso, materia
+       FROM usuarios
+       WHERE id IN (?)`,
+      [idsCursos]
+    );
+
+    // Obtener directamente los horarios configurados en dtc_cursos
+    const horariosCursos = await pool.query(
+      `SELECT 
+          id_tallerista AS id_curso,
+          LOWER(dia) AS dia,
+          horario AS hora,
+          detalle
+       FROM dtc_cursos
+       WHERE id_tallerista IN (?)`,
+      [idsCursos]
+    );
+
+    // Crear todas las combinaciones existentes según dtc_cursos
+    const combinaciones = horariosCursos.map(horario => {
+      const curso = cursos.find(c => Number(c.id_curso) === Number(horario.id_curso));
+
+      return {
+        id_curso: horario.id_curso,
+        nombre_curso: curso ? curso.nombre_curso : null,
+        dia: horario.dia,
+        hora: horario.hora,
+        cantidad_kids: 0,
+        nombres_kids: null,
+        materia: curso ? curso.materia : null,
+        detalle: horario.detalle
+      };
+    });
+
+    // Obtener los chicos anotados
+    const chiques = await pool.query(
+      `SELECT 
+          LOWER(c.dia) AS dia,
+          c.hora,
+          COUNT(sel.kid) AS cantidad_kids,
+          GROUP_CONCAT(
+            CONCAT(sel.kid, ' - ', sel.nombre, ' ', sel.apellido)
+            SEPARATOR ', '
+          ) AS nombres_kids,
+          u.mail AS nombre_curso,
+          u.id AS id_curso,
+          u.materia
+       FROM dtc_cursado AS c
+       JOIN (
+          SELECT kid, nombre, apellido, id AS idc
+          FROM dtc_chicos
+       ) AS sel
+         ON c.id_chico = sel.idc
+       JOIN usuarios AS u
+         ON c.id_curso = u.id
+       WHERE u.id IN (?)
+       GROUP BY LOWER(c.dia), c.hora, u.id, u.mail, u.materia`,
+      [idsCursos]
+    );
+
+    // Armar mapa para cruzar datos
+    const datosReales = new Map(
+      chiques.map(row => [
+        `${row.id_curso}-${row.dia}-${row.hora}`,
+        row
+      ])
+    );
+
+    // Mezclar horarios existentes con cantidad real de chicos
+    const resultados = combinaciones.map(combinacion => {
+      const key = `${combinacion.id_curso}-${combinacion.dia}-${combinacion.hora}`;
+      const datoReal = datosReales.get(key);
+
+      return {
+        id_curso: combinacion.id_curso,
+        nombre_curso: combinacion.nombre_curso,
+        dia: combinacion.dia,
+        hora: combinacion.hora,
+        detalle: combinacion.detalle,
+        cantidad_kids: datoReal ? Number(datoReal.cantidad_kids) : 0,
+        nombres_kids: datoReal ? datoReal.nombres_kids : null,
+        materia: combinacion.materia
+      };
+    });
+
+    // Orden opcional por curso, día y hora
+    const ordenDias = {
+      lunes: 1,
+      martes: 2,
+      miércoles: 3,
+      miercoles: 3,
+      jueves: 4,
+      viernes: 5
+    };
+
+    resultados.sort((a, b) => {
+      if (a.id_curso !== b.id_curso) {
+        return a.id_curso - b.id_curso;
+      }
+
+      const diaA = ordenDias[a.dia] || 99;
+      const diaB = ordenDias[b.dia] || 99;
+
+      if (diaA !== diaB) {
+        return diaA - diaB;
+      }
+
+      return a.hora.localeCompare(b.hora);
+    });
+console.log(resultados);
+    res.json(resultados);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: 'Error al obtener los datos de la base de datos'
+    });
+  }
+});
 
 router.get('/datosdechique/:id', async (req, res) => {
   const id = req.params.id
@@ -7091,82 +7217,102 @@ router.post("/borrarlegajo", async (req, res) => {
 })
 
 ////cron.schedule('0 9 * * 1-5'
- cron.schedule('1 00 * * 1-5', async () => {
-  console.log('El sistema esta creando los cursos automaticamente');
+cron.schedule('1 01 * * 1-5', async () => {
+  console.log('El sistema está creando los cursos automáticamente');
 
-  async function obtenerDiaDeLaSemana() {
-    try {
-      // Obtener la fecha actual en formato YYYY-MM-DD
-      const fecha = new Date();
-      const fechaa = fecha.toISOString().split("T")[0]; // Formato 2025-02-03
-  
-      console.log("Fecha actual:", fechaa);
-  
-      // Obtener el número del día de la semana (0 = Domingo, ..., 6 = Sábado)
-      const dia = fecha.getDay();
-  
-      // Array de días de la semana
-      const diasSemana = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
-  
-      console.log("Hoy es:", diasSemana[dia]);
-  
-      // Lista de IDs de cursos
-      const id_curso = [240, 265, 304, 306, 307, 308, 309,266];
-  
-      // Recorrer los cursos usando for...of para usar await correctamente
-      for (const idcurso of id_curso) {
-        let horarios = [];
-  
-        if (idcurso === 307) {
-          // Si es curso 307, solo martes (2), jueves (4) y viernes (5)
-          if (dia >= 1 && dia <= 5) {
-            horarios = ["14:00", "15:00", "16:00"];
-          }
-        } else if (idcurso === 304) {
-          // Si es curso 304, usar horarios específicos
-          if (dia >= 1 && dia <= 5) {
-            horarios = ["14:00", "15:00", "16:00"];
-          }
-        } else if (idcurso === 309) {
-          // Si es curso 309, solo un horario a las 17:00
-          if (dia >= 1 && dia <= 5) {
-            horarios = ["17:00"];
-          }
-        }else if (idcurso === 312) {
-          // Si es curso 309, solo un horario a las 14:00
-          if (dia >= 1 && dia <= 5) {
-            horarios = ["14:00"];
-          }
-        } else {
-          // Para los demás cursos, de lunes a viernes (1-5)
-          if (dia >= 1 && dia <= 5) {
-            horarios = ["14:00", "15:00", "16:00"];
-          }
-        }
-  
-        // Insertar horarios en la base de datos
-        if (horarios.length > 0) {
-          await Promise.all(
-            horarios.map((hora) =>
-              pool.query(
-                "INSERT INTO dtc_clases_taller (fecha, id_tallerista, titulo, dia, hora) VALUES (?, ?, ?, ?, ?)",
-                [fechaa, idcurso, "Clase del día " + diasSemana[dia], diasSemana[dia], hora]
+  try {
+    const fecha = new Date();
+    const fechaHoy = fecha.toISOString().split('T')[0];
+
+    const diasSemana = [
+      'domingo',
+      'lunes',
+      'martes',
+      'miercoles',
+      'jueves',
+      'viernes',
+      'sabado'
+    ];
+
+    const diaActual = diasSemana[fecha.getDay()];
+
+    console.log('Fecha actual:', fechaHoy);
+    console.log('Hoy es:', diaActual);
+
+    // Buscar directamente los cursos configurados para el día actual
+    const cursosDelDia = await pool.query(
+      `
+      SELECT 
+        id_tallerista,
+        detalle,
+        horario,
+        LOWER(
+          REPLACE(
+            REPLACE(dia, 'á', 'a'),
+            'é', 'e'
+          )
+        ) AS dia
+      FROM dtc_cursos
+      WHERE LOWER(
+              REPLACE(
+                REPLACE(dia, 'á', 'a'),
+                'é', 'e'
               )
-            )
-          );
-          console.log(`Horarios insertados para id_curso ${idcurso}:`, horarios);
-        }
-      }
-    } catch (error) {
-      console.error("Error al insertar horarios:", error);
+            ) = ?
+      ORDER BY id_tallerista, horario
+      `,
+      [diaActual]
+    );
+
+    if (cursosDelDia.length === 0) {
+      console.log('No hay cursos configurados para hoy');
+      return;
     }
+
+    for (const curso of cursosDelDia) {
+      // Evitar duplicados por si el cron vuelve a ejecutarse
+      const existe = await pool.query(
+        `
+        SELECT id
+        FROM dtc_clases_taller
+        WHERE fecha = ?
+          AND id_tallerista = ?
+          AND hora = ?
+          AND dia = ?
+        LIMIT 1
+        `,
+        [fechaHoy, curso.id_tallerista, curso.horario, diaActual]
+      );
+
+      if (existe.length > 0) {
+        console.log(
+          `Ya existe la clase de ${curso.detalle} - ${curso.id_tallerista} - ${curso.horario}`
+        );
+        continue;
+      }
+
+      await pool.query(
+        `
+        INSERT INTO dtc_clases_taller
+          (fecha, id_tallerista, titulo, dia, hora)
+        VALUES (?, ?, ?, ?, ?)
+        `,
+        [
+          fechaHoy,
+          curso.id_tallerista,
+          `${curso.detalle} - Clase del día ${diaActual}`,
+          diaActual,
+          curso.horario
+        ]
+      );
+
+      console.log(
+        `Clase creada: ${curso.detalle} | Tallerista ${curso.id_tallerista} | ${diaActual} ${curso.horario}`
+      );
+    }
+  } catch (error) {
+    console.error('Error al crear las clases automáticas:', error);
   }
-  
-  
-  
-  
-  // Llamar a la función
- obtenerDiaDeLaSemana();
 });
  
 
