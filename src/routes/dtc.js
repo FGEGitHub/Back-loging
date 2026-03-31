@@ -5021,7 +5021,7 @@ router.post("/traerdatosdeclasehorausuario/", async (req, res) => {
     const dia = diasSemana[new Date().getDay()];
 
     console.log("Fecha actual:", fecha, "Día:", dia);
-
+let imagenBase64 = null
     // Buscar si la clase ya existe
     const result = await pool.query(
       "SELECT * FROM marketing.dtc_clases_taller WHERE dia = ? AND hora = ? AND id_tallerista = ? AND fecha = ?",
