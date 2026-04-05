@@ -1735,7 +1735,7 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
     const chiques = await pool.query(`
       SELECT 
         id, nombre, apellido, fecha_nacimiento, observaciones, primer_contacto,
-        primer_ingreso, admision, dni, domicilio, telefono, autorizacion_imagen,
+         admision, dni, domicilio, telefono, autorizacion_imagen,
         fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso,
         aut_retirar, dato_escolar, kid, obra_social, obra_social_cual,
         escuela, grado, fines, hora_merienda, hijos, sexo, psico
@@ -3123,7 +3123,7 @@ router.post("/modificarusuario", async (req, res) => {
            fecha_nacimiento=?, 
            observaciones=?, 
            primer_contacto=?, 
-           primer_ingreso=?, 
+        
            admision=?, 
            dni=?, 
            domicilio=?, 
@@ -3153,7 +3153,7 @@ router.post("/modificarusuario", async (req, res) => {
         fecha_nacimiento,
         observaciones,
         primer_contacto,
-        primer_ingreso,
+      
         admision,
         dni,
         domicilio,
@@ -3836,152 +3836,107 @@ router.post("/nuevochiquecadia", async (req, res) => {
 
 })
 
-
 router.post("/nuevochique", async (req, res) => {
-  let {
-    nombre,
-    apellido,
-    fecha_nacimiento,
-    kid,
-    observaciones,
-    talle,
-    primer_contacto,
-    primer_ingreso,
-    admision,
-    dni,
-    domicilio,
-    telefono,
-    autorizacion_imagen,
-    fotoc_dni,
-    fotoc_responsable,
-    tel_responsable,
-    visita_social,
-    egreso,
-    aut_retirar,
-    dato_escolar,
-    hora_merienda,
-    escuela,
-    grado,
-    fines,
-    obra_social,
-    obra_social_cual,
-    sexo,
-  tiene_hijos,
-  cantidad_hijos
-  } = req.body;
-
   try {
-    let hijos;
-    // Valores por defecto
-    if (!observaciones) observaciones = "Sin observaciones";
-    if (!fecha_nacimiento) fecha_nacimiento = "Sin asignar";
-    if (!talle) talle = "Sin asignar";
-    if (!obra_social) obra_social = "Sin asignar";
-    if (!obra_social_cual) obra_social_cual = "Sin asignar";
-   
+    let data = req.body;
 
-if (!tiene_hijos || !cantidad_hijos) {
-  hijos = "No";
-} else {
-  hijos = cantidad_hijos;
-}
- if (!hijos) hijos = "No";
-    // Si el DNI está sin determinar
-    if (dni === "Sin determinar") {
-      await pool.query(
-  `INSERT INTO dtc_chicos 
-  (nombre, apellido, fecha_nacimiento, observaciones, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, 
-  autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, 
-  hora_merienda, escuela, grado, fines, kid, talle, obra_social, obra_social_cual, sexo, hijos)
-  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-  [
-    nombre,
-    apellido,
-    fecha_nacimiento,
-    observaciones,
-    primer_contacto,
-    primer_ingreso,
-    admision,
-    dni,
-    domicilio,
-    telefono,
-    autorizacion_imagen,
-    fotoc_dni,
-    fotoc_responsable,
-    tel_responsable,
-    visita_social,
-    egreso,
-    aut_retirar,
-    dato_escolar,
-    hora_merienda,
-    escuela,
-    grado,
-    fines,
-    kid,
-    talle,
-    obra_social,
-    obra_social_cual,
-    sexo,
-    hijos
-  ]
-);
+    // 🟡 Normalización básica
+    const dni = data.dni || "Sin determinar";
 
-      res.json("Agregado");
-    } else {
-      // Si ya existe el DNI, no se agrega
-      const yahay = await pool.query("SELECT * FROM dtc_chicos WHERE dni = ?", [
-        dni,
-      ]);
+    // 🟡 Verificar DNI (solo si no es "Sin determinar")
+    if (dni !== "Sin determinar") {
+      const existe = await pool.query(
+        "SELECT dni FROM dtc_chicos WHERE dni = ?",
+        [dni]
+      );
 
-      if (yahay.length > 0) {
-        res.json("Error, DNI ya registrado");
-      } else {
-       await pool.query(
-  `INSERT INTO dtc_chicos 
-  (nombre, apellido, fecha_nacimiento, observaciones, primer_contacto, primer_ingreso, admision, dni, domicilio, telefono, 
-  autorizacion_imagen, fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso, aut_retirar, dato_escolar, 
-  hora_merienda, escuela, grado, fines, talle, obra_social, obra_social_cual, sexo, hijos)
-  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-  [
-    nombre,
-    apellido,
-    fecha_nacimiento,
-    observaciones,
-    primer_contacto,
-    primer_ingreso,
-    admision,
-    dni,
-    domicilio,
-    telefono,
-    autorizacion_imagen,
-    fotoc_dni,
-    fotoc_responsable,
-    tel_responsable,
-    visita_social,
-    egreso,
-    aut_retirar,
-    dato_escolar,
-    hora_merienda,
-    escuela,
-    grado,
-    fines,
-    talle,
-    obra_social,
-    obra_social_cual,
-    sexo,
-    hijos
-  ]
-);
-
-        res.json("Agregado");
+      if (existe.length > 0) {
+        return res.json("Error, DNI ya registrado");
       }
     }
+
+    // 🟡 Valores por defecto
+    const valores = {
+      nombre: data.nombre || "",
+      apellido: data.apellido || "",
+      fecha_nacimiento: data.fecha_nacimiento || "Sin asignar",
+      dni,
+      sexo: data.sexo || "",
+      estadocivil: data.estadocivil || "",
+      telefono: data.telefono || "",
+      tel_responsable: data.tel_responsable || "",
+      domicilio: data.domicilio || "",
+      pais: data.país || "", // ⚠️ importante sin tilde en DB
+      provincia: data.provincia || "",
+      situacion_habitacional: data.situacion_habitacional || "",
+      barrio: data.barrio || "",
+      primer_contacto: data.primer_contacto || "",
+      admision: data.admision || "",
+asiste_institucion: data.asiste_institucion || "",
+      presentacion_dispositivo: data.presentacion_dispositivo || "",
+      modo_acceso: data.modo_acceso || "",
+      derivado_institucion: data.derivado_institucion || "",
+      cual_institucion: data.cual_institucion || "",
+      se_articulo: data.se_articulo || "",
+      motivo_consulta: data.motivo_consulta || "",
+asistencia_colegio: data.asistencia_colegio || "",
+busca_trabajo: data.busca_trabajo || "",
+      hijos: data.tiene_hijos
+        ? data.cantidad_hijos || "No especifica"
+        : "No",
+
+      con_quien_vive: data.con_quien_vive || "",
+beneficiario: data.beneficiario || "",
+      sabe_leer: data.sabe_leer || "",
+      nivel_educativo: data.nivel_educativo || "",
+      completo_nivel: data.completo_nivel || "",
+busca_trabajo: data.busca_trabajo || "",
+      situacion_laboral: data.situacion_laboral || "",
+      modalidad_trabajo: data.modalidad_trabajo || "",
+
+      obra_social: data.obra_social || "Sin asignar",
+      obra_social_cual: data.obra_social_cual || "Sin asignar",
+
+      autorizacion_imagen: data.autorizacion_imagen || "",
+      fotoc_dni: data.fotoc_dni || "",
+      fotoc_responsable: data.fotoc_responsable || "",
+      visita_social: data.visita_social || "",
+
+      egreso: data.egreso || "",
+      egresoconquien: data.egresoconquien || "",
+
+      responsableinscripcion: data.responsableinscripcion || "",
+      aut_retirar: data.aut_retirar || "",
+tratamiento_cud: data.tratamiento_cud || "",
+      hora_merienda: data.hora_merienda || "",
+      escuela: data.escuela || "",
+      grado: data.grado || "",
+      fines: data.fines || "",
+      discapacidad: data.discapacidad || "",
+      cud: data.cud || "",
+       discapacidad_otro: data.discapacidad_otro || "",
+
+      observaciones: data.observaciones || "Sin observaciones"
+    };
+
+    // 🟢 INSERT dinámico compatible con MySQL
+    const keys = Object.keys(valores);
+    const values = Object.values(valores);
+    const placeholders = keys.map(() => "?").join(", ");
+
+    const sql = `
+      INSERT INTO dtc_chicos (${keys.join(", ")})
+      VALUES (${placeholders})
+    `;
+
+    await pool.query(sql, values);
+
+    res.json("Agregado");
   } catch (error) {
     console.error(error);
     res.json("No agregado");
   }
 });
-
 
 
 router.post("/nuevaclaseprof", async (req, res) => {
