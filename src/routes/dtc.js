@@ -792,6 +792,27 @@ router.get('/eliminartodosloshorariosdeusuario/:id', async (req, res) => {
 
 })
 
+router.post('/eliminarhorariocursado', async (req, res) => {
+ try {
+    const { id } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ error: "Falta el parámetro 'id'" });
+    }
+
+    // Primero borramos los PDFs asociados
+    await pool.query("DELETE FROM dtc_cursado WHERE id = ?", [id]);
+
+
+
+    res.json( "Eliminado correctamente" );
+  } catch (error) {
+    console.error("Error al borrar oficio:", error);
+    res.status(500).json({ error: "Error interno al borrar el oficio" });
+  }
+
+})
+
 
 router.get('/verusosdeproducto/:id', async (req, res) => {
   let id = req.params.id;
@@ -979,7 +1000,7 @@ console.log("detalle recibido:", detalle);
 
 
 
-router.delete('/eliminarHorario/:id', async (req, res) => {
+router.delete('/eliminarHorarioo/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
