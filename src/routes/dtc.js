@@ -1000,11 +1000,8 @@ console.log("detalle recibido:", detalle);
 
 router.post("/ponerhorarios/:id", async (req, res) => {
   const { id } = req.params;
-  console.log("ID recibido en PUT:");
   const { detalle, dia, horario } = req.body;
-console.log("Detalle recibido en PUT:", detalle);
-console.log("Día recibido en PUT:", dia);
-console.log("Horario recibido en PUT:", horario);   
+
   try {
     await pool.query(
       "UPDATE dtc_cursos SET detalle = ?, dia = ?, horario = ? WHERE id = ?",
@@ -4121,6 +4118,8 @@ asiste_institucion: data.asiste_institucion || "",
       se_articulo: data.se_articulo || "",
       motivo_consulta: data.motivo_consulta || "",
 asistencia_colegio: data.asistencia_colegio || "",
+responsable_inscripcion: data.responsableinscripcion || "",
+presenta_violencia: data.presenta_violencia || "",
 busca_trabajo: data.busca_trabajo || "",
       hijos: data.tiene_hijos
         ? data.cantidad_hijos || "No especifica"
@@ -4145,7 +4144,8 @@ busca_trabajo: data.busca_trabajo || "",
 
       egreso: data.egreso || "",
       egresoconquien: data.egresoconquien || "",
-
+tipo_violencia: data.tipo_violencia || "",
+modalidad_violencia: data.modalidad_violencia || "",
       responsableinscripcion: data.responsableinscripcion || "",
       aut_retirar: data.aut_retirar || "",
 tratamiento_cud: data.tratamiento_cud || "",
