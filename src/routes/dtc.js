@@ -2582,7 +2582,7 @@ router.get('/obtenerinfodecursostodos', async (req, res) => {
 router.get('/obtenerinfodecursostodos', async (req, res) => {
   try {
     // Cursos habilitados
-    const idsCursos = [266, 240, 304, 306, 265, 307, 308, 309];
+    const idsCursos = [266, 240, 304, 306, 265, 307, 308, 309,326];
 
     // Obtener los datos base de los cursos
     const cursos = await pool.query(
@@ -3068,23 +3068,61 @@ router.post("/modificarusuariopsiq", async (req, res) => {
 });
 router.post("/modificarusuario", async (req, res) => {
   let {
-    talle,
     id,
     nombre,
     apellido,
-    kid,
+    dni,
+    sexo,
     fecha_nacimiento,
-    observaciones,
+    estadocivil,
+    pais,
+    provincia,
+    situacion_habitacional,
+
+    telefono,
+    tel_responsable,
+    domicilio,
+    barrio,
+
     primer_contacto,
+    presentacion_dispositivo,
+    modo_acceso,
+    cual_institucion,
+    se_articulo,
+    motivo_consulta,
+
+    hijos,
+    
+    con_quien_vive,
+
+    sabe_leer,
+    asistencia_colegio,
+    nivel_educativo,
+    completo_nivel,
+    asiste_institucion,
+
+    situacion_laboral,
+    modalidad_trabajo,
+    busca_trabajo,
+    beneficiario,
+
+    obra_social,
+    obra_social_cual,
+
+    discapacidad,
+    discapacidad_otro,
+    cud,
+    tratamiento_cud,
+
+    // LOS QUE YA TENÍAS
+    talle,
+    kid,
+    observaciones,
     primer_ingreso,
     admision,
-    dni,
-    domicilio,
-    telefono,
     autorizacion_imagen,
     fotoc_dni,
     fotoc_responsable,
-    tel_responsable,
     visita_social,
     egreso,
     aut_retirar,
@@ -3092,18 +3130,14 @@ router.post("/modificarusuario", async (req, res) => {
     hora_merienda,
     escuela,
     grado,
-    fines,
-    obra_social,
-    obra_social_cual,
-    sexo,
-    hijos
+    fines
   } = req.body;
 
   console.log("Modificando usuario ID:", id);
 
   try {
 
-    // 🔹 Valores por defecto
+    // 🔹 Defaults
     if (!observaciones) observaciones = "Sin observaciones";
     if (!fecha_nacimiento) fecha_nacimiento = "Sin asignar";
     if (!talle) talle = "Sin asignar";
@@ -3112,70 +3146,147 @@ router.post("/modificarusuario", async (req, res) => {
     if (!sexo) sexo = "Sin determinar";
 
     // 🔹 Normalizar hijos
-    if (!hijos || hijos === "" || hijos === "0") {
-      hijos = "No";
+    if (!hijos || hijos === "" || hijos === "0") hijos = "No";
+
+    // 🔹 Arrays a string (IMPORTANTE 🔥)
+    if (Array.isArray(motivo_consulta)) {
+      motivo_consulta = motivo_consulta.join(",");
+    }
+    if (Array.isArray(beneficiario)) {
+      beneficiario = beneficiario.join(",");
+    }
+    if (Array.isArray(discapacidad)) {
+      discapacidad = discapacidad.join(",");
     }
 
     await pool.query(
-      `UPDATE dtc_chicos 
-       SET nombre=?, 
-           apellido=?, 
-           fecha_nacimiento=?, 
-           observaciones=?, 
-           primer_contacto=?, 
+      `UPDATE dtc_chicos SET
+        nombre=?,
+        apellido=?,
+        dni=?,
+        sexo=?,
+        fecha_nacimiento=?,
+        estadocivil=?,
+        pais=?,
+        provincia=?,
+        situacion_habitacional=?,
+
+        telefono=?,
+        tel_responsable=?,
+        domicilio=?,
+        barrio=?,
+
+        primer_contacto=?,
+        presentacion_dispositivo=?,
+        modo_acceso=?,
+        cual_institucion=?,
+        se_articulo=?,
+        motivo_consulta=?,
+
+        hijos=?,
         
-           admision=?, 
-           dni=?, 
-           domicilio=?, 
-           telefono=?, 
-           autorizacion_imagen=?, 
-           fotoc_dni=?, 
-           fotoc_responsable=?, 
-           tel_responsable=?, 
-           visita_social=?, 
-           egreso=?, 
-           aut_retirar=?, 
-           dato_escolar=?, 
-           hora_merienda=?, 
-           kid=?, 
-           escuela=?, 
-           grado=?, 
-           fines=?, 
-           talle=?, 
-           obra_social=?, 
-           obra_social_cual=?,
-           sexo=?,
-           hijos=?
+        con_quien_vive=?,
+
+        sabe_leer=?,
+        asistencia_colegio=?,
+        nivel_educativo=?,
+        completo_nivel=?,
+        asiste_institucion=?,
+
+        situacion_laboral=?,
+        modalidad_trabajo=?,
+        busca_trabajo=?,
+        beneficiario=?,
+
+        obra_social=?,
+        obra_social_cual=?,
+
+        discapacidad=?,
+        discapacidad_otro=?,
+        cud=?,
+        tratamiento_cud=?,
+
+        
+        kid=?,
+        observaciones=?,
+        primer_ingreso=?,
+        admision=?,
+        autorizacion_imagen=?,
+        fotoc_dni=?,
+        fotoc_responsable=?,
+        visita_social=?,
+        egreso=?,
+        aut_retirar=?,
+        dato_escolar=?,
+       
+        escuela=?,
+        grado=?,
+        fines=?
+
        WHERE id=?`,
       [
         nombre,
         apellido,
-        fecha_nacimiento,
-        observaciones,
-        primer_contacto,
-      
-        admision,
         dni,
-        domicilio,
+        sexo,
+        fecha_nacimiento,
+        estadocivil,
+        pais,
+        provincia,
+        situacion_habitacional,
+
         telefono,
+        tel_responsable,
+        domicilio,
+        barrio,
+
+        primer_contacto,
+        presentacion_dispositivo,
+        modo_acceso,
+        cual_institucion,
+        se_articulo,
+        motivo_consulta,
+
+        hijos,
+        
+        con_quien_vive,
+
+        sabe_leer,
+        asistencia_colegio,
+        nivel_educativo,
+        completo_nivel,
+        asiste_institucion,
+
+        situacion_laboral,
+        modalidad_trabajo,
+        busca_trabajo,
+        beneficiario,
+
+        obra_social,
+        obra_social_cual,
+
+        discapacidad,
+        discapacidad_otro,
+        cud,
+        tratamiento_cud,
+
+     
+        kid,
+        observaciones,
+        primer_ingreso,
+        admision,
         autorizacion_imagen,
         fotoc_dni,
         fotoc_responsable,
-        tel_responsable,
         visita_social,
         egreso,
         aut_retirar,
         dato_escolar,
-        hora_merienda,
-        kid,
+       
         escuela,
-        grado, 
+        grado,
         fines,
-        talle,
-        obra_social,
-        obra_social_cual,
-        sexo,
-        hijos,
+
         id
       ]
     );
@@ -3184,7 +3295,7 @@ router.post("/modificarusuario", async (req, res) => {
 
   } catch (error) {
     console.log(error);
-    res.json("No modificado");
+    res.status(500).json("No modificado");
   }
 });
    
