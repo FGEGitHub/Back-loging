@@ -910,6 +910,97 @@ router.get('/traerclasestallercadia/:id', async (req, res) => {
 })
 
 
+
+
+
+router.get('/traerhorairoastalleres/:id', async (req, res) => {
+  let id = req.params.id;
+  try {
+    const clas = await pool.query(
+      'SELECT * FROM dtc_cursos WHERE id_tallerista=? ORDER BY id DESC',
+      [id]
+    );
+    res.json(clas);
+ } catch (error) {
+    console.log(error);
+ }
+    })
+
+
+   router.post('/horarios', async (req, res) => {
+  try {
+    const { id_tallerista, dia, horario, detalle } = req.body;
+
+    if (!id_tallerista || !dia || !horario) {
+      return res.status(400).json({ error: 'Faltan datos' });
+    }
+
+    // 🔒 Validar duplicado
+    const existe = await pool.query(
+      `SELECT * FROM dtc_cursos 
+       WHERE id_tallerista = ? AND dia = ? AND horario = ?`,
+      [id_tallerista, dia, horario]
+    );
+
+    if (existe.length > 0) {
+      return res.status(400).json({ error: 'El horario ya existe' });
+    }
+console.log("detalle recibido:", detalle);
+    let detalleFinal = detalle;
+
+    // 👉 Si NO viene detalle, lo buscamos
+    if (!detalleFinal || detalleFinal.trim() === "") {
+      const usuario = await pool.query(
+        `SELECT nombre FROM usuarios WHERE id = ?`,
+        [id_tallerista]
+      );
+
+      if (usuario.length > 0) {
+        detalleFinal = usuario[0].usuario || "Sin nombre";
+      } else {
+        detalleFinal = "Sin nombre";
+      }
+    }
+
+    // ✅ Insertar con detalle
+    await pool.query(
+      `INSERT INTO dtc_cursos (id_tallerista, dia, horario, detalle)
+       VALUES (?, ?, ?, ?)`,
+      [id_tallerista, dia, horario, detalleFinal]
+    );
+
+    res.json({ message: 'Horario agregado correctamente' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
+
+
+router.delete('/eliminarHorario/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `DELETE FROM dtc_cursos WHERE id = ?`,
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Horario no encontrado' });
+    }
+
+    res.json({ message: 'Horario eliminado correctamente' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
+
 router.get('/traerclasestaller/:id', async (req, res) => {
   let id = req.params.id;
   try {
