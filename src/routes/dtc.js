@@ -2673,7 +2673,7 @@ router.get('/obtenerinfodecursostodos', async (req, res) => {
 router.get('/obtenerinfodecursostodos', async (req, res) => {
   try {
     // Cursos habilitados
-    const idsCursos = [266, 240, 304, 306, 265, 307, 308, 309,326];
+    const idsCursos = [266, 240, 304, 306, 265, 307, 308, 309,326,244,246];
 
     // Obtener los datos base de los cursos
     const cursos = await pool.query(
