@@ -998,7 +998,25 @@ console.log("detalle recibido:", detalle);
   }
 });
 
+router.post("/ponerhorarios/:id", async (req, res) => {
+  const { id } = req.params;
+  console.log("ID recibido en PUT:");
+  const { detalle, dia, horario } = req.body;
+console.log("Detalle recibido en PUT:", detalle);
+console.log("Día recibido en PUT:", dia);
+console.log("Horario recibido en PUT:", horario);   
+  try {
+    await pool.query(
+      "UPDATE dtc_cursos SET detalle = ?, dia = ?, horario = ? WHERE id = ?",
+      [detalle, dia, horario, id]
+    );
 
+    res.json("Horario actualizado");
+  } catch (err) {
+    console.error(err);
+    res.status(500).json(err);
+  }
+});
 
 router.delete('/eliminarHorarioo/:id', async (req, res) => {
   try {
