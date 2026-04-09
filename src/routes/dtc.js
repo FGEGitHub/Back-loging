@@ -3086,25 +3086,271 @@ router.post("/subirlegajo", upload.single('imagen'), async (req, res) => {
 
 
 router.post("/modificarusuariocadia", async (req, res) => {
-  let { id, nombre, apellido, fecha_ingreso, fecha_nacimiento, observaciones, fecha_fin,  dni, direccion} = req.body
-
   try {
-    if (observaciones == undefined) {
-      observaciones = "Sin observaciones"
-    }
-    if (fecha_nacimiento == undefined) {
-      fecha_nacimiento = "Sin asignar"
-    }
+    let {
+      id,
+      nombre,
+      apellido,
+      dni,
+      fecha_nacimiento,
+      fecha_ingreso,
+      fecha_fin,
+      direccion,
 
-    await pool.query('update cadia_chicos  set nombre=?,apellido=?,fecha_nacimiento=?,dni=?,fecha_ingreso=?,fecha_fin=?,direccion=? where id=?', [nombre, apellido, fecha_nacimiento, dni,fecha_ingreso,fecha_fin,direccion, id])
+      telefono,
+      barrio,
+      provincia,
+      pais,
 
-    res.json('Modificado')
+      sexo,
+      estadocivil,
+
+      responsable_inscripcion,
+
+      tiene_hijos,
+      cantidad_hijos,
+      con_quien_vive,
+
+      sabe_leer,
+      nivel_educativo,
+      completo_nivel,
+      asistencia_colegio,
+
+      situacion_laboral,
+      modalidad_trabajo,
+      busca_trabajo,
+      beneficiario,
+
+      obra_social,
+      obra_social_cual,
+
+      discapacidad,
+      discapacidad_otro,
+      cud,
+      tratamiento_cud,
+
+      presenta_violencia,
+      tipo_violencia,
+      modalidad_violencia,
+
+      primer_contacto,
+      primer_ingreso,
+      admision,
+
+      presentacion_dispositivo,
+      modo_acceso,
+      modo_acceso_otro,
+      derivado_institucion,
+      cual_institucion,
+      se_articulo,
+      motivo_consulta,
+
+      escuela,
+      grado,
+      talle,
+      fines,
+
+      aut_retirar,
+      hora_merienda,
+
+      autorizacion_imagen,
+      fotoc_dni,
+      fotoc_responsable,
+      visita_social,
+
+      egreso,
+      egresoconquien,
+
+      situacion_habitacional,
+
+      observaciones
+    } = req.body;
+
+    // 👉 Normalización de datos (evita undefined)
+    const clean = (val, def = "") =>
+      val === undefined || val === null ? def : val;
+
+    observaciones = clean(observaciones, "Sin observaciones");
+    fecha_nacimiento = clean(fecha_nacimiento, null);
+
+    // 👉 Si vienen arrays (desde React), convertir a string
+    const arrayToString = (val) =>
+      Array.isArray(val) ? val.join(", ") : val;
+
+    beneficiario = arrayToString(beneficiario);
+    discapacidad = arrayToString(discapacidad);
+    motivo_consulta = arrayToString(motivo_consulta);
+
+    // 👉 LOG para ver qué llega (clave para debug)
+    console.log("Datos recibidos:", req.body);
+
+    await pool.query(
+      `
+      UPDATE cadia_chicos SET
+        nombre=?,
+        apellido=?,
+        dni=?,
+        fecha_nacimiento=?,
+        fecha_ingreso=?,
+        fecha_fin=?,
+        direccion=?,
+
+        telefono=?,
+        barrio=?,
+        provincia=?,
+        pais=?,
+
+        sexo=?,
+        estadocivil=?,
+
+        responsable_inscripcion=?,
+
+        tiene_hijos=?,
+        cantidad_hijos=?,
+        con_quien_vive=?,
+
+        sabe_leer=?,
+        nivel_educativo=?,
+        completo_nivel=?,
+        asistencia_colegio=?,
+
+        situacion_laboral=?,
+        modalidad_trabajo=?,
+        busca_trabajo=?,
+        beneficiario=?,
+
+        obra_social=?,
+        obra_social_cual=?,
+
+        discapacidad=?,
+        discapacidad_otro=?,
+        cud=?,
+        tratamiento_cud=?,
+
+        presenta_violencia=?,
+        tipo_violencia=?,
+        modalidad_violencia=?,
+
+        primer_contacto=?,
+     
+        admision=?,
+
+        presentacion_dispositivo=?,
+        modo_acceso=?,
+        modo_acceso_otro=?,
+        derivado_institucion=?,
+        cual_institucion=?,
+        se_articulo=?,
+        motivo_consulta=?,
+
+        escuela=?,
+        grado=?,
+        talle=?,
+        fines=?,
+
+        aut_retirar=?,
+        hora_merienda=?,
+
+        autorizacion_imagen=?,
+        fotoc_dni=?,
+        fotoc_responsable=?,
+        visita_social=?,
+
+        egreso=?,
+        egresoconquien=?,
+
+        situacion_habitacional=?,
+
+        observaciones=?
+      WHERE id=?
+      `,
+      [
+        nombre,
+        apellido,
+        dni,
+        fecha_nacimiento,
+        fecha_ingreso,
+        fecha_fin,
+        direccion,
+
+        telefono,
+        barrio,
+        provincia,
+        pais,
+
+        sexo,
+        estadocivil,
+
+        responsable_inscripcion,
+
+        tiene_hijos,
+        cantidad_hijos,
+        con_quien_vive,
+
+        sabe_leer,
+        nivel_educativo,
+        completo_nivel,
+        asistencia_colegio,
+
+        situacion_laboral,
+        modalidad_trabajo,
+        busca_trabajo,
+        beneficiario,
+
+        obra_social,
+        obra_social_cual,
+
+        discapacidad,
+        discapacidad_otro,
+        cud,
+        tratamiento_cud,
+
+        presenta_violencia,
+        tipo_violencia,
+        modalidad_violencia,
+
+        primer_contacto,
+      
+        admision,
+
+        presentacion_dispositivo,
+        modo_acceso,
+        modo_acceso_otro,
+        derivado_institucion,
+        cual_institucion,
+        se_articulo,
+        motivo_consulta,
+
+        escuela,
+        grado,
+        talle,
+        fines,
+
+        aut_retirar,
+        hora_merienda,
+
+        autorizacion_imagen,
+        fotoc_dni,
+        fotoc_responsable,
+        visita_social,
+
+        egreso,
+        egresoconquien,
+
+        situacion_habitacional,
+
+        observaciones,
+        id
+      ]
+    );
+
+    res.json("Modificado");
+
   } catch (error) {
-    console.log(error)
-    res.json('No modificado')
+    console.log(error);
+    res.json("No modificado");
   }
-
-})
+});
 
 router.post('/inscribiracurso', async (req, res) => {
   let { id, option, days, number } = req.body; // Obtener datos del cuerpo de la solicitud
@@ -3245,7 +3491,7 @@ router.post("/modificarusuario", async (req, res) => {
     talle,
     kid,
     observaciones,
-    primer_ingreso,
+   
     admision,
     autorizacion_imagen,
     fotoc_dni,
@@ -3336,7 +3582,7 @@ router.post("/modificarusuario", async (req, res) => {
         
         kid=?,
         observaciones=?,
-        primer_ingreso=?,
+       
         admision=?,
         autorizacion_imagen=?,
         fotoc_dni=?,
@@ -3400,7 +3646,7 @@ router.post("/modificarusuario", async (req, res) => {
      
         kid,
         observaciones,
-        primer_ingreso,
+        
         admision,
         autorizacion_imagen,
         fotoc_dni,
@@ -4237,7 +4483,7 @@ router.post("/nuevapersonapsiq", async (req, res) => {
         if (obra_social_cual == undefined) {
       obra_social_cual = "Sin asignar"
     }
-    await pool.query('insert dtc_chicos  set nombre=?,apellido=?,fecha_nacimiento=?,observaciones=?,primer_ingreso=?,dni=?,domicilio=?,telefono=?,obra_social=?, obra_social_cual=?', [nombre, apellido, fecha_nacimiento, observaciones, primer_ingreso, dni, domicilio, telefono, obra_social, obra_social_cual])
+    await pool.query('insert dtc_chicos  set nombre=?,apellido=?,fecha_nacimiento=?,observaciones=?,dni=?,domicilio=?,telefono=?,obra_social=?, obra_social_cual=?', [nombre, apellido, fecha_nacimiento, observaciones, dni, domicilio, telefono, obra_social, obra_social_cual])
 console.log('hehco')
     res.json('Agregado')
   } catch (error) {
