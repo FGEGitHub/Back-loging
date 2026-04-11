@@ -4379,10 +4379,10 @@ beneficiario: data.beneficiario || "",
 busca_trabajo: data.busca_trabajo || "",
       situacion_laboral: data.situacion_laboral || "",
       modalidad_trabajo: data.modalidad_trabajo || "",
-
+psico: data.psico || "",
       obra_social: data.obra_social || "Sin asignar",
       obra_social_cual: data.obra_social_cual || "Sin asignar",
-
+fines: data.fines || "",
       autorizacion_imagen: data.autorizacion_imagen || "",
       fotoc_dni: data.fotoc_dni || "",
       fotoc_responsable: data.fotoc_responsable || "",
@@ -4398,11 +4398,11 @@ tratamiento_cud: data.tratamiento_cud || "",
       hora_merienda: data.hora_merienda || "",
       escuela: data.escuela || "",
       grado: data.grado || "",
-      fines: data.fines || "",
+     
       discapacidad: data.discapacidad || "",
       cud: data.cud || "",
        discapacidad_otro: data.discapacidad_otro || "",
-
+kid: data.kid || "",
       observaciones: data.observaciones || "Sin observaciones"
     };
 
@@ -4410,7 +4410,7 @@ tratamiento_cud: data.tratamiento_cud || "",
     const keys = Object.keys(valores);
     const values = Object.values(valores);
     const placeholders = keys.map(() => "?").join(", ");
-
+console.log(data.fines)
     const sql = `
       INSERT INTO dtc_chicos (${keys.join(", ")})
       VALUES (${placeholders})
@@ -4418,10 +4418,17 @@ tratamiento_cud: data.tratamiento_cud || "",
 
     await pool.query(sql, values);
 
-    res.json("Agregado");
+  res.status(200).json({
+  ok: true,
+  mensaje: "Agregado"
+});
   } catch (error) {
-    console.error(error);
-    res.json("No agregado");
+ console.error(error);
+res.status(500).json({
+  ok: false,
+  mensaje: "No agregado",
+  error: error.message
+});
   }
 });
 
@@ -5220,7 +5227,7 @@ router.get('/traerpresentesfines/:id', async (req, res) => {
   const clase =await pool.query('select * from dtc_clases_taller where id=?',[id])
   const existe = await pool.query('select * from dtc_asistencia_clase join (select id as idc,nombre, apellido from dtc_chicos_fines) as sel on dtc_asistencia_clase.id_usuario=sel.idc  where id_clase=?', [id])//presentes
  //// funcion para traer todos los usuarios con su presente en el taller 
- usuarios = await pool.query("select * from dtc_chicos_fines left join (select id as ida  from dtc_asistencia_clase where id=? ) as sel on dtc_chicos_fines.id=sel.ida ", [id])
+const usuarios = await pool.query("select * from dtc_chicos_fines left join (select id as ida  from dtc_asistencia_clase where id=? ) as sel on dtc_chicos_fines.id=sel.ida ", [id])
   //nueva consulta para solo los incriptosdias etc
 //usuarios = await pool.query("select * from dtc_chicos left join (select id as ida  from dtc_asistencia_clase where id=? ) as sel on dtc_chicos.id=sel.ida join(select id as idcursado,id_chico from dtc_cursado where id=?) as sel2 on dtc_chicos.id=sel2.id_chico ", [id,cursado[0]['id']])
   res.json([existe, usuarios])
