@@ -91,7 +91,7 @@ import doneuRoutes from "./routes/doneu.js";
 import f1Routes from "./routes/f1.js";
 import clinicaRoutes from "./routes/clinica.js";
 import quilmesRoutes from "./routes/quilmes.js";
-
+import tresxtresRoutes from "./routes/tresxtres.js";
 app.use(indexRoutes);
 app.use(authRoutes);
 app.use("/dtc", dtcRoutes);
@@ -111,6 +111,8 @@ app.use("/doneu", doneuRoutes);
 app.use("/f1", f1Routes);
 app.use("/clinica", clinicaRoutes);
 app.use("/quilmes", quilmesRoutes);
+app.use("/tresxtres", tresxtresRoutes);
+
 
 
 
