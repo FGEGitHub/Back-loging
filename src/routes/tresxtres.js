@@ -96,4 +96,62 @@ router.get("/traertorneos", async (req, res) => {
 
   res.json(torneos);
 });
+
+router.post("/torneos", async (req, res) => {
+  const { nombre, zonas } = req.body;
+
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    // 1. Crear torneo
+    const torneoResult = await connection.query(
+      "INSERT INTO torneos (nombre) VALUES (?)",
+      [nombre]
+    );
+
+    const idTorneo = torneoResult.insertId;
+
+    // 2. Crear zonas + guardar equipos
+    for (let i = 0; i < zonas.length; i++) {
+      const zona = zonas[i];
+
+      // crear zona
+      const zonaResult = await connection.query(
+        "INSERT INTO zonas_3x3 (nombre, id_torneo) VALUES (?, ?)",
+        [zona.nombre, idTorneo]
+      );
+
+      const idZona = zonaResult.insertId;
+
+      // 3. insertar equipos en la zona
+      for (let j = 0; j < zona.equipos.length; j++) {
+        const equipo = zona.equipos[j];
+
+        await connection.query(
+          "INSERT INTO participacion_3x3 (id_equipo, id_zona) VALUES (?, ?)",
+          [equipo.id, idZona]
+        );
+      }
+    }
+
+    await connection.commit();
+
+    res.json({
+      ok: true,
+  
+    });
+
+  } catch (error) {
+    await connection.rollback();
+    console.error(error);
+    res.status(500).json({ error: "Error al crear torneo completo" });
+  } finally {
+    connection.release();
+  }
+});
+
+
+
 export default router;
