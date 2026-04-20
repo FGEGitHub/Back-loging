@@ -76,4 +76,24 @@ router.post("/equipo", async (req, res) => {
   }
 });
 
+
+
+
+router.get("/equipos-con-jugadores", async (req, res) => {
+  const equipos = await pool.query("SELECT * FROM equipos");
+  const jugadores = await pool.query("SELECT * FROM jugadores");
+
+  const resultado = equipos.map((eq) => ({
+    ...eq,
+    jugadores: jugadores.filter(j => j.id_equipo == eq.id)
+  }));
+  res.json(resultado);
+});
+
+
+router.get("/traertorneos", async (req, res) => {
+  const torneos = await pool.query("SELECT * FROM torneos");
+
+  res.json(torneos);
+});
 export default router;
