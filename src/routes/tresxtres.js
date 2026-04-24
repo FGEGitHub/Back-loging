@@ -124,33 +124,30 @@ router.get("/traertablas/:id", async (req, res) => {
     const resultado = [];
 
     for (const zona of zonas) {
-      const partidos = await pool.query(
-        "SELECT * FROM partidos_3x3 WHERE id_zona = ?",
+      // 🔹 1. PARTICIPACIONES → equipos de la zona
+      const participaciones = await pool.query(
+        "SELECT id_equipo FROM participacion_3x3 WHERE id_zona = ?",
         [zona.id]
       );
 
-      const equiposIds = [
-        ...new Set(
-          partidos.flatMap((p) => [
-            p.id_equipo_1,
-            p.id_equipo_2,
-          ])
-        ),
-      ];
+      const equiposIds = participaciones.map((p) => p.id_equipo);
 
-      const equipos = await pool.query(
-        "SELECT id, nombre FROM equipos WHERE id IN (?)",
-        [equiposIds]
-      );
+      // 🔹 2. TRAER EQUIPOS
+      let equipos = [];
+      if (equiposIds.length > 0) {
+        equipos = await pool.query(
+          "SELECT id, nombre FROM equipos WHERE id IN (?)",
+          [equiposIds]
+        );
+      }
 
       const equiposMap = {};
       equipos.forEach((e) => {
         equiposMap[e.id] = e.nombre;
       });
 
-      // 🔥 TABLA
+      // 🔹 3. INICIALIZAR TABLA (aunque no haya partidos)
       const tabla = {};
-
       equiposIds.forEach((idEquipo) => {
         tabla[idEquipo] = {
           equipo: equiposMap[idEquipo] || "Sin nombre",
@@ -162,7 +159,13 @@ router.get("/traertablas/:id", async (req, res) => {
         };
       });
 
-      // 🔥 PROCESAR PARTIDOS + TABLA
+      // 🔹 4. PARTIDOS
+      const partidos = await pool.query(
+        "SELECT * FROM partidos_3x3 WHERE id_zona = ?",
+        [zona.id]
+      );
+
+      // 🔹 5. PROCESAR PARTIDOS
       partidos.forEach((p) => {
         const g1 = Number(p.goles_1);
         const g2 = Number(p.goles_2);
@@ -171,6 +174,8 @@ router.get("/traertablas/:id", async (req, res) => {
 
         const e1 = tabla[p.id_equipo_1];
         const e2 = tabla[p.id_equipo_2];
+
+        if (!e1 || !e2) return; // 🔥 seguridad
 
         e1.jugados++;
         e2.jugados++;
@@ -189,10 +194,12 @@ router.get("/traertablas/:id", async (req, res) => {
         }
       });
 
+      // 🔹 6. DIFERENCIA
       Object.values(tabla).forEach((e) => {
         e.diferencia = e.goles_favor - e.goles_contra;
       });
 
+      // 🔹 7. ORDEN
       const tablaOrdenada = Object.values(tabla).sort((a, b) => {
         if (b.puntos !== a.puntos) return b.puntos - a.puntos;
         if (b.diferencia !== a.diferencia)
@@ -200,7 +207,7 @@ router.get("/traertablas/:id", async (req, res) => {
         return b.goles_favor - a.goles_favor;
       });
 
-      // 🔥 NUEVO: PARTIDOS FORMATEADOS
+      // 🔹 8. PARTIDOS FORMATEADOS
       const partidosFormateados = partidos.map((p) => ({
         equipo1: equiposMap[p.id_equipo_1] || "Equipo 1",
         equipo2: equiposMap[p.id_equipo_2] || "Equipo 2",
@@ -211,38 +218,41 @@ router.get("/traertablas/:id", async (req, res) => {
       resultado.push({
         zona: zona.nombre || `Zona ${zona.id}`,
         tabla: tablaOrdenada,
-        partidos: partidosFormateados, // 👈 nuevo
+        partidos: partidosFormateados,
       });
     }
-let ultimoPartido = null;
 
-const ultimo = await pool.query(
-  "SELECT * FROM partidos_3x3 WHERE id_torneo = ? ORDER BY id DESC LIMIT 1",
-  [id]
-);
+    // 🔥 ÚLTIMO PARTIDO GLOBAL
+    let ultimoPartido = null;
 
-if (ultimo.length > 0) {
-  const p = ultimo[0];
+    const ultimo = await pool.query(
+      "SELECT * FROM partidos_3x3 WHERE id_torneo = ? ORDER BY id DESC LIMIT 1",
+      [id]
+    );
 
-  const equipos = await pool.query(
-    "SELECT id, nombre FROM equipos WHERE id IN (?, ?)",
-    [p.id_equipo_1, p.id_equipo_2]
-  );
+    if (ultimo.length > 0) {
+      const p = ultimo[0];
 
-  const map = {};
-  equipos.forEach((e) => (map[e.id] = e.nombre));
+      const equipos = await pool.query(
+        "SELECT id, nombre FROM equipos WHERE id IN (?, ?)",
+        [p.id_equipo_1, p.id_equipo_2]
+      );
 
-  ultimoPartido = {
-    equipo1: map[p.id_equipo_1],
-    equipo2: map[p.id_equipo_2],
-    goles1: p.goles_1,
-    goles2: p.goles_2,
-  };
-}
-   res.json({
-  zonas: resultado,
-  ultimoPartido,
-});
+      const map = {};
+      equipos.forEach((e) => (map[e.id] = e.nombre));
+
+      ultimoPartido = {
+        equipo1: map[p.id_equipo_1],
+        equipo2: map[p.id_equipo_2],
+        goles1: p.goles_1,
+        goles2: p.goles_2,
+      };
+    }
+
+    res.json({
+      zonas: resultado,
+      ultimoPartido,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error en tablas" });
