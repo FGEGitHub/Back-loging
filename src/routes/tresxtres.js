@@ -80,33 +80,175 @@ router.get("/traertorneo/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    // 1. ZONAS del torneo
     const zonas = await pool.query(
       "SELECT * FROM zonas_3x3 WHERE id_torneo = ?",
       [id]
     );
 
-    // 2. PARTICIPACIONES (por esas zonas)
     const participaciones = await pool.query(
       "SELECT * FROM participacion_3x3 WHERE id_zona IN (?)",
       [zonas.map((z) => z.id)]
     );
 
-    // 3. EQUIPOS (de esas participaciones)
     const equipos = await pool.query(
       "SELECT * FROM equipos WHERE id IN (?)",
       [participaciones.map((p) => p.id_equipo)]
+    );
+
+    // 🔥 NUEVO: traer partidos
+    const partidos = await pool.query(
+      "SELECT * FROM partidos_3x3 WHERE id_torneo = ?",
+      [id]
     );
     res.json({
       zonas,
       participaciones,
       equipos,
+      partidos, // 👈 clave
     });
   } catch (error) {
     console.error("Error en traerTorneo:", error);
     res.status(500).json({ error: "Error al traer torneo" });
   }
 });
+
+router.get("/traertablas/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const zonas = await pool.query(
+      "SELECT * FROM zonas_3x3 WHERE id_torneo = ?",
+      [id]
+    );
+
+    const resultado = [];
+
+    for (const zona of zonas) {
+      const partidos = await pool.query(
+        "SELECT * FROM partidos_3x3 WHERE id_zona = ?",
+        [zona.id]
+      );
+
+      const equiposIds = [
+        ...new Set(
+          partidos.flatMap((p) => [
+            p.id_equipo_1,
+            p.id_equipo_2,
+          ])
+        ),
+      ];
+
+      const equipos = await pool.query(
+        "SELECT id, nombre FROM equipos WHERE id IN (?)",
+        [equiposIds]
+      );
+
+      const equiposMap = {};
+      equipos.forEach((e) => {
+        equiposMap[e.id] = e.nombre;
+      });
+
+      // 🔥 TABLA
+      const tabla = {};
+
+      equiposIds.forEach((idEquipo) => {
+        tabla[idEquipo] = {
+          equipo: equiposMap[idEquipo] || "Sin nombre",
+          puntos: 0,
+          goles_favor: 0,
+          goles_contra: 0,
+          diferencia: 0,
+          jugados: 0,
+        };
+      });
+
+      // 🔥 PROCESAR PARTIDOS + TABLA
+      partidos.forEach((p) => {
+        const g1 = Number(p.goles_1);
+        const g2 = Number(p.goles_2);
+
+        if (isNaN(g1) || isNaN(g2)) return;
+
+        const e1 = tabla[p.id_equipo_1];
+        const e2 = tabla[p.id_equipo_2];
+
+        e1.jugados++;
+        e2.jugados++;
+
+        e1.goles_favor += g1;
+        e1.goles_contra += g2;
+
+        e2.goles_favor += g2;
+        e2.goles_contra += g1;
+
+        if (g1 > g2) e1.puntos += 3;
+        else if (g2 > g1) e2.puntos += 3;
+        else {
+          e1.puntos += 1;
+          e2.puntos += 1;
+        }
+      });
+
+      Object.values(tabla).forEach((e) => {
+        e.diferencia = e.goles_favor - e.goles_contra;
+      });
+
+      const tablaOrdenada = Object.values(tabla).sort((a, b) => {
+        if (b.puntos !== a.puntos) return b.puntos - a.puntos;
+        if (b.diferencia !== a.diferencia)
+          return b.diferencia - a.diferencia;
+        return b.goles_favor - a.goles_favor;
+      });
+
+      // 🔥 NUEVO: PARTIDOS FORMATEADOS
+      const partidosFormateados = partidos.map((p) => ({
+        equipo1: equiposMap[p.id_equipo_1] || "Equipo 1",
+        equipo2: equiposMap[p.id_equipo_2] || "Equipo 2",
+        goles1: p.goles_1,
+        goles2: p.goles_2,
+      }));
+
+      resultado.push({
+        zona: zona.nombre || `Zona ${zona.id}`,
+        tabla: tablaOrdenada,
+        partidos: partidosFormateados, // 👈 nuevo
+      });
+    }
+let ultimoPartido = null;
+
+const ultimo = await pool.query(
+  "SELECT * FROM partidos_3x3 WHERE id_torneo = ? ORDER BY id DESC LIMIT 1",
+  [id]
+);
+
+if (ultimo.length > 0) {
+  const p = ultimo[0];
+
+  const equipos = await pool.query(
+    "SELECT id, nombre FROM equipos WHERE id IN (?, ?)",
+    [p.id_equipo_1, p.id_equipo_2]
+  );
+
+  const map = {};
+  equipos.forEach((e) => (map[e.id] = e.nombre));
+
+  ultimoPartido = {
+    equipo1: map[p.id_equipo_1],
+    equipo2: map[p.id_equipo_2],
+    goles1: p.goles_1,
+    goles2: p.goles_2,
+  };
+}
+   res.json({
+  zonas: resultado,
+  ultimoPartido,
+});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error en tablas" });
+  }
+});
+
 
 
 router.post("/guardarpartido", async (req, res) => {
