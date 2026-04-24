@@ -76,7 +76,132 @@ router.post("/equipo", async (req, res) => {
   }
 });
 
+router.get("/traertorneo/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    // 1. ZONAS del torneo
+    const zonas = await pool.query(
+      "SELECT * FROM zonas_3x3 WHERE id_torneo = ?",
+      [id]
+    );
+
+    // 2. PARTICIPACIONES (por esas zonas)
+    const participaciones = await pool.query(
+      "SELECT * FROM participacion_3x3 WHERE id_zona IN (?)",
+      [zonas.map((z) => z.id)]
+    );
+
+    // 3. EQUIPOS (de esas participaciones)
+    const equipos = await pool.query(
+      "SELECT * FROM equipos WHERE id IN (?)",
+      [participaciones.map((p) => p.id_equipo)]
+    );
+    res.json({
+      zonas,
+      participaciones,
+      equipos,
+    });
+  } catch (error) {
+    console.error("Error en traerTorneo:", error);
+    res.status(500).json({ error: "Error al traer torneo" });
+  }
+});
+
+
+router.post("/guardarpartido", async (req, res) => {
+  try {
+    const {
+      id_torneo,
+      id_zona,
+      id_equipo_1,
+      id_equipo_2,
+      goles_1,
+      goles_2,
+    } = req.body;
+
+    if (
+      !id_torneo ||
+      !id_zona ||
+      !id_equipo_1 ||
+      !id_equipo_2
+    ) {
+      return res.status(400).json({
+        error: "Faltan datos obligatorios",
+      });
+    }
+
+    // 🔥 IMPORTANTE: contemplar A vs B y B vs A
+    const partidoExistente = await pool.query(
+      `
+      SELECT * FROM partidos_3x3
+      WHERE id_torneo = ?
+      AND id_zona = ?
+      AND (
+        (id_equipo_1 = ? AND id_equipo_2 = ?)
+        OR
+        (id_equipo_1 = ? AND id_equipo_2 = ?)
+      )
+      LIMIT 1
+      `,
+      [
+        id_torneo,
+        id_zona,
+        id_equipo_1,
+        id_equipo_2,
+        id_equipo_2,
+        id_equipo_1,
+      ]
+    );
+
+    if (partidoExistente.length > 0) {
+      // 🔥 UPDATE
+      const partido = partidoExistente[0];
+
+      await pool.query(
+        `
+        UPDATE partidos_3x3
+        SET goles_1 = ?, goles_2 = ?
+        WHERE id = ?
+        `,
+        [
+          goles_1 || 0,
+          goles_2 || 0,
+          partido.id,
+        ]
+      );
+
+      return res.json({
+        message: "Partido actualizado",
+      });
+    }
+
+    // 🔥 INSERT
+    await pool.query(
+      `
+      INSERT INTO partidos_3x3 
+      (id_torneo, id_zona, id_equipo_1, id_equipo_2, goles_1, goles_2)
+      VALUES (?, ?, ?, ?, ?, ?)
+      `,
+      [
+        id_torneo,
+        id_zona,
+        id_equipo_1,
+        id_equipo_2,
+        goles_1 || 0,
+        goles_2 || 0,
+      ]
+    );
+
+    res.json({
+      message: "Partido creado",
+    });
+
+  } catch (error) {
+    console.error("Error al guardar partido:", error);
+    res.status(500).json({ error: "Error al guardar partido" });
+  }
+});
 
 
 router.get("/equipos-con-jugadores", async (req, res) => {
