@@ -2420,8 +2420,8 @@ router.get('/cumpleanosdia/:fecha', async (req, res) => {
     // Definir días y horarios en base al ID del curso
     const dias = ["lunes", "martes", "miércoles", "jueves", "viernes"];
     const dias307 = ["martes", "jueves", "viernes"];
-    const horariosEstandar = ["14:00", "15:00", "16:00"];
-    const horariosEspeciales = ["14:00", "15:00", "16:00"];
+    const horariosEstandar = ["14:30", "15:30", "16:30"];
+    const horariosEspeciales = ["14:30", "15:30", "16:30"];
     const horario309 = ["17:00"];
 
     let horarios = horariosEstandar;
@@ -2743,7 +2743,7 @@ router.get('/obtenerinfodecursostodos', async (req, res) => {
         cantidad_kids: 0,
         nombres_kids: null,
         materia: curso ? curso.materia : null,
-        detalle: horario.detalle
+        detalle: horario.detalle 
       };
     });
 
@@ -5555,7 +5555,7 @@ try {
         const { hora, id_taller } = req.body;
 
         // Obtener el día actual del sistema en español
-        const dias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+        const dias = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sábado"];
         const dia = dias[new Date().getDay()]; // Obtiene el día actual en texto
         const fechaHoy = moment().tz("America/Argentina/Buenos_Aires").format("YYYY-MM-DD");
 
@@ -5569,7 +5569,7 @@ try {
             'SELECT * FROM dtc_clases_taller WHERE id_tallerista = ? AND dia = ? AND hora = ? and fecha=?',
             [id_taller, dia, horaFormateada,fechaHoy]
         );
-
+console.log("Clase encontrada:", clase);
         if (clase.length === 0) {
             return res.json({ error: "No se encontró la clase con esos datos" });
         }
@@ -5580,6 +5580,7 @@ try {
             'SELECT * FROM dtc_asistencia_clase JOIN (SELECT id AS idc, nombre FROM dtc_chicos) AS sel ON dtc_asistencia_clase.id_usuario = sel.idc WHERE id_clase = ?',
             [id_clase]
         );
+        console.log(" Asistencias encontradas:", existe);
 
         const usuarios = await pool.query(
             "SELECT * FROM dtc_chicos LEFT JOIN (SELECT id AS ida FROM dtc_asistencia_clase WHERE id_clase = ?) AS sel ON dtc_chicos.id = sel.ida",
