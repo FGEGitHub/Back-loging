@@ -6227,71 +6227,120 @@ router.post("/nuevaetapa", async (req, res) => {
 
 router.post("/traercumples", async (req, res) => {
 
-  let { fecha } = req.body
-
-  let diacumple = ""
-  let mescumple = ""
-
-  let [dia, mes, año] = fecha.split('-');
-
-  if (dia.length == 1) {
-    diacumple = "0" + dia
-  } else {
-    diacumple = dia
-  }
-
-  if (mes.length == 1) {
-    mescumple = "0" + mes
-  } else {
-    mescumple = mes
-  }
-
-  const cumple = await pool.query(
-    'select * from dtc_chicos where fecha_nacimiento like ?',
-    ["%" + mescumple + "-" + diacumple]
-  )
-
-  const estemes = await pool.query(
-    'select * from dtc_chicos where fecha_nacimiento like ?',
-    ["%" + "-" + mescumple + "-" + "%"]
-  )
-
-  // ==========================
-  // ESTADO WHATSAPP
-  // ==========================
-
-  let whatsapp = {
-    conectado: false,
-    estado: "DESCONECTADO"
-  };
-
   try {
 
-    const client = getClient();
-console.log("Cliente WhatsApp obtenido:", !!client, "Estado actual:", isClientReady() ? "Listo" : "No listo");
-    if (client && isClientReady()) {
+    let { fecha } = req.body;
 
-      const state = await client.getState().catch(() => null);
+    let diacumple = "";
+    let mescumple = "";
+
+    let [dia, mes, año] = fecha.split('-');
+
+    // ==========================
+    // FORMATEAR DÍA
+    // ==========================
+
+    if (dia.length === 1) {
+      diacumple = "0" + dia;
+    } else {
+      diacumple = dia;
+    }
+
+    // ==========================
+    // FORMATEAR MES
+    // ==========================
+
+    if (mes.length === 1) {
+      mescumple = "0" + mes;
+    } else {
+      mescumple = mes;
+    }
+
+    // ==========================
+    // CUMPLEAÑOS DEL DÍA
+    // ==========================
+
+    const cumple = await pool.query(
+      'SELECT * FROM dtc_chicos WHERE fecha_nacimiento LIKE ?',
+      ["%" + mescumple + "-" + diacumple]
+    );
+
+    // ==========================
+    // CUMPLEAÑOS DEL MES
+    // ==========================
+
+    const estemes = await pool.query(
+      'SELECT * FROM dtc_chicos WHERE fecha_nacimiento LIKE ?',
+      ["%-" + mescumple + "-%"]
+    );
+
+    // ==========================
+    // ESTADO WHATSAPP
+    // ==========================
+
+    let whatsapp = {
+      conectado: false,
+      estado: "DESCONECTADO"
+    };
+
+    try {
+
+      const client = getClient();
+
+      console.log("📱 Cliente WhatsApp obtenido:", !!client);
+
+      if (client) {
+
+        // Obtener estado real del cliente
+        const state = await client.getState().catch((err) => {
+          console.log("❌ Error getState:", err.message);
+          return null;
+        });
+
+        console.log("📡 Estado real WhatsApp:", state);
+
+        whatsapp = {
+          conectado: state === "CONNECTED",
+          estado: state || "SIN_ESTADO"
+        };
+
+      }
+
+      console.log("✅ Resultado WhatsApp:", whatsapp);
+
+    } catch (err) {
+
+      console.log("❌ Error obteniendo estado WhatsApp:", err.message);
 
       whatsapp = {
-        conectado: state === "CONNECTED",
-        estado: state || "SIN_ESTADO"
+        conectado: false,
+        estado: "ERROR"
       };
 
+      console.log(whatsapp);
+
     }
-console.log(whatsapp)
-  } catch (err) {
 
-    console.log("❌ Error obteniendo estado WhatsApp:", err.message);
+    // ==========================
+    // RESPUESTA
+    // ==========================
 
-    whatsapp = {
-      conectado: false,
-      estado: "ERROR"
-    };
-console.log(whatsapp)
+    res.json([
+      cumple,
+      estemes,
+      whatsapp
+    ]);
+
+  } catch (error) {
+
+    console.log("❌ Error en /traercumples:", error);
+
+    res.status(500).json({
+      error: true,
+      mensaje: "Error interno del servidor"
+    });
+
   }
-
-  res.json([cumple, estemes, whatsapp]);
 
 });
 
