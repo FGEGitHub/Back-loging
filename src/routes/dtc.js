@@ -25,6 +25,7 @@ import cron from "node-cron";
 
 import qrcode from "qrcode-terminal";
 import { sendWhatsappMessage } from "./whatsapclient.js";
+import { getClient, isClientReady } from "../ruta/del/modulo/whatsapp.js";
 import puppeteer from "puppeteer-core";
 
 import { fileURLToPath } from "url";
