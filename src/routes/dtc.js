@@ -7496,7 +7496,7 @@ router.get("/listatodosdeldtc", async (req, res) => {
 });
 
 
-router.post("/traercumples", async (req, res) => {
+router.post("/traercumpless", async (req, res) => {
   const { fecha, id } = req.body
   console.log(id)
   let prod
