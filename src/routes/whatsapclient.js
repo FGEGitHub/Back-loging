@@ -129,13 +129,21 @@ async function startClient() {
     client = createClient();
 
     await client.initialize();
-  } catch (err) {
-    console.log("❌ Error iniciando WhatsApp:", err.message);
+ } catch (err) {
+  console.log("❌ Error iniciando WhatsApp:", err.message);
 
-    setTimeout(() => {
-      startClient();
-    }, 5000);
-  } finally {
+  try {
+    if (client) {
+      await client.destroy();
+    }
+  } catch {}
+
+  client = null;
+
+  setTimeout(() => {
+    startClient();
+  }, 5000);
+}finally {
     initializing = false;
   }
 }
