@@ -6279,7 +6279,7 @@ router.post("/traercumples", async (req, res) => {
       };
 
     }
-
+console.log(whatsapp)
   } catch (err) {
 
     console.log("❌ Error obteniendo estado WhatsApp:", err.message);
@@ -6288,7 +6288,7 @@ router.post("/traercumples", async (req, res) => {
       conectado: false,
       estado: "ERROR"
     };
-
+console.log(whatsapp)
   }
 
   res.json([cumple, estemes, whatsapp]);
