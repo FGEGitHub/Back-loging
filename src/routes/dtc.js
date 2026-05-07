@@ -6268,7 +6268,7 @@ router.post("/traercumples", async (req, res) => {
   try {
 
     const client = getClient();
-
+console.log("Cliente WhatsApp obtenido:", !!client, "Estado actual:", isClientReady() ? "Listo" : "No listo");
     if (client && isClientReady()) {
 
       const state = await client.getState().catch(() => null);
