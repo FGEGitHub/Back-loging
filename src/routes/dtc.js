@@ -6225,27 +6225,74 @@ router.post("/nuevaetapa", async (req, res) => {
 })
 
 router.post("/traercumples", async (req, res) => {
+
   let { fecha } = req.body
-  ///presentes mensuales 
-  fecha = fecha
+
   let diacumple = ""
   let mescumple = ""
- let mesanterior = ""
- let anioanterior = ""
-  // Divide la fecha usando el guión ('-') como separador
+
   let [dia, mes, año] = fecha.split('-');
+
   if (dia.length == 1) {
     diacumple = "0" + dia
-  } else { diacumple = dia }
+  } else {
+    diacumple = dia
+  }
+
   if (mes.length == 1) {
     mescumple = "0" + mes
-  } else { mescumple = mes }
-  console.log("'_%" + mescumple + "-" + diacumple + "'")
-  const cumple = await pool.query('select * from dtc_chicos where fecha_nacimiento like ?', ["%" + mescumple + "-" + diacumple])
-  const estemes = await pool.query('select * from dtc_chicos where fecha_nacimiento like ?', ["%" + "-" + mescumple + "-" + "%"])
+  } else {
+    mescumple = mes
+  }
 
-  res.json([cumple, estemes])
-})
+  const cumple = await pool.query(
+    'select * from dtc_chicos where fecha_nacimiento like ?',
+    ["%" + mescumple + "-" + diacumple]
+  )
+
+  const estemes = await pool.query(
+    'select * from dtc_chicos where fecha_nacimiento like ?',
+    ["%" + "-" + mescumple + "-" + "%"]
+  )
+
+  // ==========================
+  // ESTADO WHATSAPP
+  // ==========================
+
+  let whatsapp = {
+    conectado: false,
+    estado: "DESCONECTADO"
+  };
+
+  try {
+
+    const client = getClient();
+
+    if (client && isClientReady()) {
+
+      const state = await client.getState().catch(() => null);
+
+      whatsapp = {
+        conectado: state === "CONNECTED",
+        estado: state || "SIN_ESTADO"
+      };
+
+    }
+
+  } catch (err) {
+
+    console.log("❌ Error obteniendo estado WhatsApp:", err.message);
+
+    whatsapp = {
+      conectado: false,
+      estado: "ERROR"
+    };
+
+  }
+
+  res.json([cumple, estemes, whatsapp]);
+
+});
 
 
 router.post("/traerracionesmes", async (req, res) => {
