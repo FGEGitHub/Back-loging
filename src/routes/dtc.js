@@ -7898,8 +7898,8 @@ cron.schedule('25 12 * * 1-5', async () => {
       fecha3
     ]);
 
-    console.log('==============================');
-    console.log('ASISTENCIA DE HOY');
+    console.log('======Buenos dias!=======');
+    console.log('ASISTENCIA DE HOY 16 horas');
     console.log('Fecha:', fecha1);
     console.log('Cantidad presentes:', rows.length);
     console.log('==============================');
