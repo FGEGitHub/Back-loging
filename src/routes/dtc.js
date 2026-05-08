@@ -7863,6 +7863,69 @@ cron.schedule('1 01 * * 1-5', async () => {
 });
  
 
+cron.schedule('15 12 * * 1-5', async () => {
+  try {
+    const hoy = new Date();
+
+    const anio = hoy.getFullYear();
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoy.getDate()).padStart(2, '0');
+
+    // formatos posibles guardados en la DB
+    const fecha1 = `${anio}-${mes}-${dia}`; // 2026-04-23
+    const fecha2 = `${parseInt(dia)}-${parseInt(mes)}-${anio}`; // 23-4-2026
+    const fecha3 = `${dia}-${mes}-${anio}`; // 23-04-2026
+
+    const query = `
+      SELECT 
+        a.id_usuario,
+        a.fecha,
+        c.nombre,
+        c.apellido
+      FROM dtc_asistencia a
+      INNER JOIN dtc_chicos c
+        ON c.id = a.id_usuario
+      WHERE (
+        a.fecha = ?
+        OR a.fecha = ?
+        OR a.fecha = ?
+      )
+    `;
+
+    const rows = await pool.query(query, [
+      fecha1,
+      fecha2,
+      fecha3
+    ]);
+
+    console.log('==============================');
+    console.log('ASISTENCIA DE HOY');
+    console.log('Fecha:', fecha1);
+    console.log('Cantidad presentes:', rows.length);
+    console.log('==============================');
+
+    rows.forEach((item, index) => {
+      console.log(
+        `${index + 1} - ${item.nombre} ${item.apellido}`
+      );
+    });
+
+    console.log('==============================');
+
+  } catch (error) {
+    console.error('Error verificando asistencia:', error);
+  }
+});
+
+
+cron.schedule('15 9 * * 1-5', async () => {
+ console.log('El sistema está verificando la asistencia de hoy');
+  
+});
+cron.schedule('15 15 * * 1-5', async () => {
+ console.log('El sistema está verificando la asistencia de hoy 15');
+  
+});
 
 export default router;
 
