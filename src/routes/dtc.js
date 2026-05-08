@@ -7936,7 +7936,7 @@ ${lista}`;
   }
 });
 
-cron.schedule('00 18 * * 1-5', async () => {
+cron.schedule('05 18 * * 1-5', async () => {
   try {
     const hoy = new Date();
 
@@ -7989,7 +7989,7 @@ cron.schedule('00 18 * * 1-5', async () => {
 
     console.log('==============================');
 
-    const mensaje = `📋 16:00 hs ASISTENCIA DE HOY
+    const mensaje = `📋 18:00 hs ASISTENCIA FINAL DE JORNADA
 
 📅 Fecha: ${fecha1}
 
