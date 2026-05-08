@@ -7863,7 +7863,7 @@ cron.schedule('1 01 * * 1-5', async () => {
 });
  
 
-cron.schedule('15 12 * * 1-5', async () => {
+cron.schedule('21 12 * * 1-5', async () => {
   try {
     const hoy = new Date();
 
@@ -7871,10 +7871,10 @@ cron.schedule('15 12 * * 1-5', async () => {
     const mes = String(hoy.getMonth() + 1).padStart(2, '0');
     const dia = String(hoy.getDate()).padStart(2, '0');
 
-    // formatos posibles guardados en la DB
-    const fecha1 = `${anio}-${mes}-${dia}`; // 2026-04-23
-    const fecha2 = `${parseInt(dia)}-${parseInt(mes)}-${anio}`; // 23-4-2026
-    const fecha3 = `${dia}-${mes}-${anio}`; // 23-04-2026
+    // formatos posibles guardados en DB
+    const fecha1 = `${anio}-${mes}-${dia}`;
+    const fecha2 = `${parseInt(dia)}-${parseInt(mes)}-${anio}`;
+    const fecha3 = `${dia}-${mes}-${anio}`;
 
     const query = `
       SELECT 
@@ -7892,7 +7892,7 @@ cron.schedule('15 12 * * 1-5', async () => {
       )
     `;
 
-    const rows = await pool.query(query, [
+    const [rows] = await pool.query(query, [
       fecha1,
       fecha2,
       fecha3
@@ -7904,13 +7904,32 @@ cron.schedule('15 12 * * 1-5', async () => {
     console.log('Cantidad presentes:', rows.length);
     console.log('==============================');
 
+    let lista = '';
+
     rows.forEach((item, index) => {
-      console.log(
-        `${index + 1} - ${item.nombre} ${item.apellido}`
-      );
+      const nombreCompleto = `${item.nombre} ${item.apellido}`;
+
+      console.log(`${index + 1} - ${nombreCompleto}`);
+
+      lista += `${index + 1} - ${nombreCompleto}\n`;
     });
 
     console.log('==============================');
+
+    const mensaje = `📋 ASISTENCIA DE HOY
+
+📅 Fecha: ${fecha1}
+
+✅ Cantidad presentes: ${rows.length}
+
+👥 Lista:
+${lista}`;
+
+    // enviar whatsapp
+    await sendWhatsappMessage('549394702861', mensaje);
+   await sendWhatsappMessage('549394702861', mensaje);
+
+    console.log('WhatsApp enviados correctamente');
 
   } catch (error) {
     console.error('Error verificando asistencia:', error);
@@ -7918,14 +7937,6 @@ cron.schedule('15 12 * * 1-5', async () => {
 });
 
 
-cron.schedule('15 9 * * 1-5', async () => {
- console.log('El sistema está verificando la asistencia de hoy');
-  
-});
-cron.schedule('15 15 * * 1-5', async () => {
- console.log('El sistema está verificando la asistencia de hoy 15');
-  
-});
 
 export default router;
 
