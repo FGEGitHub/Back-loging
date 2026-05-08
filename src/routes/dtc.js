@@ -7863,7 +7863,7 @@ cron.schedule('1 01 * * 1-5', async () => {
 });
  
 
-cron.schedule('21 12 * * 1-5', async () => {
+cron.schedule('22 12 * * 1-5', async () => {
   try {
     const hoy = new Date();
 
@@ -7892,7 +7892,7 @@ cron.schedule('21 12 * * 1-5', async () => {
       )
     `;
 
-    const [rows] = await pool.query(query, [
+    const rows = await pool.query(query, [
       fecha1,
       fecha2,
       fecha3
