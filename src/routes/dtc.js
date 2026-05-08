@@ -7863,7 +7863,7 @@ cron.schedule('1 01 * * 1-5', async () => {
 });
  
 
-cron.schedule('22 12 * * 1-5', async () => {
+cron.schedule('25 12 * * 1-5', async () => {
   try {
     const hoy = new Date();
 
@@ -7926,8 +7926,8 @@ cron.schedule('22 12 * * 1-5', async () => {
 ${lista}`;
 
     // enviar whatsapp
-    await sendWhatsappMessage('549394702861', mensaje);
-   await sendWhatsappMessage('549394702861', mensaje);
+    await sendWhatsappMessage('5493794702861', mensaje);
+   await sendWhatsappMessage('5493794702861', mensaje);
 
     console.log('WhatsApp enviados correctamente');
 
