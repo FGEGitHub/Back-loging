@@ -7863,7 +7863,7 @@ cron.schedule('1 01 * * 1-5', async () => {
 });
  
 
-cron.schedule('25 12 * * 1-5', async () => {
+cron.schedule('00 16 * * 1-5', async () => {
   try {
     const hoy = new Date();
 
@@ -7916,7 +7916,7 @@ cron.schedule('25 12 * * 1-5', async () => {
 
     console.log('==============================');
 
-    const mensaje = `📋 ASISTENCIA DE HOY
+    const mensaje = `📋 16:00 hs ASISTENCIA DE HOY
 
 📅 Fecha: ${fecha1}
 
@@ -7926,9 +7926,9 @@ cron.schedule('25 12 * * 1-5', async () => {
 ${lista}`;
 
     // enviar whatsapp
-    await sendWhatsappMessage('5493794702861', mensaje);
+    await sendWhatsappMessage('5493794881903', mensaje);
+   await sendWhatsappMessage('5493795008689', mensaje);
    await sendWhatsappMessage('5493794702861', mensaje);
-
     console.log('WhatsApp enviados correctamente');
 
   } catch (error) {
@@ -7936,7 +7936,79 @@ ${lista}`;
   }
 });
 
+cron.schedule('00 18 * * 1-5', async () => {
+  try {
+    const hoy = new Date();
 
+    const anio = hoy.getFullYear();
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoy.getDate()).padStart(2, '0');
+
+    // formatos posibles guardados en DB
+    const fecha1 = `${anio}-${mes}-${dia}`;
+    const fecha2 = `${parseInt(dia)}-${parseInt(mes)}-${anio}`;
+    const fecha3 = `${dia}-${mes}-${anio}`;
+
+    const query = `
+      SELECT 
+        a.id_usuario,
+        a.fecha,
+        c.nombre,
+        c.apellido
+      FROM dtc_asistencia a
+      INNER JOIN dtc_chicos c
+        ON c.id = a.id_usuario
+      WHERE (
+        a.fecha = ?
+        OR a.fecha = ?
+        OR a.fecha = ?
+      )
+    `;
+
+    const rows = await pool.query(query, [
+      fecha1,
+      fecha2,
+      fecha3
+    ]);
+
+    console.log('======Buenos dias!=======');
+    console.log('ASISTENCIA DE HOY 16 horas');
+    console.log('Fecha:', fecha1);
+    console.log('Cantidad presentes:', rows.length);
+    console.log('==============================');
+
+    let lista = '';
+
+    rows.forEach((item, index) => {
+      const nombreCompleto = `${item.nombre} ${item.apellido}`;
+
+      console.log(`${index + 1} - ${nombreCompleto}`);
+
+      lista += `${index + 1} - ${nombreCompleto}\n`;
+    });
+
+    console.log('==============================');
+
+    const mensaje = `📋 16:00 hs ASISTENCIA DE HOY
+
+📅 Fecha: ${fecha1}
+
+✅ Cantidad presentes: ${rows.length}
+
+👥 Lista:
+${lista}`;
+
+    // enviar whatsapp
+    await sendWhatsappMessage('5493794881903', mensaje);
+   await sendWhatsappMessage('5493795008689', mensaje);
+ 
+
+    console.log('WhatsApp enviados correctamente');
+
+  } catch (error) {
+    console.error('Error verificando asistencia:', error);
+  }
+});
 
 export default router;
 
