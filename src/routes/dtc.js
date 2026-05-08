@@ -7862,8 +7862,7 @@ cron.schedule('1 01 * * 1-5', async () => {
   }
 });
  
-
-cron.schedule('00 16 * * 1-5', async () => {
+cron.schedule('58 12 * * 1-5', async () => {
   try {
     const hoy = new Date();
 
@@ -7875,6 +7874,10 @@ cron.schedule('00 16 * * 1-5', async () => {
     const fecha1 = `${anio}-${mes}-${dia}`;
     const fecha2 = `${parseInt(dia)}-${parseInt(mes)}-${anio}`;
     const fecha3 = `${dia}-${mes}-${anio}`;
+
+    // =========================
+    // ASISTENCIA GENERAL
+    // =========================
 
     const query = `
       SELECT 
@@ -7914,21 +7917,66 @@ cron.schedule('00 16 * * 1-5', async () => {
       lista += `${index + 1} - ${nombreCompleto}\n`;
     });
 
+    // =========================
+    // ASISTENCIA POR TALLERISTA
+    // =========================
+
+    const queryClases = `
+      SELECT 
+        u.mail,
+        COUNT(ac.id) as cantidad
+      FROM dtc_asistencia_clase ac
+      INNER JOIN dtc_clases_taller ct
+        ON ac.id_clase = ct.id
+      INNER JOIN usuarios u
+        ON ct.id_talleristas = u.id
+      WHERE (
+        ac.fecha = ?
+        OR ac.fecha = ?
+        OR ac.fecha = ?
+      )
+      GROUP BY u.mail
+    `;
+
+    const clasesRows = await pool.query(queryClases, [
+      fecha1,
+      fecha2,
+      fecha3
+    ]);
+
+    console.log('====== PRESENTES EN CLASE ======');
+
+    let listaClases = '';
+
+    clasesRows.forEach((item, index) => {
+
+      console.log(
+        `${index + 1} - ${item.mail}: ${item.cantidad} presentes`
+      );
+
+      listaClases += `${index + 1} - ${item.mail}: ${item.cantidad} presentes\n`;
+    });
+
     console.log('==============================');
 
     const mensaje = `📋 16:00 hs ASISTENCIA DE HOY
 
 📅 Fecha: ${fecha1}
 
-✅ Cantidad presentes: ${rows.length}
+✅ Cantidad presentes general: ${rows.length}
 
 👥 Lista:
-${lista}`;
+${lista}
+
+🏫 PRESENTES EN CLASE
+
+${listaClases}`;
 
     // enviar whatsapp
     await sendWhatsappMessage('5493794881903', mensaje);
-   await sendWhatsappMessage('5493795008689', mensaje);
-   await sendWhatsappMessage('5493794702861', mensaje);
+    await sendWhatsappMessage('5493795008689', mensaje);
+    await sendWhatsappMessage('5493794702861', mensaje);
+
     console.log('WhatsApp enviados correctamente');
 
   } catch (error) {
