@@ -7862,7 +7862,7 @@ cron.schedule('1 01 * * 1-5', async () => {
   }
 });
  
-cron.schedule('58 12 * * 1-5', async () => {
+cron.schedule('00 16 * * 1-5', async () => {
   try {
     const hoy = new Date();
 
@@ -7929,7 +7929,7 @@ cron.schedule('58 12 * * 1-5', async () => {
       INNER JOIN dtc_clases_taller ct
         ON ac.id_clase = ct.id
       INNER JOIN usuarios u
-        ON ct.id_talleristas = u.id
+        ON ct.id_tallerista = u.id
       WHERE (
         ac.fecha = ?
         OR ac.fecha = ?
