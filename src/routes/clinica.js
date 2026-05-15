@@ -66,7 +66,7 @@ console.log("Webhook recibido:", type, data);
 
         await pool.query(
           `UPDATE turnos 
-           SET estado = 'confirmado'
+           SET estado = 'confirmado', modo_solicitud = 'web'
            WHERE id = ?`,
           [id_turno]
         );
@@ -319,7 +319,7 @@ router.get('/datospaciente/:id', async (req, res) => {
 
       const turnos = await pool.query('select * from turnos where id_paciente =?', [id])
 
-     const consultas = await pool.query('select * from turnos where id_paciente =?', [id])
+     const consultas = await pool.query('select * from consultas where id_paciente =?', [id])
     res.json([chiques, "imagenBase64", turnos, consultas])
   } catch (error) {
     console.log(error)
@@ -438,117 +438,236 @@ router.post('/borrarpaciente', isLoggedInncli, async (req, res) => {
   }
 });
 
-router.post('/guardarConsulta', async (req, res) => {
+// ==========================================
+// NUEVA CONSULTA
+// ==========================================
+router.post("/guardarConsulta", async (req, res) => {
   const {
     id_turno,
     id_paciente,
     motivo,
     evolucion,
     tratamiento,
-    fecha
+    fecha,
   } = req.body;
 
   try {
+    const turnoValido =
+      id_turno &&
+      id_turno !== "sin_turno";
 
-    // Normalizamos turno
-    const turnoValido = id_turno && id_turno !== "sin_turno";
-
-    // 🔹 Si no hay id_paciente y hay turno → buscar paciente
     let pacienteFinal = id_paciente;
 
+    // ==========================================
+    // BUSCAR PACIENTE DESDE TURNO
+    // ==========================================
     if (!pacienteFinal && turnoValido) {
       const turnoRows = await pool.query(
-        'SELECT id_paciente FROM turnos WHERE id = ?',
+        "SELECT id_paciente FROM turnos WHERE id = ?",
         [id_turno]
       );
 
       if (turnoRows.length === 0) {
-        return res.status(404).json({ message: 'Turno no encontrado' });
+        return res
+          .status(404)
+          .json({
+            message: "Turno no encontrado",
+          });
       }
 
-      pacienteFinal = turnoRows[0].id_paciente;
+      pacienteFinal =
+        turnoRows[0].id_paciente;
     }
 
     if (!pacienteFinal) {
-      return res.status(400).json({ message: 'Falta id_paciente' });
+      return res
+        .status(400)
+        .json({
+          message: "Falta id_paciente",
+        });
     }
 
-    // =====================================
-    // 🔹 CASO 1 → CONSULTA SIN TURNO
-    // =====================================
+    // ==========================================
+    // CONSULTA SIN TURNO
+    // ==========================================
     if (!turnoValido) {
-
-      await pool.query(
-        `INSERT INTO consultas
-         (id_paciente, motivo, evolucion, tratamiento, fecha)
-         VALUES (?, ?, ?, ?, ?)`,
+      const result = await pool.query(
+        `
+        INSERT INTO consultas
+        (
+          id_paciente,
+          motivo,
+          evolucion,
+          tratamiento,
+          fecha
+        )
+        VALUES (?, ?, ?, ?, ?)
+      `,
         [
           pacienteFinal,
           motivo,
           evolucion,
           tratamiento,
-          fecha || new Date()
+          fecha || new Date(),
         ]
       );
 
-      return res.json({ ok: true, creada: "sin_turno" });
+      return res.json({
+        ok: true,
+        accion: "creada",
+
+      });
     }
 
-    // =====================================
-    // 🔹 CASO 2 → CONSULTA CON TURNO
-    // =====================================
-
-    // Verifico si ya hay consulta para ese turno
-    const consultaExistente = await pool.query(
-      'SELECT id FROM consultas WHERE id_turno = ?',
+    // ==========================================
+    // VERIFICAR SI YA EXISTE
+    // ==========================================
+    const existente = await pool.query(
+      `
+      SELECT id
+      FROM consultas
+      WHERE id_turno = ?
+    `,
       [id_turno]
     );
 
-    if (consultaExistente.length === 0) {
-      // Insert
+    // ==========================================
+    // SI YA EXISTE → ERROR
+    // ==========================================
+    if (existente.length > 0) {
+      return res.status(409).json({
+        message:
+          "La consulta ya existe. Use modificarConsulta.",
+      });
+    }
+
+    // ==========================================
+    // INSERTAR CONSULTA
+    // ==========================================
+    const result = await pool.query(
+      `
+      INSERT INTO consultas
+      (
+        id_turno,
+        id_paciente,
+        motivo,
+        evolucion,
+        tratamiento,
+        fecha
+      )
+      VALUES (?, ?, ?, ?, ?, ?)
+    `,
+      [
+        id_turno,
+        pacienteFinal,
+        motivo,
+        evolucion,
+        tratamiento,
+        fecha || new Date(),
+      ]
+    );
+
+    // ==========================================
+    // ACTUALIZAR TURNO
+    // ==========================================
+    await pool.query(
+      `
+      UPDATE turnos
+      SET estado = 'Atendido'
+      WHERE id = ?
+    `,
+      [id_turno]
+    );
+
+    res.json({
+      ok: true,
+      accion: "creada",
+      id_consulta: result.insertId,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message:
+        "Error al guardar consulta",
+    });
+  }
+});
+
+
+
+// ==========================================
+// MODIFICAR CONSULTA
+// ==========================================
+router.post(
+  "/modificarConsulta",
+  async (req, res) => {
+    try {
+      const {
+        id,
+        motivo,
+        evolucion,
+        tratamiento,
+        fecha,
+      } = req.body;
+
+      // ==========================================
+      // VERIFICAR EXISTENCIA
+      // ==========================================
+      const consulta =
+        await pool.query(
+          `
+          SELECT id
+          FROM consultas
+          WHERE id = ?
+        `,
+          [id]
+        );
+
+      if (consulta.length === 0) {
+        return res.status(404).json({
+          message:
+            "Consulta no encontrada",
+        });
+      }
+
+      // ==========================================
+      // UPDATE
+      // ==========================================
       await pool.query(
-        `INSERT INTO consultas
-         (id_turno, id_paciente, motivo, evolucion, tratamiento, fecha)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [
-          id_turno,
-          pacienteFinal,
-          motivo,
-          evolucion,
-          tratamiento,
-          fecha || new Date()
-        ]
-      );
-    } else {
-      // Update
-      await pool.query(
-        `UPDATE consultas
-         SET motivo=?, evolucion=?, tratamiento=?, fecha=?
-         WHERE id_turno=?`,
+        `
+        UPDATE consultas
+        SET
+          motivo = ?,
+          evolucion = ?,
+          tratamiento = ?,
+          fecha = ?
+        WHERE id = ?
+      `,
         [
           motivo,
           evolucion,
           tratamiento,
           fecha || new Date(),
-          id_turno
+          id,
         ]
       );
+
+      res.json({
+        ok: true,
+        accion: "modificada",
+      });
+
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        message:
+          "Error al modificar consulta",
+      });
     }
-
-    // Marco turno atendido
-    await pool.query(
-      `UPDATE turnos SET estado='Atendido' WHERE id=?`,
-      [id_turno]
-    );
-
-    res.json({ ok: true, creada: "con_turno" });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al guardar consulta' });
   }
-});
-
+);
 
 router.post('/nuevoturnodisp',  async (req, res) => {
   try {
