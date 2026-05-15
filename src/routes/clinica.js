@@ -1,10 +1,10 @@
 import express from "express";
 const router = express.Router();
-
+import cron from "node-cron";
 import { isLoggedInncli } from "../lib/auth.js";
 import pool from "../database5.js";
 
-
+import { sendWhatsappMessage } from "./whatsapclient.js";
 
 import { Payment } from "mercadopago";
 
@@ -44,11 +44,17 @@ auto_return: "approved",
     res.status(500).json({ error: "Error Mercado Pago" });
   }
 });
+router.post("/success", async (req, res) => {
+console.loft("Pago exitoso:", req.body);
+res.send("¡Pago exitoso! Gracias por su compra.");
+});
+
+
 
 router.post("/webhook", async (req, res) => {
   try {
     const { type, data } = req.body;
-
+console.log("Webhook recibido:", type, data);
     if (type === "payment") {
       const paymentId = data.id;
 
@@ -64,8 +70,13 @@ router.post("/webhook", async (req, res) => {
            WHERE id = ?`,
           [id_turno]
         );
-
-        console.log("✅ Turno confirmado:", id_turno);
+try {
+      await sendWhatsappMessage("3794702861", mensaje);
+      console.log("✅ Mensaje de WhatsApp enviado a:", telefono);
+    } catch (error) {
+      console.log(error);
+    }
+        console.log("✅ Turno solicitado:", id_turno);
       }
     }
 
@@ -542,7 +553,6 @@ router.post('/guardarConsulta', async (req, res) => {
 router.post('/nuevoturnodisp',  async (req, res) => {
   try {
     let { fecha, hora, observaciones } = req.body;
-console.log(fecha, hora, observaciones )
     // Validaciones mínimas
     if (!fecha || !hora) {
       return res.status(400).json({ message: "Fecha y hora son obligatorias" });
@@ -581,7 +591,7 @@ router.post('/agendarapaciente',  async (req, res) => {
     }
 
     // Verificar que el turno exista
-    const [turno] = await pool.query(
+    const turno = await pool.query(
       "SELECT id FROM turnos WHERE id = ?",
       [id_turno]
     );
@@ -647,13 +657,18 @@ router.post("/solicitarturno", async (req, res) => {
       return res.status(409).json({ message: "Turno ya ocupado" });
     }
 
-    // 3. Reservar turno (estado pendiente de pago)
-/*     await pool.query(
-      `UPDATE turnos 
-       SET id_paciente = ?, categoria = ?, estado = 'pendiente_pago'
-       WHERE id = ?`,
-      [id_paciente, categoria, id_turno]
-    ); */
+  const vencimiento = new Date(Date.now() + 5 * 60 * 1000);
+
+await pool.query(
+  `UPDATE turnos
+   SET 
+      id_paciente = ?,
+      categoria = ?,
+      estado = 'pendiente_pago',
+      vencimiento_pago = ?
+   WHERE id = ?`,
+  [id_paciente, categoria, vencimiento, id_turno]
+);
 
     // 4. Crear preferencia de pago
 const preference = new Preference(client);
@@ -664,12 +679,12 @@ const preference = new Preference(client);
           {
             title: "Consulta Clínica",
             quantity: 1,
-            unit_price: 2000,
+            unit_price: 5000,
             currency_id: "ARS",
           },
         ],
         external_reference: String(id_turno), // MUY IMPORTANTE
-        notification_url: "https://unideographic-deborah-winnable.ngrok-free.dev/webhook",
+        notification_url: "https://unideographic-deborah-winnable.ngrok-free.dev/clinica/webhook",
      back_urls: {
   success: "https://unideographic-deborah-winnable.ngrok-free.dev/clinica/success",
   failure: "https://unideographic-deborah-winnable.ngrok-free.dev/clinica/failure",
@@ -690,5 +705,29 @@ auto_return: "approved",
     res.status(500).json({ message: "Error del servidor" });
   }
 });
+
+
+///cron.schedule("*/1 * * * *", async () => {
+ /*  try {
+
+    await pool.query(`
+      UPDATE turnos
+      SET
+        estado = 'libre',
+        id_paciente = NULL,
+        categoria = NULL,
+        vencimiento_pago = NULL
+      WHERE estado = 'pendiente_pago'
+      AND vencimiento_pago < NOW()
+    `);
+
+    console.log("✅ Turnos vencidos liberados");
+
+  } catch (error) {
+    console.log(error);
+  } */
+///});
+
+
 
 export default router;
