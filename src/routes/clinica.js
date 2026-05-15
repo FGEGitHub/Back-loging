@@ -106,7 +106,7 @@ router.get('/traerusuario/:cuil_cuit', async (req, res) => {
 
 
 
-router.get('/traerpacientes',isLoggedInncli, async (req, res) => {
+router.get('/traerpacientes', async (req, res) => {
 const    cuil_cuit = req.params.cuil_cuit
     const usuario = await pool.query('select * from pacientes where baja="No" ')
    
@@ -138,7 +138,7 @@ router.get('/traerTurnosDisponibles',  async (req, res) => {
 });
 
 
-router.get('/traerturnos', isLoggedInncli, async (req, res) => {
+router.get('/traerturnos',  async (req, res) => {
   try {
     const turnos = await pool.query(`
       SELECT 
@@ -707,8 +707,8 @@ auto_return: "approved",
 });
 
 
-///cron.schedule("*/1 * * * *", async () => {
- /*  try {
+//cron.schedule("*/1 * * * *", async () => {
+  /* try {
 
     await pool.query(`
       UPDATE turnos
@@ -725,8 +725,8 @@ auto_return: "approved",
 
   } catch (error) {
     console.log(error);
-  } */
-///});
+  } 
+}); */
 
 
 
