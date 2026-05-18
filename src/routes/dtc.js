@@ -7699,9 +7699,7 @@ router.post("/traerpresentes", async (req, res) => {
 router.post("/traerpresentescocina", async (req, res) => {
   const { fecha, id } = req.body
 
-  console.log(fecha)
-    usuarios = await pool.query("select * from dtc_chicos  join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=?) as sel on dtc_chicos.id=sel.id_usuario ", [fecha])
-    console.log(usuarios.length)
+  const  usuarios = await pool.query("select * from dtc_chicos  join (select fecha, id_usuario, id_tallerista from dtc_asistencia  where fecha=?) as sel on dtc_chicos.id=sel.id_usuario ", [fecha])
 //console.log(usuarios)
   res.json([usuarios])
 
