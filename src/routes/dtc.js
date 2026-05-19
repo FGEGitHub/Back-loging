@@ -1209,7 +1209,7 @@ router.get('/sumar1/:id', async (req, res) => {
 })
 
 router.get('/sumar1p/:id', async (req, res) => {
-  id = req.params.id
+  const id = req.params.id
   try {
     await pool.query(' UPDATE dtc_asistencia SET premerienda = premerienda + 1 where id=?', [id])
 
