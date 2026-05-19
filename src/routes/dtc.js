@@ -7863,78 +7863,208 @@ cron.schedule('1 01 * * 1-5', async () => {
 
 
 cron.schedule('00 18 * * 1-5', async () => {
+
   try {
+
     const hoy = new Date();
 
     const anio = hoy.getFullYear();
     const mes = String(hoy.getMonth() + 1).padStart(2, '0');
     const dia = String(hoy.getDate()).padStart(2, '0');
 
-    // formatos posibles guardados en DB
-    const fecha1 = `${anio}-${mes}-${dia}`;
-    const fecha2 = `${parseInt(dia)}-${parseInt(mes)}-${anio}`;
-    const fecha3 = `${dia}-${mes}-${anio}`;
+    const fechaHoy = `${anio}-${mes}-${dia}`;
 
-    const query = `
+    // =====================================
+    // ASISTENCIA GENERAL DEL DIA
+    // =====================================
+    const queryGeneral = `
       SELECT 
-        a.id_usuario,
-        a.fecha,
-        c.nombre,
-        c.apellido
+        a.id_usuario
       FROM dtc_asistencia a
-      INNER JOIN dtc_chicos c
-        ON c.id = a.id_usuario
-      WHERE (
-        a.fecha = ?
-        OR a.fecha = ?
-        OR a.fecha = ?
-      )
+      WHERE a.fecha = ?
     `;
 
-    const rows = await pool.query(query, [
-      fecha1,
-      fecha2,
-      fecha3
-    ]);
+    const asistenciaGeneral = await pool.query(
+      queryGeneral,
+      [fechaHoy]
+    );
 
-    console.log('======Buenos dias!=======');
-    console.log('ASISTENCIA DE HOY 16 horas');
-    console.log('Fecha:', fecha1);
-    console.log('Cantidad presentes:', rows.length);
-    console.log('==============================');
+    // =====================================
+    // MENSAJE 1 - ASISTENCIA GENERAL
+    // =====================================
+    const mensajeGeneral = `
+📋 ASISTENCIA GENERAL
 
-    let lista = '';
+📅 FECHA: ${fechaHoy}
 
-    rows.forEach((item, index) => {
-      const nombreCompleto = `${item.nombre} ${item.apellido}`;
+✅ CANTIDAD PRESENTES: ${asistenciaGeneral.length}
+    `;
 
-      console.log(`${index + 1} - ${nombreCompleto}`);
 
-      lista += `${index + 1} - ${nombreCompleto}\n`;
+
+    // =====================================
+    // BUSCAR CLASES DEL DIA
+    // =====================================
+    const queryClases = `
+      SELECT 
+        ct.id,
+        ct.hora,
+        ct.fecha,
+        ct.id_tallerista,
+        u.mail
+      FROM dtc_clases_taller ct
+      INNER JOIN usuarios u
+        ON u.id = ct.id_tallerista
+      WHERE ct.fecha = ?
+      ORDER BY u.mail ASC, ct.hora ASC
+    `;
+
+    const clases = await pool.query(queryClases, [fechaHoy]);
+
+    let clasesSinPresentes = [];
+
+    let resumenClases = {};
+
+    for (const clase of clases) {
+
+      // =====================================
+      // BUSCAR ASISTENCIA DE CLASE
+      // =====================================
+      const queryAsistenciaClase = `
+        SELECT 
+          ac.id
+        FROM dtc_asistencia_clase ac
+        WHERE ac.id_clase = ?
+      `;
+
+      const asistencias = await pool.query(
+        queryAsistenciaClase,
+        [clase.id]
+      );
+
+      // MAIL = NOMBRE CLASE
+      const nombreClase = clase.mail;
+
+      // CREAR GRUPO
+      if (!resumenClases[nombreClase]) {
+
+        resumenClases[nombreClase] = [];
+
+      }
+
+      // =====================================
+      // CON PRESENTES
+      // =====================================
+      if (asistencias.length > 0) {
+
+        resumenClases[nombreClase].push({
+          hora: clase.hora,
+          cantidad: asistencias.length
+        });
+
+      } else {
+
+        // =====================================
+        // SIN PRESENTES
+        // =====================================
+        clasesSinPresentes.push({
+          clase: nombreClase,
+          hora: clase.hora
+        });
+
+      }
+
+    }
+
+    // =====================================
+    // ARMAR MENSAJE 2
+    // =====================================
+    let mensajeClases = `
+==============================
+REPORTE CLASES
+FECHA: ${fechaHoy}
+==============================
+`;
+
+    // CLASES CON PRESENTES
+    Object.keys(resumenClases).forEach((nombreClase) => {
+
+      const horarios = resumenClases[nombreClase];
+
+      if (horarios.length > 0) {
+
+        mensajeClases += `CLASE: ${nombreClase}\n`;
+
+        horarios.forEach((item) => {
+
+          mensajeClases += `HORA: ${item.hora}\n`;
+          mensajeClases += `CANTIDAD PRESENTES: ${item.cantidad}\n`;
+
+        });
+
+        mensajeClases += `------------------------------\n`;
+
+      }
+
     });
 
-    console.log('==============================');
+    // CLASES SIN PRESENTES
+    mensajeClases += `CLASES SIN PRESENTES\n`;
+    mensajeClases += `==============================\n`;
 
-    const mensaje = `📋 18:00 hs ASISTENCIA FINAL DE JORNADA
+    if (clasesSinPresentes.length === 0) {
 
-📅 Fecha: ${fecha1}
+      mensajeClases += `TODAS LAS CLASES TUVIERON PRESENTES\n`;
 
-✅ Cantidad presentes: ${rows.length}
+    } else {
 
-👥 Lista:
-${lista}`;
+      clasesSinPresentes.forEach((item, index) => {
 
-    // enviar whatsapp
-    await sendWhatsappMessage('5493794881903', mensaje);
-   await sendWhatsappMessage('5493795008689', mensaje);
- 
+        mensajeClases += `${index + 1} - CLASE: ${item.clase} | HORA: ${item.hora}\n`;
 
-    console.log('WhatsApp enviados correctamente');
+      });
+
+    }
+
+
+    // =====================================
+    // ENVIAR WHATSAPP
+    // TOTAL 4 MENSAJES
+    // =====================================
+
+    // MENSAJE GENERAL
+    await sendWhatsappMessage(
+      '5493794881903',
+      mensajeGeneral
+    );
+
+    await sendWhatsappMessage(
+      '5493795008689',
+      mensajeGeneral
+    );
+
+    // MENSAJE CLASES
+    await sendWhatsappMessage(
+      '5493794881903',
+      mensajeClases
+    );
+
+    await sendWhatsappMessage(
+      '5493795008689',
+      mensajeClases
+    );
+
+    console.log('WHATSAPP ENVIADOS CORRECTAMENTE');
 
   } catch (error) {
+
     console.error('Error verificando asistencia:', error);
+
   }
+
 });
+
+
 
 export default router;
 
