@@ -18,6 +18,24 @@ function verifyToken(req, secret) {
   }
 }
 
+
+export const verifyTokenclin = (req, secret) => {
+  const authorization = req.get('authorization')
+
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    const token = authorization.substring(7)
+
+    try {
+      return jwt.verify(token, secret)
+    } catch (error) {
+      return null
+    }
+  }
+
+  return null
+}
+
+
 // =======================
 // Middlewares
 // =======================
@@ -65,13 +83,15 @@ export function isLoggedInn5(req, res, next) {
 }
 
 export function isLoggedInncli(req, res, next) {
-  const decodedToken = verifyToken(req, "clin123");
+  const decodedToken = verifyToken(req, "clin123")
+
+  console.log(decodedToken)
 
   if (!decodedToken?.id) {
-    return res.status(401).send("error login");
+    return res.status(401).send("error login")
   }
 
-  next();
+  next()
 }
 
 // =======================
