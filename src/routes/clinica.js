@@ -70,9 +70,11 @@ console.log("Webhook recibido:", type, data);
            WHERE id = ?`,
           [id_turno]
         );
+        console.log("Turno confirmado:", id_turno);
 try {
-      await sendWhatsappMessage("3794702861", mensaje);
-      console.log("✅ Mensaje de WhatsApp enviado a:", telefono);
+  const mensajee  ="confirmado"
+      await sendWhatsappMessage("5493794702861", mensajee);
+      console.log("✅ Mensaje de WhatsApp enviado a:", 34784);
     } catch (error) {
       console.log(error);
     }
@@ -313,6 +315,52 @@ router.post('/agregarPersona', isLoggedInncli, async (req, res) => {
   }
 });
 
+
+
+router.get('/estadoSolicitud/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+
+    const rows = await pool.query(
+      `
+      SELECT 
+        id,
+        estado,
+        vencimiento_pago
+      FROM turnos
+      WHERE id = ?
+      `,
+      [id]
+    );
+
+    // no existe
+    if (rows.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        mensaje: 'Solicitud no encontrada',
+      });
+    }
+
+    // devolver datos
+    return res.json({
+      ok: true,
+      solicitud: rows[0],
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      ok: false,
+      mensaje: 'Error del servidor',
+    });
+  }
+});
+
+
+
+
 router.get('/datospaciente/:id', async (req, res) => {
   const id = req.params.id
   try {  const chiques = await pool.query('select * from pacientes where id =?', [id])
@@ -441,7 +489,75 @@ router.post('/borrarpaciente', isLoggedInncli, async (req, res) => {
 // ==========================================
 // NUEVA CONSULTA
 // ==========================================
-router.post("/guardarConsulta", async (req, res) => {
+
+router.post(
+  "/guardarConsultanueva",
+  isLoggedInncli,
+  async (req, res) => {
+    const {
+      id_paciente,
+      motivo,
+      evolucion,
+      tratamiento,
+      fecha,
+    } = req.body;
+
+    try {
+      // ==========================================
+      // VALIDAR PACIENTE
+      // ==========================================
+      if (!id_paciente) {
+        return res.status(400).json({
+          message: "Falta id_paciente",
+        });
+      }
+
+      // ==========================================
+      // CREAR CONSULTA
+      // ==========================================
+      const result = await pool.query(
+        `
+        INSERT INTO consultas
+        (
+          id_paciente,
+          motivo,
+          evolucion,
+          tratamiento,
+          fecha
+        )
+        VALUES (?, ?, ?, ?, ?)
+      `,
+        [
+          id_paciente,
+          motivo,
+          evolucion,
+          tratamiento,
+          fecha || new Date(),
+        ]
+      );
+
+      res.json({
+        ok: true,
+        accion: "creada",
+    
+      });
+    } catch (error) {
+      console.error(error);
+
+      res.status(500).json({
+        message:
+          "Error al guardar consulta",
+      });
+    }
+  }
+);
+
+
+
+
+
+////////referente  a un turno, traer datos del paciente y consultas asociadas a ese turno
+router.post("/guardarConsulta",isLoggedInncli, async (req, res) => {
   const {
     id_turno,
     id_paciente,
@@ -467,7 +583,7 @@ router.post("/guardarConsulta", async (req, res) => {
         [id_turno]
       );
 
-      if (turnoRows.length === 0) {
+      if (turnoRows.length == 0) {
         return res
           .status(404)
           .json({
@@ -582,7 +698,7 @@ router.post("/guardarConsulta", async (req, res) => {
     res.json({
       ok: true,
       accion: "creada",
-      id_consulta: result.insertId,
+   
     });
   } catch (error) {
     console.error(error);
