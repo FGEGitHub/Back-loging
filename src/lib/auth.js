@@ -83,7 +83,7 @@ export function isLoggedInn5(req, res, next) {
 }
 
 export function isLoggedInncli(req, res, next) {
-  const decodedToken = verifyToken(req, "clin123")
+  const decodedToken = verifyTokenclin(req, "clin123")
 
   console.log(decodedToken)
 
