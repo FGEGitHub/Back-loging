@@ -559,7 +559,7 @@ router.post(
 
 router.get(
   "/traerodontograma/:id",
-  isLoggedInncli,
+ 
   async (req, res) => {
 
     try {
