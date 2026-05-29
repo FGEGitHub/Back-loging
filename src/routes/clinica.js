@@ -238,9 +238,9 @@ router.post('/crearturno', isLoggedInncli, async (req, res) => {
     }
 });
 
-
 router.post('/agregarPersona', isLoggedInncli, async (req, res) => {
   try {
+
     const {
       nombre,
       apellido,
@@ -251,16 +251,38 @@ router.post('/agregarPersona', isLoggedInncli, async (req, res) => {
       telefono,
       direccion,
       obra_social,
-      numero_afiliado
+      numero_afiliado,
+      email,
+      observaciones,
+
+      hospitalizacion_2_anios,
+      atencion_medica_6_meses,
+      tratamientos_quirurgicos,
+      medicacion_actual,
+      alergias,
+      grupo_sanguineo,
+      antecedentes_hereditarios,
+      problemas_coagulacion,
+      fuma,
+      embarazo,
+      anticonceptivos,
+      presion_arterial,
+      hta,
+      enfermedades_sistemicas,
+      enfermedades_transmision_sexual,
+      hiv
+
     } = req.body;
 
     if (!dni) {
       return res.status(400).json('El DNI es obligatorio');
     }
 
-    // 🔎 Verificar si ya existe el DNI (y que no esté dado de baja)
+    // 🔎 Verificar si ya existe el DNI
     const existe = await pool.query(
-      `SELECT id FROM pacientes WHERE dni = ? AND baja = 'No'`,
+      `SELECT id FROM pacientes 
+       WHERE dni = ? 
+       AND baja = 'No'`,
       [dni]
     );
 
@@ -273,7 +295,7 @@ router.post('/agregarPersona', isLoggedInncli, async (req, res) => {
 
     // ➕ Insertar paciente
     const sql = `
-      INSERT INTO pacientes 
+      INSERT INTO pacientes
       (
         nombre,
         apellido,
@@ -284,12 +306,37 @@ router.post('/agregarPersona', isLoggedInncli, async (req, res) => {
         telefono,
         direccion,
         obra_social,
-        numero_afiliado
+        numero_afiliado,
+        email,
+        observaciones,
+
+        hospitalizacion_2_anios,
+        atencion_medica_6_meses,
+        tratamientos_quirurgicos,
+        medicacion_actual,
+        alergias,
+        grupo_sanguineo,
+        antecedentes_hereditarios,
+        problemas_coagulacion,
+        fuma,
+        embarazo,
+        anticonceptivos,
+        presion_arterial,
+        hta,
+        enfermedades_sistemicas,
+        enfermedades_transmision_sexual,
+        hiv
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+
+      VALUES
+      (
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+      )
     `;
 
     const values = [
+
       nombre || null,
       apellido || null,
       dni,
@@ -299,7 +346,27 @@ router.post('/agregarPersona', isLoggedInncli, async (req, res) => {
       telefono || null,
       direccion || null,
       obra_social || null,
-      numero_afiliado || null
+      numero_afiliado || null,
+      email || null,
+      observaciones || null,
+
+      hospitalizacion_2_anios || null,
+      atencion_medica_6_meses || null,
+      tratamientos_quirurgicos || null,
+      medicacion_actual || null,
+      alergias || null,
+      grupo_sanguineo || null,
+      antecedentes_hereditarios || null,
+      problemas_coagulacion || null,
+      fuma || null,
+      embarazo || null,
+      anticonceptivos || null,
+      presion_arterial || null,
+      hta || null,
+      enfermedades_sistemicas || null,
+      enfermedades_transmision_sexual || null,
+      hiv || null
+
     ];
 
     await pool.query(sql, values);
@@ -310,11 +377,17 @@ router.post('/agregarPersona', isLoggedInncli, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error al agregar paciente:', error);
-    res.status(500).json('Error al agregar paciente');
+
+    console.error(
+      'Error al agregar paciente:',
+      error
+    );
+
+    res.status(500).json(
+      'Error al agregar paciente'
+    );
   }
 });
-
 
 
 router.get('/estadoSolicitud/:id', async (req, res) => {
@@ -504,10 +577,7 @@ router.post(
         "GUARDANDO:"
       );
 
-      console.log(
-        odontograma
-      );
-
+    
       // buscar si existe
 
       const sqlBuscar = `
