@@ -490,7 +490,7 @@ router.post('/borrarpaciente', isLoggedInncli, async (req, res) => {
 
 router.post(
   "/guardarodontogramapaciente",
- 
+  
   async (req, res) => {
 
     try {
@@ -500,43 +500,81 @@ router.post(
         odontograma,
       } = req.body;
 
-      // =========================
-      // MOSTRAR EN CONSOLA
-      // =========================
-
-      // =========================
-      // GUARDAR MYSQL
-      // =========================
-
-      const sql = `
-        INSERT INTO odontogramas
-        (
-          id_paciente,
-          odontograma
-        )
-        VALUES (?, ?)
-      `;
-
-      await pool.query(
-        sql,
-        [
-          id_paciente,
-          JSON.stringify(
-            odontograma
-          ),
-        ]
+      console.log(
+        "GUARDANDO:"
       );
 
-      // =========================
-      // RESPUESTA
-      // =========================
+      console.log(
+        odontograma
+      );
+
+      // buscar si existe
+
+      const sqlBuscar = `
+        SELECT *
+        FROM odontogramas
+        WHERE id_paciente = ?
+      `;
+
+      const rows =
+        await pool.query(
+          sqlBuscar,
+          [id_paciente]
+        );
+
+      // SI EXISTE -> UPDATE
+
+      if (
+        rows.length > 0
+      ) {
+
+        const sqlUpdate = `
+          UPDATE odontogramas
+          SET odontograma = ?
+          WHERE id_paciente = ?
+        `;
+
+        await pool.query(
+          sqlUpdate,
+          [
+            JSON.stringify(
+              odontograma
+            ),
+
+            id_paciente,
+          ]
+        );
+
+      }
+
+      // SI NO EXISTE -> INSERT
+
+      else {
+
+        const sqlInsert = `
+          INSERT INTO odontogramas
+          (
+            id_paciente,
+            odontograma
+          )
+          VALUES (?, ?)
+        `;
+
+        await pool.query(
+          sqlInsert,
+          [
+            id_paciente,
+
+            JSON.stringify(
+              odontograma
+            ),
+          ]
+        );
+      }
 
       res.status(200).json({
 
         ok: true,
-
-        message:
-          "Odontograma guardado correctamente",
 
       });
 
@@ -548,14 +586,12 @@ router.post(
 
         ok: false,
 
-        error:
-          "Error servidor",
-
       });
 
     }
   }
 );
+
 
 router.get(
   "/traerodontograma/:id",
@@ -569,9 +605,8 @@ router.get(
 
       const sql = `
         SELECT *
-        FROM odontogramas 
+        FROM odontogramas
         WHERE id_paciente = ?
-        ORDER BY fecha DESC
         LIMIT 1
       `;
 
@@ -580,12 +615,6 @@ router.get(
           sql,
           [id_paciente]
         );
-
-      console.log(
-        "ROWS:"
-      );
-
-      console.log(rows);
 
       if (
         rows.length === 0
@@ -598,32 +627,13 @@ router.get(
         });
       }
 
-      console.log(
-        "TIPO:"
-      );
-
-      console.log(
-        typeof rows[0]
-        .odontograma
-      );
-
-      console.log(
-        "ODONTOGRAMA:"
-      );
-
-      console.log(
-        rows[0]
-        .odontograma
-      );
-
-      // IMPORTANTE:
-      // NO HACER JSON.parse
-
       res.status(200).json({
 
         odontograma:
-          rows[0]
-          .odontograma,
+          JSON.parse(
+            rows[0]
+            .odontograma
+          ),
 
       });
 
@@ -634,9 +644,6 @@ router.get(
       res.status(500).json({
 
         ok: false,
-
-        error:
-          "Error servidor",
 
       });
 
