@@ -1,7 +1,7 @@
 import express from "express";
 const router = express.Router();
 import cron from "node-cron";
-import { isLoggedInncli } from "../lib/auth.js";
+import { } from "../lib/auth.js";
 import pool from "../database5.js";
 
 import { sendWhatsappMessage } from "./whatsapclient.js";
@@ -162,7 +162,7 @@ router.get('/traerturnos',  async (req, res) => {
   }
 });
 
-router.post('/modificarusuario', isLoggedInncli, async (req, res) => {
+router.post('/modificarusuario',  async (req, res) => {
   try {
     const { id, ...datos } = req.body;
 
@@ -202,7 +202,7 @@ router.post('/modificarusuario', isLoggedInncli, async (req, res) => {
 
 
 
-router.post('/crearturno', isLoggedInncli, async (req, res) => {
+router.post('/crearturno',  async (req, res) => {
     try {
         const {
             id_paciente,
@@ -238,7 +238,7 @@ router.post('/crearturno', isLoggedInncli, async (req, res) => {
     }
 });
 
-router.post('/agregarPersona', isLoggedInncli, async (req, res) => {
+router.post('/agregarPersona',  async (req, res) => {
   try {
 
     const {
@@ -522,7 +522,7 @@ router.get('/traerTurnoDetalle/:id', async (req, res) => {
 
 
 
-router.post('/borrarpaciente', isLoggedInncli, async (req, res) => {
+router.post('/borrarpaciente',  async (req, res) => {
   const conn = await pool.getConnection();
 
   try {
@@ -726,7 +726,7 @@ router.get(
 
 router.post(
   "/guardarConsultanueva",
-  isLoggedInncli,
+  
   async (req, res) => {
     const {
       id_paciente,
@@ -791,7 +791,7 @@ router.post(
 
 
 ////////referente  a un turno, traer datos del paciente y consultas asociadas a ese turno
-router.post("/guardarConsulta",isLoggedInncli, async (req, res) => {
+router.post("/guardarConsulta", async (req, res) => {
   const {
     id_turno,
     id_paciente,
