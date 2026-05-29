@@ -490,7 +490,7 @@ router.post('/borrarpaciente', isLoggedInncli, async (req, res) => {
 
 router.post(
   "/guardarodontogramapaciente",
-  isLoggedInncli,
+ 
   async (req, res) => {
 
     try {
