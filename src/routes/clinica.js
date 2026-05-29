@@ -486,6 +486,163 @@ router.post('/borrarpaciente', isLoggedInncli, async (req, res) => {
   }
 });
 
+
+
+router.post(
+  "/guardarodontogramapaciente",
+  isLoggedInncli,
+  async (req, res) => {
+
+    try {
+
+      const {
+        id_paciente,
+        odontograma,
+      } = req.body;
+
+      // =========================
+      // MOSTRAR EN CONSOLA
+      // =========================
+
+      // =========================
+      // GUARDAR MYSQL
+      // =========================
+
+      const sql = `
+        INSERT INTO odontogramas
+        (
+          id_paciente,
+          odontograma
+        )
+        VALUES (?, ?)
+      `;
+
+      await pool.query(
+        sql,
+        [
+          id_paciente,
+          JSON.stringify(
+            odontograma
+          ),
+        ]
+      );
+
+      // =========================
+      // RESPUESTA
+      // =========================
+
+      res.status(200).json({
+
+        ok: true,
+
+        message:
+          "Odontograma guardado correctamente",
+
+      });
+
+    } catch (error) {
+
+      console.log(error);
+
+      res.status(500).json({
+
+        ok: false,
+
+        error:
+          "Error servidor",
+
+      });
+
+    }
+  }
+);
+
+router.get(
+  "/traerodontograma/:id",
+  isLoggedInncli,
+  async (req, res) => {
+
+    try {
+
+      const id_paciente =
+        req.params.id;
+
+      const sql = `
+        SELECT *
+        FROM odontogramas 
+        WHERE id_paciente = ?
+        ORDER BY fecha DESC
+        LIMIT 1
+      `;
+
+      const rows =
+        await pool.query(
+          sql,
+          [id_paciente]
+        );
+
+      console.log(
+        "ROWS:"
+      );
+
+      console.log(rows);
+
+      if (
+        rows.length === 0
+      ) {
+
+        return res
+        .status(200)
+        .json({
+          odontograma: {},
+        });
+      }
+
+      console.log(
+        "TIPO:"
+      );
+
+      console.log(
+        typeof rows[0]
+        .odontograma
+      );
+
+      console.log(
+        "ODONTOGRAMA:"
+      );
+
+      console.log(
+        rows[0]
+        .odontograma
+      );
+
+      // IMPORTANTE:
+      // NO HACER JSON.parse
+
+      res.status(200).json({
+
+        odontograma:
+          rows[0]
+          .odontograma,
+
+      });
+
+    } catch (error) {
+
+      console.log(error);
+
+      res.status(500).json({
+
+        ok: false,
+
+        error:
+          "Error servidor",
+
+      });
+
+    }
+  }
+);
 // ==========================================
 // NUEVA CONSULTA
 // ==========================================
