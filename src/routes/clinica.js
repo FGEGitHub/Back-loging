@@ -108,9 +108,9 @@ router.get('/traerusuario/:cuil_cuit', async (req, res) => {
 
 
 
-router.get('/traerpacientes', async (req, res) => {
-const    cuil_cuit = req.params.cuil_cuit
-    const usuario = await pool.query('select * from pacientes where baja="No" ')
+router.get('/traerpacientes/:id', async (req, res) => {
+const    id = req.params.id
+    const usuario = await pool.query('select * from pacientes where baja="No" and id_usuario= ? ', [id])
    
     res.json(usuario)
 
@@ -138,6 +138,31 @@ router.get('/traerTurnosDisponibles',  async (req, res) => {
     res.status(500).json({ error: 'Error al traer turnos' });
   }
 });
+
+
+
+router.get('/traerturnosusuario/:id',  async (req, res) => {
+  try {
+    const turnos = await pool.query(`
+      SELECT 
+        t.*, 
+        p.nombre,
+        p.apellido,
+        p.dni,
+        p.id AS id_pacientee
+      FROM turnos t
+      LEFT JOIN pacientes p ON t.id_paciente = p.id
+      where t.baja="No" AND t.id_usuario = ?
+      ORDER BY t.hora ASC, p.dni ASC
+    `, [req.params.id]);
+
+    res.json(turnos);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Error al traer turnos' });
+  }
+});
+
 
 
 router.get('/traerturnos',  async (req, res) => {
@@ -238,6 +263,72 @@ router.post('/crearturno',  async (req, res) => {
     }
 });
 
+
+router.post('/actualizarPerfil', async (req, res) => {
+  try {
+    const {
+      id,
+      nombre_clinica,
+      foto,
+      color_nav,
+      color_fondo
+    } = req.body;
+
+    const campos = [];
+    const values = [];
+
+    if (nombre_clinica !== undefined) {
+      campos.push('nombre_clinica = ?');
+      values.push(nombre_clinica);
+    }
+
+    if (foto !== undefined) {
+      campos.push('foto = ?');
+      values.push(foto);
+    }
+
+    if (color_nav !== undefined) {
+      campos.push('color_nav = ?');
+      values.push(color_nav);
+    }
+
+    if (color_fondo !== undefined) {
+      campos.push('color_fondo = ?');
+      values.push(color_fondo);
+    }
+
+    if (campos.length === 0) {
+      return res.status(400).json({
+        error: 'No se recibieron campos para actualizar'
+      });
+    }
+
+    values.push(id);
+
+    const sql = `
+      UPDATE usuarios
+      SET ${campos.join(', ')}
+      WHERE id = ?
+    `;
+
+    await pool.query(sql, values);
+
+    res.json({
+      success: true,
+      message: 'Perfil actualizado correctamente'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: 'Error al actualizar perfil'
+    });
+  }
+});
+
+
+
+
 router.post('/agregarPersona',  async (req, res) => {
   try {
 
@@ -270,7 +361,8 @@ router.post('/agregarPersona',  async (req, res) => {
       hta,
       enfermedades_sistemicas,
       enfermedades_transmision_sexual,
-      hiv
+      hiv,
+      id_usuario
 
     } = req.body;
 
@@ -325,13 +417,14 @@ router.post('/agregarPersona',  async (req, res) => {
         hta,
         enfermedades_sistemicas,
         enfermedades_transmision_sexual,
-        hiv
+        hiv,
+        id_usuario
       )
 
       VALUES
       (
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?
       )
     `;
 
@@ -365,7 +458,8 @@ router.post('/agregarPersona',  async (req, res) => {
       hta || null,
       enfermedades_sistemicas || null,
       enfermedades_transmision_sexual || null,
-      hiv || null
+      hiv || null,
+      id_usuario || null
 
     ];
 
@@ -451,6 +545,11 @@ router.get('/datospaciente/:id', async (req, res) => {
 ////////////////////traerusuario
 
 
+router.get('/traerperfil/:id', async (req, res) => {
+  const { id } = req.params;
+const usuariod =  await pool.query('select * from usuarios where id =?', [id])
+res.json(usuariod[0])
+})
 router.get('/traerTurnoDetalle/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -1021,7 +1120,7 @@ router.post(
 
 router.post('/nuevoturnodisp',  async (req, res) => {
   try {
-    let { fecha, hora, observaciones } = req.body;
+    let { fecha, hora, observaciones, id_usuario } = req.body;
     // Validaciones mínimas
     if (!fecha || !hora) {
       return res.status(400).json({ message: "Fecha y hora son obligatorias" });
@@ -1034,11 +1133,11 @@ router.post('/nuevoturnodisp',  async (req, res) => {
 
     const sql = `
       INSERT INTO turnos
-      (fecha, hora, observaciones)
-      VALUES (?, ?, ?)
+      (fecha, hora, observaciones, id_usuario)
+      VALUES (?, ?, ?, ?)
     `;
 
-    await pool.query(sql, [fecha, hora, observaciones]);
+    await pool.query(sql, [fecha, hora, observaciones, id_usuario]);
 
     res.json({ message: "Turno creado correctamente" });
 
