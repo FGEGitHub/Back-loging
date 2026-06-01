@@ -7,11 +7,14 @@ import {
   isLoggedInn2,
   isLoggedInn4
 } from "../lib/auth.js";
+
 router.post("/equipo", async (req, res) => {
-  const { equipo, jugadores } = req.body;
+  const { equipo, jugadores, capitan } = req.body;
 
   if (!equipo || !jugadores || jugadores.length < 3) {
-    return res.status(400).json({ error: "Datos inválidos" });
+    return res.status(400).json({
+      error: "Datos inválidos",
+    });
   }
 
   const connection = await pool.getConnection();
@@ -21,7 +24,7 @@ router.post("/equipo", async (req, res) => {
 
     const dnis = jugadores.map(j => j.dni);
 
-    // 🔎 Buscar DNIs existentes
+    // Buscar DNIs existentes
     const existentes = await connection.query(
       `SELECT j.dni, e.nombre AS equipo
        FROM jugadores j
@@ -43,20 +46,54 @@ router.post("/equipo", async (req, res) => {
       });
     }
 
-    // 🏀 Insertar equipo
+    // Crear equipo
     const equipoResult = await connection.query(
-      `INSERT INTO equipos (nombre) VALUES (?)`,
+      `INSERT INTO equipos (nombre)
+       VALUES (?)`,
       [equipo]
     );
 
     const idEquipo = equipoResult.insertId;
 
-    // 👥 Insertar jugadores uno por uno
+    let idCapitan = null;
+
+    // Insertar jugadores
     for (const j of jugadores) {
+      const jugadorResult = await connection.query(
+        `INSERT INTO jugadores (
+          nombre,
+          apellido,
+          dni,
+          telefono,
+          email,
+          fecha_nacimiento,
+          id_equipo
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          j.nombre,
+          j.apellido,
+          j.dni,
+          j.telefono || null,
+          j.email || null,
+          j.fechaNacimiento || null,
+          idEquipo,
+        ]
+      );
+
+      // Si coincide con el DNI del capitán, guardamos su ID
+      if (String(j.dni) === String(capitan)) {
+        idCapitan = jugadorResult.insertId;
+      }
+    }
+
+    // Actualizar el equipo con el capitán
+    if (idCapitan) {
       await connection.query(
-        `INSERT INTO jugadores (nombre, apellido, dni, id_equipo)
-         VALUES (?, ?, ?, ?)`,
-        [j.nombre, j.apellido, j.dni, idEquipo]
+        `UPDATE equipos
+         SET id_capitan = ?
+         WHERE id = ?`,
+        [idCapitan, idEquipo]
       );
     }
 
@@ -64,13 +101,16 @@ router.post("/equipo", async (req, res) => {
 
     res.json({
       ok: true,
-      
+    
     });
 
   } catch (error) {
     await connection.rollback();
     console.error(error);
-    res.status(500).json({ error: "Error en el servidor" });
+
+    res.status(500).json({
+      error: "Error en el servidor",
+    });
   } finally {
     connection.release();
   }
