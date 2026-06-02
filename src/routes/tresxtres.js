@@ -153,6 +153,133 @@ router.get("/traertorneo/:id", async (req, res) => {
 });
 
 
+router.post("/guardarZonasTorneo", async (req, res) => {
+  const { id_torneo, zonas } = req.body;
+
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    // Buscar zonas existentes del torneo
+    const zonasExistentes = await connection.query(
+      `
+      SELECT id
+      FROM zonas_3x3
+      WHERE id_torneo = ?
+      `,
+      [id_torneo]
+    );
+
+    // Borrar participaciones anteriores
+    for (const zona of zonasExistentes) {
+      await connection.query(
+        `
+        DELETE FROM participacion_3x3
+        WHERE id_zona = ?
+        `,
+        [zona.id]
+      );
+    }
+
+    // Borrar zonas anteriores
+    await connection.query(
+      `
+      DELETE FROM zonas_3x3
+      WHERE id_torneo = ?
+      `,
+      [id_torneo]
+    );
+
+    // Crear nuevamente las zonas
+    for (let i = 0; i < zonas.length; i++) {
+      const zona = zonas[i];
+
+      const zonaResult = await connection.query(
+        `
+        INSERT INTO zonas_3x3
+        (
+          nombre,
+          id_torneo
+        )
+        VALUES (?, ?)
+        `,
+        [
+          zona.nombre,
+          id_torneo
+        ]
+      );
+
+      const idZona = zonaResult.insertId;
+
+      // Guardar equipos participantes
+      for (let j = 0; j < zona.equipos.length; j++) {
+        const equipo = zona.equipos[j];
+
+        await connection.query(
+          `
+          INSERT INTO participacion_3x3
+          (
+            id_equipo,
+            id_zona
+          )
+          VALUES (?, ?)
+          `,
+          [
+            equipo.id_equipo,
+            idZona
+          ]
+        );
+      }
+    }
+
+    await connection.commit();
+
+    res.json({
+      ok: true
+    });
+
+  } catch (error) {
+    await connection.rollback();
+
+    console.error(error);
+
+    res.status(500).json({
+      ok: false,
+      error: "Error al guardar zonas"
+    });
+
+  } finally {
+    connection.release();
+  }
+});
+
+router.get("/torneos/:id/estado", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const zonas = await pool.query(
+      `
+      SELECT id
+      FROM zonas_3x3
+      WHERE id_torneo = ?
+      LIMIT 1
+      `,
+      [id]
+    );
+
+    res.json({
+      tieneZonas: zonas.length > 0
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error" });
+  }
+});
+
+
+
 router.get("/traerJugadores", async (req, res) => {
   try {
     const rows = await pool.query(`
@@ -176,6 +303,34 @@ router.get("/traerJugadores", async (req, res) => {
     });
   }
 });
+
+
+
+
+router.post("/crearTorneo", async (req, res) => {
+  try {
+    const { nombre } = req.body;
+
+    const result = await pool.query(
+      `
+      INSERT INTO torneos (nombre)
+      VALUES (?)
+      `,
+      [nombre]
+    );
+
+    res.json({
+      ok: true,
+ 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: "Error al crear torneo",
+    });
+  }
+});
+
 
 
 router.get("/traertablas/:id", async (req, res) => {
@@ -421,17 +576,103 @@ router.post("/guardarpartido", async (req, res) => {
   }
 });
 
+router.get("/traerequipos2/:id_torneo", async (req, res) => {
+  const { id_torneo } = req.params;
 
-router.get("/equipos-con-jugadores", async (req, res) => {
-  const equipos = await pool.query("SELECT * FROM equipos");
-  const jugadores = await pool.query("SELECT * FROM jugadores");
+  const equipos = await pool.query(`
+    SELECT *
+    FROM equipos
+  `);
+
+  const jugadores = await pool.query(`
+    SELECT *
+    FROM jugadores
+  `);
+
+  const confirmaciones = await pool.query(`
+    SELECT id_equipo
+    FROM confirmaciones_3x3
+    WHERE id_torneo = ?
+  `, [id_torneo]);
 
   const resultado = equipos.map((eq) => ({
     ...eq,
-    jugadores: jugadores.filter(j => j.id_equipo == eq.id)
+
+    confirmado: confirmaciones.some(
+      (c) => c.id_equipo == eq.id
+    ),
+
+    jugadores: jugadores.filter(
+      (j) => j.id_equipo == eq.id
+    ),
   }));
+
   res.json(resultado);
 });
+
+
+
+
+
+
+router.post("/confirmarInvitacion", async (req, res) => {
+  try {
+    const {
+      id_torneo,
+      id_equipo
+    } = req.body;
+
+    const existe = await pool.query(
+      `
+      SELECT *
+      FROM confirmaciones_3x3
+      WHERE id_torneo = ?
+      AND id_equipo = ?
+      `,
+      [
+        id_torneo,
+        id_equipo
+      ]
+    );
+
+    if (existe.length > 0) {
+      return res.json({
+        ok: true,
+        mensaje: "Ya estaba confirmado"
+      });
+    }
+
+    await pool.query(
+      `
+      INSERT INTO confirmaciones_3x3
+      (
+        id_torneo,
+        id_equipo
+      )
+      VALUES (?,?)
+      `,
+      [
+        id_torneo,
+        id_equipo
+      ]
+    );
+
+    res.json({
+      ok: true,
+      mensaje: "Equipo confirmado"
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      ok: false,
+      mensaje: "Error al confirmar invitación"
+    });
+  }
+});
+
+
 
 
 router.get("/traertorneos", async (req, res) => {
