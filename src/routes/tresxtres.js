@@ -152,6 +152,32 @@ router.get("/traertorneo/:id", async (req, res) => {
   }
 });
 
+
+router.get("/traerJugadores", async (req, res) => {
+  try {
+    const rows = await pool.query(`
+      SELECT 
+        j.*,
+        e.nombre AS equipo,
+        CASE
+          WHEN j.id = e.id_capitan THEN 1
+          ELSE 0
+        END AS capitan
+      FROM jugadores j
+      LEFT JOIN equipos e
+        ON j.id_equipo = e.id
+      ORDER BY e.nombre, j.apellido, j.nombre
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      mensaje: "Error al traer jugadores",
+    });
+  }
+});
+
+
 router.get("/traertablas/:id", async (req, res) => {
   try {
     const { id } = req.params;
