@@ -258,12 +258,40 @@ router.get('/traerexpedientes', async (req, res) => {
       ORDER BY id DESC
     `);
 
-    const resultado = expedientes.map(exp => ({
-      ...exp,
-      movimientos: movimientos
+    const hoy = new Date();
+
+    const resultado = expedientes.map(exp => {
+      const movimientosExp = movimientos
         .filter(mov => mov.id_expediente == exp.id)
-        .sort((a, b) => b.id - a.id)
-    }));
+        .sort((a, b) => b.id - a.id);
+
+      let dias = 0;
+
+      if (movimientosExp.length > 0) {
+        const ultimaFecha = movimientosExp[0].fecha;
+
+        if (ultimaFecha) {
+          const [dia, mes, anio] = ultimaFecha.split('/');
+
+          const fechaMovimiento = new Date(
+            Number(anio),
+            Number(mes) - 1,
+            Number(dia)
+          );
+
+          dias = Math.floor(
+            (hoy - fechaMovimiento) /
+            (1000 * 60 * 60 * 24)
+          );
+        }
+      }
+
+      return {
+        ...exp,
+        dias,
+        movimientos: movimientosExp
+      };
+    });
 
     res.json(resultado);
 
@@ -275,6 +303,5 @@ router.get('/traerexpedientes', async (req, res) => {
     });
   }
 });
-
 
 export default router;
