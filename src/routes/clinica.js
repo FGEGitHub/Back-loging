@@ -118,17 +118,18 @@ const    id = req.params.id
 })
 
 
-router.get('/traerTurnosDisponibles',  async (req, res) => {
+router.get('/traerTurnosDisponibles', async (req, res) => {
   try {
     const turnos = await pool.query(`
       SELECT 
-        t.*, 
-  
+        t.*,
         p.dni,
-        p.id AS id_pacientee
+        p.id AS id_pacientee,
+        u.consulta_paga
       FROM turnos t
       LEFT JOIN pacientes p ON t.id_paciente = p.id
-      where t.baja="No" 
+      LEFT JOIN usuarios u ON t.id_usuario = u.id
+      WHERE t.baja = "No"
       ORDER BY t.hora ASC, p.dni ASC
     `);
 
@@ -138,7 +139,6 @@ router.get('/traerTurnosDisponibles',  async (req, res) => {
     res.status(500).json({ error: 'Error al traer turnos' });
   }
 });
-
 
 
 router.get('/traerturnosusuario/:id',  async (req, res) => {
@@ -1274,7 +1274,118 @@ auto_return: "approved",
   }
 });
 
+router.post("/confirmarTurnoNoPago", async (req, res) => {
+  try {
+    const {
+      id_turno,
+      nombre,
+      dni,
+      telefono,
+      categoria,
+    } = req.body;
 
+    if (
+      !id_turno ||
+      !nombre ||
+      !dni ||
+      !telefono ||
+      !categoria
+    ) {
+      return res.status(400).json({
+        message: "Faltan datos",
+      });
+    }
+
+    // =========================
+    // VERIFICAR / CREAR PACIENTE
+    // =========================
+
+    const existe = await pool.query(
+      "SELECT id FROM pacientes WHERE dni = ?",
+      [dni]
+    );
+
+    let id_paciente;
+
+    if (existe.length > 0) {
+      id_paciente = existe[0].id;
+
+      // actualiza datos por si cambiaron
+      await pool.query(
+        `UPDATE pacientes
+         SET nombre = ?, telefono = ?
+         WHERE id = ?`,
+        [nombre, telefono, id_paciente]
+      );
+    } else {
+      const nuevo = await pool.query(
+        `INSERT INTO pacientes
+        (nombre, dni, telefono)
+        VALUES (?, ?, ?)`,
+        [nombre, dni, telefono]
+      );
+
+      id_paciente = nuevo.insertId;
+    }
+
+    // =========================
+    // VERIFICAR TURNO
+    // =========================
+
+    const turno = await pool.query(
+      `SELECT id, id_paciente
+       FROM turnos
+       WHERE id = ?`,
+      [id_turno]
+    );
+
+    if (turno.length === 0) {
+      return res.status(404).json({
+        message: "Turno no encontrado",
+      });
+    }
+
+    if (turno[0].id_paciente) {
+      return res.status(409).json({
+        message: "Turno ya ocupado",
+      });
+    }
+
+    // =========================
+    // CONFIRMAR TURNO
+    // =========================
+
+    await pool.query(
+      `UPDATE turnos
+       SET
+         id_paciente = ?,
+         categoria = ?,
+         estado = 'confirmado',
+         modo_solicitud = 'web'
+       WHERE id = ?`,
+      [
+        id_paciente,
+        categoria,
+        id_turno,
+      ]
+    );
+
+    return res.json({
+      success: true,
+      message:
+        "Turno confirmado correctamente",
+     
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message:
+        "Error al confirmar turno",
+    });
+  }
+});
 //cron.schedule("*/1 * * * *", async () => {
   /* try {
 
