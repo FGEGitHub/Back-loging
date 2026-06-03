@@ -229,7 +229,6 @@ cron.schedule("20 6-14 * * 1-5", async () => {
 });
 
 
-
 router.get('/traerexpedientes', async (req, res) => {
   try {
     const expedientes = await pool.query(`
@@ -258,37 +257,17 @@ router.get('/traerexpedientes', async (req, res) => {
       ORDER BY id DESC
     `);
 
-    const hoy = new Date();
-
     const resultado = expedientes.map(exp => {
       const movimientosExp = movimientos
         .filter(mov => mov.id_expediente == exp.id)
         .sort((a, b) => b.id - a.id);
 
-      let dias = 0;
-
-      if (movimientosExp.length > 0) {
-        const ultimaFecha = movimientosExp[0].fecha;
-
-        if (ultimaFecha) {
-          const [dia, mes, anio] = ultimaFecha.split('/');
-
-          const fechaMovimiento = new Date(
-            Number(anio),
-            Number(mes) - 1,
-            Number(dia)
-          );
-
-          dias = Math.floor(
-            (hoy - fechaMovimiento) /
-            (1000 * 60 * 60 * 24)
-          );
-        }
-      }
-
       return {
         ...exp,
-        dias,
+        dias:
+          movimientosExp.length > 0
+            ? movimientosExp[0].dias
+            : 0,
         movimientos: movimientosExp
       };
     });
