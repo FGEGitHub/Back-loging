@@ -9,7 +9,7 @@ import { clav } from "../keys.js";
 
 
 
-cron.schedule("30 6-14 * * 1-5", async () => {
+cron.schedule("32 6-14 * * 1-5", async () => {
   try {
     console.log("Iniciando actualización de expedientes...");
 
