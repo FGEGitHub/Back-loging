@@ -9,34 +9,36 @@ import { clav } from "../keys.js";
 
 
 
-cron.schedule("20 6-14 * * 1-5", async () => {
+cron.schedule("30 6-14 * * 1-5", async () => {
   try {
     console.log("Iniciando actualización de expedientes...");
 
     const expedientes = await pool.query(`
-      SELECT id, anio, letra, numero
+      SELECT
+        id,
+        anio,
+        letra,
+        numero,
+        ultimomovimiento,
+        fecha_ultimo_cambio
       FROM expedientes
     `);
 
-    const listaExpedientes = expedientes|| expedientes;
+    const listaExpedientes = expedientes;
 
     for (const expediente of listaExpedientes) {
       const url =
         `https://sistemas.ciudaddecorrientes.gov.ar/consulta/resultado.php?` +
         `lugar=1&anio=${expediente.anio}` +
         `&letra=${expediente.letra}` +
-        `&orden=${expediente.numero}`+`&codigo=${clav}`;
+        `&orden=${expediente.numero}` +
+        `&codigo=${clav}`;
 
       try {
         console.log(`Consultando: ${url}`);
 
         const respuesta = await axios.get(url);
-
         const $ = cheerio.load(respuesta.data);
-
-        // ==========================
-        // DATOS DEL EXPEDIENTE
-        // ==========================
 
         let iniciador = "";
         let extracto = "";
@@ -45,15 +47,11 @@ cron.schedule("20 6-14 * * 1-5", async () => {
           const texto = $(el).text().trim();
 
           if (texto.includes("Iniciador:")) {
-            iniciador = texto
-              .replace("Iniciador:", "")
-              .trim();
+            iniciador = texto.replace("Iniciador:", "").trim();
           }
 
           if (texto.includes("Extracto:")) {
-            extracto = texto
-              .replace("Extracto:", "")
-              .trim();
+            extracto = texto.replace("Extracto:", "").trim();
           }
         });
 
@@ -73,7 +71,7 @@ cron.schedule("20 6-14 * * 1-5", async () => {
         );
 
         // ==========================
-        // MOVIMIENTO ACTUAL
+        // ÚLTIMO MOVIMIENTO
         // ==========================
 
         let ultimoMovimiento = null;
@@ -83,11 +81,42 @@ cron.schedule("20 6-14 * * 1-5", async () => {
           const columnasActual = primeraFila.find("td");
 
           if (columnasActual.length >= 3) {
-            ultimoMovimiento = columnasActual
-              .eq(2)
-              .text()
-              .trim();
+            ultimoMovimiento = columnasActual.eq(2).text().trim();
           }
+        }
+
+        // ==========================
+        // CONTROL DE CAMBIOS
+        // ==========================
+
+        let fechaUltimoCambio =
+          expediente.fecha_ultimo_cambio;
+
+        let diasSinMovimiento = 0;
+
+        const movimientoCambio =
+          expediente.ultimomovimiento !== ultimoMovimiento;
+
+        if (movimientoCambio) {
+          fechaUltimoCambio = new Date();
+          diasSinMovimiento = 0;
+
+          console.log(
+            `Expediente ${expediente.id}: CAMBIÓ movimiento`
+          );
+        } else {
+          if (fechaUltimoCambio) {
+            const hoy = new Date();
+
+            diasSinMovimiento = Math.floor(
+              (hoy - new Date(fechaUltimoCambio)) /
+              (1000 * 60 * 60 * 24)
+            );
+          }
+
+          console.log(
+            `Expediente ${expediente.id}: sin cambios hace ${diasSinMovimiento} días`
+          );
         }
 
         // ==========================
@@ -100,116 +129,218 @@ cron.schedule("20 6-14 * * 1-5", async () => {
           SET
             iniciador = ?,
             extracto = ?,
-            ultimomovimiento = ?
+            ultimomovimiento = ?,
+            fecha_ultimo_cambio = ?,
+            dias_sin_movimiento = ?
           WHERE id = ?
           `,
           [
             iniciador,
             extracto,
             ultimoMovimiento,
+            fechaUltimoCambio,
+            diasSinMovimiento,
             expediente.id,
           ]
         );
 
-        console.log(
-          `Expediente ${expediente.id} actualizado`
+
+        // ==========================
+        // MOVIMIENTOS
+        // ==========================
+
+      // ==========================
+// MOVIMIENTOS
+// ==========================
+
+for (let i = filas.length - 1; i >= 0; i--) {
+  const columnas = $(filas[i]).find("td");
+
+  if (columnas.length < 3) {
+    continue;
+  }
+
+  const fecha = columnas.eq(0).text().trim();
+  const origen = columnas.eq(1).text().trim();
+  const destino = columnas.eq(2).text().trim();
+
+  let diasEnArea = null;
+
+  if (columnas.length >= 4) {
+    diasEnArea =
+      columnas.eq(3).text().trim() || null;
+  }
+
+  const existe = await pool.query(
+    `
+    SELECT
+      id,
+      fecha_sistema,
+      dias_sistema
+    FROM movimientos
+    WHERE id_expediente = ?
+      AND fecha = ?
+      AND origen = ?
+      AND destino = ?
+    `,
+    [
+      expediente.id,
+      fecha,
+      origen,
+      destino,
+    ]
+  );
+
+  const registros = existe;
+
+  // ==========================
+  // INSERTAR MOVIMIENTO NUEVO
+  // ==========================
+
+  if (registros.length === 0) {
+
+    await pool.query(
+      `
+      INSERT INTO movimientos
+      (
+        id_expediente,
+        fecha,
+        origen,
+        destino,
+        dias,
+        fecha_sistema,
+        dias_sistema
+      )
+      VALUES
+      (
+        ?, ?, ?, ?, ?,
+        NOW(),
+        0
+      )
+      `,
+      [
+        expediente.id,
+        fecha,
+        origen,
+        destino,
+        diasEnArea,
+      ]
+    );
+
+    console.log(
+      `Movimiento agregado expediente ${expediente.id}`
+    );
+
+  } else {
+
+    // Solo actualizamos el dato que viene del scraping
+    await pool.query(
+      `
+      UPDATE movimientos
+      SET dias = ?
+      WHERE id = ?
+      `,
+      [
+        diasEnArea,
+        registros[0].id,
+      ]
+    );
+  }
+}
+
+// ===================================================
+// ACTUALIZAR DIAS_SISTEMA SOLO DEL MOVIMIENTO ACTUAL
+// (PRIMERA FILA DE LA TABLA)
+// ===================================================
+
+if (filas.length > 0) {
+
+  const primeraFila = $(filas[0]);
+  const columnasActual = primeraFila.find("td");
+
+  if (columnasActual.length >= 3) {
+
+    const fechaActual =
+      columnasActual.eq(0).text().trim();
+
+    const origenActual =
+      columnasActual.eq(1).text().trim();
+
+    const destinoActual =
+      columnasActual.eq(2).text().trim();
+
+    const movimientoActual =
+      await pool.query(
+        `
+        SELECT
+          id,
+          fecha_sistema
+        FROM movimientos
+        WHERE id_expediente = ?
+          AND fecha = ?
+          AND origen = ?
+          AND destino = ?
+        LIMIT 1
+        `,
+        [
+          expediente.id,
+          fechaActual,
+          origenActual,
+          destinoActual,
+        ]
+      );
+
+    if (movimientoActual.length > 0) {
+
+      let fechaSistema =
+        movimientoActual[0].fecha_sistema;
+
+      // Si no tiene fecha_sistema, la inicializamos hoy
+      if (!fechaSistema) {
+
+        fechaSistema = new Date();
+
+        await pool.query(
+          `
+          UPDATE movimientos
+          SET fecha_sistema = ?
+          WHERE id = ?
+          `,
+          [
+            fechaSistema,
+            movimientoActual[0].id,
+          ]
         );
+      }
 
-        // ==========================
-        // RECORRER DE ABAJO HACIA ARRIBA
-        // ==========================
+      const hoy = new Date();
 
-        for (let i = filas.length - 1; i >= 0; i--) {
-          const columnas = $(filas[i]).find("td");
+      const diasSistema = Math.floor(
+        (
+          hoy.getTime() -
+          new Date(fechaSistema).getTime()
+        ) /
+        (1000 * 60 * 60 * 24)
+      );
 
-          if (columnas.length < 3) {
-            continue;
-          }
+      await pool.query(
+        `
+        UPDATE movimientos
+        SET dias_sistema = ?
+        WHERE id = ?
+        `,
+        [
+          diasSistema,
+          movimientoActual[0].id,
+        ]
+      );
 
-          const fecha = columnas.eq(0).text().trim();
-          const origen = columnas.eq(1).text().trim();
-          const destino = columnas.eq(2).text().trim();
-
-          let diasEnArea = null;
-
-          if (columnas.length >= 4) {
-            diasEnArea =
-              columnas.eq(3).text().trim() || null;
-          }
-
-          console.log({
-            expediente: expediente.id,
-            fecha,
-            origen,
-            destino,
-            diasEnArea,
-          });
-
-          const existe = await pool.query(
-            `
-            SELECT id
-            FROM movimientos
-            WHERE id_expediente = ?
-            AND fecha = ?
-            AND origen = ?
-            AND destino = ?
-            `,
-            [
-              expediente.id,
-              fecha,
-              origen,
-              destino,
-            ]
-          );
-
-          const registros =
-            existe || existe;
-
-          if (registros.length === 0) {
-            await pool.query(
-              `
-              INSERT INTO movimientos
-              (
-                id_expediente,
-                fecha,
-                origen,
-                destino,
-                dias
-              )
-              VALUES (?, ?, ?, ?, ?)
-              `,
-              [
-                expediente.id,
-                fecha,
-                origen,
-                destino,
-                diasEnArea,
-              ]
-            );
-
-            console.log(
-              `Movimiento agregado expediente ${expediente.id}`
-            );
-          } else {
-            await pool.query(
-              `
-              UPDATE movimientos
-              SET dias = ?
-              WHERE id_expediente = ?
-              AND fecha = ?
-              AND origen = ?
-              AND destino = ?
-              `,
-              [
-                diasEnArea,
-                expediente.id,
-                fecha,
-                origen,
-                destino,
-              ]
-            );
-          }
-        }
+      console.log(
+        `Movimiento activo ${destinoActual} - ${diasSistema} días`
+      );
+    }
+  }
+}
 
         console.log(
           `Expediente ${expediente.id} procesado correctamente`
