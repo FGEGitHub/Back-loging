@@ -5196,6 +5196,9 @@ const confirm = await pool.query('select * from cadia_turnos where estado="Agend
 
 
 })
+
+
+
 router.get('/traerpresentesdeclase/:id', async (req, res) => {
   const id = req.params.id
   const clase =await pool.query('select * from dtc_clases_taller where id=?',[id])
@@ -7624,8 +7627,61 @@ router.post("/traerparaturnoscadia", async (req, res) => {
 
 
 })
+
+
+router.post("/traerhorariosusuario", async (req, res) => {
+  try {
+    const { id_usuario } = req.body;
+
+    console.log("Usuario:", id_usuario);
+
+    const horarios = await pool.query(`
+      SELECT
+        cu.dia,
+        cu.hora,
+        u.mail AS detalle
+      FROM marketing.dtc_cursado cu
+      INNER JOIN marketing.usuarios u
+        ON cu.id_curso = u.id
+      WHERE cu.id_chico = ?
+      ORDER BY
+        FIELD(
+          cu.dia,
+          'lunes',
+          'martes',
+          'miércoles',
+          'jueves',
+          'viernes',
+          'sábado',
+          'Domingo'
+        ),
+        cu.hora
+    `, [id_usuario]);
+    const agrupados = {};
+
+    horarios.forEach((h) => {
+      if (!agrupados[h.dia]) {
+        agrupados[h.dia] = [];
+      }
+
+      agrupados[h.dia].push({
+        detalle: h.detalle,
+        hora: h.hora
+      });
+    });
+
+    res.json(agrupados);
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      error: "Error al obtener horarios"
+    });
+  }
+});
 router.post("/traerpresentes", async (req, res) => {
   const { fecha, id } = req.body
+  console.log(fecha)
   const usua = await pool.query('select * from usuarios where id=?', [id])
 
   let prod = []
