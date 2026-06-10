@@ -875,34 +875,34 @@ router.get('/traeralumnosfines', async (req, res) => {
 
 
 router.get('/traerclasesprof/:id', async (req, res) => {
-  let id = req.params.id
+  const id = req.params.id;
+
   try {
-    const clas = await pool.query(' select * from  cadia_clases_prof  where idtallerista=? ORDER BY id_clase DESC', [id])
-    env = []
-    for (iii in clas){
-      can = await pool.query('select * from dtc_asistencia_clase where id_clase=?',[clas[iii]['id_clase']])
-      nuev={
-        id:clas[iii]['id_clase'],
-        fecha:clas[iii]['fecha'],
-        titulo:clas[iii]['titulo'],
-        descripcion:clas[iii]['descripcion'],
-        id_tallerista:clas[iii]['id_tallerista'],
-        cantidad:can.length
-      }
-      env.push(nuev)
-    }
+    const clases = await pool.query(`
+      SELECT
+        c.id_clase AS id,
+        c.fecha,
+        c.titulo,
+        c.descripcion,
+        c.id_tallerista,
+        COUNT(a.id_clase) AS cantidad
+      FROM cadia_clases_prof c
+      LEFT JOIN dtc_asistencia_clase a
+        ON a.id_clase = c.id_clase
+      WHERE c.idtallerista = ?
+      GROUP BY c.id_clase
+      ORDER BY c.id_clase DESC
+    `, [id]);
 
-   
-    res.json(env)
+    res.json(clases);
+
   } catch (error) {
-    console.log(error)
-    res.json('Error')
+    console.error(error);
+    res.status(500).json('Error');
   }
+});
 
-
-})
-
-
+/* 
 router.get('/traerclasestallercadia/:id', async (req, res) => {
   let id = req.params.id
   try {
@@ -929,7 +929,7 @@ router.get('/traerclasestallercadia/:id', async (req, res) => {
   }
 
 
-})
+}) */
 
 
 
@@ -1037,41 +1037,33 @@ router.delete('/eliminarHorarioo/:id', async (req, res) => {
   }
 });
 
-
 router.get('/traerclasestaller/:id', async (req, res) => {
-  let id = req.params.id;
+  const id = req.params.id;
+
   try {
-    const clas = await pool.query(
-      'SELECT * FROM dtc_clases_taller WHERE id_tallerista=? ORDER BY id DESC',
-      [id]
-    );
-   
-    let env = [];
+    const clases = await pool.query(`
+      SELECT
+        c.id,
+        c.fecha,
+        c.titulo,
+        c.dia,
+        c.hora,
+        c.descripcion,
+        c.id_tallerista,
+        COUNT(a.id_clase) AS cantidad
+      FROM dtc_clases_taller c
+      INNER JOIN dtc_asistencia_clase a
+        ON a.id_clase = c.id
+      WHERE c.id_tallerista = ?
+      GROUP BY c.id
+      HAVING COUNT(a.id_clase) > 0
+      ORDER BY c.id DESC
+    `, [id]);
 
-    for (const clase of clas) {
-      const can = await pool.query(
-        'SELECT * FROM dtc_asistencia_clase WHERE id_clase=?',
-        [clase.id]
-      );
+    res.json(clases);
 
-      if (can.length > 0) { // Solo agregar si hay asistentes
-        const nuev = {
-          id: clase.id,
-          fecha: clase.fecha,
-          titulo: clase.titulo,
-          dia: clase.dia,
-          hora: clase.hora,
-          descripcion: clase.descripcion,
-          id_tallerista: clase.id_tallerista,
-          cantidad: can.length
-        };
-        env.push(nuev);
-      }
-    }
-
-    res.json(env);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ error: 'Error al obtener las clases' });
   }
 });
@@ -1542,12 +1534,7 @@ router.post('/listachiquesparainscribir/', async (req, res) => {
       [id, dia, hora]
     );
 
-    // Convertir BigInt a String si es necesario
-    const resultado = chiques.map(chico => ({
-      ...chico,
-      id: chico.id.toString(),
-      dni: chico.dni ? chico.dni.toString() : null,
-    }));
+
 
     // Mostrar en consola solo los inscritos
 
