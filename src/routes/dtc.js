@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-
+import { WHATSAPP_LOTES } from "../keys.js";
 import {
   isLoggedIn,
   isLoggedInn,
@@ -8106,6 +8106,30 @@ FECHA: ${fechaHoy}
   }
 
 });
+
+
+
+
+
+
+cron.schedule('20 12 12 * *', async () => {
+  try {
+const mensajeamandar =
+  "📢 ¿Te olvidaste de hacer la facturación del mes anterior?\n\n" +
+  "No te preocupes 😊\n\n" +
+  "Recordá que hasta el día 10 de cada mes podés facturar los servicios correspondientes al mes anterior, siempre que no hayas emitido facturas con fecha del mes actual.\n\n" +
+  "Si necesitás ayuda o tenés alguna duda, escribime 📩";
+
+    for (const numero of WHATSAPP_LOTES.lote1) {
+      await sendWhatsappMessage(numero, mensajeamandar);
+
+      console.log(`Mensaje enviado a ${numero}`);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+});
+
 
 
 
