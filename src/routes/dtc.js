@@ -8157,7 +8157,7 @@ cron.schedule('30 10 9 * *', async () => {
 
 
 
-cron.schedule('14 12 19 * *', async () => {
+cron.schedule('0 10 20 * *', async () => {
   try {
     const mensajeamandar =
       "📢 Estimado/a 😊\n\n" +
