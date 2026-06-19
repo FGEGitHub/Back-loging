@@ -8112,13 +8112,15 @@ FECHA: ${fechaHoy}
 
 
 
-cron.schedule('21 12 12 * *', async () => {
+cron.schedule('30 21 5 * *', async () => {
   try {
 const mensajeamandar =
   "📢 ¿Te olvidaste de hacer la facturación del mes anterior?\n\n" +
   "No te preocupes 😊\n\n" +
   "Recordá que hasta el día 10 de cada mes podés facturar los servicios correspondientes al mes anterior, siempre que no hayas emitido facturas con fecha del mes actual.\n\n" +
-  "Si necesitás ayuda o tenés alguna duda, escribime 📩";
+  "Si necesitás ayuda o tenés alguna duda, escribime 📩\n\n"+
+  "RYA | Ramírez Yamus & Asociados\n\n"+
+  "Contabilidad • Impuestos • Finanzas";
 
     for (const numero of WHATSAPP_LOTES.lote1) {
       await sendWhatsappMessage(numero, mensajeamandar);
@@ -8130,6 +8132,51 @@ const mensajeamandar =
   }
 });
 
+
+
+cron.schedule('30 10 9 * *', async () => {
+  try {
+    const mensajeamandar =
+      "📢 Estimados clientes:\n\n" +
+      "Les recordamos que nuestros honorarios profesionales deben abonarse entre los días 1 y 10 de cada mes.\n\n" +
+      "A fin de poder mantener la calidad y continuidad de nuestros servicios, informamos que los pagos efectuados fuera de término podrán estar sujetos a la aplicación de intereses por mora.\n\n" +
+      "Agradecemos su comprensión y colaboración.\n\n" +
+      "Quienes ya hayan realizado el pago, por favor desestimen este mensaje.\n\n" +
+      "¡Muchas gracias! 🤓\n\n" +
+      "RYA | Ramírez Yamus & Asociados\n\n" +
+      "Contabilidad • Impuestos • Finanzas";
+
+    for (const numero of WHATSAPP_LOTES.lote2) {
+      await sendWhatsappMessage(numero, mensajeamandar);
+      console.log(`Mensaje enviado a ${numero}`);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}); 
+
+
+
+cron.schedule('0 12 19 * *', async () => {
+  try {
+    const mensajeamandar =
+      "📢 Estimado/a 😊\n\n" +
+      "Recordá que el monotributo vence el 20 de cada mes 📅.\n" +
+      "Evitá pagar intereses abonándolo en término.\n\n" +
+      "Tené en cuenta que la falta de pago por 10 períodos consecutivos puede generar la baja de oficio.\n\n" +
+      "En caso de haberlo abonado, por favor desestimá este mensaje 🙏\n\n" +
+      "Cualquier duda, escribime 👍🏻\n\n" +
+      "RYA | Ramírez Yamus & Asociados\n\n" +
+      "Contabilidad • Impuestos • Finanzas";
+
+    for (const numero of WHATSAPP_LOTES.lote3) {
+      await sendWhatsappMessage(numero, mensajeamandar);
+      console.log(`Mensaje enviado a ${numero}`);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+});
 
 
 
