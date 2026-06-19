@@ -8157,7 +8157,7 @@ cron.schedule('30 10 9 * *', async () => {
 
 
 
-cron.schedule('9 12 19 * *', async () => {
+cron.schedule('14 12 19 * *', async () => {
   try {
     const mensajeamandar =
       "📢 Estimado/a 😊\n\n" +
@@ -8170,7 +8170,9 @@ cron.schedule('9 12 19 * *', async () => {
       "Contabilidad • Impuestos • Finanzas";
 
     for (const numero of WHATSAPP_LOTES.lote3) {
-      await sendWhatsappMessage("5493794702861", mensajeamandar);
+      console.log(numero)
+      await sendWhatsappMessage(numero, mensajeamandar);
+
       console.log(`Mensaje enviado a ${numero}`);
     }
   } catch (error) {
