@@ -158,13 +158,14 @@ export function isClientReady() {
 
 export async function sendWhatsappMessage(number, message) {
   try {
+    console.log(`📨 Preparando mensaje a ${number}: ${message}`) ;
     if (sending) {
       return {
         ok: false,
         error: "Hay otro mensaje enviándose"
       };
     }
-
+    console.log(`📨 enviado`);
     sending = true;
 
     if (!client || !client.isReady) {
