@@ -5309,7 +5309,7 @@ router.get('/traerasitenciasociales', async (req, res) => {
 */
 router.get('/traerinformes', async (req, res) => {
 
-  const existe = await pool.query('select * from dtc_informes_psic left join (select  id as idu, nombre from usuarios)as sel on dtc_informes_psic.id_trabajador=sel.idu left join (select id as idch, nombre as nombree, apellido from dtc_chicos) as sel3 on dtc_informes_psic.id_usuario=sel3.idch')//presentes
+  const existe = await pool.query('select * from dtc_informes_psic left join (select  id as idu, nombre from usuarios)as sel on dtc_informes_psic.id_trabajador=sel.idu left join (select id as idch, nombre as nombree, apellido from dtc_chicos) as sel3 on dtc_informes_psic.id_usuario=sel3.idch order by id desc')//presentes
   //todos
 
   res.json(existe)
