@@ -6698,23 +6698,42 @@ router.post("/agregarturnocadia", async (req, res) => {
     obra_social,           // ✅ Nuevo campo
     obra_social_cual       // ✅ Nuevo campo
   } = req.body;
+const saludos = [
+  "Hola {nombre} 👋",
+  "Buen día {nombre} 😊",
+  "Hola {nombre}, ¿cómo estás?",
+  "¡Hola {nombre}!",
+  "Buenas {nombre}",
+  "Hola {nombre}, esperamos que estés teniendo un buen día.",
+  "Buenas tardes {nombre}.",
+  "Buen día {nombre}, esperamos que estés muy bien.",
+  "Hola {nombre}, te enviamos una actualización.",
+  "¡Buen día, {nombre}!"
+];
 
-  console.log(
-    id,
-    id_persona,
-    nuevoUsuario,
-    nombre,
-    apellido,
-    dni,
-    domicilio,
-    barrio,
-    usuariodispositivo,
-    agendadopor,
-    observaciones,
-    obra_social,
-    obra_social_cual
-  );
+const introducciones = [
+  "Desde el DTC queremos avisarte que tenés un nuevo turno programado.",
+  "Te informamos desde el DTC que se asignó un nuevo turno.",
+  "Queremos notificarte que se registró un nuevo turno.",
+  "Hay un nuevo turno agendado para vos desde el DTC.",
+  "Se confirmó un nuevo turno para tu agenda."
+];
 
+const frasesTurno = [
+  "📅 Día: {fecha}\n🕒 Hora: {hora}",
+  "🗓️ Fecha del turno: {fecha}\n⏰ Horario: {hora}",
+  "📌 El turno quedó confirmado para el {fecha} a las {hora}.",
+  "📆 Tenés asignado un turno el {fecha} a las {hora}.",
+  "🗓️ Agendamos un turno para el {fecha} a las {hora}."
+];
+
+const despedidas = [
+  "¡Muchas gracias!",
+  "Saludos del equipo del DTC.",
+  "Que tengas una excelente jornada.",
+  "Gracias por tu compromiso.",
+  "Ante cualquier consulta, estamos a disposición."
+];
   // ✅ Valores por defecto
   if (!observaciones || observaciones.trim() === "") observaciones = "No determinado";
   if (!usuariodispositivo || usuariodispositivo.trim() === "") usuariodispositivo = "No";
@@ -6782,10 +6801,39 @@ router.post("/agregarturnocadia", async (req, res) => {
     );
 
     // ✅ Construir mensaje
-    let mensaje = `Hola ${profesionall[0]?.nombre}, de parte del DTC te notificamos que tenés un nuevo turno para el día ${profesionall[0]?.fecha} a las ${profesionall[0]?.detalle} del paciente ${personapsiq[0]?.nombre} ${personapsiq[0]?.apellido}.`;
+const saludo = saludos[
+  Math.floor(Math.random() * saludos.length)
+].replace("{nombre}", profesionall[0]?.nombre);
 
-    mensaje += `\n\n📋 Datos del paciente:\n🪪 DNI: ${personapsiq[0]?.dni || dni}\n🏠 Domicilio: ${personapsiq[0]?.domicilio || domicilio}\n🌆 Barrio: ${personapsiq[0]?.barrio || barrio}\n🗒️ Observaciones: ${observaciones}`;
+const intro = introducciones[
+  Math.floor(Math.random() * introducciones.length)
+];
 
+const datosTurno = frasesTurno[
+  Math.floor(Math.random() * frasesTurno.length)
+]
+  .replace("{fecha}", profesionall[0]?.fecha)
+  .replace("{hora}", profesionall[0]?.detalle);
+
+const despedida = despedidas[
+  Math.floor(Math.random() * despedidas.length)
+];
+
+let mensaje = `${saludo}
+
+${intro}
+
+${datosTurno}
+
+👤 Paciente: ${personapsiq[0]?.nombre} ${personapsiq[0]?.apellido}`;
+
+mensaje += `
+
+📋 Datos del paciente:
+🪪 DNI: ${personapsiq[0]?.dni || dni}
+🏠 Domicilio: ${personapsiq[0]?.domicilio || domicilio}
+🌆 Barrio: ${personapsiq[0]?.barrio || barrio}
+🗒️ Observaciones: ${observaciones}`;
     // ✅ Agrega información de obra social si existe
     if (personapsiq[0]?.obra_social && personapsiq[0]?.obra_social !== "No") {
       mensaje += `\n🏥 Obra social: ${personapsiq[0]?.obra_social_cual || "Sin especificar"}`;
@@ -6807,7 +6855,9 @@ router.post("/agregarturnocadia", async (req, res) => {
       mensaje += '\n\nNo hay horarios disponibles para ese día.';
     }
 
-    console.log(mensaje);
+  mensaje += `
+
+${despedida}`;
 
     // Enviar mensaje por WhatsApp
 try {
