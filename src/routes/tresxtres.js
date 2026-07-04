@@ -41,7 +41,7 @@ router.post("/equipo", async (req, res) => {
         detalle: existentes.map(e => ({
           dni: e.dni,
           equipo: e.equipo,
-          mensaje: `El DNI ${e.dni} ya pertenece al equipo ${e.equipo}`
+          mensaje: `El DNI ${e.dni} ya pertenece al equipo ${e.equipo}`,
         })),
       });
     }
@@ -66,16 +66,20 @@ router.post("/equipo", async (req, res) => {
           dni,
           telefono,
           email,
+          barrio,
+          direccion,
           fecha_nacimiento,
           id_equipo
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           j.nombre,
           j.apellido,
           j.dni,
           j.telefono || null,
           j.email || null,
+          j.barrio || null,
+          j.direccion || null,
           j.fechaNacimiento || null,
           idEquipo,
         ]
@@ -101,7 +105,6 @@ router.post("/equipo", async (req, res) => {
 
     res.json({
       ok: true,
-    
     });
 
   } catch (error) {
@@ -115,6 +118,8 @@ router.post("/equipo", async (req, res) => {
     connection.release();
   }
 });
+
+
 
 router.get("/traertorneo/:id", async (req, res) => {
   try {
@@ -278,6 +283,40 @@ router.get("/torneos/:id/estado", async (req, res) => {
   }
 });
 
+
+
+
+
+
+router.post("/verificarjugador", async (req, res) => {
+  const { dni } = req.body;
+
+  const jugador = await pool.query(
+    `
+    SELECT j.nombre,
+           j.apellido,
+           e.nombre AS equipo
+    FROM jugadores j
+    INNER JOIN equipos e ON e.id = j.id_equipo
+    WHERE j.dni = ?
+    LIMIT 1
+    `,
+    [dni]
+  );
+
+  if (jugador.length > 0)  {
+    return res.json({
+      registrado: true,
+      nombre: jugador.nombre,
+      apellido: jugador.apellido,
+      equipo: jugador.equipo,
+    });
+  }
+
+  res.json({
+    registrado: false,
+  });
+});
 
 
 router.get("/traerJugadores", async (req, res) => {
