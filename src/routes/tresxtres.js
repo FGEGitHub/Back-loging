@@ -69,9 +69,10 @@ router.post("/equipo", async (req, res) => {
           barrio,
           direccion,
           fecha_nacimiento,
+          edad,
           id_equipo
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           j.nombre,
           j.apellido,
@@ -81,6 +82,7 @@ router.post("/equipo", async (req, res) => {
           j.barrio || null,
           j.direccion || null,
           j.fechaNacimiento || null,
+            j.edad || null,
           idEquipo,
         ]
       );
