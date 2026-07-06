@@ -121,6 +121,8 @@ router.post("/equipo", async (req, res) => {
 
 
 
+
+
 router.get("/traertorneo/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -157,6 +159,45 @@ router.get("/traertorneo/:id", async (req, res) => {
   }
 });
 
+router.get("/equipos-con-jugadores", async (req, res) => {
+  try {
+    const equipos = await pool.query(`
+      SELECT *
+      FROM equipos
+      ORDER BY nombre
+    `);
+
+    const jugadores = await pool.query(`
+      SELECT *
+      FROM jugadores
+      ORDER BY nombre
+    `);
+
+    // Agrupar jugadores por equipo
+    const jugadoresPorEquipo = {};
+
+    jugadores.forEach((jugador) => {
+      if (!jugadoresPorEquipo[jugador.id_equipo]) {
+        jugadoresPorEquipo[jugador.id_equipo] = [];
+      }
+
+      jugadoresPorEquipo[jugador.id_equipo].push(jugador);
+    });
+
+    // Agregar el arreglo de jugadores a cada equipo
+    const resultado = equipos.map((equipo) => ({
+      ...equipo,
+      jugadores: jugadoresPorEquipo[equipo.id] || [],
+    }));
+
+    res.json(resultado);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      mensaje: "Error al obtener equipos con jugadores",
+    });
+  }
+});
 
 router.post("/guardarZonasTorneo", async (req, res) => {
   const { id_torneo, zonas } = req.body;

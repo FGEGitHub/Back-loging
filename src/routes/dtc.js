@@ -8162,7 +8162,7 @@ FECHA: ${fechaHoy}
 
 
 
-cron.schedule('30 21 5 * *', async () => {
+cron.schedule('30 9 5 * *', async () => {
   try {
 const mensajeamandar =
   "📢 ¿Te olvidaste de hacer la facturación del mes anterior?\n\n" +
