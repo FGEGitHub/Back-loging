@@ -121,37 +121,48 @@ router.post("/equipo", async (req, res) => {
 
 
 
-
-
 router.get("/traertorneo/:id", async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Traer datos del torneo (incluye clasificacion)
+    const [torneo] = await pool.query(
+      "SELECT clasificacion FROM torneos WHERE id = ?",
+      [id]
+    );
 
     const zonas = await pool.query(
       "SELECT * FROM zonas_3x3 WHERE id_torneo = ?",
       [id]
     );
 
-    const participaciones = await pool.query(
-      "SELECT * FROM participacion_3x3 WHERE id_zona IN (?)",
-      [zonas.map((z) => z.id)]
-    );
+    const participaciones =
+      zonas.length > 0
+        ? await pool.query(
+            "SELECT * FROM participacion_3x3 WHERE id_zona IN (?)",
+            [zonas.map((z) => z.id)]
+          )
+        : [];
 
-    const equipos = await pool.query(
-      "SELECT * FROM equipos WHERE id IN (?)",
-      [participaciones.map((p) => p.id_equipo)]
-    );
+    const equipos =
+      participaciones.length > 0
+        ? await pool.query(
+            "SELECT * FROM equipos WHERE id IN (?)",
+            [participaciones.map((p) => p.id_equipo)]
+          )
+        : [];
 
-    // 🔥 NUEVO: traer partidos
     const partidos = await pool.query(
       "SELECT * FROM partidos_3x3 WHERE id_torneo = ?",
       [id]
     );
+
     res.json({
+      clasificacion: torneo?.clasificacion || 0,
       zonas,
       participaciones,
       equipos,
-      partidos, // 👈 clave
+      partidos,
     });
   } catch (error) {
     console.error("Error en traerTorneo:", error);
