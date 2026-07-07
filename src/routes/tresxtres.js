@@ -339,8 +339,458 @@ router.get("/torneos/:id/estado", async (req, res) => {
 
 
 
+router.post("/guardarClasificacion",async(req,res)=>{
+
+const {id_torneo,clasificacion}=req.body;
+
+await pool.query(
+`
+UPDATE torneos
+SET clasificacion=?
+WHERE id=?
+`,
+[clasificacion,id_torneo]
+);
+
+res.json({ok:true});
+
+});
 
 
+
+router.post("/generarPlayoff", async (req, res) => {
+
+  const connection = await pool.getConnection();
+
+  try {
+
+    await connection.beginTransaction();
+
+
+    const {
+      id_torneo,
+      clasificados,
+      cruces,
+      libre
+    } = req.body;
+
+
+
+    if (!id_torneo || !clasificados || !cruces) {
+      throw new Error("Datos incompletos para generar playoff");
+    }
+
+
+
+    /*
+      ======================================
+      BORRAR PLAYOFF ANTERIOR DEL TORNEO
+      ======================================
+    */
+
+    await connection.query(
+      `
+      DELETE FROM partidos_playoffs
+      WHERE id_torneo = ?
+      `,
+      [id_torneo]
+    );
+
+
+
+    /*
+      ======================================
+      DEFINIR PRIMERA RONDA
+      ======================================
+    */
+
+
+    let instanciaInicial;
+
+
+    switch (clasificados.length) {
+
+      case 2:
+        instanciaInicial = "Final";
+        break;
+
+
+      case 4:
+        instanciaInicial = "Semifinal";
+        break;
+
+
+      case 8:
+        instanciaInicial = "Cuartos";
+        break;
+
+
+      case 16:
+        instanciaInicial = "8vos";
+        break;
+
+
+      case 32:
+        instanciaInicial = "16vos";
+        break;
+
+
+      default:
+        throw new Error(
+          "Cantidad de clasificados inválida"
+        );
+
+    }
+
+
+
+    const rondas = [
+      "16vos",
+      "8vos",
+      "Cuartos",
+      "Semifinal",
+      "Final"
+    ];
+
+
+    const indiceInicial =
+      rondas.indexOf(instanciaInicial);
+
+
+
+    /*
+      ======================================
+      CREAR PRIMERA RONDA
+      ======================================
+    */
+
+
+    let rondaActual = [];
+
+
+
+    for(let i = 0; i < cruces.length; i++){
+
+
+      const result = await connection.query(
+        `
+        INSERT INTO partidos_playoffs
+        (
+          id_torneo,
+          instancia,
+          numero_partido,
+          id_equipo_local,
+          id_equipo_visitante
+        )
+        VALUES (?,?,?,?,?)
+        `,
+        [
+          id_torneo,
+          instanciaInicial,
+          i + 1,
+          cruces[i].local,
+          cruces[i].visitante
+        ]
+      );
+
+
+      rondaActual.push(result.insertId);
+
+    }
+
+
+
+
+    /*
+      ======================================
+      EQUIPO LIBRE
+      ======================================
+    */
+
+
+    if(libre){
+
+
+      const result = await connection.query(
+        `
+        INSERT INTO partidos_playoffs
+        (
+          id_torneo,
+          instancia,
+          numero_partido,
+          id_equipo_local,
+          ganador,
+          estado
+        )
+        VALUES (?,?,?,?,?,?)
+        `,
+        [
+          id_torneo,
+          instanciaInicial,
+          cruces.length + 1,
+          libre.equipo.id,
+          libre.equipo.id,
+          "Finalizado"
+        ]
+      );
+
+
+      rondaActual.push(result.insertId);
+
+    }
+
+
+
+
+    /*
+      ======================================
+      CREAR SIGUIENTES RONDAS
+      ======================================
+    */
+
+
+    for(
+      let nivel = indiceInicial + 1;
+      nivel < rondas.length;
+      nivel++
+    ){
+
+
+      const siguienteRonda = [];
+
+      let numero = 1;
+
+
+
+      for(
+        let i = 0;
+        i < rondaActual.length;
+        i += 2
+      ){
+
+
+        const origenLocal =
+          rondaActual[i];
+
+
+        const origenVisitante =
+          rondaActual[i + 1] || null;
+
+
+
+        const result = await connection.query(
+          `
+          INSERT INTO partidos_playoffs
+          (
+            id_torneo,
+            instancia,
+            numero_partido,
+            origen_local,
+            origen_visitante
+          )
+          VALUES (?,?,?,?,?)
+          `,
+          [
+            id_torneo,
+            rondas[nivel],
+            numero++,
+            origenLocal,
+            origenVisitante
+          ]
+        );
+
+
+
+        siguienteRonda.push(
+          result.insertId
+        );
+
+      }
+
+
+      rondaActual = siguienteRonda;
+
+    }
+
+
+
+
+    await connection.commit();
+
+
+
+    res.json({
+
+      ok:true,
+
+      mensaje:
+      "Playoff generado correctamente",
+
+      torneo:id_torneo,
+
+      primera_ronda:
+      instanciaInicial,
+
+      partidos_generados:
+      clasificados.length - (libre ? 1 : 0)
+
+    });
+
+
+
+  } catch(error){
+
+
+    await connection.rollback();
+
+
+    console.log(error);
+
+
+
+    res.status(500).json({
+
+      ok:false,
+
+      error:error.message
+
+    });
+
+
+
+  } finally {
+
+
+    connection.release();
+
+
+  }
+
+
+});
+
+
+router.post("/resultadoPlayoff", async(req,res)=>{
+
+    const connection=await pool.getConnection();
+
+    try{
+
+        await connection.beginTransaction();
+
+        const{
+            id_partido,
+            goles_local,
+            goles_visitante
+        }=req.body;
+
+        const [[partido]]=await connection.query(
+            `
+            SELECT *
+            FROM partidos_playoffs
+            WHERE id=?
+            `,
+            [id_partido]
+        );
+
+        const ganador=
+            Number(goles_local)>Number(goles_visitante)
+                ? partido.id_equipo_local
+                : partido.id_equipo_visitante;
+
+        await connection.query(
+            `
+            UPDATE partidos_playoffs
+            SET
+                goles_local=?,
+                goles_visitante=?,
+                ganador=?,
+                estado='Finalizado'
+            WHERE id=?
+            `,
+            [
+                goles_local,
+                goles_visitante,
+                ganador,
+                id_partido
+            ]
+        );
+
+        await connection.query(
+            `
+            UPDATE partidos_playoffs
+            SET
+                id_equipo_local=
+                    CASE
+                        WHEN origen_local=? THEN ?
+                        ELSE id_equipo_local
+                    END,
+
+                id_equipo_visitante=
+                    CASE
+                        WHEN origen_visitante=? THEN ?
+                        ELSE id_equipo_visitante
+                    END
+            WHERE origen_local=? OR origen_visitante=?
+            `,
+            [
+                id_partido,
+                ganador,
+                id_partido,
+                ganador,
+                id_partido,
+                id_partido
+            ]
+        );
+
+        await connection.commit();
+
+        res.json({ok:true});
+
+    }catch(err){
+
+        await connection.rollback();
+
+        console.log(err);
+
+        res.status(500).json(err);
+
+    }finally{
+
+        connection.release();
+
+    }
+
+});
+
+
+router.get("/traerplayoffs/:id_torneo", async (req, res) => {
+  try {
+    const { id_torneo } = req.params;
+
+    const rows = await pool.query(`
+      SELECT
+        p.*,
+        el.nombre AS nombre_local,
+        ev.nombre AS nombre_visitante,
+        eg.nombre AS nombre_ganador
+      FROM partidos_playoffs p
+      LEFT JOIN equipos el ON el.id = p.id_equipo_local
+      LEFT JOIN equipos ev ON ev.id = p.id_equipo_visitante
+      LEFT JOIN equipos eg ON eg.id = p.ganador
+      WHERE p.id_torneo=?
+      ORDER BY
+        FIELD(instancia,'16vos','8vos','Cuartos','Semifinal','Final'),
+        numero_partido
+    `,[id_torneo]);
+
+    res.json(rows);
+
+  } catch(err){
+    console.log(err);
+    res.status(500).json(err);
+  }
+});
 
 router.post("/verificarjugador", async (req, res) => {
   const { dni } = req.body;
