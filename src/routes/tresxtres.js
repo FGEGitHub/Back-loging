@@ -339,6 +339,48 @@ router.get("/torneos/:id/estado", async (req, res) => {
 
 
 
+
+
+
+router.post("/borrarPlayoffs", async (req, res) => {
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const { id_torneo } = req.body;
+console.log("Eliminando playoffs del torneo:", id_torneo);
+    await connection.query(
+      `
+      DELETE FROM partidos_playoffs
+      WHERE id_torneo = ?
+      `,
+      [id_torneo]
+    );
+
+    await connection.commit();
+
+    res.json({
+      ok: true,
+      mensaje: "Playoffs eliminados correctamente."
+    });
+  } catch (error) {
+    await connection.rollback();
+    console.log(error);
+
+    res.status(500).json({
+      ok: false,
+      error: error.message
+    });
+  } finally {
+    connection.release();
+  }
+});
+
+
+
+
+
 router.post("/guardarClasificacion",async(req,res)=>{
 
 const {id_torneo,clasificacion}=req.body;
