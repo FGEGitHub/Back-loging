@@ -8207,23 +8207,51 @@ cron.schedule('30 10 9 * *', async () => {
 
 
 
+const saludoss = [
+  "📢 Hola ",
+  " Buen día",
+  " Hola, ¿cómo estás?",
+  " Buenas",
+  " ¡Buen día!",
+  " Hola, espero que estés muy bien."
+];
+
+function obtenerMensaje() {
+const saludo = saludoss[Math.floor(Math.random() * saludoss.length)];
+  return (
+    `${saludo}\n\n` +
+    "Recordá que el monotributo vence el 20 de cada mes 📅.\n" +
+    "Evitá pagar intereses abonándolo en término.\n\n" +
+    "Tené en cuenta que la falta de pago por 10 períodos consecutivos puede generar la baja de oficio.\n\n" +
+    "En caso de haberlo abonado, por favor desestimá este mensaje 🙏\n\n" +
+    "Cualquier duda, escribime 👍🏻\n\n" +
+    "RYA | Ramírez Yamus & Asociados\n\n" +
+    "Contabilidad • Impuestos • Finanzas"
+  );
+}
+
+function esperar(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 cron.schedule('0 10 20 * *', async () => {
   try {
-    const mensajeamandar =
-      "📢 Estimado/a 😊\n\n" +
-      "Recordá que el monotributo vence el 20 de cada mes 📅.\n" +
-      "Evitá pagar intereses abonándolo en término.\n\n" +
-      "Tené en cuenta que la falta de pago por 10 períodos consecutivos puede generar la baja de oficio.\n\n" +
-      "En caso de haberlo abonado, por favor desestimá este mensaje 🙏\n\n" +
-      "Cualquier duda, escribime 👍🏻\n\n" +
-      "RYA | Ramírez Yamus & Asociados\n\n" +
-      "Contabilidad • Impuestos • Finanzas";
-
     for (const numero of WHATSAPP_LOTES.lote3) {
-      console.log(numero)
-      await sendWhatsappMessage(numero, mensajeamandar);
+
+      const mensaje = obtenerMensaje();
+
+      console.log(`Enviando a ${numero}`);
+
+      await sendWhatsappMessage(numero, mensaje);
 
       console.log(`Mensaje enviado a ${numero}`);
+
+      // Espera aleatoria entre 8 y 20 segundos
+      const demora = Math.floor(Math.random() * 12000) + 8000;
+
+      console.log(`Esperando ${Math.round(demora / 1000)} segundos...`);
+
+      await esperar(demora);
     }
   } catch (error) {
     console.error(error);
