@@ -106,7 +106,16 @@ router.get('/traerusuario/:cuil_cuit', async (req, res) => {
 })
 
 
+router.get('/traerEmpresas/', async (req, res) => {
+  
 
+
+    const usuario = await pool.query('select * from usuarios  ')
+   
+    res.json(usuario)
+
+
+})
 
 router.get('/traerpacientes/:id', async (req, res) => {
 const    id = req.params.id
@@ -140,6 +149,36 @@ router.get('/traerTurnosDisponibles', async (req, res) => {
   }
 });
 
+router.get('/traerTurnosDisponibles/:id', async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const turnos = await pool.query(`
+      SELECT 
+        t.*,
+        p.dni,
+        p.id AS id_pacientee,
+        u.consulta_paga
+      FROM turnos t
+      LEFT JOIN pacientes p ON t.id_paciente = p.id
+      LEFT JOIN usuarios u ON t.id_usuario = u.id
+      WHERE
+        t.baja = 'No'
+        AND t.id_usuario = ?
+      ORDER BY
+        t.fecha ASC,
+        t.hora ASC,
+        p.dni ASC
+    `, [id]);
+
+    res.json(turnos);
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Error al traer turnos' });
+  }
+});
 
 router.get('/traerturnosusuario/:id',  async (req, res) => {
   try {
@@ -1282,11 +1321,13 @@ router.post("/confirmarTurnoNoPago", async (req, res) => {
       dni,
       telefono,
       categoria,
+        id_empresa,
     } = req.body;
 
     if (
       !id_turno ||
       !nombre ||
+        !id_empresa ||
       !dni ||
       !telefono ||
       !categoria
