@@ -27,7 +27,8 @@ import qrcode from "qrcode-terminal";
 import { sendWhatsappMessage } from "./whatsapclient.js";
 import { getClient, isClientReady } from "./whatsapclient.js";
 import puppeteer from "puppeteer-core";
-
+import axios from "axios";
+import * as cheerio from "cheerio";
 import { fileURLToPath } from "url";
 
 /* ================================
@@ -1848,14 +1849,9 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
     // LISTA CHIQUES
     // -----------------------
     const chiques = await pool.query(`
-      SELECT 
-        id, nombre, apellido, fecha_nacimiento, observaciones, primer_contacto,
-         admision, dni, domicilio, telefono, autorizacion_imagen,
-        fotoc_dni, fotoc_responsable, tel_responsable, visita_social, egreso,
-        aut_retirar, dato_escolar, kid, obra_social, obra_social_cual,
-        escuela, grado, fines, hora_merienda, hijos, sexo, psico
-      FROM marketing.dtc_chicos
-      ORDER BY apellido
+     SELECT *
+FROM marketing.dtc_chicos
+ORDER BY apellido;
     `);
 
     // AGREGAR EDAD A CADA CHICO
@@ -8260,5 +8256,76 @@ cron.schedule('0 10 20 * *', async () => {
 
 
 
+
+
+/* async function verificarDolar() {
+  try {
+    const { data } = await axios.get("https://dolarhoy.com/", {
+      headers: {
+        "User-Agent": "Mozilla/5.0"
+      }
+    });
+
+    const $ = cheerio.load(data);
+
+    let oficial = {
+      venta: null,
+      variacion: null
+    };
+
+    let mep = {
+      venta: null,
+      variacion: null
+    };
+
+    $(".tile").each((i, el) => {
+      const titulo = $(el).find(".title").text().trim().toLowerCase();
+
+      const venta = $(el).find(".venta .val").first().text().trim();
+      const variacion = $(el)
+        .find(".venta .var-porcentaje div")
+        .first()
+        .text()
+        .trim();
+
+      if (titulo.includes("oficial")) {
+        oficial.venta = venta;
+        oficial.variacion = variacion;
+      }
+
+      if (titulo.includes("mep")) {
+        mep.venta = venta;
+        mep.variacion = variacion;
+      }
+    });
+
+    console.clear();
+    console.log("=================================");
+    console.log("Fecha:", new Date().toLocaleString());
+
+    console.log(
+      `OFICIAL: ${oficial.venta} | ${oficial.variacion} | ${
+        oficial.variacion === "0.00%" ? "SIN CAMBIO" : "HAY CAMBIO"
+      }`
+    );
+
+    console.log(
+      `MEP: ${mep.venta} | ${mep.variacion} | ${
+        mep.variacion === "0.00%" ? "SIN CAMBIO" : "HAY CAMBIO"
+      }`
+    );
+
+    console.log("=================================");
+
+  } catch (err) {
+    console.error(err.message);
+  }
+}
+
+verificarDolar();
+
+cron.schedule("* * * * *", async () => {
+  await verificarDolar();
+}); */
 export default router;
 
