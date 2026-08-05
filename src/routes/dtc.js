@@ -1847,6 +1847,30 @@ router.get('/listachiquesmomentaneo/', async (req, res) => {
 
     // -----------------------
     // LISTA CHIQUES
+/*     const chiques = await pool.query(`
+SELECT
+    c.*,
+
+    GROUP_CONCAT(DISTINCT v.vinculo
+        ORDER BY v.vinculo
+        SEPARATOR ' | ') AS vinculos,
+
+    GROUP_CONCAT(DISTINCT u.nombre
+        ORDER BY u.nombre
+        SEPARATOR ' | ') AS nombres_vinculos
+
+FROM marketing.dtc_chicos c
+
+LEFT JOIN marketing.dtc_vinculos v
+    ON c.id = v.id_usuario
+
+LEFT JOIN marketing.dtc_usuarios u
+    ON v.id_vinculo = u.id
+
+GROUP BY c.id
+
+ORDER BY c.apellido;
+`); */
     // -----------------------
     const chiques = await pool.query(`
      SELECT *
@@ -7951,7 +7975,7 @@ cron.schedule('1 01 * * 1-5', async () => {
  
 
 
-cron.schedule('00 18 * * 1-5', async () => {
+cron.schedule('00 22 * * 1-5', async () => {
 
   try {
 
