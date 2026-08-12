@@ -180,10 +180,29 @@ router.get('/traerTurnosDisponibles/:id', async (req, res) => {
   }
 });
 
-router.get('/traerturnosusuario/:id',  async (req, res) => {
+router.get('/traerturnosusuario/:id', async (req, res) => {
   try {
-    const turnos = await pool.query(`
-      SELECT 
+    const idUsuario = req.params.id;
+
+    // Buscar configuración del usuario
+    const usuarios = await pool.query(
+      `SELECT consulta_paga
+       FROM usuarios
+       WHERE id = ?`,
+      [idUsuario]
+    );
+
+    if (usuarios.length === 0) {
+      return res.status(404).json({
+        error: 'Usuario no encontrado'
+      });
+    }
+
+    const consulta_paga = usuarios[0].consulta_paga;
+
+    // Traer turnos
+    const turnos = await pool.query(
+      `SELECT 
         t.*, 
         p.nombre,
         p.apellido,
@@ -191,17 +210,28 @@ router.get('/traerturnosusuario/:id',  async (req, res) => {
         p.id AS id_pacientee
       FROM turnos t
       LEFT JOIN pacientes p ON t.id_paciente = p.id
-      where t.baja="No" AND t.id_usuario = ?
-      ORDER BY t.hora ASC, p.dni ASC
-    `, [req.params.id]);
+      WHERE t.baja = "No"
+        AND t.id_usuario = ?
+      ORDER BY t.hora ASC, p.dni ASC`,
+      [idUsuario]
+    );
 
-    res.json(turnos);
+    // Agregar consulta_paga a cada turno
+    const turnosConParametros = turnos.map(turno => ({
+      ...turno,
+      consulta_paga
+    }));
+
+    res.json(turnosConParametros);
+
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: 'Error al traer turnos' });
+
+    res.status(500).json({
+      error: 'Error al traer turnos'
+    });
   }
 });
-
 
 
 router.get('/traerturnos',  async (req, res) => {
@@ -365,7 +395,57 @@ router.post('/actualizarPerfil', async (req, res) => {
   }
 });
 
+router.post('/actualizarParametros', async (req, res) => {
+  const {
+    id,
+    precio_consulta,
+    tipo_consulta,
+    consulta_paga
+  } = req.body;
 
+  if (!id) {
+    return res.status(400).json({
+      error: 'Falta el ID del usuario'
+    });
+  }
+
+  const connection = await pool.getConnection();
+
+  try {
+    const resultado = await connection.query(
+      `UPDATE usuarios
+       SET
+         precio_consulta = ?,
+         tipo_consulta = ?,
+         consulta_paga = ?
+       WHERE id = ?`,
+      [
+        precio_consulta ?? null,
+        tipo_consulta ?? null,
+        consulta_paga ?? null,
+        id
+      ]
+    );
+
+    if (resultado.affectedRows === 0) {
+      return res.status(404).json({
+        error: 'Usuario no encontrado'
+      });
+    }
+
+    res.json('Parámetros actualizados correctamente');
+
+  } catch (error) {
+    console.error('Error al actualizar parámetros:', error);
+
+    res.status(500).json({
+      error: 'Error al actualizar los parámetros del usuario'
+    });
+
+  } finally {
+    connection.release();
+  }
+});
 
 
 router.post('/agregarPersona',  async (req, res) => {
@@ -1361,9 +1441,9 @@ router.post("/confirmarTurnoNoPago", async (req, res) => {
     } else {
       const nuevo = await pool.query(
         `INSERT INTO pacientes
-        (nombre, dni, telefono)
-        VALUES (?, ?, ?)`,
-        [nombre, dni, telefono]
+        (nombre, dni, telefono, id_usuario)
+        VALUES (?, ?, ?, ?)`,
+        [nombre, dni, telefono, id_empresa]
       );
 
       id_paciente = nuevo.insertId;
