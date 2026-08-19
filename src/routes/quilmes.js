@@ -524,8 +524,7 @@ router.get("/traersocios", async (req, res) => {
       ORDER BY s.apellido ASC, s.nombre ASC, c.anio DESC, c.mes DESC
 
     `);
-console.log(rows);
-console.log(rows.length)
+
     res.json(rows);
 
   } catch (error) {
