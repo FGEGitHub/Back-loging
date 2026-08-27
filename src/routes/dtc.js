@@ -3419,7 +3419,7 @@ router.post("/modificarusuariopsiq", async (req, res) => {
       fecha_nacimiento: fecha_nacimiento || "Sin asignar",
       observaciones: observaciones || "Sin observaciones",
       primer_contacto,
-      primer_ingreso: primer_ingreso || "Sin asignar",
+   
     obra_social_cual: obra_social_cual || "Sin asignar",
       obra_social: obra_social || "Sin determinar",
       dni: dni || "Sin asignar",
