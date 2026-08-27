@@ -775,9 +775,6 @@ const fines = await pool.query(`
   WHERE fecha LIKE '2025-%'
 `);
 
-console.log("asistencias",asistencias2025.length)
-console.log("turnos",turnos.length)
-console.log("gimnasio",gimnasio.length)
   res.json([chicos,asistencias2025,pacientes,turnos,gimnasio,colacion,merienda,asistenciatalleress])         
 
 })
@@ -6169,8 +6166,6 @@ const otras2 = trabajoSocial.map(t => ({
       cumple,
     };
 
-       console.log("OTRAS2:", otras);
-    console.log("OTRAS2:", otras2);
 
     res.json([
       estad,
