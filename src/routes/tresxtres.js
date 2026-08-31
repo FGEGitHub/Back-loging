@@ -48,9 +48,9 @@ router.post("/equipo", async (req, res) => {
 
     // Crear equipo
     const equipoResult = await connection.query(
-      `INSERT INTO equipos (nombre)
-       VALUES (?)`,
-      [equipo]
+      `INSERT INTO equipos (nombre, edicion)
+       VALUES (?, ?)`,
+      [equipo, "Segunda"]
     );
 
     const idEquipo = equipoResult.insertId;
@@ -853,7 +853,7 @@ router.post("/verificarjugador", async (req, res) => {
            e.nombre AS equipo
     FROM jugadores j
     INNER JOIN equipos e ON e.id = j.id_equipo
-    WHERE j.dni = ?
+    WHERE j.dni = ? and e.edicion="Segunda"
     LIMIT 1
     `,
     [dni]
