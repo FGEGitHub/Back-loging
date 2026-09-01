@@ -8,7 +8,7 @@ import {
   isLoggedInn,
 
 } from "../lib/auth.js";
- const API = import.meta.env.VITE_API_URL;
+const API = process.env.VITE_API_URL;
 //import { sendWhatsappMessage } from "./whatsapclient.js";
 
 import { Payment } from "mercadopago";
