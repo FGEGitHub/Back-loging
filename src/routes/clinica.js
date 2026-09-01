@@ -1,15 +1,22 @@
 import express from "express";
+import dotenv from "dotenv";
 const router = express.Router();
 import cron from "node-cron";
 import { } from "../lib/auth.js";
 import pool from "../database5.js";
+import {
+  isLoggedInncli,
 
-import { sendWhatsappMessage } from "./whatsapclient.js";
+} from "../lib/auth.js";
+//import { sendWhatsappMessage } from "./whatsapclient.js";
 
 import { Payment } from "mercadopago";
 
 import { Preference, MercadoPagoConfig } from "mercadopago";
-import { MP_ACCESS_TOKEN } from "../keys.js";
+
+dotenv.config();
+const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
+
 
 const client = new MercadoPagoConfig({
   accessToken: MP_ACCESS_TOKEN,
@@ -73,7 +80,7 @@ console.log("Webhook recibido:", type, data);
         console.log("Turno confirmado:", id_turno);
 try {
   const mensajee  ="confirmado"
-      await sendWhatsappMessage("5493794702861", mensajee);
+   //   await sendWhatsappMessage("5493794702861", mensajee);
       console.log("✅ Mensaje de WhatsApp enviado a:", 34784);
     } catch (error) {
       console.log(error);
@@ -117,7 +124,7 @@ router.get('/traerEmpresas/', async (req, res) => {
 
 })
 
-router.get('/traerpacientes/:id', async (req, res) => {
+router.get('/traerpacientes/:id',isLoggedInncli, async (req, res) => {
 const    id = req.params.id
     const usuario = await pool.query('select * from pacientes where baja="No" and id_usuario= ? ', [id])
    
@@ -256,7 +263,7 @@ router.get('/traerturnos',  async (req, res) => {
   }
 });
 
-router.post('/modificarusuario',  async (req, res) => {
+router.post('/modificarusuario',isLoggedInncli,  async (req, res) => {
   try {
     const { id, ...datos } = req.body;
 

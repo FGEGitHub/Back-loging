@@ -19,35 +19,49 @@ function verifyToken(req, secret) {
 }
 
 
-export const verifyTokenclin = (req, secret) => {
-  const authorization = req.get('authorization')
 
-  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    const token = authorization.substring(7)
+function verifyTokenclin(req) {
+    const authorization = req.get("authorization");
+
+    // Verificar que exista el header Authorization
+    // y que utilice el formato Bearer
+    if (!authorization || !authorization.startsWith("Bearer ")) {
+        console.log("No autorizado: Header Authorization no presente o formato incorrecto");
+        return null;
+    }
+
+    // Obtener solamente el token
+    const token = authorization.substring(7);
 
     try {
-      return jwt.verify(token, secret)
+        // Verificar el token utilizando la clave del .env
+        console.log(jwt.verify(token, process.env.JWT_SECRET));
+        return jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
-      return null
+        console.log("Error al verificar el token:", error);
+        return null;
     }
-  }
-
-  return null
 }
+
 
 
 // =======================
 // Middlewares
 // =======================
-export function isLoggedInn(req, res, next) {
-  const decodedToken = verifyToken(req, "fideicomisocs121");
+export function isLoggedInncli(req, res, next) {
 
-  if (!decodedToken?.id) {
-    return res.status(401).send("error login");
-  }
-
-  next();
+    const decodedToken = verifyTokenclin(req);
+    console.log('decodedToken')
+console.log(decodedToken)
+    if (!decodedToken?.id) {
+        return res.status(401).json({
+            message: "No autorizado"
+        });
+    }
+console.log(decodedToken)
+    next();
 }
+
 
 export function isLoggedInn2(req, res, next) {
   const decodedToken = verifyToken(req, "fideicomisocs121");
@@ -82,17 +96,16 @@ export function isLoggedInn5(req, res, next) {
   next();
 }
 
-export function isLoggedInncli(req, res, next) {
-  const decodedToken = verifyTokenclin(req, "clin123")
-
-  console.log(decodedToken)
+export function isLoggedInn(req, res, next) {
+  const decodedToken = verifyToken(req, "fideicomisocs121");
 
   if (!decodedToken?.id) {
-    return res.status(401).send("error login")
+    return res.status(401).send("error login");
   }
 
-  next()
+  next();
 }
+
 
 // =======================
 // Passport

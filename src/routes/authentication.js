@@ -55,24 +55,58 @@ router.post('/signupf1', (req, res, next) => {
 });
 
 router.post('/signupcl', (req, res, next) => {
-  passport.authenticate('local.signupcl', (err, user, info) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ message: 'Error del servidor.' });
-    }
-    if (!user) {
-      return res.status(400).json({ message: info.message || 'Registro fallido.' });
-    }
-    // Si se quiere iniciar sesión automáticamente después de registrar
-    req.logIn(user, (err) => {
-      if (err) {
-        return res.status(500).json({ message: 'Error al iniciar sesión después del registro.' });
-      }
-      return res.status(200).json({ message: 'Registrado exitosamente.', user });
-    });
-  })(req, res, next);
+
+    // Registro de usuario con Passport
+    passport.authenticate(
+        'local.signupcl',
+        { session: false },
+        (err, user, info) => {
+
+            if (err) {
+                console.error(err);
+
+                return res.status(500).json({
+                    message: 'Error del servidor.'
+                });
+            }
+
+            if (!user) {
+                return res.status(400).json({
+                    message: info?.message || 'Registro fallido.'
+                });
+            }
+
+            // Datos que se incluirán en el JWT
+        const userForToken = {
+    id: Number(user.id),
+    usuario: user.usuario,
+    nivel: Number(user.nivel)
+};
+
+            // Generar token JWT
+            const token = jwt.sign(
+                userForToken,
+                process.env.JWT_SECRET,
+                {
+                    expiresIn: '7d'
+                }
+            );
+
+            // Respuesta al frontend
+          return res.status(201).json({
+    message: 'Registrado exitosamente.',
+    user: {
+        id: Number(user.id),
+        usuario: user.usuario,
+        nombre: user.nombre,
+        nivel: Number(user.nivel)
+    },
+    token
 });
 
+        }
+    )(req, res, next);
+});
 
 
 router.post('/signupcv', passport.authenticate('local.signup', {
@@ -133,34 +167,42 @@ router.post('/signinf1', passport.authenticate('local.signinf1', { failureRedire
 }
   
   );
-router.post('/signincl', (req, res, next) => {
-    console.log("➡️ POST /signincl BODY:", req.body);
-    next();
-}, passport.authenticate('local.signincli', { failureRedirect: '/noexito' }),
-  function(req, res) {
-   
-    const userFoRToken ={
-        id :req.user.id,
-        usuario: req.user.usuario,
-        nivel:req.user.nivel,
-       
-     
-    }
- 
-    const token = jwt.sign(userFoRToken, 'clin123',{ expiresIn: 60*60*24*7})
 
-    res.send({
-        id :req.user.id,
-        usuario: req.user.usuario,
-        nivel: req.user.nivel,
-       
-        token,
-      
-        
-    } )
-}
-  
-  );
+
+router.post(
+    '/signincl',
+    (req, res, next) => {
+        console.log("➡️ POST /signincl BODY:", req.body);
+        next();
+    },
+    passport.authenticate('local.signincli', {
+        session: false
+    }),
+    (req, res) => {
+
+        const userForToken = {
+            id: req.user.id,
+            usuario: req.user.usuario,
+            nivel: req.user.nivel
+        };
+
+        const token = jwt.sign(
+            userForToken,
+            process.env.JWT_SECRET,
+            {
+                expiresIn: '7d'
+            }
+        );
+
+        res.json({
+            id: req.user.id,
+            usuario: req.user.usuario,
+            nivel: req.user.nivel,
+            token
+        });
+    }
+);
+
 router.post('/signupcv', passport.authenticate('local.signup', {
     successRedirect: '/exitosignup',
     failureRedirect:'/noexito',
