@@ -5,7 +5,7 @@ import cron from "node-cron";
 import { } from "../lib/auth.js";
 import pool from "../database5.js";
 import {
-  isLoggedInn,
+  isLoggedInncli,
 
 } from "../lib/auth.js";
 
@@ -125,7 +125,7 @@ router.get('/traerEmpresas/', async (req, res) => {
 
 })
 
-router.get('/traerpacientes/:id',isLoggedInn, async (req, res) => {
+router.get('/traerpacientes/:id',isLoggedInncli, async (req, res) => {
 const    id = req.params.id
     const usuario = await pool.query('select * from pacientes where baja="No" and id_usuario= ? ', [id])
    
@@ -264,7 +264,7 @@ router.get('/traerturnos',  async (req, res) => {
   }
 });
 
-router.post('/modificarusuario',isLoggedInn,  async (req, res) => {
+router.post('/modificarusuario',isLoggedInncli,  async (req, res) => {
   try {
     const { id, ...datos } = req.body;
 
@@ -1367,7 +1367,7 @@ await pool.query(
 
     // 4. Crear preferencia de pago
 const preference = new Preference(client);
-  console.log("API:", API)
+ 
     const result = await preference.create({
       body: {
         items: [
