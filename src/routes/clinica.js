@@ -1367,7 +1367,7 @@ await pool.query(
 
     // 4. Crear preferencia de pago
 const preference = new Preference(client);
-
+  console.log("API:", API)
     const result = await preference.create({
       body: {
         items: [
@@ -1379,12 +1379,13 @@ const preference = new Preference(client);
           },
         ],
         external_reference: String(id_turno), // MUY IMPORTANTE
-       
+     
         notification_url: API+"clinica/webhook",
+        
      back_urls: {
-  success: "https://unideographic-deborah-winnable.ngrok-free.dev/clinica/success",
-  failure: "https://unideographic-deborah-winnable.ngrok-free.dev/clinica/failure",
-  pending: "https://unideographic-deborah-winnable.ngrok-free.dev/clinica/pending",
+  success: API+"clinica/success",
+  failure:API+ "clinica/failure",
+  pending: API+"clinica/pending",
 },
 auto_return: "approved",
       },
