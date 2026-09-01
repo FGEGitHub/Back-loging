@@ -8,7 +8,7 @@ import {
   isLoggedInn,
 
 } from "../lib/auth.js";
-const API = process.env.VITE_API_URL;
+
 //import { sendWhatsappMessage } from "./whatsapclient.js";
 
 import { Payment } from "mercadopago";
@@ -17,7 +17,7 @@ import { Preference, MercadoPagoConfig } from "mercadopago";
 
 dotenv.config();
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
-
+const API = process.env.VITE_API_URL;
 
 const client = new MercadoPagoConfig({
   accessToken: MP_ACCESS_TOKEN,
