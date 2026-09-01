@@ -569,111 +569,122 @@ passport.use('local.signinqui', new LocalStrategy({
     }
 }))
 
-passport.use('local.signincli', new LocalStrategy({
-    usernameField: 'usuario',
-    passwordField: 'password',
-    passReqToCallback: true  // <--- debe ser boolean, no string
-}, 
-async (req, usuario, password, done) => {
+passport.use(
+    "local.signincli",
+    new LocalStrategy(
+        {
+            usernameField: "usuario",
+            passwordField: "password",
+        },
+        async (usuario, password, done) => {
+            try {
+                
+                // Buscar usuario en la base de datos
+                const rows = await pool5.query(
+                    "SELECT * FROM usuarios WHERE usuario = ?",
+                    [usuario]
+                );
 
-    try {
-        console.log("➡️ Iniciando login de usuario:", usuario);
+                // Verificar si el usuario existe
+                if (rows.length === 0) {
+                    return done(null, false, {
+                        message: "Usuario o contraseña incorrectos",
+                    });
+                }
 
-        const rows = await pool5.query(
-            'SELECT * FROM usuarios WHERE usuario = ?', 
-            [usuario]
-        );
+                const user = rows[0];
 
-        console.log("📌 Resultado DB:", rows);
+                // Verificar contraseña
+                const validPassword = await helpers.matchPassword(
+                    password,
+                    user.password
+                );
 
-        if (rows.length === 0) {
-            console.log("❌ Usuario no existe");
-            return done(null, false,'Bienvenido');
+                if (!validPassword) {
+                    return done(null, false, {
+                        message: "Usuario o contraseña incorrectos",
+                    });
+                }
+
+                // Login exitoso
+                return done(null, user);
+
+            } catch (error) {
+                console.error("Error en local.signincli:", error);
+
+                return done(error);
+            }
         }
+    )
+);
 
-        const user = rows[0];
+passport.use(
+    "local.signupcl",
+    new LocalStrategy(
+        {
+            usernameField: "usuario",
+            passwordField: "password",
+            passReqToCallback: true,
+        },
+        async (req, usuario, password, done) => {
+            try {
+                
+                // Obtener datos adicionales del formulario
+                let { nombre, nivel } = req.body;
 
-        const validPassword = await helpers.matchPassword(password, user.password);
+                // Nivel predeterminado
+                if (nivel === undefined) {
+                    nivel = 1;
+                }
 
-        if (!validPassword) {
-            console.log("❌ Contraseña incorrecta");
-            return done(null, false, 'Bienvenido');
+                // Verificar si el usuario ya existe
+                const verif = await pool5.query(
+                    "SELECT * FROM usuarios WHERE usuario = ?",
+                    [usuario]
+                );
+
+                if (verif.length > 0) {
+                    return done(null, false, {
+                        message: "El usuario ya existe",
+                    });
+                }
+
+                // Encriptar contraseña antes de almacenarla
+                const encryptedPassword =
+                    await helpers.encryptPassword(password);
+
+                // Insertar usuario en la base de datos
+                const result = await pool5.query(
+                    `INSERT INTO usuarios
+                    SET password = ?, usuario = ?, nombre = ?, nivel = ?`,
+                    [
+                        encryptedPassword,
+                        usuario,
+                        nombre,
+                        nivel,
+                    ]
+                );
+
+                // Crear objeto con los datos del nuevo usuario
+                // No se incluye la contraseña
+                const newUser = {
+                    id: result.insertId,
+                    usuario,
+                    nombre,
+                    nivel,
+                };
+
+                // Registro exitoso
+                return done(null, newUser);
+
+            } catch (error) {
+                console.error("Error en local.signupcl:", error);
+
+                return done(error);
+            }
         }
-
-        console.log("✅ Login correcto:", user.usuario);
-        return done(null, user, 'Bienvenido');
-
-    } catch (error) {
-        console.error("🔥 ERROR en local.signincli:", error);
-        return done(error);
-    }
-
-}));
-passport.use('local.signupcl', new LocalStrategy({
-    usernameField: 'usuario',
-    passwordField: 'password',
-    passReqToCallback: 'true'
-}, async (req, usuario, password, done) => {
-    
-    const { nombre,nivel } = req.body
-    //  const razon = await pool.query('Select razon from clientes where cuil_cuit like  ?', [cuil_cuit]) seleccionar razon
-
-
-  if (nivel == undefined){
-    nivel= 100
-  }
- 
-    const newUser = {
-        password,
-        usuario,
-        nombre,
-      
-        nivel
-
-
-    }
-
-
-    //fin transformar 
-    try {  
-      
-        const verif  = await pool5.query('select * from usuarios where usuario = ?',[usuario])
-        if (verif.length>0){
-            return ('message', 'error, usuario existente')
-        }else{
-        newUser.password = await helpers.encryptPassword(password)
-        try {
-       
-            const result = await pool5.query('INSERT INTO usuarios  set password=?, usuario=?,nivel=?', [newUser.password, usuario, 1])
-            
-            newUser.id = result.insertId// porque newuser no tiene el id
-           
-
-            return done(null, newUser)// para continuar, y devuelve el newUser para que almacene en una sesion
-
-        } catch (error) {
-            console.log(error)
-        }}
-
-
-   
-
-
-
-    } catch (error) {
-        console.log(error)
-       // req.flash('message', 'error,algo sucedio ')
-
-    }
-
-
-
-
-
-}
-
-
-))
+    )
+);
 
 
 passport.use('local.signinde', new LocalStrategy({
