@@ -101,14 +101,14 @@ try {
 
  
 
-router.get('/traerusuario/:cuil_cuit', async (req, res) => {
-    const cuil_cuit = req.params.cuil_cuit
-   console.log(cuil_cuit)
+router.get('/traerusuario/:usuario', async (req, res) => {
+    const usuario = req.params.usuario
+  
 
 
-    const usuario = await pool.query('select * from usuarios where usuario= ? ', [cuil_cuit])
-   
-    res.json(usuario)
+    const user = await pool.query('select * from usuarios where usuario= ? ', [usuario])
+  
+    res.json(user)
 
 
 })
@@ -1245,32 +1245,67 @@ router.post(
   }
 );
 
-router.post('/nuevoturnodisp',  async (req, res) => {
+router.post('/nuevoturnodisp', async (req, res) => {
   try {
-    let { fecha, hora, observaciones, id_usuario } = req.body;
+    let {
+      fecha,
+      hora,
+      observaciones,
+      id_usuario,
+      duracion
+    } = req.body;
+
     // Validaciones mínimas
     if (!fecha || !hora) {
-      return res.status(400).json({ message: "Fecha y hora son obligatorias" });
+      return res.status(400).json({
+        message: "Fecha y hora son obligatorias"
+      });
     }
 
-    // Si observaciones viene vacío → texto por defecto
+    // Duración por defecto
+    if (!duracion) {
+      duracion = 30;
+    }
+
+    // Validar duración permitida
+    duracion = Number(duracion);
+
+    if (![30, 45, 60, 90].includes(duracion)) {
+      return res.status(400).json({
+        message: "La duración debe ser 30, 45, 60 o 90 minutos"
+      });
+    }
+
+    // Si observaciones viene vacío
     if (!observaciones || observaciones.trim() === "") {
       observaciones = "Sin observaciones";
     }
 
     const sql = `
       INSERT INTO turnos
-      (fecha, hora, observaciones, id_usuario)
-      VALUES (?, ?, ?, ?)
+      (fecha, hora, observaciones, id_usuario, duracion)
+      VALUES (?, ?, ?, ?, ?)
     `;
 
-    await pool.query(sql, [fecha, hora, observaciones, id_usuario]);
+    await pool.query(sql, [
+      fecha,
+      hora,
+      observaciones,
+      id_usuario,
+      duracion
+    ]);
 
-    res.json({ message: "Turno creado correctamente" });
+    res.json({
+      message: "Turno creado correctamente",
+      duracion: duracion
+    });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error al crear turno" });
+
+    res.status(500).json({
+      message: "Error al crear turno"
+    });
   }
 });
 
