@@ -4183,7 +4183,7 @@ router.post("/nuevooficio", async (req, res) => {
 
     res.json({
       mensaje: "Oficio guardado correctamente",
-      id_usuario: idUsuario,
+     
       intervencion: intervencion
     });
 
