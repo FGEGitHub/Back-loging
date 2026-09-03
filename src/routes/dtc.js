@@ -4098,7 +4098,7 @@ router.post("/nuevooficio", async (req, res) => {
         dni
       );
 
-      const [usuariosEncontrados] =
+      const usuariosEncontrados =
         await pool.query(
           `
           SELECT id, nombre, apellido, dni
@@ -4196,9 +4196,9 @@ router.post("/nuevooficio", async (req, res) => {
           VALUES (?, ?, ?, ?)
         `;
 
-        const [
+        const 
           resultUsuario
-        ] = await pool.query(
+         = await pool.query(
           sqlUsuario,
           [
             campos.nombre,
@@ -4381,9 +4381,9 @@ router.post("/nuevooficio", async (req, res) => {
       VALUES (${placeholders})
     `;
 
-    const [
+    const 
       resultadoOficio
-    ] = await pool.query(
+     = await pool.query(
       sql,
       valores
     );
