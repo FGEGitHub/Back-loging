@@ -2940,7 +2940,7 @@ router.get('/traerfoto/:id', async (req, res) => {
   const id = req.params.id
   const productosdeunapersona = await pool.query('select * from dtc_legajos where id =?', [id])
   let rutaImagen = path.join(__dirname, '../imagenesvendedoras', productosdeunapersona[0]['ubicacion']);
-  imagenBase64 = ""
+  let imagenBase64 = ""
   if (productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 3] + productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 2] + productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 1] === "pdf") {
     imagenBase64 = rutaImagen
     res.sendFile(rutaImagen)
