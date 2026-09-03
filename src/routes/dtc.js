@@ -4072,6 +4072,10 @@ router.post("/nuevooficio", async (req, res) => {
 
     let idUsuario = campos.id_usuario || null;
 
+    // Variable para informar si el usuario ya existía
+    // o si fue creado nuevo
+    let estadoUsuario = "";
+
     // Convertir BigInt
     if (typeof idUsuario === "bigint") {
       idUsuario = Number(idUsuario);
@@ -4124,6 +4128,10 @@ router.post("/nuevooficio", async (req, res) => {
         idUsuario =
           usuarioExistente.id;
 
+        // Informamos que el usuario ya existía
+        estadoUsuario = "existente";
+
+        // Convertir BigInt
         if (
           typeof idUsuario === "bigint"
         ) {
@@ -4196,21 +4204,24 @@ router.post("/nuevooficio", async (req, res) => {
           VALUES (?, ?, ?, ?)
         `;
 
-        const 
-          resultUsuario
-         = await pool.query(
-          sqlUsuario,
-          [
-            campos.nombre,
-            campos.apellido,
-            dni,
-            campos.tel || null
-          ]
-        );
+        const resultUsuario =
+          await pool.query(
+            sqlUsuario,
+            [
+              campos.nombre,
+              campos.apellido,
+              dni,
+              campos.tel || null
+            ]
+          );
 
         idUsuario =
           resultUsuario.insertId;
 
+        // Informamos que se creó un usuario nuevo
+        estadoUsuario = "nuevo";
+
+        // Convertir BigInt
         if (
           typeof idUsuario === "bigint"
         ) {
@@ -4381,12 +4392,11 @@ router.post("/nuevooficio", async (req, res) => {
       VALUES (${placeholders})
     `;
 
-    const 
-      resultadoOficio
-     = await pool.query(
-      sql,
-      valores
-    );
+    const resultadoOficio =
+      await pool.query(
+        sql,
+        valores
+      );
 
     // =====================================================
     // ID DEL OFICIO
@@ -4403,13 +4413,36 @@ router.post("/nuevooficio", async (req, res) => {
     }
 
     // =====================================================
+    // MENSAJE FINAL
+    // =====================================================
+
+    let mensajeFinal =
+      "Oficio guardado correctamente.";
+
+    if (
+      estadoUsuario === "nuevo"
+    ) {
+
+      mensajeFinal =
+        "Oficio guardado correctamente. Se creó un usuario nuevo con ese DNI.";
+
+    } else if (
+      estadoUsuario === "existente"
+    ) {
+
+      mensajeFinal =
+        "Oficio guardado correctamente. Ya existía un usuario con ese DNI.";
+
+    }
+
+    // =====================================================
     // RESPUESTA
     // =====================================================
 
     return res.json({
 
       mensaje:
-        "Oficio guardado correctamente",
+        mensajeFinal,
 
       id_oficio:
         idOficio,
@@ -4418,7 +4451,10 @@ router.post("/nuevooficio", async (req, res) => {
         idUsuario,
 
       intervencion:
-        intervencion
+        intervencion,
+
+      usuario:
+        estadoUsuario
 
     });
 
@@ -4501,9 +4537,9 @@ router.post("/nuevooficio", async (req, res) => {
 
     } else if (
       error.code ===
-        "PROTOCOL_CONNECTION_LOST" ||
+      "PROTOCOL_CONNECTION_LOST" ||
       error.code ===
-        "ECONNREFUSED"
+      "ECONNREFUSED"
     ) {
 
       tipoError =
