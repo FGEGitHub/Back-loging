@@ -2849,7 +2849,7 @@ router.get('/datosdechique/:id', async (req, res) => {
     } else {
       rutaImagen = path.join(__dirname, '../imagenesvendedoras', chiques[0]['foto']);
       try {
-        imagenBuffer = fs.readFileSync(rutaImagen);
+      let  imagenBuffer = fs.readFileSync(rutaImagen);
         imagenBase64 = imagenBuffer.toString('base64');
       } catch (error) {
         imagenBase64=null
