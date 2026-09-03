@@ -3876,6 +3876,7 @@ router.get("/traaeroficios", async (req, res) => {
         dtc_oficios.causa,
         dtc_oficios.solicitud,
         dtc_oficios.oficio,
+          dtc_oficios.intervencion,
         dtc_oficios.fecha,
         dtc_oficios.fuero, -- ✅ CAMPO FUERO
         dtc_oficios.id_usuario,
@@ -3902,6 +3903,7 @@ router.get("/traaeroficios", async (req, res) => {
           causa: row.causa,
           solicitud: row.solicitud,
           oficio: row.oficio,
+           intervencion: row.intervencion,
           fecha: row.fecha,
           fuero: row.fuero, // ✅ AGREGADO
           anio,
@@ -4042,10 +4044,10 @@ router.post("/nuevaprestacioninv", async (req, res) => {
 
   
 })
-
 router.post("/nuevooficio", async (req, res) => {
   try {
     const campos = req.body;
+
     console.log("Datos recibidos:", campos);
 
     if (Object.keys(campos).length === 0) {
@@ -4057,17 +4059,29 @@ router.post("/nuevooficio", async (req, res) => {
 
     let idUsuario = campos.id_usuario || null;
 
-    // Si no hay id_usuario, pero hay datos de nuevo usuario
-    if (!idUsuario && (campos.nombre || campos.apellido || campos.dni)) {
-      if (!campos.nombre || !campos.apellido || !campos.dni) {
+    // =====================================================
+    // CREAR NUEVO USUARIO SI NO SE SELECCIONÓ UNO EXISTENTE
+    // =====================================================
+
+    if (
+      !idUsuario &&
+      (campos.nombre || campos.apellido || campos.dni)
+    ) {
+      if (
+        !campos.nombre ||
+        !campos.apellido ||
+        !campos.dni
+      ) {
         return res.status(400).json({
-          error: "Faltan datos obligatorios para crear usuario (nombre, apellido, dni)",
+          error:
+            "Faltan datos obligatorios para crear usuario (nombre, apellido, dni)",
           tipo: "CamposIncompletos"
         });
       }
 
       const sqlUsuario = `
-        INSERT INTO dtc_chicos (nombre, apellido, dni, telefono)
+        INSERT INTO dtc_chicos 
+        (nombre, apellido, dni, telefono)
         VALUES (?, ?, ?, ?)
       `;
 
@@ -4080,21 +4094,57 @@ router.post("/nuevooficio", async (req, res) => {
 
       idUsuario = resultUsuario.insertId;
 
-      console.log("Usuario nuevo creado con id:", idUsuario);
+      console.log(
+        "Usuario nuevo creado con id:",
+        idUsuario
+      );
     }
+
+    // =====================================================
+    // VERIFICAR USUARIO
+    // =====================================================
 
     if (!idUsuario) {
       return res.status(400).json({
-        error: "Debe seleccionar o crear un usuario antes de guardar el oficio",
+        error:
+          "Debe seleccionar o crear un usuario antes de guardar el oficio",
         tipo: "UsuarioRequerido"
       });
     }
 
-    // Creamos el oficio
+    // =====================================================
+    // PREPARAR INTERVENCIONES
+    // =====================================================
+
+    let intervencion = [];
+
+    if (Array.isArray(campos.intervencion)) {
+      intervencion = campos.intervencion;
+    } else if (campos.intervencion) {
+      // Por si llega una sola intervención como texto
+      intervencion = [campos.intervencion];
+    }
+
+    // Convertimos el array a JSON para MySQL
+    const intervencionJSON = JSON.stringify(intervencion);
+
+    console.log(
+      "Intervenciones a guardar:",
+      intervencionJSON
+    );
+
+    // =====================================================
+    // CREAR OFICIO
+    // =====================================================
+
     const datosOficio = {
       expediente: campos.expediente || "",
       juzgado: campos.juzgado || "",
       fuero: campos.fuero || "Sin fuero",
+
+      // Guardamos múltiples intervenciones como JSON
+      intervencion: intervencionJSON,
+
       causa: campos.causa || "",
       solicitud: campos.solicitud || "",
       oficio: campos.oficio || "",
@@ -4102,9 +4152,22 @@ router.post("/nuevooficio", async (req, res) => {
       id_usuario: idUsuario
     };
 
+    console.log(
+      "Datos del oficio:",
+      datosOficio
+    );
+
+    // =====================================================
+    // INSERT DINÁMICO
+    // =====================================================
+
     const columnas = Object.keys(datosOficio).join(", ");
+
     const valores = Object.values(datosOficio);
-    const placeholders = valores.map(() => "?").join(", ");
+
+    const placeholders = valores
+      .map(() => "?")
+      .join(", ");
 
     const sql = `
       INSERT INTO dtc_oficios (${columnas})
@@ -4113,21 +4176,34 @@ router.post("/nuevooficio", async (req, res) => {
 
     await pool.query(sql, valores);
 
+    // =====================================================
+    // RESPUESTA
+    // =====================================================
+
     res.json({
-      mensaje: "Oficio guardado correctamente"
+      mensaje: "Oficio guardado correctamente",
+      id_usuario: idUsuario,
+      intervencion: intervencion
     });
 
   } catch (error) {
-    console.error("Error al guardar el oficio:", error);
+
+    console.error(
+      "Error al guardar el oficio:",
+      error
+    );
 
     let tipoError = "ErrorDesconocido";
 
     if (error.code === "ER_BAD_FIELD_ERROR") {
       tipoError = "CampoInexistente";
+
     } else if (error.code === "ER_DUP_ENTRY") {
       tipoError = "ValorDuplicado";
+
     } else if (error.code === "ER_NO_SUCH_TABLE") {
       tipoError = "TablaInexistente";
+
     } else if (
       error.code === "PROTOCOL_CONNECTION_LOST" ||
       error.code === "ECONNREFUSED"
@@ -4142,7 +4218,6 @@ router.post("/nuevooficio", async (req, res) => {
     });
   }
 });
-
 
 /* router.post("/nuevooficio", async (req, res) => {
   try {
