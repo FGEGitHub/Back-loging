@@ -2939,6 +2939,7 @@ router.get('/traerasistencia/:id', async (req, res) => {
 router.get('/traerfoto/:id', async (req, res) => {
   const id = req.params.id
   const productosdeunapersona = await pool.query('select * from dtc_legajos where id =?', [id])
+  console.log(productosdeunapersona[0])
   let rutaImagen = path.join(__dirname, '../imagenesvendedoras', productosdeunapersona[0]['ubicacion']);
   let imagenBase64 = ""
   if (productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 3] + productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 2] + productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 1] === "pdf") {
@@ -6020,8 +6021,8 @@ router.get('/traterpsicologos2/', async (req, res) => {
 router.get('/descargar/:id', async (req, res) => {
   const id = req.params.id;
   const nomb = await pool.query('select * from dtc_legajos where id=?', [id])
-  filePath = path.join(__dirname, '../imagenesvendedoras', nomb[0]['ubicacion']);
-  console.log(filePath)
+  let filePath = path.join(__dirname, '../imagenesvendedoras', nomb[0]['ubicacion']);
+ 
   // const filePath = __dirname + '/uploads/' + nomb[0]['ubicacion'];
 
   res.download(filePath);
