@@ -4211,7 +4211,7 @@ router.post("/nuevooficio", async (req, res) => {
     ) {
       tipoError = "ConexionBD";
     }
-
+console.log("Tipo de error:", tipoError);
     res.status(500).json({
       error: "No se pudo guardar el oficio",
       tipo: tipoError,
