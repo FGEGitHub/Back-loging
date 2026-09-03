@@ -4049,15 +4049,15 @@ router.post("/nuevooficio", async (req, res) => {
     console.log("Datos recibidos:", campos);
 
     if (Object.keys(campos).length === 0) {
-      return res.status(400).json({ 
-        error: "No se enviaron datos", 
-        tipo: "DatosVacíos" 
+      return res.status(400).json({
+        error: "No se enviaron datos",
+        tipo: "DatosVacíos"
       });
     }
 
     let idUsuario = campos.id_usuario || null;
 
-    // 🔸 Si no hay id_usuario, pero hay datos de nuevo usuario:
+    // Si no hay id_usuario, pero hay datos de nuevo usuario
     if (!idUsuario && (campos.nombre || campos.apellido || campos.dni)) {
       if (!campos.nombre || !campos.apellido || !campos.dni) {
         return res.status(400).json({
@@ -4070,6 +4070,7 @@ router.post("/nuevooficio", async (req, res) => {
         INSERT INTO dtc_chicos (nombre, apellido, dni, telefono)
         VALUES (?, ?, ?, ?)
       `;
+
       const resultUsuario = await pool.query(sqlUsuario, [
         campos.nombre,
         campos.apellido,
@@ -4077,7 +4078,8 @@ router.post("/nuevooficio", async (req, res) => {
         campos.tel || null
       ]);
 
-      idUsuario = resultUsuario.insertId; // guardamos el nuevo ID
+      idUsuario = resultUsuario.insertId;
+
       console.log("Usuario nuevo creado con id:", idUsuario);
     }
 
@@ -4088,10 +4090,11 @@ router.post("/nuevooficio", async (req, res) => {
       });
     }
 
-    // 🔸 Creamos el oficio con el id_usuario correcto
+    // Creamos el oficio
     const datosOficio = {
       expediente: campos.expediente || "",
       juzgado: campos.juzgado || "",
+      fuero: campos.fuero || "Sin fuero",
       causa: campos.causa || "",
       solicitud: campos.solicitud || "",
       oficio: campos.oficio || "",
@@ -4103,12 +4106,15 @@ router.post("/nuevooficio", async (req, res) => {
     const valores = Object.values(datosOficio);
     const placeholders = valores.map(() => "?").join(", ");
 
-    const sql = `INSERT INTO dtc_oficios (${columnas}) VALUES (${placeholders})`;
+    const sql = `
+      INSERT INTO dtc_oficios (${columnas})
+      VALUES (${placeholders})
+    `;
+
     await pool.query(sql, valores);
 
     res.json({
-      mensaje: "Oficio guardado correctamente",
-      
+      mensaje: "Oficio guardado correctamente"
     });
 
   } catch (error) {
@@ -4116,13 +4122,16 @@ router.post("/nuevooficio", async (req, res) => {
 
     let tipoError = "ErrorDesconocido";
 
-    if (error.code === 'ER_BAD_FIELD_ERROR') {
+    if (error.code === "ER_BAD_FIELD_ERROR") {
       tipoError = "CampoInexistente";
-    } else if (error.code === 'ER_DUP_ENTRY') {
+    } else if (error.code === "ER_DUP_ENTRY") {
       tipoError = "ValorDuplicado";
-    } else if (error.code === 'ER_NO_SUCH_TABLE') {
+    } else if (error.code === "ER_NO_SUCH_TABLE") {
       tipoError = "TablaInexistente";
-    } else if (error.code === 'PROTOCOL_CONNECTION_LOST' || error.code === 'ECONNREFUSED') {
+    } else if (
+      error.code === "PROTOCOL_CONNECTION_LOST" ||
+      error.code === "ECONNREFUSED"
+    ) {
       tipoError = "ConexionBD";
     }
 
