@@ -4046,13 +4046,18 @@ router.post("/nuevaprestacioninv", async (req, res) => {
   
 })
 
+
+
 router.post("/nuevooficio", async (req, res) => {
 
   try {
 
     const campos = req.body;
 
-    console.log("Datos recibidos:", campos);
+    console.log("====================================");
+    console.log("DATOS RECIBIDOS:");
+    console.log(campos);
+    console.log("====================================");
 
     if (!campos || Object.keys(campos).length === 0) {
       return res.status(400).json({
@@ -4067,12 +4072,12 @@ router.post("/nuevooficio", async (req, res) => {
 
     let idUsuario = campos.id_usuario || null;
 
-    // Convertimos BigInt a Number si corresponde
+    // Convertir BigInt
     if (typeof idUsuario === "bigint") {
       idUsuario = Number(idUsuario);
     }
 
-    // Si viene como string numérico
+    // Convertir string numérico
     if (
       typeof idUsuario === "string" &&
       idUsuario.trim() !== ""
@@ -4081,65 +4086,165 @@ router.post("/nuevooficio", async (req, res) => {
     }
 
     // =====================================================
-    // CREAR NUEVO USUARIO
+    // SI NO VIENE ID, BUSCAR POR DNI
     // =====================================================
 
-    if (
-      !idUsuario &&
-      (campos.nombre || campos.apellido || campos.dni)
-    ) {
+    if (!idUsuario && campos.dni) {
 
-      if (
-        !campos.nombre ||
-        !campos.apellido ||
-        !campos.dni
-      ) {
-
-        return res.status(400).json({
-          error:
-            "Faltan datos obligatorios para crear usuario (nombre, apellido, dni)",
-          tipo: "CamposIncompletos"
-        });
-
-      }
-
-      const sqlUsuario = `
-        INSERT INTO dtc_chicos
-        (nombre, apellido, dni, telefono)
-        VALUES (?, ?, ?, ?)
-      `;
-
-      const [resultUsuario] = await pool.query(
-        sqlUsuario,
-        [
-          campos.nombre,
-          campos.apellido,
-          campos.dni,
-          campos.tel || null
-        ]
-      );
-
-      // =====================================================
-      // OBTENER ID GENERADO
-      // =====================================================
-
-      idUsuario = resultUsuario.insertId;
-
-      // Si MySQL devuelve BigInt
-      if (typeof idUsuario === "bigint") {
-        idUsuario = Number(idUsuario);
-      }
+      const dni = String(campos.dni).trim();
 
       console.log(
-        "Usuario nuevo creado con id:",
-        idUsuario,
-        "tipo:",
-        typeof idUsuario
+        "Buscando usuario por DNI:",
+        dni
       );
+
+      const [usuariosEncontrados] =
+        await pool.query(
+          `
+          SELECT id, nombre, apellido, dni
+          FROM dtc_chicos
+          WHERE dni = ?
+          LIMIT 1
+          `,
+          [dni]
+        );
+
+      // ===================================================
+      // EL DNI YA EXISTE
+      // ===================================================
+
+      if (
+        usuariosEncontrados &&
+        usuariosEncontrados.length > 0
+      ) {
+
+        const usuarioExistente =
+          usuariosEncontrados[0];
+
+        idUsuario =
+          usuarioExistente.id;
+
+        if (
+          typeof idUsuario === "bigint"
+        ) {
+          idUsuario =
+            Number(idUsuario);
+        }
+
+        console.log(
+          "===================================="
+        );
+
+        console.log(
+          "USUARIO YA EXISTE"
+        );
+
+        console.log(
+          "DNI:",
+          dni
+        );
+
+        console.log(
+          "ID EXISTENTE:",
+          idUsuario
+        );
+
+        console.log(
+          "Nombre:",
+          usuarioExistente.nombre,
+          usuarioExistente.apellido
+        );
+
+        console.log(
+          "===================================="
+        );
+
+      }
+
+      // ===================================================
+      // EL DNI NO EXISTE → CREAR USUARIO
+      // ===================================================
+
+      else {
+
+        console.log(
+          "DNI no encontrado. Creando nuevo usuario..."
+        );
+
+        if (
+          !campos.nombre ||
+          !campos.apellido ||
+          !campos.dni
+        ) {
+
+          return res.status(400).json({
+            error:
+              "Faltan datos obligatorios para crear usuario (nombre, apellido, dni)",
+            tipo: "CamposIncompletos"
+          });
+
+        }
+
+        const sqlUsuario = `
+          INSERT INTO dtc_chicos
+          (
+            nombre,
+            apellido,
+            dni,
+            telefono
+          )
+          VALUES (?, ?, ?, ?)
+        `;
+
+        const [
+          resultUsuario
+        ] = await pool.query(
+          sqlUsuario,
+          [
+            campos.nombre,
+            campos.apellido,
+            dni,
+            campos.tel || null
+          ]
+        );
+
+        idUsuario =
+          resultUsuario.insertId;
+
+        if (
+          typeof idUsuario === "bigint"
+        ) {
+          idUsuario =
+            Number(idUsuario);
+        }
+
+        console.log(
+          "===================================="
+        );
+
+        console.log(
+          "USUARIO NUEVO CREADO"
+        );
+
+        console.log(
+          "DNI:",
+          dni
+        );
+
+        console.log(
+          "ID NUEVO:",
+          idUsuario
+        );
+
+        console.log(
+          "===================================="
+        );
+
+      }
     }
 
     // =====================================================
-    // VERIFICAR USUARIO
+    // SI NO HAY ID NI DNI → ERROR
     // =====================================================
 
     if (
@@ -4151,13 +4256,14 @@ router.post("/nuevooficio", async (req, res) => {
 
       return res.status(400).json({
         error:
-          "Debe seleccionar o crear un usuario antes de guardar el oficio",
+          "Debe seleccionar un usuario existente o ingresar un DNI para crear/buscar el usuario",
         tipo: "UsuarioRequerido"
       });
 
     }
 
-    idUsuario = Number(idUsuario);
+    idUsuario =
+      Number(idUsuario);
 
     // =====================================================
     // PREPARAR INTERVENCIONES
@@ -4165,22 +4271,35 @@ router.post("/nuevooficio", async (req, res) => {
 
     let intervencion = [];
 
-    if (Array.isArray(campos.intervencion)) {
+    if (
+      Array.isArray(
+        campos.intervencion
+      )
+    ) {
 
-      intervencion = campos.intervencion
-        .filter(Boolean)
-        .map((item) => String(item).trim());
+      intervencion =
+        campos.intervencion
+          .filter(Boolean)
+          .map((item) =>
+            String(item).trim()
+          );
 
-    } else if (campos.intervencion) {
+    } else if (
+      campos.intervencion
+    ) {
 
       intervencion = [
-        String(campos.intervencion).trim()
+        String(
+          campos.intervencion
+        ).trim()
       ];
 
     }
 
     const intervencionJSON =
-      JSON.stringify(intervencion);
+      JSON.stringify(
+        intervencion
+      );
 
     console.log(
       "Intervenciones a guardar:",
@@ -4188,48 +4307,73 @@ router.post("/nuevooficio", async (req, res) => {
     );
 
     // =====================================================
-    // CREAR OFICIO
+    // CREAR DATOS DEL OFICIO
     // =====================================================
 
     const datosOficio = {
 
-      expediente: campos.expediente || "",
+      expediente:
+        campos.expediente || "",
 
-      juzgado: campos.juzgado || "",
+      juzgado:
+        campos.juzgado || "",
 
-      fuero: campos.fuero || "Sin fuero",
+      fuero:
+        campos.fuero || "Sin fuero",
 
-      intervencion: intervencionJSON,
+      intervencion:
+        intervencionJSON,
 
-      causa: campos.causa || "",
+      causa:
+        campos.causa || "",
 
-      solicitud: campos.solicitud || "",
+      solicitud:
+        campos.solicitud || "",
 
-      oficio: campos.oficio || "",
+      oficio:
+        campos.oficio || "",
 
-      fecha: campos.fecha || null,
+      fecha:
+        campos.fecha || null,
 
-      id_usuario: idUsuario
-
+      id_usuario:
+        idUsuario
     };
 
     console.log(
-      "Datos del oficio:",
+      "===================================="
+    );
+
+    console.log(
+      "DATOS DEL OFICIO:"
+    );
+
+    console.log(
       datosOficio
     );
 
+    console.log(
+      "===================================="
+    );
+
     // =====================================================
-    // INSERT
+    // INSERT OFICIO
     // =====================================================
 
     const columnas =
-      Object.keys(datosOficio).join(", ");
+      Object.keys(
+        datosOficio
+      ).join(", ");
 
     const valores =
-      Object.values(datosOficio);
+      Object.values(
+        datosOficio
+      );
 
     const placeholders =
-      valores.map(() => "?").join(", ");
+      valores
+        .map(() => "?")
+        .join(", ");
 
     const sql = `
       INSERT INTO dtc_oficios
@@ -4237,21 +4381,12 @@ router.post("/nuevooficio", async (req, res) => {
       VALUES (${placeholders})
     `;
 
-    console.log(
-      "SQL:",
-      sql
-    );
-
-    console.log(
-      "Valores:",
+    const [
+      resultadoOficio
+    ] = await pool.query(
+      sql,
       valores
     );
-
-    const [resultadoOficio] =
-      await pool.query(
-        sql,
-        valores
-      );
 
     // =====================================================
     // ID DEL OFICIO
@@ -4260,8 +4395,11 @@ router.post("/nuevooficio", async (req, res) => {
     let idOficio =
       resultadoOficio.insertId;
 
-    if (typeof idOficio === "bigint") {
-      idOficio = Number(idOficio);
+    if (
+      typeof idOficio === "bigint"
+    ) {
+      idOficio =
+        Number(idOficio);
     }
 
     // =====================================================
@@ -4291,7 +4429,7 @@ router.post("/nuevooficio", async (req, res) => {
     );
 
     console.error(
-      "ERROR AL GUARDAR OFICIO"
+      "ERROR AL GUARDAR EL OFICIO"
     );
 
     console.error(
@@ -4347,6 +4485,22 @@ router.post("/nuevooficio", async (req, res) => {
 
     } else if (
       error.code ===
+      "ER_DATA_TOO_LONG"
+    ) {
+
+      tipoError =
+        "DatoDemasiadoLargo";
+
+    } else if (
+      error.code ===
+      "ER_TRUNCATED_WRONG_VALUE"
+    ) {
+
+      tipoError =
+        "ValorIncorrecto";
+
+    } else if (
+      error.code ===
         "PROTOCOL_CONNECTION_LOST" ||
       error.code ===
         "ECONNREFUSED"
@@ -4354,6 +4508,7 @@ router.post("/nuevooficio", async (req, res) => {
 
       tipoError =
         "ConexionBD";
+
     }
 
     console.log(
@@ -4377,6 +4532,7 @@ router.post("/nuevooficio", async (req, res) => {
   }
 
 });
+
 
 
 
