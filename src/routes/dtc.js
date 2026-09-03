@@ -2947,7 +2947,7 @@ router.get('/traerfoto/:id', async (req, res) => {
 
 
   } else {
-    imagenBuffer = fs.readFileSync(rutaImagen);
+  let  imagenBuffer = fs.readFileSync(rutaImagen);
     imagenBase64 = imagenBuffer.toString('base64');
     res.json([imagenBase64, productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 3] + productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 2] + productosdeunapersona[0]['ubicacion'][productosdeunapersona[0]['ubicacion'].length - 1]])
 
