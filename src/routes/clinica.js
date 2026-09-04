@@ -611,6 +611,63 @@ router.post('/agregarPersona',  async (req, res) => {
 });
 
 
+
+
+
+
+
+
+router.post('/agregarespecialidad', async (req, res) => {
+  try {
+    const { usuarioid, nombre } = req.body;
+console.log(usuarioid, nombre)
+    // Validaciones
+    if (!usuarioid) {
+      return res.status(400).json({
+        message: 'El usuarioid es obligatorio'
+      });
+    }
+
+    if (!nombre || !nombre.trim()) {
+      return res.status(400).json({
+        message: 'El nombre de la especialidad es obligatorio'
+      });
+    }
+
+    // Insertar especialidad
+    const resultado = await pool.query(
+      `INSERT INTO especialidades 
+       (nombre, id_medico)
+       VALUES (?, ?)`,
+      [
+        nombre.trim(),
+        usuarioid
+      ]
+    );
+
+    return res.status(201).json({
+      message: 'Especialidad agregada correctamente',
+     // id: resultado.insertId,
+      nombre: nombre.trim(),
+      ig_medico: usuarioid
+    });
+
+  } catch (error) {
+    console.error('Error al agregar especialidad:', error);
+
+    return res.status(500).json({
+      message: 'Error al agregar la especialidad',
+      error: error.message
+    });
+  }
+});
+
+
+
+
+
+
+
 router.get('/estadoSolicitud/:id', async (req, res) => {
   const id = req.params.id;
 
@@ -670,13 +727,45 @@ router.get('/datospaciente/:id', async (req, res) => {
 
 })
 ////////////////////traerusuario
-
-
 router.get('/traerperfil/:id', async (req, res) => {
-  const { id } = req.params;
-const usuariod =  await pool.query('select * from usuarios where id =?', [id])
-res.json(usuariod[0])
-})
+  try {
+    const { id } = req.params;
+
+    // Buscar usuario
+    const usuarios = await pool.query(
+      'SELECT * FROM usuarios WHERE id = ?',
+      [id]
+    );
+
+    if (usuarios.length === 0) {
+      return res.status(404).json({
+        message: 'Usuario no encontrado'
+      });
+    }
+
+    const usuario = usuarios[0];
+
+    // Buscar todas las especialidades del médico
+    const especialidades = await pool.query(
+      'SELECT * FROM especialidades WHERE id_medico = ?',
+      [id]
+    );
+console.log(especialidades)
+    // Agregar las especialidades al perfil
+    usuario.especialidades = especialidades;
+
+    res.json(usuario);
+
+  } catch (error) {
+    console.error('Error al traer perfil:', error);
+
+    res.status(500).json({
+      message: 'Error al obtener el perfil'
+    });
+  }
+});
+
+
 router.get('/traerTurnoDetalle/:id', async (req, res) => {
   const { id } = req.params;
 
