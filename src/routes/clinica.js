@@ -22,7 +22,7 @@ const API = process.env.VITE_API_URL;
 const client = new MercadoPagoConfig({
   accessToken: MP_ACCESS_TOKEN,
 });
-
+////////////Mercado pago 
 router.post("/crear-preferencia", async (req, res) => {
   try {
     const preference = new Preference(client);
@@ -52,12 +52,11 @@ auto_return: "approved",
     res.status(500).json({ error: "Error Mercado Pago" });
   }
 });
+
 router.post("/success", async (req, res) => {
 console.loft("Pago exitoso:", req.body);
 res.send("¡Pago exitoso! Gracias por su compra.");
 });
-
-
 
 router.post("/webhook", async (req, res) => {
   try {
@@ -96,11 +95,10 @@ try {
     res.sendStatus(500);
   }
 });
+/////////////Fin Mercado pago 
 
 
-
- 
-
+////datos de la clinica, se busca por usuario
 router.get('/traerusuario/:usuario', async (req, res) => {
     const usuario = req.params.usuario
   
@@ -113,7 +111,7 @@ router.get('/traerusuario/:usuario', async (req, res) => {
 
 })
 
-
+///// Traer usuarios/clinicas para elegir 
 router.get('/traerEmpresas/', async (req, res) => {
   
 
@@ -125,6 +123,7 @@ router.get('/traerEmpresas/', async (req, res) => {
 
 })
 
+/////trae lista de pacientes,  la id es para q traiga solo los de la clinica
 router.get('/traerpacientes/:id',isLoggedInncli, async (req, res) => {
 const    id = req.params.id
     const usuario = await pool.query('select * from pacientes where baja="No" and id_usuario= ? ', [id])
@@ -134,7 +133,7 @@ const    id = req.params.id
 
 })
 
-
+///DESconectado, trar todos
 router.get('/traerTurnosDisponibles', async (req, res) => {
   try {
     const turnos = await pool.query(`
@@ -156,7 +155,7 @@ router.get('/traerTurnosDisponibles', async (req, res) => {
     res.status(500).json({ error: 'Error al traer turnos' });
   }
 });
-
+///DESconectado, trar todos los turnos de uan clinica y agrega si es paga 
 router.get('/traerTurnosDisponibles/:id', async (req, res) => {
   try {
 
@@ -187,6 +186,7 @@ router.get('/traerTurnosDisponibles/:id', async (req, res) => {
     res.status(500).json({ error: 'Error al traer turnos' });
   }
 });
+
 
 router.get('/traerturnosusuario/:id', async (req, res) => {
   try {
@@ -837,6 +837,74 @@ router.get('/traerTurnoDetalle/:id', async (req, res) => {
 
 
 
+router.post('/eliminarEspecialidad', async (req, res) => {
+  try {
+    const { idEspecialidad } = req.body;
+
+    if (!idEspecialidad) {
+      return res.status(400).json({
+        message: "El id de la especialidad es obligatorio"
+      });
+    }
+
+    const resultado = await pool.query(
+      `DELETE FROM especialidades WHERE id = ?`,
+      [idEspecialidad]
+    );
+
+    if (resultado.affectedRows === 0) {
+      return res.status(404).json({
+        message: "No se encontró la especialidad"
+      });
+    }
+
+    res.json({
+      message: "Especialidad eliminada correctamente"
+    });
+
+  } catch (error) {
+    console.error("Error al eliminar especialidad:", error);
+
+    res.status(500).json({
+      message: "Error al eliminar la especialidad"
+    });
+  }
+});
+
+
+router.post('/traerespecialidades', async (req, res) => {
+  try {
+    const { id_usuario } = req.body;
+
+    if (!id_usuario) {
+      return res.status(400).json({
+        message: "El id_usuario es obligatorio"
+      });
+    }
+
+    const especialidades = await pool.query(
+      `
+      SELECT 
+        e.id,
+        e.nombre
+      FROM especialidades e
+      WHERE e.id_medico = ?
+      ORDER BY e.nombre
+      `,
+      [id_usuario]
+    );
+
+    res.json(especialidades);
+
+  } catch (error) {
+    console.error("Error al traer especialidades:", error);
+
+    res.status(500).json({
+      message: "Error al traer las especialidades"
+    });
+  }
+});
+
 router.post('/borrarpaciente',  async (req, res) => {
   const conn = await pool.getConnection();
 
@@ -1341,9 +1409,9 @@ router.post('/nuevoturnodisp', async (req, res) => {
       hora,
       observaciones,
       id_usuario,
+      especialidad,
       duracion
     } = req.body;
-
     // Validaciones mínimas
     if (!fecha || !hora) {
       return res.status(400).json({
@@ -1372,8 +1440,8 @@ router.post('/nuevoturnodisp', async (req, res) => {
 
     const sql = `
       INSERT INTO turnos
-      (fecha, hora, observaciones, id_usuario, duracion)
-      VALUES (?, ?, ?, ?, ?)
+      (fecha, hora, observaciones, id_usuario, duracion, especialidad)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
 
     await pool.query(sql, [
@@ -1381,7 +1449,8 @@ router.post('/nuevoturnodisp', async (req, res) => {
       hora,
       observaciones,
       id_usuario,
-      duracion
+      duracion,
+      especialidad || null
     ]);
 
     res.json({
@@ -1641,6 +1710,11 @@ router.post("/confirmarTurnoNoPago", async (req, res) => {
     });
   }
 });
+
+
+
+
+
 //cron.schedule("*/1 * * * *", async () => {
   /* try {
 

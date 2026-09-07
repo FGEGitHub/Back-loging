@@ -35,7 +35,6 @@ function verifyTokenclin(req) {
 
     try {
         // Verificar el token utilizando la clave del .env
-        console.log(jwt.verify(token, process.env.JWT_SECRET));
         return jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
         console.log("Error al verificar el token:", error);
@@ -51,14 +50,13 @@ function verifyTokenclin(req) {
 export function isLoggedInncli(req, res, next) {
 
     const decodedToken = verifyTokenclin(req);
-    console.log('decodedToken')
-console.log(decodedToken)
+
     if (!decodedToken?.id) {
         return res.status(401).json({
             message: "No autorizado"
         });
     }
-console.log(decodedToken)
+
     next();
 }
 
