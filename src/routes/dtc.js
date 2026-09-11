@@ -5655,6 +5655,7 @@ const confirm = await pool.query('select * from cadia_turnos where estado="Agend
 
 router.get('/traerpresentesdeclase/:id', async (req, res) => {
   const id = req.params.id
+  
   const clase =await pool.query('select * from dtc_clases_taller where id=?',[id])
   const cursado =await pool.query('select * from dtc_cursado where id_curso=? and dia=? and hora=?',[clase[0]['id_tallerista'],clase[0]['dia'],clase[0]['hora']])
   const existe = await pool.query('select * from dtc_asistencia_clase join (select id as idc,nombre, apellido from dtc_chicos) as sel on dtc_asistencia_clase.id_usuario=sel.idc  where id_clase=?', [id])//presentes
@@ -5999,44 +6000,151 @@ try {
     try {
         const { hora, id_taller } = req.body;
 
-        // Obtener el día actual del sistema en español
-        const dias = ["domingo", "lunes", "martes", "miercoles", "jueves", "viernes", "sábado"];
-        const dia = dias[new Date().getDay()]; // Obtiene el día actual en texto
-        const fechaHoy = moment().tz("America/Argentina/Buenos_Aires").format("YYYY-MM-DD");
+        // Día actual
+        const dias = [
+            "domingo",
+            "lunes",
+            "martes",
+            "miercoles",
+            "jueves",
+            "viernes",
+            "sábado"
+        ];
 
-        // Formatear la hora a HH:mm
-        let horaFormateada = hora.toString().padStart(4, '0'); // Asegura que tenga 4 dígitos
-        horaFormateada = `${horaFormateada.slice(0, 2)}:${horaFormateada.slice(2)}`; // Convierte "1500" a "15:00"
+        const dia = dias[new Date().getDay()];
 
-       // console.log(`Día del sistema: ${dia}, Hora: ${horaFormateada}, ID Taller: ${id_taller}`);
+        // Fecha actual Argentina
+        const fechaHoy = moment()
+            .tz("America/Argentina/Buenos_Aires")
+            .format("YYYY-MM-DD");
 
-        const clase = await pool.query(
-            'SELECT * FROM dtc_clases_taller WHERE id_tallerista = ? AND dia = ? AND hora = ? and fecha=?',
-            [id_taller, dia, horaFormateada,fechaHoy]
+        // Formatear hora
+        let horaFormateada = hora.toString().padStart(4, '0');
+
+        horaFormateada = `${horaFormateada.slice(0, 2)}:${horaFormateada.slice(2)}`;
+
+        console.log("Día:", dia);
+        console.log("Hora:", horaFormateada);
+        console.log("Taller:", id_taller);
+        console.log("Fecha:", fechaHoy);
+
+        // ============================================
+        // BUSCAR CLASE
+        // ============================================
+
+        let clase = await pool.query(
+            `SELECT * 
+             FROM dtc_clases_taller 
+             WHERE id_tallerista = ?
+             AND dia = ?
+             AND hora = ?
+             AND fecha = ?`,
+            [
+                id_taller,
+                dia,
+                horaFormateada,
+                fechaHoy
+            ]
         );
-console.log("Clase encontrada:", clase);
+
+        console.log("Clase encontrada:", clase);
+
+        // ============================================
+        // SI NO EXISTE, CREARLA
+        // ============================================
+
         if (clase.length === 0) {
-            return res.json({ error: "No se encontró la clase con esos datos" });
+
+            console.log("No existe la clase. Creando...");
+
+            const nuevaClase = await pool.query(
+                `INSERT INTO dtc_clases_taller
+                (id_tallerista, dia, hora, fecha)
+                VALUES (?, ?, ?, ?)`,
+                [
+                    id_taller,
+                    dia,
+                    horaFormateada,
+                    fechaHoy
+                ]
+            );
+
+            console.log("Nueva clase:", nuevaClase);
+
+            // Dependiendo del driver de MySQL
+            // normalmente el insert devuelve insertId
+
+            const id_clase = nuevaClase.insertId;
+
+            console.log("ID nueva clase:", id_clase);
+
+            // Volvemos a buscar la clase
+            clase = await pool.query(
+                `SELECT *
+                 FROM dtc_clases_taller
+                 WHERE id = ?`,
+                [id_clase]
+            );
         }
+
+        // ============================================
+        // ID DE LA CLASE
+        // ============================================
 
         const id_clase = clase[0].id;
 
+        console.log("ID clase:", id_clase);
+
+        // ============================================
+        // ASISTENCIAS
+        // ============================================
+
         const existe = await pool.query(
-            'SELECT * FROM dtc_asistencia_clase JOIN (SELECT id AS idc, nombre FROM dtc_chicos) AS sel ON dtc_asistencia_clase.id_usuario = sel.idc WHERE id_clase = ?',
+            `SELECT *
+             FROM dtc_asistencia_clase
+             JOIN (
+                 SELECT id AS idc, nombre
+                 FROM dtc_chicos
+             ) AS sel
+             ON dtc_asistencia_clase.id_usuario = sel.idc
+             WHERE id_clase = ?`,
             [id_clase]
         );
-        console.log(" Asistencias encontradas:", existe);
+
+        console.log("Asistencias encontradas:", existe);
+
+        // ============================================
+        // TODOS LOS USUARIOS
+        // ============================================
 
         const usuarios = await pool.query(
-            "SELECT * FROM dtc_chicos LEFT JOIN (SELECT id AS ida FROM dtc_asistencia_clase WHERE id_clase = ?) AS sel ON dtc_chicos.id = sel.ida",
+            `SELECT *
+             FROM dtc_chicos
+             LEFT JOIN (
+                 SELECT id AS ida
+                 FROM dtc_asistencia_clase
+                 WHERE id_clase = ?
+             ) AS sel
+             ON dtc_chicos.id = sel.ida`,
             [id_clase]
         );
 
-        res.json([existe, usuarios] );
+        // ============================================
+        // RESPUESTA
+        // ============================================
+
+        res.json([
+            existe,
+            usuarios
+        ]);
 
     } catch (error) {
+
         console.error(error);
-        res.status(500).json({ error: "Error en el servidor" });
+
+        res.status(500).json({
+            error: "Error en el servidor"
+        });
     }
 });
 
@@ -7704,6 +7812,17 @@ router.post("/ponerausenteclase", async (req, res) => {
     res.json('Error')
   }
 })
+
+
+
+
+
+
+
+
+
+
+
 
 
 
