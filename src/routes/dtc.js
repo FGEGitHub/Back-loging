@@ -5602,7 +5602,7 @@ router.get('/traertodoslosturnospsiq', async (req, res) => {
       SELECT dtc_turnos.*, sel.nombre AS nombre_psico 
       FROM dtc_turnos 
       JOIN (SELECT id AS idu, nombre FROM usuarios) AS sel 
-      ON dtc_turnos.id_psico = sel.idu
+      ON dtc_turnos.id_psico = sel.idu order by dtc_turnos.fecha desc
     `);
 
     const agrupados = await pool.query(`
