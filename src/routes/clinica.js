@@ -2020,5 +2020,157 @@ router.get("/traerlogo/:id", async (req, res) => {
 
 
 
+router.post("/guardarhorarios", async (req, res) => {
+  try {
+    const { horarios, usuario_id } = req.body;
 
+    console.log("📅 Guardando horarios:", {
+      usuario_id,
+      horarios,
+    });
+
+    if (!usuario_id) {
+      return res.status(400).json({
+        error: "Falta el usuario_id",
+      });
+    }
+
+    if (!Array.isArray(horarios) || horarios.length === 0) {
+      return res.status(400).json({
+        error: "No se recibieron horarios",
+      });
+    }
+
+    // Insertamos cada horario
+    for (const horario of horarios) {
+
+      const {
+        dia,
+        hora_inicio,
+        hora_fin,
+        duracion,
+      } = horario;
+
+      if (
+        !dia ||
+        !hora_inicio ||
+        !hora_fin ||
+        !duracion
+      ) {
+        continue;
+      }
+
+      await pool.query(
+        `
+        INSERT INTO horarios
+        (
+          usuario_id,
+          dia,
+          hora_inicio,
+          hora_fin,
+          duracion
+        )
+        VALUES (?, ?, ?, ?, ?)
+        `,
+        [
+          usuario_id,
+          dia,
+          hora_inicio,
+          hora_fin,
+          duracion,
+        ]
+      );
+    }
+
+    res.status(200).json({
+      ok: true,
+      mensaje: "Horarios guardados correctamente",
+    });
+
+  } catch (error) {
+
+    console.error("❌ Error guardando horarios:", error);
+
+    res.status(500).json({
+      error: "Error al guardar los horarios",
+    });
+  }
+});
+
+router.get("/traerhorarios/:usuario_id", async (req, res) => {
+  try {
+    const { usuario_id } = req.params;
+
+    console.log("📅 Trayendo horarios del usuario:", usuario_id);
+
+    if (!usuario_id) {
+      return res.status(400).json({
+        error: "Falta el ID del usuario",
+      });
+    }
+
+    const horarios = await pool.query(
+      `
+      SELECT
+        id,
+        usuario_id,
+        dia,
+        hora_inicio,
+        hora_fin,
+        duracion
+      FROM horarios
+      WHERE usuario_id = ?
+      ORDER BY dia ASC, hora_inicio ASC
+      `,
+      [usuario_id]
+    );
+
+    console.log("📅 Horarios encontrados:", horarios.length);
+
+    return res.status(200).json(horarios);
+
+  } catch (error) {
+    console.error("❌ Error trayendo horarios:", error);
+
+    return res.status(500).json({
+      error: "Error interno al traer los horarios",
+    });
+  }
+});
+
+router.delete("/eliminarhorario/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log("🗑️ Eliminando horario:", id);
+
+    if (!id) {
+      return res.status(400).json({
+        error: "Falta el ID del horario",
+      });
+    }
+
+    const resultado = await pool.query(
+      `
+      DELETE FROM horarios
+      WHERE id = ?
+      `,
+      [id]
+    );
+
+    console.log("✅ Horario eliminado:", id);
+
+    return res.status(200).json({
+      ok: true,
+      mensaje: "Horario eliminado correctamente",
+    });
+
+  } catch (error) {
+    console.error("❌ Error eliminando horario:", error);
+
+    return res.status(500).json({
+      error: "Error interno al eliminar el horario",
+    });
+  }
+});
 export default router;
