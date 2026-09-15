@@ -8,7 +8,9 @@ import {
   isLoggedInncli,
 
 } from "../lib/auth.js";
-
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 //import { sendWhatsappMessage } from "./whatsapclient.js";
 
 import { Payment } from "mercadopago";
@@ -22,6 +24,82 @@ const API = process.env.VITE_API_URL;
 const client = new MercadoPagoConfig({
   accessToken: MP_ACCESS_TOKEN,
 });
+
+
+
+const carpetaLogos = path.join(
+  process.cwd(),
+  "logos"
+);
+
+// Crear carpeta automáticamente
+if (!fs.existsSync(carpetaLogos)) {
+  fs.mkdirSync(carpetaLogos, {
+    recursive: true,
+  });
+}
+
+// ==========================================
+// MULTER
+// ==========================================
+
+const storage = multer.diskStorage({
+
+  destination: (req, file, cb) => {
+    cb(null, carpetaLogos);
+  },
+
+  filename: (req, file, cb) => {
+
+    const extension = path.extname(
+      file.originalname
+    ).toLowerCase();
+
+    const id = req.body.id;
+
+    const nombreArchivo =
+      `logo_${id}_${Date.now()}${extension}`;
+
+    cb(null, nombreArchivo);
+  },
+});
+
+// ==========================================
+// FILTRO DE IMÁGENES
+// ==========================================
+
+const fileFilter = (req, file, cb) => {
+
+  const tiposPermitidos = [
+    "image/png",
+    "image/jpeg",
+    "image/jpg",
+    "image/svg+xml",
+    "image/webp",
+  ];
+
+  if (tiposPermitidos.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(
+      new Error(
+        "Formato de imagen no permitido"
+      ),
+      false
+    );
+  }
+};
+
+const upload = multer({
+  storage,
+  fileFilter,
+
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+});
+
+
 ////////////Mercado pago 
 router.post("/crear-preferencia", async (req, res) => {
   try {
@@ -96,6 +174,7 @@ try {
   }
 });
 /////////////Fin Mercado pago 
+
 
 
 ////datos de la clinica, se busca por usuario
@@ -1735,6 +1814,210 @@ router.post("/confirmarTurnoNoPago", async (req, res) => {
     console.log(error);
   } 
 }); */
+
+
+
+
+
+router.post(
+  "/guardarlogo",
+  upload.single("logo"),
+
+  async (req, res) => {
+    try {
+      const { id } = req.body;
+
+      console.log("📷 Guardando logo usuario:", id);
+
+      // ==========================================
+      // VALIDAR ID
+      // ==========================================
+
+      if (!id) {
+        if (req.file) {
+          fs.unlink(req.file.path, () => {});
+        }
+
+        return res.status(400).json({
+          error: "Falta el ID del usuario",
+        });
+      }
+
+      // ==========================================
+      // VALIDAR ARCHIVO
+      // ==========================================
+
+      if (!req.file) {
+        return res.status(400).json({
+          error: "No se recibió ningún logo",
+        });
+      }
+
+      console.log("📁 Archivo recibido:", req.file.filename);
+
+
+
+      const usuarios = await pool.query(
+        `
+        SELECT id, logodir
+        FROM usuarios
+        WHERE id = ?
+        `,
+        [id]
+      );
+
+      if (!usuarios || usuarios.length === 0) {
+        // El usuario no existe.
+        // Borramos el archivo recién subido.
+
+        fs.unlink(req.file.path, () => {});
+
+        return res.status(404).json({
+          error: "Usuario no encontrado",
+        });
+      }
+
+      // ==========================================
+      // LOGO ANTERIOR
+      // ==========================================
+
+      const logoAnterior = usuarios[0].logodir;
+
+      // ==========================================
+      // NUEVA RUTA
+      // ==========================================
+
+      const logodir = `/logos/${req.file.filename}`;
+
+      // ==========================================
+      // ACTUALIZAR USUARIO
+      // ==========================================
+
+      await pool.query(
+        `
+        UPDATE usuarios
+        SET logodir = ?
+        WHERE id = ?
+        `,
+        [
+          logodir,
+          id,
+        ]
+      );
+
+      // ==========================================
+      // BORRAR LOGO ANTERIOR
+      // ==========================================
+
+      if (
+        logoAnterior &&
+        logoAnterior.startsWith("/logos/")
+      ) {
+        const archivoAnterior = path.join(
+          process.cwd(),
+          logoAnterior.replace("/logos/", "logos/")
+        );
+
+        console.log(
+          "🗑️ Logo anterior:",
+          archivoAnterior
+        );
+
+        if (fs.existsSync(archivoAnterior)) {
+          fs.unlink(
+            archivoAnterior,
+            (error) => {
+              if (error) {
+                console.error(
+                  "⚠️ Error eliminando logo anterior:",
+                  error.message
+                );
+              } else {
+                console.log(
+                  "🗑️ Logo anterior eliminado"
+                );
+              }
+            }
+          );
+        }
+      }
+
+      // ==========================================
+      // RESPUESTA
+      // ==========================================
+
+      console.log(
+        "✅ Logo guardado correctamente:",
+        logodir
+      );
+
+      return res.status(200).json({
+        ok: true,
+        mensaje: "Logo guardado correctamente",
+        logodir,
+      });
+
+    } catch (error) {
+      console.error(
+        "❌ Error guardarlogo:",
+        error
+      );
+
+      // ==========================================
+      // SI FALLÓ LA BD, BORRAR ARCHIVO
+      // ==========================================
+
+      if (req.file) {
+        fs.unlink(
+          req.file.path,
+          (errorArchivo) => {
+            if (errorArchivo) {
+              console.error(
+                "⚠️ No se pudo borrar archivo:",
+                errorArchivo.message
+              );
+            }
+          }
+        );
+      }
+
+      return res.status(500).json({
+        error: "Error interno al guardar el logo",
+      });
+    }
+  }
+);
+
+
+
+router.get("/traerlogo/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const usuarios = await pool.query(
+      `SELECT logodir FROM usuarios WHERE id = ?`,
+      [id]
+    );
+
+    if (!usuarios || usuarios.length === 0) {
+      return res.status(404).json({
+        error: "Usuario no encontrado"
+      });
+    }
+
+    res.json({
+      logodir: usuarios[0].logodir || null
+    });
+
+  } catch (error) {
+    console.error("❌ Error trayendo logo:", error);
+
+    res.status(500).json({
+      error: "Error al traer el logo"
+    });
+  }
+});
+
 
 
 

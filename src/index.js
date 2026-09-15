@@ -49,7 +49,7 @@ app.use(
 );
 
 app.use("/imagenesvendedoras", express.static("imagenesvendedoras"));
-
+app.use( "/logos", express.static( path.join(process.cwd(), "logos") ) );
 app.use(flash());
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: false }));
