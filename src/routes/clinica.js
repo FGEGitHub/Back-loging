@@ -1610,20 +1610,21 @@ router.post("/solicitarturno", async (req, res) => {
 
   try {
 
-    const {
-      id_empresa,
-      fecha,
-      hora,
-      hora_inicio,
-      hora_fin,
-      duracion,
-      id_horario_estandar,
-      especialidad,
-      nombre,
-      dni,
-      telefono,
-      categoria
-    } = req.body;
+   const {
+  id_empresa,
+  fecha,
+  hora,
+  hora_inicio,
+  hora_fin,
+  duracion,
+  id_horario_estandar,
+  especialidad,
+  nombre,
+  apellido,
+  dni,
+  telefono,
+  categoria
+} = req.body;
 
 
     // ==========================================
@@ -1636,6 +1637,7 @@ router.post("/solicitarturno", async (req, res) => {
       !hora ||
       !duracion ||
       !nombre ||
+      !apellido ||
       !dni ||
       !telefono ||
       !categoria
@@ -1647,24 +1649,6 @@ router.post("/solicitarturno", async (req, res) => {
 
     }
 
-
-    console.log(
-      "📥 SOLICITUD DE TURNO:",
-      {
-        id_empresa,
-        fecha,
-        hora,
-        hora_inicio,
-        hora_fin,
-        duracion,
-        id_horario_estandar,
-        especialidad,
-        nombre,
-        dni,
-        telefono,
-        categoria
-      }
-    );
 
 
     // ==========================================
@@ -1790,14 +1774,16 @@ router.post("/solicitarturno", async (req, res) => {
     INSERT INTO pacientes
     (
       nombre,
+      apellido,
       dni,
       telefono,
       id_usuario
     )
-    VALUES (?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?)
     `,
     [
       nombre,
+      apellido,
       dni,
       telefono,
       id_empresa
