@@ -266,7 +266,6 @@ router.get('/traerTurnosDisponibles/:id', async (req, res) => {
   }
 });
 
-
 router.get('/traerturnosusuario/:id', async (req, res) => {
   try {
     const idUsuario = req.params.id;
@@ -287,7 +286,20 @@ router.get('/traerturnosusuario/:id', async (req, res) => {
 
     const consulta_paga = usuarios[0].consulta_paga;
 
-    // Traer turnos
+    // ==========================================
+    // 1. TRAER HORARIOS CONFIGURADOS DEL USUARIO
+    // ==========================================
+    const horarios = await pool.query(
+      `SELECT *
+       FROM horarios
+       WHERE usuario_id = ?
+       ORDER BY dia ASC, hora_inicio ASC`,
+      [idUsuario]
+    );
+
+    // ==========================================
+    // 2. TRAER TURNOS YA ASIGNADOS
+    // ==========================================
     const turnos = await pool.query(
       `SELECT 
         t.*, 
@@ -309,7 +321,16 @@ router.get('/traerturnosusuario/:id', async (req, res) => {
       consulta_paga
     }));
 
-    res.json(turnosConParametros);
+    // ==========================================
+    // RESPUESTA
+    // POSICIÓN 0 = HORARIOS
+    // POSICIÓN 1 = TURNOS ASIGNADOS
+    // ==========================================
+
+    res.json([
+      horarios,
+      turnosConParametros
+    ]);
 
   } catch (error) {
     console.log(error);
@@ -319,6 +340,7 @@ router.get('/traerturnosusuario/:id', async (req, res) => {
     });
   }
 });
+
 
 
 router.get('/traerturnos',  async (req, res) => {
@@ -1585,94 +1607,516 @@ router.post('/agendarapaciente',  async (req, res) => {
 });
 
 router.post("/solicitarturno", async (req, res) => {
-  try {
-    const { id_turno, nombre, dni, telefono, categoria } = req.body;
 
-    if (!id_turno || !nombre || !dni || !telefono || !categoria) {
-      return res.status(400).json({ message: "Faltan datos" });
+  try {
+
+    const {
+      id_empresa,
+      fecha,
+      hora,
+      hora_inicio,
+      hora_fin,
+      duracion,
+      id_horario_estandar,
+      especialidad,
+      nombre,
+      dni,
+      telefono,
+      categoria
+    } = req.body;
+
+
+    // ==========================================
+    // 1. VALIDAR DATOS
+    // ==========================================
+
+    if (
+      !id_empresa ||
+      !fecha ||
+      !hora ||
+      !duracion ||
+      !nombre ||
+      !dni ||
+      !telefono ||
+      !categoria
+    ) {
+
+      return res.status(400).json({
+        message: "Faltan datos"
+      });
+
     }
 
-    // 1. Verificar / crear paciente
-    const existe = await pool.query(
-      "SELECT id FROM pacientes WHERE dni = ?",
-      [dni]
+
+    console.log(
+      "📥 SOLICITUD DE TURNO:",
+      {
+        id_empresa,
+        fecha,
+        hora,
+        hora_inicio,
+        hora_fin,
+        duracion,
+        id_horario_estandar,
+        especialidad,
+        nombre,
+        dni,
+        telefono,
+        categoria
+      }
     );
+
+
+    // ==========================================
+    // 2. OBTENER SI LA CONSULTA ES PAGA
+    // ==========================================
+
+    const usuarios = await pool.query(
+      `
+      SELECT consulta_paga
+      FROM usuarios
+      WHERE id = ?
+      LIMIT 1
+      `,
+      [id_empresa]
+    );
+
+
+    if (usuarios.length === 0) {
+
+      return res.status(404).json({
+        message: "Usuario/empresa no encontrado"
+      });
+
+    }
+
+
+    const consulta_paga =
+      usuarios[0].consulta_paga;
+
+
+    console.log(
+      "💰 CONSULTA PAGA:",
+      consulta_paga
+    );
+
+
+    // ==========================================
+    // 3. VERIFICAR QUE EL HORARIO ESTÁ LIBRE
+    // ==========================================
+
+    const turnoExistente =
+      await pool.query(
+        `
+        SELECT id
+        FROM turnos
+        WHERE id_usuario = ?
+          AND fecha = ?
+          AND hora = ?
+          AND baja = 'No'
+        LIMIT 1
+        `,
+        [
+          id_empresa,
+          fecha,
+          hora
+        ]
+      );
+
+
+    if (
+      turnoExistente.length > 0
+    ) {
+
+      return res.status(409).json({
+        message:
+          "El horario acaba de ser ocupado"
+      });
+
+    }
+
+
+    // ==========================================
+    // 4. BUSCAR PACIENTE
+    // ==========================================
+
+    const existePaciente =
+      await pool.query(
+        `
+        SELECT id
+        FROM pacientes
+        WHERE dni = ?
+        LIMIT 1
+        `,
+        [dni]
+      );
+
 
     let id_paciente;
 
-    if (existe.length > 0) {
-      id_paciente = existe[0].id;
-    } else {
-      const nuevo = await pool.query(
-        "INSERT INTO pacientes (nombre, dni, telefono) VALUES (?, ?, ?)",
-        [nombre, dni, telefono]
+
+    // ==========================================
+    // 5. CREAR / ACTUALIZAR PACIENTE
+    // ==========================================
+
+    if (
+      existePaciente.length > 0
+    ) {
+
+      id_paciente =
+        existePaciente[0].id;
+
+
+      await pool.query(
+        `
+        UPDATE pacientes
+        SET
+          nombre = ?,
+          telefono = ?
+        WHERE id = ?
+        `,
+        [
+          nombre,
+          telefono,
+          id_paciente
+        ]
       );
-      id_paciente = nuevo.insertId;
+
+    } else {
+
+    const nuevoPaciente =
+  await pool.query(
+    `
+    INSERT INTO pacientes
+    (
+      nombre,
+      dni,
+      telefono,
+      id_usuario
+    )
+    VALUES (?, ?, ?, ?)
+    `,
+    [
+      nombre,
+      dni,
+      telefono,
+      id_empresa
+    ]
+  );
+
+id_paciente =
+  nuevoPaciente.insertId;
+
     }
 
-    // 2. Verificar turno
-    const turno = await pool.query(
-      "SELECT id, id_paciente FROM turnos WHERE id = ?",
-      [id_turno]
+
+    // ==========================================
+    // 6. VALIDAR HORARIO ESTÁNDAR
+    // ==========================================
+
+    if (
+      id_horario_estandar
+    ) {
+
+      const horarios =
+        await pool.query(
+          `
+          SELECT id
+          FROM horarios
+          WHERE id = ?
+            AND usuario_id = ?
+          LIMIT 1
+          `,
+          [
+            id_horario_estandar,
+            id_empresa
+          ]
+        );
+
+
+      if (
+        horarios.length === 0
+      ) {
+
+        return res.status(400).json({
+          message:
+            "El horario seleccionado ya no está disponible"
+        });
+
+      }
+
+    }
+
+
+    // ==========================================
+    // 7. DEFINIR ESTADO DEL TURNO
+    // ==========================================
+
+    let estadoTurno;
+
+    let vencimiento = null;
+
+
+    if (
+      consulta_paga === "No"
+    ) {
+
+      // No necesita pago
+      estadoTurno = "confirmado";
+
+    } else {
+
+      // Necesita Mercado Pago
+      estadoTurno = "pendiente_pago";
+
+      vencimiento =
+        new Date(
+          Date.now() +
+          5 * 60 * 1000
+        );
+
+    }
+
+
+    console.log(
+      "📌 ESTADO DEL TURNO:",
+      estadoTurno
     );
 
-    if (turno.length === 0) {
-      return res.status(404).json({ message: "Turno no encontrado" });
+
+    // ==========================================
+    // 8. CREAR TURNO REAL
+    // ==========================================
+
+    const nuevoTurno =
+      await pool.query(
+        `
+        INSERT INTO turnos
+        (
+          id_paciente,
+          fecha,
+          hora,
+          asistencia,
+          observaciones,
+          motivo,
+          baja,
+          estado,
+          categoria,
+          vencimiento_pago,
+          modo_solicitud,
+          id_usuario,
+          duracion,
+          especialidad
+        )
+        VALUES
+        (
+          ?,
+          ?,
+          ?,
+          NULL,
+          'Sin observaciones',
+          NULL,
+          'No',
+          ?,
+          ?,
+          ?,
+          'online',
+          ?,
+          ?,
+          ?
+        )
+        `,
+        [
+          id_paciente,
+          fecha,
+          hora,
+          estadoTurno,
+          categoria,
+          vencimiento,
+          id_empresa,
+          duracion,
+          especialidad || null
+        ]
+      );
+
+
+    // ==========================================
+    // 9. IMPORTANTE: BIGINT
+    // ==========================================
+
+    // MySQL puede devolver BIGINT como Number
+    // o BigInt dependiendo de la configuración
+    // del driver.
+
+    const idTurno =
+      nuevoTurno.insertId != null
+        ? String(nuevoTurno.insertId)
+        : null;
+
+
+    console.log(
+      "✅ TURNO CREADO:",
+      idTurno
+    );
+
+
+    // ==========================================
+    // 10. SI NO ES PAGA
+    // ==========================================
+
+    if (
+      consulta_paga === "No"
+    ) {
+
+      console.log(
+        "✅ CONSULTA NO PAGA - NO SE CREA MERCADO PAGO"
+      );
+
+
+      return res.json({
+
+        ok: true,
+
+        message:
+          "Turno confirmado correctamente",
+
+        id_turno:
+          idTurno,
+
+        id_solicitud:
+          idTurno,
+
+        consulta_paga:
+          "No",
+
+        estado:
+          "confirmado"
+
+      });
+
     }
 
-    if (turno[0].id_paciente) {
-      return res.status(409).json({ message: "Turno ya ocupado" });
-    }
 
-  const vencimiento = new Date(Date.now() + 5 * 60 * 1000);
+    // ==========================================
+    // 11. SI ES PAGA → MERCADO PAGO
+    // ==========================================
 
-await pool.query(
-  `UPDATE turnos
-   SET 
-      id_paciente = ?,
-      categoria = ?,
-      estado = 'pendiente_pago',
-      vencimiento_pago = ?
-   WHERE id = ?`,
-  [id_paciente, categoria, vencimiento, id_turno]
-);
+    console.log(
+      "💳 CONSULTA PAGA - CREANDO PREFERENCIA"
+    );
 
-    // 4. Crear preferencia de pago
-const preference = new Preference(client);
- 
-    const result = await preference.create({
-      body: {
-        items: [
-          {
-            title: "Consulta Clínica",
-            quantity: 1,
-            unit_price: 5000,
-            currency_id: "ARS",
+
+    const preference =
+      new Preference(client);
+
+
+    const result =
+      await preference.create({
+
+        body: {
+
+          items: [
+            {
+              title:
+                "Consulta Clínica",
+
+              quantity: 1,
+
+              unit_price: 5000,
+
+              currency_id:
+                "ARS"
+            }
+          ],
+
+
+          // IMPORTANTE:
+          // Mercado Pago recibe STRING
+          // para evitar problemas con BIGINT
+
+          external_reference:
+            idTurno,
+
+
+          notification_url:
+            API +
+            "clinica/webhook",
+
+
+          back_urls: {
+
+            success:
+              API +
+              "clinica/success",
+
+            failure:
+              API +
+              "clinica/failure",
+
+            pending:
+              API +
+              "clinica/pending"
+
           },
-        ],
-        external_reference: String(id_turno), // MUY IMPORTANTE
-     
-        notification_url: API+"clinica/webhook",
-        
-     back_urls: {
-  success: API+"clinica/success",
-  failure:API+ "clinica/failure",
-  pending: API+"clinica/pending",
-},
-auto_return: "approved",
-      },
+
+
+          auto_return:
+            "approved"
+
+        }
+
+      });
+
+
+    // ==========================================
+    // 12. RESPUESTA
+    // ==========================================
+
+    return res.json({
+
+      ok: true,
+
+      message:
+        "Turno reservado, pendiente de pago",
+
+      id_turno:
+        idTurno,
+
+      id_solicitud:
+        idTurno,
+
+      consulta_paga:
+        "Si",
+
+      estado:
+        "pendiente_pago",
+
+      pago_url:
+        result.sandbox_init_point,
+
+      preference_id:
+        String(result.id)
+
     });
-    // 5. Responder con link de pago
-    res.json({
-      message: "Turno reservado, pendiente de pago",
-   pago_url: result.sandbox_init_point,
-      preference_id: result.id,
-    });
+
 
   } catch (error) {
-    console.error("Error solicitarturno:", error);
-    res.status(500).json({ message: "Error del servidor" });
+
+    console.error(
+      "❌ Error solicitarturno:",
+      error
+    );
+
+
+    return res.status(500).json({
+
+      message:
+        "Error del servidor"
+
+    });
+
   }
+
 });
 
 router.post("/confirmarTurnoNoPago", async (req, res) => {
@@ -2019,7 +2463,6 @@ router.get("/traerlogo/:id", async (req, res) => {
 });
 
 
-
 router.post("/guardarhorarios", async (req, res) => {
   try {
     const { horarios, usuario_id } = req.body;
@@ -2041,7 +2484,10 @@ router.post("/guardarhorarios", async (req, res) => {
       });
     }
 
-    // Insertamos cada horario
+    let guardados = 0;
+    let duplicados = 0;
+
+    // Revisamos UNO POR UNO
     for (const horario of horarios) {
 
       const {
@@ -2051,14 +2497,70 @@ router.post("/guardarhorarios", async (req, res) => {
         duracion,
       } = horario;
 
+      // Validar datos
       if (
         !dia ||
         !hora_inicio ||
         !hora_fin ||
         !duracion
       ) {
+        console.log(
+          "⚠️ Horario incompleto, se saltea:",
+          horario
+        );
+
         continue;
       }
+
+      // ============================
+      // BUSCAR SI YA EXISTE
+      // ============================
+
+      const existente = await pool.query(
+        `
+        SELECT id
+        FROM horarios
+        WHERE usuario_id = ?
+          AND dia = ?
+          AND hora_inicio = ?
+          AND hora_fin = ?
+          AND duracion = ?
+        LIMIT 1
+        `,
+        [
+          usuario_id,
+          dia,
+          hora_inicio,
+          hora_fin,
+          duracion,
+        ]
+      );
+
+      // ============================
+      // YA EXISTE
+      // ============================
+
+      if (existente.length > 0) {
+
+        console.log(
+          "⏭️ Horario ya existe:",
+          {
+            usuario_id,
+            dia,
+            hora_inicio,
+            hora_fin,
+            duracion,
+          }
+        );
+
+        duplicados++;
+
+        continue;
+      }
+
+      // ============================
+      // INSERTAR
+      // ============================
 
       await pool.query(
         `
@@ -2080,22 +2582,41 @@ router.post("/guardarhorarios", async (req, res) => {
           duracion,
         ]
       );
+
+      console.log(
+        "✅ Horario guardado:",
+        {
+          usuario_id,
+          dia,
+          hora_inicio,
+          hora_fin,
+          duracion,
+        }
+      );
+
+      guardados++;
     }
 
     res.status(200).json({
       ok: true,
-      mensaje: "Horarios guardados correctamente",
+      mensaje: "Proceso de horarios completado",
+      guardados,
+      duplicados,
     });
 
   } catch (error) {
 
-    console.error("❌ Error guardando horarios:", error);
+    console.error(
+      "❌ Error guardando horarios:",
+      error
+    );
 
     res.status(500).json({
       error: "Error al guardar los horarios",
     });
   }
 });
+
 
 router.get("/traerhorarios/:usuario_id", async (req, res) => {
   try {
