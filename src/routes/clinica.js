@@ -1774,16 +1774,14 @@ router.post("/solicitarturno", async (req, res) => {
     INSERT INTO pacientes
     (
       nombre,
-      apellido,
       dni,
       telefono,
       id_usuario
     )
-    VALUES (?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?)
     `,
     [
       nombre,
-      apellido,
       dni,
       telefono,
       id_empresa
