@@ -490,6 +490,104 @@ console.log(tiene_tutor);
   }
 });
  */
+
+
+
+router.post("/enviagregastonuevo", async (req, res) => {
+
+  try {
+
+    const {
+      usuario_id,
+      actividad_id,
+      zona_id,
+      descripcion,
+      monto,
+      fecha
+    } = req.body;
+console.log(  usuario_id,
+      actividad_id,
+      zona_id,
+      descripcion,
+      monto,
+      fecha)
+    if (!usuario_id) {
+      return res.status(400).json({
+        error: "Falta usuario_id"
+      });
+    }
+
+    if (!actividad_id) {
+      return res.status(400).json({
+        error: "Falta actividad_id"
+      });
+    }
+
+    if (!zona_id) {
+      return res.status(400).json({
+        error: "Falta zona_id"
+      });
+    }
+
+    if (!descripcion) {
+      return res.status(400).json({
+        error: "Falta descripción"
+      });
+    }
+
+    if (!monto || Number(monto) <= 0) {
+      return res.status(400).json({
+        error: "Monto inválido"
+      });
+    }
+
+    if (!fecha) {
+      return res.status(400).json({
+        error: "Falta fecha"
+      });
+    }
+
+    const sql = `
+      INSERT INTO actividades (
+        usuario_id,
+        actividad_id,
+        zona_id,
+        descripcion,
+        monto,
+        fecha
+      )
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    const resultado = await pool.query(sql, [
+      usuario_id,
+      actividad_id,
+      zona_id,
+      descripcion,
+      monto,
+      fecha
+    ]);
+
+    res.status(201).json({
+      ok: true,
+      mensaje: "Gasto agregado correctamente"
+    
+    });
+
+  } catch (error) {
+
+    console.error("Error agregando gasto:", error);
+
+    res.status(500).json({
+      error: "Error interno del servidor"
+    });
+
+  }
+
+});
+
+
+
 router.get("/traersocios", async (req, res) => {
   try {
 
