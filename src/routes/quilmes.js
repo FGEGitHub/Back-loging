@@ -548,7 +548,7 @@ console.log(  usuario_id,
     }
 
     const sql = `
-      INSERT INTO actividades (
+      INSERT INTO gastos (
         usuario_id,
         actividad_id,
         zona_id,
@@ -586,6 +586,28 @@ console.log(  usuario_id,
 
 });
 
+
+router.get("/traeractividades", async (req, res) => {
+  try {
+    const resultados = await pool.query(`
+      SELECT 
+        id,
+        nombre,
+        tipo_id
+      FROM actividades
+      ORDER BY nombre ASC
+    `);
+
+    res.status(200).json(resultados);
+
+  } catch (error) {
+    console.error("Error al traer actividades:", error);
+
+    res.status(500).json({
+      error: "No se pudieron obtener las actividades"
+    });
+  }
+});
 
 
 router.get("/traersocios", async (req, res) => {
