@@ -610,6 +610,28 @@ router.get("/traeractividades", async (req, res) => {
 });
 
 
+
+router.get("/traerGastos", async (req, res) => {
+  try {
+    const resultados = await pool.query(`
+      SELECT 
+      *
+      FROM gastos
+      ORDER BY id DESC
+    `);
+
+    res.status(200).json(resultados);
+
+  } catch (error) {
+    console.error("Error al traer actividades:", error);
+
+    res.status(500).json({
+      error: "No se pudieron obtener las actividades"
+    });
+  }
+});
+
+
 router.get("/traersocios", async (req, res) => {
   try {
 
