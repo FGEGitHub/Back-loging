@@ -492,25 +492,29 @@ console.log(tiene_tutor);
  */
 
 
-
 router.post("/enviagregastonuevo", async (req, res) => {
-
   try {
 
     const {
       usuario_id,
       actividad_id,
+      tipo,
       zona_id,
       descripcion,
       monto,
       fecha
     } = req.body;
-console.log(  usuario_id,
+
+    console.log(
+      usuario_id,
       actividad_id,
+      tipo,
       zona_id,
       descripcion,
       monto,
-      fecha)
+      fecha
+    );
+
     if (!usuario_id) {
       return res.status(400).json({
         error: "Falta usuario_id"
@@ -520,6 +524,12 @@ console.log(  usuario_id,
     if (!actividad_id) {
       return res.status(400).json({
         error: "Falta actividad_id"
+      });
+    }
+
+    if (!tipo) {
+      return res.status(400).json({
+        error: "Falta tipo"
       });
     }
 
@@ -551,17 +561,19 @@ console.log(  usuario_id,
       INSERT INTO gastos (
         usuario_id,
         actividad_id,
+        tipo,
         zona_id,
         descripcion,
         monto,
         fecha
       )
-      VALUES (?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
     const resultado = await pool.query(sql, [
       usuario_id,
       actividad_id,
+      tipo,
       zona_id,
       descripcion,
       monto,
@@ -571,7 +583,6 @@ console.log(  usuario_id,
     res.status(201).json({
       ok: true,
       mensaje: "Gasto agregado correctamente"
-    
     });
 
   } catch (error) {
@@ -581,9 +592,7 @@ console.log(  usuario_id,
     res.status(500).json({
       error: "Error interno del servidor"
     });
-
   }
-
 });
 
 
