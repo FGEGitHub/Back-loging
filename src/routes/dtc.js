@@ -4444,15 +4444,7 @@ router.post("/nuevooficio", async (req, res) => {
       mensaje:
         mensajeFinal,
 
-      id_oficio:
-        idOficio,
-
-      id_usuario:
-        idUsuario,
-
-      intervencion:
-        intervencion,
-
+     
       usuario:
         estadoUsuario
 
@@ -5168,7 +5160,6 @@ router.get('/traerarcchivoo/:id',async (req, res) => {
   try {
     const query2 = await pool.query('SELECT id, ubicacion FROM dtc_cosas_usuario WHERE id = ?',[id])
     const filePath = path.join(__dirname, '../imagenesvendedoras', query2[0].ubicacion);
-        console.log('Ruta del archivo:', filePath); // Muestra la ruta completa del archivo
         res.sendFile(filePath); // Enviar el archivo al cliente
   } catch (error) {
     console.log(error)
@@ -6069,14 +6060,12 @@ try {
                 ]
             );
 
-            console.log("Nueva clase:", nuevaClase);
 
             // Dependiendo del driver de MySQL
             // normalmente el insert devuelve insertId
 
             const id_clase = nuevaClase.insertId;
 
-            console.log("ID nueva clase:", id_clase);
 
             // Volvemos a buscar la clase
             clase = await pool.query(
@@ -6093,7 +6082,7 @@ try {
 
         const id_clase = clase[0].id;
 
-        console.log("ID clase:", id_clase);
+
 
         // ============================================
         // ASISTENCIAS
@@ -7192,23 +7181,40 @@ router.post("/ponerpresenteactividad", async (req, res) => {
 
 
 router.post("/agregarturno", async (req, res) => {
-  let { fecha, horario, id_psic,profesional} = req.body
-  console.log(fecha, horario, id_psic,profesional)
-  if(profesional != undefined){
-    id_psic=profesional
-    fecha=fecha.fecha
+
+  let { fecha, horario, id_psic, profesional } = req.body;
+
+  console.log("Datos recibidos:", fecha, horario, id_psic, profesional);
+
+  // Si fecha viene como { fecha: "2026-09-24" }, tomar el valor interno
+  if (fecha && typeof fecha === "object") {
+    fecha = fecha.fecha;
   }
-  console.log(fecha)
+
+  // Si viene profesional, usarlo como id_psic
+  if (profesional !== undefined) {
+    id_psic = profesional;
+  }
+
+  console.log("Fecha normalizada:", fecha);
+
   try {
-    await pool.query('insert into dtc_turnos set fecha=?, detalle=?,id_psico=?, estado="Disponible"', [fecha, horario, id_psic])
-    res.json('Realizado')
+
+    await pool.query(
+      `INSERT INTO dtc_turnos 
+       SET fecha=?, detalle=?, id_psico=?, estado="Disponible"`,
+      [fecha, horario, id_psic]
+    );
+
+    res.json("Realizado");
+
   } catch (error) {
-    console.log(error)
-    res.json('No Realizado')
+
+    console.log(error);
+    res.json("No Realizado");
+
   }
-
-})
-
+});
 
 router.post("/agregarturnocadia", async (req, res) => {
   let { fecha, horario, id_psic,profesional} = req.body
