@@ -1567,15 +1567,18 @@ router.post('/nuevoturnodisp', async (req, res) => {
     });
   }
 });
-
-router.post('/agendarapaciente',  async (req, res) => {
+router.post('/agendarapaciente', async (req, res) => {
   try {
-    const { id_turno, id_paciente, categoria } = req.body;
+    const {
+      id_turno,
+      id_paciente,
+      especialidad
+    } = req.body;
 
     // Validaciones básicas
-    if (!id_turno || !id_paciente || !categoria) {
-      return res.status(400).json({ 
-        message: "Faltan datos obligatorios" 
+    if (!id_turno || !id_paciente || !especialidad) {
+      return res.status(400).json({
+        message: "Faltan datos obligatorios"
       });
     }
 
@@ -1586,23 +1589,40 @@ router.post('/agendarapaciente',  async (req, res) => {
     );
 
     if (turno.length === 0) {
-      return res.status(404).json({ message: "Turno no encontrado" });
+      return res.status(404).json({
+        message: "Turno no encontrado"
+      });
     }
 
-    // Actualizar turno con paciente y categoría
+    // Actualizar turno con paciente y especialidad
     const sql = `
       UPDATE turnos
-      SET id_paciente = ?, categoria = ?
+      SET id_paciente = ?, especialidad = ?
       WHERE id = ?
     `;
 
-    await pool.query(sql, [id_paciente, categoria, id_turno]);
+    await pool.query(
+      sql,
+      [
+        id_paciente,
+        especialidad,
+        id_turno
+      ]
+    );
 
-    res.json({ message: "Paciente agendado correctamente" });
+    res.json({
+      message: "Paciente agendado correctamente"
+    });
 
   } catch (error) {
-    console.error("Error en agendarapaciente:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error(
+      "Error en agendarapaciente:",
+      error
+    );
+
+    res.status(500).json({
+      message: "Error interno del servidor"
+    });
   }
 });
 
@@ -1614,8 +1634,7 @@ router.post("/solicitarturno", async (req, res) => {
   id_empresa,
   fecha,
   hora,
-  hora_inicio,
-  hora_fin,
+ 
   duracion,
   id_horario_estandar,
   especialidad,
@@ -2449,12 +2468,23 @@ router.get("/traerlogo/:id", async (req, res) => {
 
 router.post("/guardarhorarios", async (req, res) => {
   try {
-    const { horarios, usuario_id } = req.body;
 
-    console.log("📅 Guardando horarios:", {
-      usuario_id,
+    const {
       horarios,
-    });
+      usuario_id
+    } = req.body;
+
+    console.log(
+      "📅 Guardando horarios:",
+      {
+        usuario_id,
+        horarios,
+      }
+    );
+
+    // ============================
+    // VALIDACIONES GENERALES
+    // ============================
 
     if (!usuario_id) {
       return res.status(400).json({
@@ -2462,7 +2492,10 @@ router.post("/guardarhorarios", async (req, res) => {
       });
     }
 
-    if (!Array.isArray(horarios) || horarios.length === 0) {
+    if (
+      !Array.isArray(horarios) ||
+      horarios.length === 0
+    ) {
       return res.status(400).json({
         error: "No se recibieron horarios",
       });
@@ -2470,8 +2503,12 @@ router.post("/guardarhorarios", async (req, res) => {
 
     let guardados = 0;
     let duplicados = 0;
+    let invalidos = 0;
 
-    // Revisamos UNO POR UNO
+    // ============================
+    // PROCESAR HORARIOS
+    // ============================
+
     for (const horario of horarios) {
 
       const {
@@ -2479,26 +2516,40 @@ router.post("/guardarhorarios", async (req, res) => {
         hora_inicio,
         hora_fin,
         duracion,
+        categoria,
       } = horario;
 
-      // Validar datos
+      // ============================
+      // VALIDAR DATOS
+      // ============================
+
       if (
         !dia ||
         !hora_inicio ||
         !hora_fin ||
-        !duracion
+        !duracion ||
+        !categoria
       ) {
+
         console.log(
           "⚠️ Horario incompleto, se saltea:",
           horario
         );
 
+        invalidos++;
+
         continue;
       }
 
       // ============================
-      // BUSCAR SI YA EXISTE
+      // BUSCAR DUPLICADO
       // ============================
+      //
+      // No incluimos categoria porque
+      // dos horarios iguales no deberían
+      // existir aunque tengan categorías
+      // diferentes.
+      //
 
       const existente = await pool.query(
         `
@@ -2508,7 +2559,6 @@ router.post("/guardarhorarios", async (req, res) => {
           AND dia = ?
           AND hora_inicio = ?
           AND hora_fin = ?
-          AND duracion = ?
         LIMIT 1
         `,
         [
@@ -2516,7 +2566,6 @@ router.post("/guardarhorarios", async (req, res) => {
           dia,
           hora_inicio,
           hora_fin,
-          duracion,
         ]
       );
 
@@ -2534,6 +2583,7 @@ router.post("/guardarhorarios", async (req, res) => {
             hora_inicio,
             hora_fin,
             duracion,
+            categoria,
           }
         );
 
@@ -2554,9 +2604,10 @@ router.post("/guardarhorarios", async (req, res) => {
           dia,
           hora_inicio,
           hora_fin,
-          duracion
+          duracion,
+          categoria
         )
-        VALUES (?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?)
         `,
         [
           usuario_id,
@@ -2564,6 +2615,7 @@ router.post("/guardarhorarios", async (req, res) => {
           hora_inicio,
           hora_fin,
           duracion,
+          categoria,
         ]
       );
 
@@ -2575,17 +2627,24 @@ router.post("/guardarhorarios", async (req, res) => {
           hora_inicio,
           hora_fin,
           duracion,
+          categoria,
         }
       );
 
       guardados++;
     }
 
+    // ============================
+    // RESPUESTA
+    // ============================
+
     res.status(200).json({
       ok: true,
-      mensaje: "Proceso de horarios completado",
+      mensaje:
+        "Proceso de horarios completado",
       guardados,
       duplicados,
+      invalidos,
     });
 
   } catch (error) {
@@ -2596,10 +2655,13 @@ router.post("/guardarhorarios", async (req, res) => {
     );
 
     res.status(500).json({
-      error: "Error al guardar los horarios",
+      error:
+        "Error al guardar los horarios",
     });
   }
 });
+
+
 
 
 router.get("/traerhorarios/:usuario_id", async (req, res) => {
