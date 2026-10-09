@@ -558,7 +558,7 @@ router.post("/enviagregastonuevo", async (req, res) => {
     }
 
     const sql = `
-      INSERT INTO gastos (
+      INSERT INTO movimientos (
         usuario_id,
         actividad_id,
         tipo,
@@ -596,6 +596,122 @@ router.post("/enviagregastonuevo", async (req, res) => {
 });
 
 
+router.get("/traerdatosinicio", async (req, res) => {
+  try {
+    const { id, mes, anio } = req.query;
+
+    if (!id || !mes || !anio) {
+      return res.status(400).json({
+        error: "Faltan el id del usuario, el mes o el año.",
+      });
+    }
+
+    const mesNumero = Number(mes);
+    const anioNumero = Number(anio);
+    const idNumero = Number(id);
+
+    if (
+      !Number.isInteger(idNumero) ||
+      idNumero <= 0 ||
+      !Number.isInteger(mesNumero) ||
+      mesNumero < 1 ||
+      mesNumero > 12 ||
+      !Number.isInteger(anioNumero) ||
+      anioNumero < 2000 ||
+      anioNumero > 2100
+    ) {
+      return res.status(400).json({
+        error: "Los parámetros enviados no son válidos.",
+      });
+    }
+
+    // 1. Jugadores activos
+    const jugadores = await pool.query(`
+      SELECT COUNT(*) AS cantidad
+      FROM socios
+      WHERE estado_deportivo = 'Activo'
+    `);
+
+    // 2. Nombre del usuario que inició sesión
+    const usuarios = await pool.query(
+      `
+        SELECT nombre
+        FROM usuarios
+        WHERE id = ?
+        LIMIT 1
+      `,
+      [idNumero]
+    );
+
+    if (usuarios.length === 0) {
+      return res.status(404).json({
+        error: "No se encontró el usuario.",
+      });
+    }
+
+    // 3. Total cobrado en cuotas del mes y año seleccionados
+    const cuotas = await pool.query(
+      `
+        SELECT
+          COUNT(*) AS cantidad,
+          COALESCE(SUM(
+            CAST(monto AS DECIMAL(15, 2))
+          ), 0) AS total
+        FROM cuotas
+        WHERE mes = ? AND anio = ?
+      `,
+      [mesNumero, anioNumero]
+    );
+
+    // 4. Total cobrado a sponsors.
+    // monto está guardado como texto.
+    // Se eliminan $ y separadores de miles antes de convertir.
+    const sponsors = await pool.query(
+      `
+        SELECT
+          COALESCE(
+            SUM(
+              CAST(
+                REPLACE(
+                  REPLACE(
+                    REPLACE(TRIM(monto), '$', ''),
+                    '.',
+                    ''
+                  ),
+                  ',',
+                  '.'
+                ) AS DECIMAL(15, 2)
+              )
+            ),
+            0
+          ) AS total
+        FROM movimientos
+        WHERE tipo = 'Cobro de sponsor'
+          AND MONTH(fecha) = ?
+          AND YEAR(fecha) = ?
+      `,
+      [mesNumero, anioNumero]
+    );
+
+    return res.json({
+      nombreUsuario: usuarios[0].nombre,
+      jugadoresActivos: Number(jugadores[0].cantidad),
+      cuotasCobradas: Number(cuotas[0].cantidad),
+      cobradoCuotas: Number(cuotas[0].total),
+      cobradoSponsors: Number(sponsors[0].total),
+      mes: mesNumero,
+      anio: anioNumero,
+    });
+  } catch (error) {
+    console.error("Error en traerdatosinicio:", error);
+
+    return res.status(500).json({
+      error: "Error al obtener los datos del inicio.",
+    });
+  }
+});
+
+
 router.get("/traeractividades", async (req, res) => {
   try {
     const resultados = await pool.query(`
@@ -625,7 +741,7 @@ router.get("/traerGastos", async (req, res) => {
     const resultados = await pool.query(`
       SELECT 
       *
-      FROM gastos
+      FROM movimientos
       ORDER BY id DESC
     `);
 
