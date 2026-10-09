@@ -70,9 +70,10 @@ router.post("/equipo", async (req, res) => {
           direccion,
           fecha_nacimiento,
           edad,
+          federado,
           id_equipo
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           j.nombre,
           j.apellido,
@@ -82,12 +83,13 @@ router.post("/equipo", async (req, res) => {
           j.barrio || null,
           j.direccion || null,
           j.fechaNacimiento || null,
-            j.edad || null,
+          j.edad || null,
+          j.federado === true ? 1 : 0,
           idEquipo,
         ]
       );
 
-      // Si coincide con el DNI del capitán, guardamos su ID
+      // Guardar el ID del capitán
       if (String(j.dni) === String(capitan)) {
         idCapitan = jugadorResult.insertId;
       }
