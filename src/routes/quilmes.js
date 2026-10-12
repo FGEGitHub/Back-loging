@@ -233,6 +233,8 @@ router.post("/actualizarsocio", async (req, res) => {
 );
 
 
+
+
 router.post("/pagarcuota", async (req, res) => {
   try {
     const {
@@ -240,8 +242,16 @@ router.post("/pagarcuota", async (req, res) => {
       mes,
       anio,
       fecha_pago,
-      medio
+      medio,
+      monto
     } = req.body;
+
+    // Si no se envía monto, guardar 0
+    const montoFinal =
+      monto === undefined || monto === null || monto === ""
+        ? 0
+        : Number(monto);
+
     /* ================= VALIDACIONES ================= */
 
     if (!socio_id || !mes || !anio) {
@@ -258,10 +268,18 @@ router.post("/pagarcuota", async (req, res) => {
       });
     }
 
+    if (!Number.isFinite(montoFinal) || montoFinal < 0) {
+      return res.status(400).json({
+        ok: false,
+        msg: "El monto debe ser un número mayor o igual a 0",
+      });
+    }
+
     /* ================= VERIFICAR SI YA EXISTE ================= */
 
     const existe = await pool.query(
-      `SELECT id FROM cuotas 
+      `SELECT id
+       FROM cuotas
        WHERE id_socio = ? AND mes = ? AND anio = ?`,
       [socio_id, mes, anio]
     );
@@ -275,27 +293,31 @@ router.post("/pagarcuota", async (req, res) => {
 
     /* ================= INSERT ================= */
 
-    const result = await pool.query(
+    await pool.query(
       `INSERT INTO cuotas
-      (id_socio, mes, anio, fecha, medio)
-      VALUES (?, ?, ?, ?, ?)`,
+       (id_socio, mes, anio, fecha, medio, monto)
+       VALUES (?, ?, ?, ?, ?, ?)`,
       [
         socio_id,
         mes,
         anio,
         fecha_pago || null,
         medio || null,
+        montoFinal,
       ]
     );
 
     /* ================= OK ================= */
 
-    res.status(201).json("Cuota registrada correctamente");
+    return res.status(201).json({
+      ok: true,
+      msg: "Cuota registrada correctamente",
+    });
 
   } catch (error) {
     console.error("Error pagarcuota:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       ok: false,
       msg: "Error interno del servidor",
     });
@@ -686,7 +708,7 @@ router.get("/traerdatosinicio", async (req, res) => {
             0
           ) AS total
         FROM movimientos
-        WHERE tipo = 'Cobro de sponsor'
+        WHERE actividad_id = 3
           AND MONTH(fecha) = ?
           AND YEAR(fecha) = ?
       `,
