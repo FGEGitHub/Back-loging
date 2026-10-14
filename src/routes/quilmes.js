@@ -895,4 +895,40 @@ router.get("/traercuotas/:id", async (req, res) => {
     res.status(500).json()
   }}
 )
+
+router.post("/agregaractividad", async (req, res) => {
+  try {
+    const { nombre, tipo } = req.body;
+console.log(nombre, tipo);  
+    // Validaciones
+    if (
+      typeof nombre !== "string" ||
+      !nombre.trim() ||
+      typeof tipo !== "string" ||
+      !tipo.trim()
+    ) {
+      return res.status(400).json({
+        message: "El nombre y el tipo son obligatorios.",
+      });
+    }
+
+    // Insertar actividad
+    const resultado = await pool.query(
+      `INSERT INTO actividades (nombre, tipo)
+       VALUES (?, ?)`,
+      [nombre.trim(), tipo.trim()]
+    );
+
+    return res.status(201).json({
+      message: "Actividad agregada correctamente.",
+      
+    });
+  } catch (error) {
+    console.error("Error al agregar actividad:", error);
+
+    return res.status(500).json({
+      message: "Error interno al guardar la actividad.",
+    });
+  }
+});
 export default router;
