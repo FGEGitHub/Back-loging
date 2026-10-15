@@ -7,6 +7,27 @@ import pool from "../database6.js";
 
 import bcrypt from "bcryptjs";
 
+const convertirBigInt = (dato) => {
+  if (typeof dato === "bigint") {
+    return dato.toString();
+  }
+
+  if (Array.isArray(dato)) {
+    return dato.map(convertirBigInt);
+  }
+
+  if (dato && typeof dato === "object") {
+    return Object.fromEntries(
+      Object.entries(dato).map(([clave, valor]) => [
+        clave,
+        convertirBigInt(valor),
+      ])
+    );
+  }
+
+  return dato;
+};
+
 
 /* router.get("/crear-usuario", async (req, res) => {
   try {
@@ -1373,7 +1394,7 @@ router.post(
 
       const resultado = await pool.execute(
         `INSERT INTO partidos_movimientos
-          (partido_id, tipo, concepto, monto, fecha, observaciones)
+          (partido_id, tipo,  monto, fecha, observaciones)
          VALUES (?, ?, ?, ?, ?, ?)`,
         [
           id,
@@ -1423,6 +1444,111 @@ router.delete(
   }
 );
 
+
+// Resumen de caja
+
+router.get("/CAJA/quilmes_resumen_caja", async (req, res) => {
+  try {
+    const movimientosGenerales = await pool.execute(`
+      SELECT
+        COALESCE(SUM(
+          CASE WHEN tipo = 'cobro' THEN monto ELSE 0 END
+        ), 0) AS ingresos,
+        COALESCE(SUM(
+          CASE WHEN tipo = 'gasto' THEN monto ELSE 0 END
+        ), 0) AS egresos
+      FROM movimientos
+    `);
+
+    const movimientosPartidos = await pool.execute(`
+      SELECT
+        COALESCE(SUM(
+          CASE WHEN tipo = 'ingreso' THEN monto ELSE 0 END
+        ), 0) AS ingresos,
+        COALESCE(SUM(
+          CASE WHEN tipo = 'gasto' THEN monto ELSE 0 END
+        ), 0) AS egresos
+      FROM partidos_movimientos
+    `);
+
+    const ingresos =
+      Number(movimientosGenerales[0]?.ingresos ?? 0) +
+      Number(movimientosPartidos[0]?.ingresos ?? 0);
+
+    const egresos =
+      Number(movimientosGenerales[0]?.egresos ?? 0) +
+      Number(movimientosPartidos[0]?.egresos ?? 0);
+
+   return res.json(
+  convertirBigInt({
+    ingresos,
+    egresos,
+    resultado: ingresos - egresos,
+    gastos_fijos_pendientes: 0,
+  })
+);
+  } catch (error) {
+    console.error("Error obteniendo resumen de caja:", error);
+    return res.status(500).json({
+      mensaje: "Error al obtener el resumen de caja",
+    });
+  }
+});
+
+
+router.get("/CAJA/quilmes_listar_movimientos", async (req, res) => {
+  try {
+    const movimientosGenerales = await pool.execute(`
+      SELECT
+        m.id,
+        m.monto,
+        m.tipo,
+        m.fecha,
+        a.nombre AS actividad,
+        'general' AS origen
+      FROM movimientos m
+      LEFT JOIN actividades a ON a.id = m.actividad_id
+    `);
+
+    const movimientosPartidos = await pool.execute(`
+      SELECT
+        pm.id,
+        pm.monto,
+        pm.tipo,
+        pm.fecha,
+        CONCAT('Partido vs. ', p.rival) AS actividad,
+        'partido' AS origen
+      FROM partidos_movimientos pm
+      INNER JOIN partidos p ON p.id = pm.partido_id
+      INNER JOIN clubes c ON c.id = p.club_id
+      WHERE c.nombre = 'Quilmes'
+    `);
+
+    const todos = [
+      ...movimientosGenerales.map((m) => ({
+        ...m,
+        tipo: m.tipo === "ingreso" ? "cobro" : m.tipo,
+      })),
+      ...movimientosPartidos.map((m) => ({
+        ...m,
+        tipo: m.tipo === "ingreso" ? "cobro" : m.tipo,
+      })),
+    ];
+
+    todos.sort((a, b) => {
+      const fechaA = a.fecha ? new Date(a.fecha).getTime() : 0;
+      const fechaB = b.fecha ? new Date(b.fecha).getTime() : 0;
+      return fechaB - fechaA || Number(b.id) - Number(a.id);
+    });
+
+  return res.json(convertirBigInt(todos.slice(0, 20)));
+  } catch (error) {
+    console.error("Error listando movimientos de caja:", error);
+    return res.status(500).json({
+      mensaje: "Error al listar los movimientos",
+    });
+  }
+});
 
 
 export default router;
