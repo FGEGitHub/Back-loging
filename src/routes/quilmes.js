@@ -931,4 +931,498 @@ console.log(nombre, tipo);
     });
   }
 });
+
+
+
+
+
+// ======================================================
+// GET /PARTIDOS/quilmes_listar_categorias
+// ======================================================
+router.get("/PARTIDOS/quilmes_listar_categorias", async (req, res) => {
+  try {
+    const categorias = await pool.execute(`
+      SELECT id, nombre
+      FROM categorias
+      WHERE activo = 1
+      ORDER BY nombre
+    `);
+
+    res.json(categorias);
+  } catch (error) {
+    console.error("Error listando categorías:", error);
+    res.status(500).json({ mensaje: "Error al listar categorías" });
+  }
+});
+
+// ======================================================
+// GET /PARTIDOS/quilmes_listar_partidos
+// Filtros opcionales: desde, hasta, categoria_id, estado
+// ======================================================
+router.get("/PARTIDOS/quilmes_listar_partidos", async (req, res) => {
+  try {
+    const { desde, hasta, categoria_id, estado } = req.query;
+
+    let sql = `
+      SELECT
+        p.id,
+        p.club_id,
+        p.categoria_id,
+        p.rival,
+        p.fecha,
+        p.hora,
+        p.condicion,
+        p.goles_favor,
+        p.goles_contra,
+        p.estado,
+        p.observaciones,
+        c.nombre AS club,
+        cat.nombre AS categoria,
+
+        COALESCE(SUM(
+          CASE WHEN m.tipo = 'ingreso'
+          THEN m.monto ELSE 0 END
+        ), 0) AS recaudacion,
+
+        COALESCE(SUM(
+          CASE WHEN m.tipo = 'gasto'
+          THEN m.monto ELSE 0 END
+        ), 0) AS gastos,
+
+        COALESCE(SUM(
+          CASE
+            WHEN m.tipo = 'ingreso' THEN m.monto
+            WHEN m.tipo = 'gasto' THEN -m.monto
+            ELSE 0
+          END
+        ), 0) AS resultado_neto
+
+      FROM partidos p
+      INNER JOIN clubes c ON c.id = p.club_id
+      INNER JOIN categorias cat ON cat.id = p.categoria_id
+      LEFT JOIN partidos_movimientos m ON m.partido_id = p.id
+      WHERE c.nombre = 'Quilmes'
+    `;
+
+    const params = [];
+
+    if (desde) {
+      sql += " AND p.fecha >= ?";
+      params.push(desde);
+    }
+
+    if (hasta) {
+      sql += " AND p.fecha <= ?";
+      params.push(hasta);
+    }
+
+    if (categoria_id) {
+      sql += " AND p.categoria_id = ?";
+      params.push(categoria_id);
+    }
+
+    if (estado) {
+      sql += " AND p.estado = ?";
+      params.push(estado);
+    }
+
+    sql += `
+      GROUP BY p.id
+      ORDER BY p.fecha DESC, p.id DESC
+    `;
+
+const partidos = await pool.execute(sql, params);
+
+const partidosSerializables = partidos.map((partido) => {
+  return Object.fromEntries(
+    Object.entries(partido).map(([clave, valor]) => [
+      clave,
+      typeof valor === "bigint" ? valor.toString() : valor
+    ])
+  );
+});
+
+return res.json(partidosSerializables);
+  } catch (error) {
+    console.error("Error listando partidos:", error);
+    res.status(500).json({ mensaje: "Error al listar partidos" });
+  }
+});
+
+// ======================================================
+// GET /PARTIDOS/quilmes_resumen_partidos
+// Filtros opcionales: desde, hasta, categoria_id
+// ======================================================
+router.get("/PARTIDOS/quilmes_resumen_partidos", async (req, res) => {
+  try {
+    const { desde, hasta, categoria_id } = req.query;
+
+    let sql = `
+      SELECT
+        COUNT(DISTINCT p.id) AS partidos_registrados,
+
+        COALESCE(SUM(
+          CASE WHEN m.tipo = 'ingreso'
+          THEN m.monto ELSE 0 END
+        ), 0) AS recaudacion,
+
+        COALESCE(SUM(
+          CASE WHEN m.tipo = 'gasto'
+          THEN m.monto ELSE 0 END
+        ), 0) AS gastos,
+
+        COALESCE(SUM(
+          CASE
+            WHEN m.tipo = 'ingreso' THEN m.monto
+            WHEN m.tipo = 'gasto' THEN -m.monto
+            ELSE 0
+          END
+        ), 0) AS resultado_neto
+
+      FROM partidos p
+      INNER JOIN clubes c ON c.id = p.club_id
+      LEFT JOIN partidos_movimientos m ON m.partido_id = p.id
+      WHERE c.nombre = 'Quilmes'
+    `;
+
+    const params = [];
+
+    if (desde) {
+      sql += " AND p.fecha >= ?";
+      params.push(desde);
+    }
+
+    if (hasta) {
+      sql += " AND p.fecha <= ?";
+      params.push(hasta);
+    }
+
+    if (categoria_id) {
+      sql += " AND p.categoria_id = ?";
+      params.push(categoria_id);
+    }
+
+    const resultado = await pool.execute(sql, params);
+
+const resumen = resultado[0];
+
+res.json({
+  partidos_registrados: Number(resumen.partidos_registrados ?? 0),
+  recaudacion: Number(resumen.recaudacion ?? 0),
+  gastos: Number(resumen.gastos ?? 0),
+  resultado_neto: Number(resumen.resultado_neto ?? 0),
+});
+  } catch (error) {
+    console.error("Error obteniendo resumen:", error);
+    res.status(500).json({ mensaje: "Error al obtener resumen" });
+  }
+});
+
+// ======================================================
+// GET /PARTIDOS/quilmes_obtener_partido/:id
+// ======================================================
+router.get("/PARTIDOS/quilmes_obtener_partido/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const partidos = await pool.execute(
+      `SELECT
+         p.*,
+         c.nombre AS club,
+         cat.nombre AS categoria,
+         COALESCE((
+           SELECT SUM(m.monto)
+           FROM partidos_movimientos m
+           WHERE m.partido_id = p.id AND m.tipo = 'ingreso'
+         ), 0) AS recaudacion,
+         COALESCE((
+           SELECT SUM(m.monto)
+           FROM partidos_movimientos m
+           WHERE m.partido_id = p.id AND m.tipo = 'gasto'
+         ), 0) AS gastos
+       FROM partidos p
+       INNER JOIN clubes c ON c.id = p.club_id
+       INNER JOIN categorias cat ON cat.id = p.categoria_id
+       WHERE p.id = ? AND c.nombre = 'Quilmes'`,
+      [id]
+    );
+
+    if (!partidos.length) {
+      return res.status(404).json({ mensaje: "Partido no encontrado" });
+    }
+
+    const [movimientos] = await pool.execute(
+      `SELECT id, tipo, concepto, monto, fecha, observaciones
+       FROM partidos_movimientos
+       WHERE partido_id = ?
+       ORDER BY id DESC`,
+      [id]
+    );
+
+    const partido = partidos[0];
+    partido.resultado_neto =
+      Number(partido.recaudacion) - Number(partido.gastos);
+
+    res.json({ ...partido, movimientos });
+  } catch (error) {
+    console.error("Error obteniendo partido:", error);
+    res.status(500).json({ mensaje: "Error al obtener partido" });
+  }
+});
+
+// ======================================================
+// POST /PARTIDOS/quilmes_crear_partido
+// ======================================================
+router.post("/PARTIDOS/quilmes_crear_partido", async (req, res) => {
+  try {
+    const {
+      categoria_id,
+      rival,
+      fecha,
+      hora,
+      condicion = "local",
+      estado = "programado",
+      goles_favor = null,
+      goles_contra = null,
+      observaciones = null,
+    } = req.body;
+
+    if (
+      !categoria_id ||
+      !Number.isInteger(Number(categoria_id)) ||
+      !rival?.trim() ||
+      !fecha
+    ) {
+      return res.status(400).json({
+        mensaje: "Categoría, rival y fecha son obligatorios",
+      });
+    }
+
+    if (!["local", "visitante", "neutral"].includes(condicion)) {
+      return res.status(400).json({ mensaje: "Condición inválida" });
+    }
+
+    if (
+      !["programado", "jugado", "suspendido", "cancelado"].includes(estado)
+    ) {
+      return res.status(400).json({ mensaje: "Estado inválido" });
+    }
+
+    const clubes = await pool.execute(
+      "SELECT id FROM clubes WHERE nombre = ?",
+      ["Quilmes"]
+    );
+
+    if (!clubes.length) {
+      return res.status(500).json({
+        mensaje: "No existe el club Quilmes en la base de datos",
+      });
+    }
+
+    const categorias = await pool.execute(
+      "SELECT id FROM categorias WHERE id = ? AND activo = 1",
+      [Number(categoria_id)]
+    );
+
+    if (!categorias.length) {
+      return res.status(400).json({ mensaje: "Categoría inválida" });
+    }
+
+    const resultado = await pool.execute(
+      `INSERT INTO partidos (
+        club_id, categoria_id, rival, fecha, hora,
+        condicion, estado, goles_favor, goles_contra, observaciones
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        clubes[0].id,
+        Number(categoria_id),
+        rival.trim(),
+        fecha,
+        hora || null,
+        condicion,
+        estado,
+        goles_favor,
+        goles_contra,
+        observaciones,
+      ]
+    );
+
+ 
+res.status(201).json({
+  mensaje: "Partido creado correctamente",
+  id: resultado.insertId.toString(),
+});
+
+  } catch (error) {
+    console.error("Error creando partido:", error);
+    res.status(500).json({ mensaje: "Error al crear partido" });
+  }
+});
+
+// ======================================================
+// PUT /PARTIDOS/quilmes_editar_partido/:id
+// ======================================================
+router.put("/PARTIDOS/quilmes_editar_partido/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      categoria_id,
+      rival,
+      fecha,
+      hora,
+      condicion,
+      estado,
+      goles_favor,
+      goles_contra,
+      observaciones,
+    } = req.body;
+
+    if (
+      !categoria_id ||
+      !Number.isInteger(Number(categoria_id)) ||
+      !rival?.trim() ||
+      !fecha
+    ) {
+      return res.status(400).json({
+        mensaje: "Categoría, rival y fecha son obligatorios",
+      });
+    }
+
+    if (!["local", "visitante", "neutral"].includes(condicion)) {
+      return res.status(400).json({ mensaje: "Condición inválida" });
+    }
+
+    if (
+      !["programado", "jugado", "suspendido", "cancelado"].includes(estado)
+    ) {
+      return res.status(400).json({ mensaje: "Estado inválido" });
+    }
+
+    const result = await pool.execute(
+      `UPDATE partidos p
+       INNER JOIN clubes c ON c.id = p.club_id
+       SET p.categoria_id = ?,
+           p.rival = ?,
+           p.fecha = ?,
+           p.hora = ?,
+           p.condicion = ?,
+           p.estado = ?,
+           p.goles_favor = ?,
+           p.goles_contra = ?,
+           p.observaciones = ?
+       WHERE p.id = ? AND c.nombre = 'Quilmes'`,
+      [
+        Number(categoria_id),
+        rival.trim(),
+        fecha,
+        hora || null,
+        condicion,
+        estado,
+        goles_favor ?? null,
+        goles_contra ?? null,
+        observaciones || null,
+        id,
+      ]
+    );
+
+    if (!result.affectedRows) {
+      return res.status(404).json({ mensaje: "Partido no encontrado" });
+    }
+
+    res.json({ mensaje: "Partido actualizado correctamente" });
+  } catch (error) {
+    console.error("Error editando partido:", error);
+    res.status(500).json({ mensaje: "Error al editar partido" });
+  }
+});
+
+// ======================================================
+// POST /PARTIDOS/quilmes_agregar_movimiento/:id
+// Body: { tipo, concepto, monto, fecha, observaciones }
+// ======================================================
+router.post(
+  "/PARTIDOS/quilmes_agregar_movimiento/:id",
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { tipo, concepto, monto, fecha, observaciones } = req.body;
+      const importe = Number(monto);
+
+      if (
+        !["ingreso", "gasto"].includes(tipo) ||
+        !concepto?.trim() ||
+        !Number.isFinite(importe) ||
+        importe <= 0
+      ) {
+        return res.status(400).json({
+          mensaje: "Tipo, concepto e importe positivo son obligatorios",
+        });
+      }
+
+      const partidos = await pool.execute(
+        `SELECT p.id
+         FROM partidos p
+         INNER JOIN clubes c ON c.id = p.club_id
+         WHERE p.id = ? AND c.nombre = 'Quilmes'`,
+        [id]
+      );
+
+      if (!partidos.length) {
+        return res.status(404).json({ mensaje: "Partido no encontrado" });
+      }
+
+      const resultado = await pool.execute(
+        `INSERT INTO partidos_movimientos
+          (partido_id, tipo, concepto, monto, fecha, observaciones)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          id,
+          tipo,
+          concepto.trim(),
+          importe,
+          fecha || null,
+          observaciones || null,
+        ]
+      );
+
+
+res.status(201).json({
+  mensaje: "Movimiento registrado correctamente",
+  id: resultado.insertId.toString(),
+});
+    } catch (error) {
+      console.error("Error agregando movimiento:", error);
+      res.status(500).json({ mensaje: "Error al registrar movimiento" });
+    }
+  }
+);
+
+// ======================================================
+// DELETE /PARTIDOS/quilmes_eliminar_partido/:id
+// ======================================================
+router.delete(
+  "/PARTIDOS/quilmes_eliminar_partido/:id",
+  async (req, res) => {
+    try {
+      const resultado = await pool.execute(
+        `DELETE p FROM partidos p
+         INNER JOIN clubes c ON c.id = p.club_id
+         WHERE p.id = ? AND c.nombre = 'Quilmes'`,
+        [req.params.id]
+      );
+
+      if (!resultado.affectedRows) {
+        return res.status(404).json({ mensaje: "Partido no encontrado" });
+      }
+
+      res.json({ mensaje: "Partido eliminado correctamente" });
+    } catch (error) {
+      console.error("Error eliminando partido:", error);
+      res.status(500).json({ mensaje: "Error al eliminar partido" });
+    }
+  }
+);
+
+
+
 export default router;
