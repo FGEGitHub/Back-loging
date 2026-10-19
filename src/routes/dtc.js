@@ -8908,5 +8908,259 @@ verificarDolar();
 cron.schedule("* * * * *", async () => {
   await verificarDolar();
 }); */
+
+// =====================================================
+// TRAER REFERENTES Y USUARIOS DESDE dtc_chicos
+// =====================================================
+
+
+router.get("/referentesyusuarios", async (req, res) => {
+  try {
+    const filas = await pool.query(`
+      SELECT id, nombre, apellido, referente
+      FROM dtc_chicos
+      ORDER BY apellido, nombre
+    `);
+
+    res.json({
+      referentes: filas.filter(
+        (p) => Number(p.referente) === 1
+      ),
+      usuarios: filas.filter(
+        (p) => Number(p.referente) !== 1
+      ),
+    });
+  } catch (error) {
+    console.error("Error al traer personas:", error);
+
+    res.status(500).json({
+      error: "No se pudieron obtener las personas",
+    });
+  }
+});
+
+
+// =====================================================
+// GUARDAR O ACTUALIZAR ASISTENCIA DE HOY
+// =====================================================
+
+
+router.post(
+  "/dtc/asistencia-grupo-terapeutico",
+  async (req, res) => {
+    let conexion;
+
+    try {
+      const {
+        nuevo,
+        id_usuario,
+        asistencia,
+        nombre,
+        apellido,
+        dni,
+        direccion,
+        barrio,
+        fecha_nacimiento,
+        telefono,
+        referente,
+      } = req.body;
+
+      if (!["Presente", "Ausente"].includes(asistencia)) {
+        return res.status(400).json({
+          error: "Debe seleccionar Presente o Ausente.",
+        });
+      }
+
+      // Persona existente: conservar el comportamiento actual.
+      if (!nuevo) {
+        const id = Number(id_usuario);
+
+        if (!Number.isInteger(id) || id <= 0) {
+          return res.status(400).json({
+            error: "Debe indicar un ID de persona válido.",
+          });
+        }
+
+        const persona = await pool.query(
+          "SELECT id FROM dtc_chicos WHERE id = ? LIMIT 1",
+          [id]
+        );
+
+        if (!persona.length) {
+          return res.status(404).json({
+            error: "La persona no existe en dtc_chicos.",
+          });
+        }
+
+        await pool.query(
+          `
+            INSERT INTO dtc_asistencia_grupo_terapeutico
+              (fecha, id_usuario, asistencia)
+            VALUES (CURDATE(), ?, ?)
+            ON DUPLICATE KEY UPDATE
+              asistencia = VALUES(asistencia)
+          `,
+          [id, asistencia]
+        );
+
+        return res.json({
+          mensaje: "Asistencia registrada correctamente.",
+          id_usuario: id,
+          asistencia,
+        });
+      }
+
+      // Persona nueva: validar los datos obligatorios.
+      if (
+        !String(nombre || "").trim() ||
+        !String(apellido || "").trim() ||
+        !String(dni || "").trim()
+      ) {
+        return res.status(400).json({
+          error: "Nombre, apellido y DNI son obligatorios.",
+        });
+      }
+
+      if (String(direccion || "").length > 95) {
+        return res.status(400).json({
+          error: "La dirección no puede superar los 95 caracteres.",
+        });
+      }
+
+      if (typeof referente !== "boolean") {
+        return res.status(400).json({
+          error: "El campo referente debe ser true o false.",
+        });
+      }
+
+      // Obtener conexión para insertar persona y asistencia
+      // dentro de la misma transacción.
+      conexion = await pool.getConnection();
+      await conexion.beginTransaction();
+
+      const resultadoPersona = await conexion.query(
+        `
+          INSERT INTO dtc_chicos
+            (
+              nombre,
+              apellido,
+              dni,
+              domicilio,
+              barrio,
+              fecha_nacimiento,
+              telefono,
+              referente
+            )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+        [
+          String(nombre).trim(),
+          String(apellido).trim(),
+          String(dni).trim(),
+          String(direccion || "").trim(),
+          String(barrio || "").trim(),
+          fecha_nacimiento || null,
+          String(telefono || "").trim(),
+          referente,
+        ]
+      );
+
+      const nuevoId = Number(resultadoPersona.insertId);
+
+      if (!Number.isInteger(nuevoId) || nuevoId <= 0) {
+        throw new Error("No se obtuvo el ID de la persona nueva.");
+      }
+
+      await conexion.query(
+        `
+          INSERT INTO dtc_asistencia_grupo_terapeutico
+            (fecha, id_usuario, asistencia)
+          VALUES (CURDATE(), ?, ?)
+          ON DUPLICATE KEY UPDATE
+            asistencia = VALUES(asistencia)
+        `,
+        [nuevoId, asistencia]
+      );
+
+      await conexion.commit();
+
+      return res.status(201).json({
+        mensaje: "Persona creada y asistencia registrada correctamente.",
+        id_usuario: nuevoId,
+        referente,
+        asistencia,
+      });
+    } catch (error) {
+      if (conexion) {
+        try {
+          await conexion.rollback();
+        } catch (errorRollback) {
+          console.error("Error al revertir la transacción:", errorRollback);
+        }
+      }
+
+      console.error("Error al guardar asistencia:", error);
+
+      return res.status(500).json({
+        error: error.code === "ER_DUP_ENTRY"
+          ? "Ya existe un registro duplicado. Verifique el DNI."
+          : "No se pudo guardar la persona y su asistencia.",
+      });
+    } finally {
+      if (conexion) {
+        conexion.release();
+      }
+    }
+  }
+);
+
+
+
+// =====================================================
+// TRAER ASISTENCIAS DEL DÍA
+// =====================================================
+
+router.get("/traerreferentesyusuariosdia", async (req, res) => {
+  try {
+    // Consultamos la fecha a la propia base de datos.
+    const resultadoFecha = await pool.query(`
+      SELECT DATE_FORMAT(CURDATE(), '%Y-%m-%d') AS fecha
+    `);
+
+    const fecha = resultadoFecha[0].fecha;
+
+    const filas = await pool.query(`
+      SELECT
+        a.id,
+        DATE_FORMAT(a.fecha, '%Y-%m-%d') AS fecha,
+        a.id_usuario,
+        a.asistencia,
+        u.nombre,
+        u.apellido,
+        u.referente
+      FROM dtc_asistencia_grupo_terapeutico a
+      INNER JOIN dtc_chicos u
+        ON u.id = a.id_usuario
+      WHERE a.fecha = CURDATE()
+      ORDER BY u.apellido, u.nombre
+    `);
+
+    res.json({
+      fecha,
+      referentes: filas.filter(
+        (p) => Number(p.referente) === 1
+      ),
+      usuarios: filas.filter(
+        (p) => Number(p.referente) !== 1
+      ),
+    });
+  } catch (error) {
+    console.error("Error al traer asistencias del día:", error);
+
+    res.status(500).json({
+      error: "No se pudieron obtener las asistencias del día",
+    });
+  }
+});
 export default router;
 
