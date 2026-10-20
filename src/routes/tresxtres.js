@@ -7,7 +7,8 @@ import {
   isLoggedInn2,
   isLoggedInn4
 } from "../lib/auth.js";
-
+import { sendWhatsappMessage } from "./whatsapclient.js";
+import { getClient, isClientReady } from "./whatsapclient.js";
 router.post("/equipo", async (req, res) => {
   const { equipo, jugadores, capitan } = req.body;
 
@@ -33,18 +34,7 @@ router.post("/equipo", async (req, res) => {
       [dnis]
     );
 
-    if (existentes.length > 0) {
-      await connection.rollback();
 
-      return res.status(400).json({
-        error: "Algunos DNIs ya pertenecen a un equipo",
-        detalle: existentes.map(e => ({
-          dni: e.dni,
-          equipo: e.equipo,
-          mensaje: `El DNI ${e.dni} ya pertenece al equipo ${e.equipo}`,
-        })),
-      });
-    }
 
     // Crear equipo
     const equipoResult = await connection.query(
@@ -106,6 +96,43 @@ router.post("/equipo", async (req, res) => {
     }
 
     await connection.commit();
+
+try {
+  const saludos = [
+    "Hola, te informamos que se registró un nuevo equipo.",
+    "¡Buen día! Se ha registrado un nuevo equipo en el sistema.",
+    "Hola, hay novedades: se registró un equipo nuevo.",
+    "¡Atención! Se completó el registro de un nuevo equipo.",
+    "Hola, te compartimos una actualización sobre las inscripciones."
+  ];
+
+  const saludo = saludos[Math.floor(Math.random() * saludos.length)];
+
+  const nombresJugadores = jugadores
+    .map(j => `${j.nombre} ${j.apellido || ""}`.trim())
+    .join("\n- ");
+
+  const mensaje = `${saludo}
+
+⚽ *NUEVO EQUIPO REGISTRADO*
+
+🏆 Equipo: ${equipo}
+📋 Edición: Segunda
+👥 Cantidad de jugadores: ${jugadores.length}
+
+📝 *Integrantes:*
+- ${nombresJugadores}
+
+El registro se completó correctamente en el sistema.
+
+Mensaje automático de notificación.`;
+
+  await sendWhatsappMessage("5493794681596", mensaje);
+
+} catch (errorWhatsapp) {
+  console.error("Error al enviar WhatsApp:", errorWhatsapp);
+}
+
 
     res.json({
       ok: true,
