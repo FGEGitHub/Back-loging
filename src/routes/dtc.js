@@ -9116,6 +9116,75 @@ router.post(
 
 
 
+
+
+router.get(
+  "/todassisteterapeutico",
+  async (req, res) => {
+    try {
+      const filas = await pool.query(`
+        SELECT
+          DATE_FORMAT(a.fecha, '%Y-%m-%d') AS fecha,
+          a.id_usuario,
+          a.asistencia,
+          u.nombre,
+          u.apellido,
+          u.dni,
+          u.referente
+        FROM dtc_asistencia_grupo_terapeutico a
+        INNER JOIN dtc_chicos u
+          ON u.id = a.id_usuario
+        ORDER BY a.fecha DESC, u.apellido ASC, u.nombre ASC
+      `);
+
+      const asistenciasPorFecha = new Map();
+
+      for (const fila of filas) {
+        const fecha = fila.fecha;
+
+        if (!asistenciasPorFecha.has(fecha)) {
+          asistenciasPorFecha.set(fecha, {
+            fecha,
+            cantidad_referentes: 0,
+            cantidad_usuarios: 0,
+            personas: [],
+          });
+        }
+
+        const grupo = asistenciasPorFecha.get(fecha);
+        const esReferente = Number(fila.referente) === 1;
+
+        if (esReferente) {
+          grupo.cantidad_referentes++;
+        } else {
+          grupo.cantidad_usuarios++;
+        }
+
+        grupo.personas.push({
+          id_usuario: Number(fila.id_usuario),
+          nombre: fila.nombre,
+          apellido: fila.apellido,
+          dni: fila.dni,
+          referente: esReferente,
+          asistencia: fila.asistencia,
+        });
+      }
+
+      return res.json(Array.from(asistenciasPorFecha.values()));
+    } catch (error) {
+      console.error(
+        "Error al traer todas las asistencias grupales:",
+        error
+      );
+
+      return res.status(500).json({
+        error: "No se pudieron obtener las asistencias grupales.",
+      });
+    }
+  }
+);
+
+
 // =====================================================
 // TRAER ASISTENCIAS DEL DÍA
 // =====================================================
