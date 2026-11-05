@@ -18,9 +18,11 @@ import { Payment } from "mercadopago";
 import { Preference, MercadoPagoConfig } from "mercadopago";
 
 dotenv.config();
-const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
-const API = process.env.VITE_API_URL;
 
+const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN;
+const API = process.env.API_URL;
+
+console.log(API)
 const client = new MercadoPagoConfig({
   accessToken: MP_ACCESS_TOKEN,
 });
@@ -832,13 +834,12 @@ router.get('/traerperfil/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Buscar usuario
     const usuarios = await pool.query(
       'SELECT * FROM usuarios WHERE id = ?',
       [id]
     );
 
-    if (usuarios.length === 0) {
+    if (!usuarios.length) {
       return res.status(404).json({
         message: 'Usuario no encontrado'
       });
@@ -846,25 +847,171 @@ router.get('/traerperfil/:id', async (req, res) => {
 
     const usuario = usuarios[0];
 
-    // Buscar todas las especialidades del médico
     const especialidades = await pool.query(
-      'SELECT * FROM especialidades WHERE id_medico = ?',
+      `SELECT * FROM especialidades
+       WHERE id_medico = ?`,
       [id]
     );
-console.log(especialidades)
-    // Agregar las especialidades al perfil
-    usuario.especialidades = especialidades;
 
+    const consultas = await pool.query(
+      `SELECT ce.*
+       FROM consultas_especialidades ce
+       INNER JOIN especialidades e
+         ON e.id = ce.id_especialidad
+       WHERE e.id_medico = ?`,
+      [id]
+    );
+
+    usuario.especialidades = especialidades.map(esp => ({
+      ...esp,
+      consultas: consultas.filter(
+        c => Number(c.id_especialidad) === Number(esp.id)
+      )
+    }));
+console.log(usuario)
     res.json(usuario);
 
   } catch (error) {
-    console.error('Error al traer perfil:', error);
+    console.error(error);
 
     res.status(500).json({
       message: 'Error al obtener el perfil'
     });
   }
 });
+
+router.post('/agregarconsultaespecialidad', async (req, res) => {
+  try {
+    const { id_especialidad, nombre, id_medico } = req.body;
+console.log(id_especialidad, nombre, id_medico)
+    if (!id_especialidad || !nombre?.trim() || !id_medico) {
+      return res.status(400).json({
+        message: 'Faltan datos obligatorios'
+      });
+    }
+
+    const especialidad = await pool.query(
+      `SELECT id FROM especialidades
+       WHERE id = ? AND id_medico = ?`,
+      [id_especialidad, id_medico]
+    );
+
+    if (!especialidad.length) {
+      return res.status(404).json({
+        message: 'Especialidad no encontrada'
+      });
+    }
+
+    await pool.query(
+      `INSERT INTO consultas_especialidades
+       (id_especialidad, nombre)
+       VALUES (?, ?)`,
+      [id_especialidad, nombre.trim()]
+    );
+
+    res.json({
+      message: 'Consulta agregada correctamente'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Error al agregar consulta'
+    });
+  }
+});
+
+
+router.put('/editarconsultaespecialidad/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre, id_medico } = req.body;
+
+    if (!nombre?.trim() || !id_medico) {
+      return res.status(400).json({
+        message: 'Faltan datos obligatorios'
+      });
+    }
+
+    const consulta = await pool.query(
+      `SELECT ce.id
+       FROM consultas_especialidades ce
+       INNER JOIN especialidades e
+         ON e.id = ce.id_especialidad
+       WHERE ce.id = ? AND e.id_medico = ?`,
+      [id, id_medico]
+    );
+
+    if (!consulta.length) {
+      return res.status(404).json({
+        message: 'Consulta no encontrada'
+      });
+    }
+
+    await pool.query(
+      `UPDATE consultas_especialidades
+       SET nombre = ?
+       WHERE id = ?`,
+      [nombre.trim(), id]
+    );
+
+    res.json({
+      message: 'Consulta modificada correctamente'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Error al modificar consulta'
+    });
+  }
+});
+
+
+router.delete('/eliminarconsultaespecialidad/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { id_medico } = req.body;
+
+    if (!id_medico) {
+      return res.status(400).json({
+        message: 'Falta el médico'
+      });
+    }
+
+    const consulta = await pool.query(
+      `SELECT ce.id
+       FROM consultas_especialidades ce
+       INNER JOIN especialidades e
+         ON e.id = ce.id_especialidad
+       WHERE ce.id = ? AND e.id_medico = ?`,
+      [id, id_medico]
+    );
+
+    if (!consulta.length) {
+      return res.status(404).json({
+        message: 'Consulta no encontrada'
+      });
+    }
+
+    await pool.query(
+      'DELETE FROM consultas_especialidades WHERE id = ?',
+      [id]
+    );
+
+    res.json({
+      message: 'Consulta eliminada correctamente'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Error al eliminar consulta'
+    });
+  }
+});
+
+
 
 
 router.get('/traerTurnoDetalle/:id', async (req, res) => {
@@ -1626,25 +1773,24 @@ router.post('/agendarapaciente', async (req, res) => {
   }
 });
 
+
 router.post("/solicitarturno", async (req, res) => {
+  let idTurno = null;
 
   try {
-
-   const {
-  id_empresa,
-  fecha,
-  hora,
- 
-  duracion,
-  id_horario_estandar,
-  especialidad,
-  nombre,
-  apellido,
-  dni,
-  telefono,
-  categoria
-} = req.body;
-
+    const {
+      id_empresa,
+      fecha,
+      hora,
+      duracion,
+      id_horario_estandar,
+      especialidad,
+      nombre,
+      apellido,
+      dni,
+      telefono,
+      categoria
+    } = req.body;
 
     // ==========================================
     // 1. VALIDAR DATOS
@@ -1661,17 +1807,42 @@ router.post("/solicitarturno", async (req, res) => {
       !telefono ||
       !categoria
     ) {
-
       return res.status(400).json({
+        ok: false,
         message: "Faltan datos"
       });
-
     }
 
+    // ==========================================
+    // 2. VALIDAR CONFIGURACIÓN MERCADO PAGO
+    // ==========================================
 
+    if (!MP_ACCESS_TOKEN) {
+      console.error("MP_ACCESS_TOKEN no está configurado");
+
+      return res.status(500).json({
+        ok: false,
+        message: "Mercado Pago no está configurado"
+      });
+    }
+
+    if (!API) {
+      console.error("API no está configurada");
+
+      return res.status(500).json({
+        ok: false,
+        message: "La URL de la API no está configurada"
+      });
+    }
+
+    console.log("CONFIG MP:", {
+      tokenConfigurado: Boolean(MP_ACCESS_TOKEN),
+      tokenTest: MP_ACCESS_TOKEN.trim().startsWith("TEST-"),
+      apiConfigurada: Boolean(API)
+    });
 
     // ==========================================
-    // 2. OBTENER SI LA CONSULTA ES PAGA
+    // 3. OBTENER SI LA CONSULTA ES PAGA
     // ==========================================
 
     const usuarios = await pool.query(
@@ -1684,443 +1855,364 @@ router.post("/solicitarturno", async (req, res) => {
       [id_empresa]
     );
 
-
     if (usuarios.length === 0) {
-
       return res.status(404).json({
+        ok: false,
         message: "Usuario/empresa no encontrado"
       });
-
     }
 
+    const consulta_paga = usuarios[0].consulta_paga;
 
-    const consulta_paga =
-      usuarios[0].consulta_paga;
+    console.log("💰 CONSULTA PAGA:", consulta_paga);
 
+    // ==========================================
+    // 4. VERIFICAR QUE EL HORARIO ESTÁ LIBRE
+    // ==========================================
 
-    console.log(
-      "💰 CONSULTA PAGA:",
-      consulta_paga
+    const turnoExistente = await pool.query(
+      `
+      SELECT id
+      FROM turnos
+      WHERE id_usuario = ?
+        AND fecha = ?
+        AND hora = ?
+        AND baja = 'No'
+      LIMIT 1
+      `,
+      [id_empresa, fecha, hora]
     );
 
-
-    // ==========================================
-    // 3. VERIFICAR QUE EL HORARIO ESTÁ LIBRE
-    // ==========================================
-
-    const turnoExistente =
-      await pool.query(
-        `
-        SELECT id
-        FROM turnos
-        WHERE id_usuario = ?
-          AND fecha = ?
-          AND hora = ?
-          AND baja = 'No'
-        LIMIT 1
-        `,
-        [
-          id_empresa,
-          fecha,
-          hora
-        ]
-      );
-
-
-    if (
-      turnoExistente.length > 0
-    ) {
-
+    if (turnoExistente.length > 0) {
       return res.status(409).json({
-        message:
-          "El horario acaba de ser ocupado"
+        ok: false,
+        message: "El horario acaba de ser ocupado"
       });
-
     }
 
-
     // ==========================================
-    // 4. BUSCAR PACIENTE
+    // 5. BUSCAR PACIENTE
     // ==========================================
 
-    const existePaciente =
-      await pool.query(
-        `
-        SELECT id
-        FROM pacientes
-        WHERE dni = ?
-        LIMIT 1
-        `,
-        [dni]
-      );
-
+    const existePaciente = await pool.query(
+      `
+      SELECT id
+      FROM pacientes
+      WHERE dni = ?
+      LIMIT 1
+      `,
+      [dni]
+    );
 
     let id_paciente;
 
-
     // ==========================================
-    // 5. CREAR / ACTUALIZAR PACIENTE
+    // 6. CREAR / ACTUALIZAR PACIENTE
     // ==========================================
 
-    if (
-      existePaciente.length > 0
-    ) {
-
-      id_paciente =
-        existePaciente[0].id;
-
+    if (existePaciente.length > 0) {
+      id_paciente = existePaciente[0].id;
 
       await pool.query(
         `
         UPDATE pacientes
-        SET
-          nombre = ?,
-          telefono = ?
+        SET nombre = ?, telefono = ?
         WHERE id = ?
         `,
-        [
-          nombre,
-          telefono,
-          id_paciente
-        ]
+        [nombre, telefono, id_paciente]
       );
 
     } else {
+      const nuevoPaciente = await pool.query(
+        `
+        INSERT INTO pacientes
+        (
+          nombre,
+          dni,
+          telefono,
+          id_usuario
+        )
+        VALUES (?, ?, ?, ?)
+        `,
+        [nombre, dni, telefono, id_empresa]
+      );
 
-    const nuevoPaciente =
-  await pool.query(
-    `
-    INSERT INTO pacientes
-    (
-      nombre,
-      dni,
-      telefono,
-      id_usuario
-    )
-    VALUES (?, ?, ?, ?)
-    `,
-    [
-      nombre,
-      dni,
-      telefono,
-      id_empresa
-    ]
-  );
-
-id_paciente =
-  nuevoPaciente.insertId;
-
+      id_paciente = nuevoPaciente.insertId;
     }
 
-
     // ==========================================
-    // 6. VALIDAR HORARIO ESTÁNDAR
+    // 7. VALIDAR HORARIO ESTÁNDAR
     // ==========================================
 
-    if (
-      id_horario_estandar
-    ) {
+    if (id_horario_estandar) {
+      const horarios = await pool.query(
+        `
+        SELECT id
+        FROM horarios
+        WHERE id = ?
+          AND usuario_id = ?
+        LIMIT 1
+        `,
+        [id_horario_estandar, id_empresa]
+      );
 
-      const horarios =
-        await pool.query(
-          `
-          SELECT id
-          FROM horarios
-          WHERE id = ?
-            AND usuario_id = ?
-          LIMIT 1
-          `,
-          [
-            id_horario_estandar,
-            id_empresa
-          ]
-        );
-
-
-      if (
-        horarios.length === 0
-      ) {
-
+      if (horarios.length === 0) {
         return res.status(400).json({
-          message:
-            "El horario seleccionado ya no está disponible"
+          ok: false,
+          message: "El horario seleccionado ya no está disponible"
         });
-
       }
-
     }
 
-
     // ==========================================
-    // 7. DEFINIR ESTADO DEL TURNO
+    // 8. DEFINIR ESTADO DEL TURNO
     // ==========================================
 
     let estadoTurno;
-
     let vencimiento = null;
 
-
-    if (
-      consulta_paga === "No"
-    ) {
-
-      // No necesita pago
+    if (consulta_paga === "No") {
       estadoTurno = "confirmado";
-
     } else {
-
-      // Necesita Mercado Pago
       estadoTurno = "pendiente_pago";
 
-      vencimiento =
-        new Date(
-          Date.now() +
-          5 * 60 * 1000
-        );
-
+      vencimiento = new Date(
+        Date.now() + 5 * 60 * 1000
+      );
     }
 
+    console.log("📌 ESTADO DEL TURNO:", estadoTurno);
 
-    console.log(
-      "📌 ESTADO DEL TURNO:",
-      estadoTurno
+    // ==========================================
+    // 9. CREAR TURNO
+    // ==========================================
+
+    const nuevoTurno = await pool.query(
+      `
+      INSERT INTO turnos
+      (
+        id_paciente,
+        fecha,
+        hora,
+        asistencia,
+        observaciones,
+        motivo,
+        baja,
+        estado,
+        categoria,
+        vencimiento_pago,
+        modo_solicitud,
+        id_usuario,
+        duracion,
+        especialidad
+      )
+      VALUES
+      (
+        ?,
+        ?,
+        ?,
+        NULL,
+        'Sin observaciones',
+        NULL,
+        'No',
+        ?,
+        ?,
+        ?,
+        'online',
+        ?,
+        ?,
+        ?
+      )
+      `,
+      [
+        id_paciente,
+        fecha,
+        hora,
+        estadoTurno,
+        categoria,
+        vencimiento,
+        id_empresa,
+        duracion,
+        especialidad || null
+      ]
     );
 
+    idTurno = nuevoTurno.insertId != null
+      ? String(nuevoTurno.insertId)
+      : null;
 
-    // ==========================================
-    // 8. CREAR TURNO REAL
-    // ==========================================
+    if (!idTurno) {
+      throw new Error("No se pudo obtener el ID del turno creado");
+    }
 
-    const nuevoTurno =
-      await pool.query(
-        `
-        INSERT INTO turnos
-        (
-          id_paciente,
-          fecha,
-          hora,
-          asistencia,
-          observaciones,
-          motivo,
-          baja,
-          estado,
-          categoria,
-          vencimiento_pago,
-          modo_solicitud,
-          id_usuario,
-          duracion,
-          especialidad
-        )
-        VALUES
-        (
-          ?,
-          ?,
-          ?,
-          NULL,
-          'Sin observaciones',
-          NULL,
-          'No',
-          ?,
-          ?,
-          ?,
-          'online',
-          ?,
-          ?,
-          ?
-        )
-        `,
-        [
-          id_paciente,
-          fecha,
-          hora,
-          estadoTurno,
-          categoria,
-          vencimiento,
-          id_empresa,
-          duracion,
-          especialidad || null
-        ]
-      );
-
-
-    // ==========================================
-    // 9. IMPORTANTE: BIGINT
-    // ==========================================
-
-    // MySQL puede devolver BIGINT como Number
-    // o BigInt dependiendo de la configuración
-    // del driver.
-
-    const idTurno =
-      nuevoTurno.insertId != null
-        ? String(nuevoTurno.insertId)
-        : null;
-
-
-    console.log(
-      "✅ TURNO CREADO:",
-      idTurno
-    );
-
+    console.log("✅ TURNO CREADO:", idTurno);
 
     // ==========================================
     // 10. SI NO ES PAGA
     // ==========================================
 
-    if (
-      consulta_paga === "No"
-    ) {
-
-      console.log(
-        "✅ CONSULTA NO PAGA - NO SE CREA MERCADO PAGO"
-      );
-
+    if (consulta_paga === "No") {
+      console.log("✅ CONSULTA NO PAGA");
 
       return res.json({
-
         ok: true,
-
-        message:
-          "Turno confirmado correctamente",
-
-        id_turno:
-          idTurno,
-
-        id_solicitud:
-          idTurno,
-
-        consulta_paga:
-          "No",
-
-        estado:
-          "confirmado"
-
+        message: "Turno confirmado correctamente",
+        id_turno: idTurno,
+        id_solicitud: idTurno,
+        consulta_paga: "No",
+        estado: "confirmado"
       });
-
     }
 
-
     // ==========================================
-    // 11. SI ES PAGA → MERCADO PAGO
+    // 11. CREAR PREFERENCIA MERCADO PAGO
     // ==========================================
 
-    console.log(
-      "💳 CONSULTA PAGA - CREANDO PREFERENCIA"
+    console.log("💳 CONSULTA PAGA - CREANDO PREFERENCIA");
+
+    const baseURL = API.endsWith("/")
+      ? API
+      : `${API}/`;
+
+    const preferenceBody = {
+      items: [
+        {
+          title: "Consulta Clínica",
+          quantity: 1,
+          unit_price: 5000,
+          currency_id: "ARS"
+        }
+      ],
+
+      external_reference: idTurno,
+
+      notification_url:
+        `${baseURL}clinica/webhook`,
+
+      back_urls: {
+        success: `${baseURL}clinica/success`,
+        failure: `${baseURL}clinica/failure`,
+        pending: `${baseURL}clinica/pending`
+      },
+
+      auto_return: "approved"
+    };
+
+    const mpResponse = await fetch(
+      "https://api.mercadopago.com/checkout/preferences",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${MP_ACCESS_TOKEN.trim()}`
+        },
+
+        body: JSON.stringify(preferenceBody)
+      }
     );
 
+    // ==========================================
+    // 12. LEER RESPUESTA MERCADO PAGO
+    // ==========================================
 
-    const preference =
-      new Preference(client);
+    const responseText = await mpResponse.text();
 
+    console.log("MERCADO PAGO STATUS:", mpResponse.status);
 
-    const result =
-      await preference.create({
+    console.log(
+      "MERCADO PAGO CONTENT-TYPE:",
+      mpResponse.headers.get("content-type")
+    );
 
-        body: {
+    console.log(
+      "MERCADO PAGO REQUEST ID:",
+      mpResponse.headers.get("x-request-id")
+    );
 
-          items: [
-            {
-              title:
-                "Consulta Clínica",
+    console.log("MERCADO PAGO BODY:", responseText);
 
-              quantity: 1,
+    if (!responseText) {
+      throw new Error(
+        `Mercado Pago respondió vacío. HTTP ${mpResponse.status}`
+      );
+    }
 
-              unit_price: 5000,
+    let result;
 
-              currency_id:
-                "ARS"
-            }
-          ],
+    try {
+      result = JSON.parse(responseText);
+    } catch (parseError) {
+      throw new Error(
+        `Respuesta no válida de Mercado Pago. HTTP ${mpResponse.status}. BODY: ${responseText.slice(0, 1000)}`
+      );
+    }
 
+    if (!mpResponse.ok) {
+      throw new Error(
+        `Mercado Pago rechazó la preferencia. HTTP ${mpResponse.status}: ${JSON.stringify(result)}`
+      );
+    }
 
-          // IMPORTANTE:
-          // Mercado Pago recibe STRING
-          // para evitar problemas con BIGINT
-
-          external_reference:
-            idTurno,
-
-
-          notification_url:
-            API +
-            "clinica/webhook",
-
-
-          back_urls: {
-
-            success:
-              API +
-              "clinica/success",
-
-            failure:
-              API +
-              "clinica/failure",
-
-            pending:
-              API +
-              "clinica/pending"
-
-          },
-
-
-          auto_return:
-            "approved"
-
-        }
-
-      });
-
+    if (!result.id) {
+      throw new Error(
+        "Mercado Pago respondió correctamente pero no devolvió el ID de preferencia"
+      );
+    }
 
     // ==========================================
-    // 12. RESPUESTA
+    // 13. OBTENER URL DE PAGO
+    // ==========================================
+
+    const pagoUrl = MP_ACCESS_TOKEN.trim().startsWith("TEST-")
+      ? result.sandbox_init_point
+      : result.init_point;
+
+    if (!pagoUrl) {
+      throw new Error(
+        "Mercado Pago no devolvió una URL de pago"
+      );
+    }
+
+    console.log("✅ PREFERENCIA CREADA:", result.id);
+
+    // ==========================================
+    // 14. RESPUESTA
     // ==========================================
 
     return res.json({
-
       ok: true,
 
-      message:
-        "Turno reservado, pendiente de pago",
+      message: "Turno reservado, pendiente de pago",
 
-      id_turno:
-        idTurno,
+      id_turno: idTurno,
+      id_solicitud: idTurno,
 
-      id_solicitud:
-        idTurno,
+      consulta_paga: "Si",
+      estado: "pendiente_pago",
 
-      consulta_paga:
-        "Si",
-
-      estado:
-        "pendiente_pago",
-
-      pago_url:
-        result.sandbox_init_point,
-
-      preference_id:
-        String(result.id)
-
+      pago_url: pagoUrl,
+      preference_id: String(result.id)
     });
-
 
   } catch (error) {
 
-    console.error(
-      "❌ Error solicitarturno:",
-      error
-    );
-
-
-    return res.status(500).json({
-
-      message:
-        "Error del servidor"
-
+    console.error("❌ ERROR SOLICITARTURNO:", {
+      message: error.message,
+      status: error.status,
+      stack: error.stack
     });
 
+    return res.status(500).json({
+      ok: false,
+      message: "Error al solicitar el turno",
+      id_turno: idTurno,
+      estado: idTurno ? "pendiente_pago" : null,
+      error: error.message
+    });
   }
-
 });
+
 
 router.post("/confirmarTurnoNoPago", async (req, res) => {
   try {
