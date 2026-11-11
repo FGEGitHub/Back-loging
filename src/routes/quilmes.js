@@ -1394,7 +1394,7 @@ router.post(
 
       const resultado = await pool.execute(
         `INSERT INTO partidos_movimientos
-          (partido_id, tipo,  monto, fecha, observaciones)
+          (partido_id, tipo,concepto,  monto, fecha, observaciones)
          VALUES (?, ?, ?, ?, ?, ?)`,
         [
           id,
