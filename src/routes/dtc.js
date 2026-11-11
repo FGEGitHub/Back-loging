@@ -8945,6 +8945,7 @@ router.get("/referentesyusuarios", async (req, res) => {
 // =====================================================
 
 
+
 router.post(
   "/dtc/asistencia-grupo-terapeutico",
   async (req, res) => {
@@ -8955,6 +8956,7 @@ router.post(
         nuevo,
         id_usuario,
         asistencia,
+        fecha,
         nombre,
         apellido,
         dni,
@@ -8965,13 +8967,36 @@ router.post(
         referente,
       } = req.body;
 
+      // Validar asistencia
       if (!["Presente", "Ausente"].includes(asistencia)) {
         return res.status(400).json({
           error: "Debe seleccionar Presente o Ausente.",
         });
       }
 
-      // Persona existente: conservar el comportamiento actual.
+      // Validar fecha seleccionada
+      if (!fecha || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+        return res.status(400).json({
+          error: "Debe proporcionar una fecha válida (YYYY-MM-DD).",
+        });
+      }
+
+      // Validar que la fecha exista realmente en el calendario
+      const fechaValida = new Date(`${fecha}T00:00:00Z`);
+
+      if (
+        Number.isNaN(fechaValida.getTime()) ||
+        fechaValida.toISOString().slice(0, 10) !== fecha
+      ) {
+        return res.status(400).json({
+          error: "La fecha ingresada no es válida.",
+        });
+      }
+
+      // =====================================================
+      // PERSONA EXISTENTE
+      // =====================================================
+
       if (!nuevo) {
         const id = Number(id_usuario);
 
@@ -8992,25 +9017,31 @@ router.post(
           });
         }
 
+        // Registrar asistencia usando la fecha seleccionada
         await pool.query(
           `
             INSERT INTO dtc_asistencia_grupo_terapeutico
               (fecha, id_usuario, asistencia)
-            VALUES (CURDATE(), ?, ?)
+            VALUES (?, ?, ?)
             ON DUPLICATE KEY UPDATE
               asistencia = VALUES(asistencia)
           `,
-          [id, asistencia]
+          [fecha, id, asistencia]
         );
 
         return res.json({
           mensaje: "Asistencia registrada correctamente.",
           id_usuario: id,
           asistencia,
+          fecha,
         });
       }
 
-      // Persona nueva: validar los datos obligatorios.
+      // =====================================================
+      // PERSONA NUEVA
+      // =====================================================
+
+      // Validar datos obligatorios
       if (
         !String(nombre || "").trim() ||
         !String(apellido || "").trim() ||
@@ -9036,6 +9067,7 @@ router.post(
       // Obtener conexión para insertar persona y asistencia
       // dentro de la misma transacción.
       conexion = await pool.getConnection();
+
       await conexion.beginTransaction();
 
       const resultadoPersona = await conexion.query(
@@ -9071,15 +9103,16 @@ router.post(
         throw new Error("No se obtuvo el ID de la persona nueva.");
       }
 
+      // Registrar asistencia usando la fecha seleccionada
       await conexion.query(
         `
           INSERT INTO dtc_asistencia_grupo_terapeutico
             (fecha, id_usuario, asistencia)
-          VALUES (CURDATE(), ?, ?)
+          VALUES (?, ?, ?)
           ON DUPLICATE KEY UPDATE
             asistencia = VALUES(asistencia)
         `,
-        [nuevoId, asistencia]
+        [fecha, nuevoId, asistencia]
       );
 
       await conexion.commit();
@@ -9089,23 +9122,30 @@ router.post(
         id_usuario: nuevoId,
         referente,
         asistencia,
+        fecha,
       });
+
     } catch (error) {
       if (conexion) {
         try {
           await conexion.rollback();
         } catch (errorRollback) {
-          console.error("Error al revertir la transacción:", errorRollback);
+          console.error(
+            "Error al revertir la transacción:",
+            errorRollback
+          );
         }
       }
 
       console.error("Error al guardar asistencia:", error);
 
       return res.status(500).json({
-        error: error.code === "ER_DUP_ENTRY"
-          ? "Ya existe un registro duplicado. Verifique el DNI."
-          : "No se pudo guardar la persona y su asistencia.",
+        error:
+          error.code === "ER_DUP_ENTRY"
+            ? "Ya existe un registro duplicado. Verifique el DNI."
+            : "No se pudo guardar la persona y su asistencia.",
       });
+
     } finally {
       if (conexion) {
         conexion.release();
@@ -9113,6 +9153,7 @@ router.post(
     }
   }
 );
+
 
 
 
@@ -9189,16 +9230,24 @@ router.get(
 // TRAER ASISTENCIAS DEL DÍA
 // =====================================================
 
+
 router.get("/traerreferentesyusuariosdia", async (req, res) => {
   try {
-    // Consultamos la fecha a la propia base de datos.
-    const resultadoFecha = await pool.query(`
-      SELECT DATE_FORMAT(CURDATE(), '%Y-%m-%d') AS fecha
-    `);
+    const { fecha } = req.query;
 
-    const fecha = resultadoFecha[0].fecha;
+    // Validar formato YYYY-MM-DD
+    if (
+      !fecha ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(fecha)
+    ) {
+      return res.status(400).json({
+        error: "Debe proporcionar una fecha válida (YYYY-MM-DD)",
+      });
+    }
 
-    const filas = await pool.query(`
+    // Consultar asistencias de la fecha seleccionada
+    const filas = await pool.query(
+      `
       SELECT
         a.id,
         DATE_FORMAT(a.fecha, '%Y-%m-%d') AS fecha,
@@ -9210,9 +9259,12 @@ router.get("/traerreferentesyusuariosdia", async (req, res) => {
       FROM dtc_asistencia_grupo_terapeutico a
       INNER JOIN dtc_chicos u
         ON u.id = a.id_usuario
-      WHERE a.fecha = CURDATE()
+      WHERE a.fecha >= ?
+        AND a.fecha < DATE_ADD(?, INTERVAL 1 DAY)
       ORDER BY u.apellido, u.nombre
-    `);
+      `,
+      [fecha, fecha]
+    );
 
     res.json({
       fecha,
@@ -9223,13 +9275,15 @@ router.get("/traerreferentesyusuariosdia", async (req, res) => {
         (p) => Number(p.referente) !== 1
       ),
     });
+
   } catch (error) {
-    console.error("Error al traer asistencias del día:", error);
+    console.error("Error al traer asistencias:", error);
 
     res.status(500).json({
-      error: "No se pudieron obtener las asistencias del día",
+      error: "No se pudieron obtener las asistencias",
     });
   }
 });
+
 export default router;
 
