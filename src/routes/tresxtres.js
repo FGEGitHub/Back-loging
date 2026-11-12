@@ -956,9 +956,14 @@ router.post("/crearTorneo", async (req, res) => {
 
 
 
+
 router.get("/traertablas/:id", async (req, res) => {
   try {
     const { id } = req.params;
+
+    // =====================================
+    // 1. TRAER ZONAS DEL TORNEO
+    // =====================================
 
     const zonas = await pool.query(
       "SELECT * FROM zonas_3x3 WHERE id_torneo = ?",
@@ -967,31 +972,55 @@ router.get("/traertablas/:id", async (req, res) => {
 
     const resultado = [];
 
+    // =====================================
+    // 2. RECORRER CADA ZONA
+    // =====================================
+
     for (const zona of zonas) {
-      // 🔹 1. PARTICIPACIONES → equipos de la zona
+
+      // Equipos pertenecientes a la zona
       const participaciones = await pool.query(
-        "SELECT id_equipo FROM participacion_3x3 WHERE id_zona = ?",
+        `
+        SELECT id_equipo
+        FROM participacion_3x3
+        WHERE id_zona = ?
+        `,
         [zona.id]
       );
 
-      const equiposIds = participaciones.map((p) => p.id_equipo);
+      const equiposIds = participaciones.map((p) =>
+        Number(p.id_equipo)
+      );
 
-      // 🔹 2. TRAER EQUIPOS
+      // =====================================
+      // 3. TRAER NOMBRES DE EQUIPOS
+      // =====================================
+
       let equipos = [];
+
       if (equiposIds.length > 0) {
         equipos = await pool.query(
-          "SELECT id, nombre FROM equipos WHERE id IN (?)",
+          `
+          SELECT id, nombre
+          FROM equipos
+          WHERE id IN (?)
+          `,
           [equiposIds]
         );
       }
 
       const equiposMap = {};
+
       equipos.forEach((e) => {
         equiposMap[e.id] = e.nombre;
       });
 
-      // 🔹 3. INICIALIZAR TABLA (aunque no haya partidos)
+      // =====================================
+      // 4. INICIALIZAR TABLA
+      // =====================================
+
       const tabla = {};
+
       equiposIds.forEach((idEquipo) => {
         tabla[idEquipo] = {
           equipo: equiposMap[idEquipo] || "Sin nombre",
@@ -1003,23 +1032,141 @@ router.get("/traertablas/:id", async (req, res) => {
         };
       });
 
-      // 🔹 4. PARTIDOS
-      const partidos = await pool.query(
-        "SELECT * FROM partidos_3x3 WHERE id_zona = ?",
-        [zona.id]
-      );
+      // =====================================
+      // 5. TRAER PARTIDOS DE LA ZONA
+      //    E INTERZONALES DE SUS EQUIPOS
+      // =====================================
 
-      // 🔹 5. PROCESAR PARTIDOS
+      let partidos = [];
+
+      if (equiposIds.length > 0) {
+        partidos = await pool.query(
+          `
+          SELECT *
+          FROM partidos_3x3
+          WHERE id_torneo = ?
+          AND (
+            id_zona = ?
+            OR (
+              tipo_partido = 'interzonal'
+              AND (
+                id_equipo_1 IN (?)
+                OR id_equipo_2 IN (?)
+              )
+            )
+          )
+          ORDER BY id ASC
+          `,
+          [id, zona.id, equiposIds, equiposIds]
+        );
+      }
+
+      // =====================================
+      // 6. TRAER NOMBRES DE TODOS LOS EQUIPOS
+      //    QUE PARTICIPAN EN LOS PARTIDOS
+      // =====================================
+
+      const idsDePartidos = [
+        ...new Set(
+          partidos.flatMap((p) => [
+            Number(p.id_equipo_1),
+            Number(p.id_equipo_2),
+          ])
+        ),
+      ];
+
+      if (idsDePartidos.length > 0) {
+        const equiposPartidos = await pool.query(
+          `
+          SELECT id, nombre
+          FROM equipos
+          WHERE id IN (?)
+          `,
+          [idsDePartidos]
+        );
+
+        equiposPartidos.forEach((e) => {
+          equiposMap[e.id] = e.nombre;
+        });
+      }
+
+      // =====================================
+      // 7. PROCESAR PARTIDOS
+      // =====================================
+
       partidos.forEach((p) => {
+
+        // No contabilizar partidos sin resultado
+        if (
+          p.goles_1 === null ||
+          p.goles_2 === null ||
+          p.goles_1 === undefined ||
+          p.goles_2 === undefined ||
+          p.goles_1 === "" ||
+          p.goles_2 === ""
+        ) {
+          return;
+        }
+
         const g1 = Number(p.goles_1);
         const g2 = Number(p.goles_2);
 
-        if (isNaN(g1) || isNaN(g2)) return;
+        if (
+          !Number.isFinite(g1) ||
+          !Number.isFinite(g2) ||
+          !Number.isInteger(g1) ||
+          !Number.isInteger(g2) ||
+          g1 < 0 ||
+          g2 < 0
+        ) {
+          return;
+        }
 
         const e1 = tabla[p.id_equipo_1];
         const e2 = tabla[p.id_equipo_2];
 
-        if (!e1 || !e2) return; // 🔥 seguridad
+        // =================================
+        // PARTIDOS INTERZONALES
+        // =================================
+
+        if (p.tipo_partido === "interzonal") {
+
+          // Si equipo 1 pertenece a esta zona
+          if (e1) {
+            e1.jugados++;
+
+            e1.goles_favor += g1;
+            e1.goles_contra += g2;
+
+            if (g1 > g2) {
+              e1.puntos += 3;
+            } else if (g1 === g2) {
+              e1.puntos += 1;
+            }
+          }
+
+          // Si equipo 2 pertenece a esta zona
+          if (e2) {
+            e2.jugados++;
+
+            e2.goles_favor += g2;
+            e2.goles_contra += g1;
+
+            if (g2 > g1) {
+              e2.puntos += 3;
+            } else if (g1 === g2) {
+              e2.puntos += 1;
+            }
+          }
+
+          return;
+        }
+
+        // =================================
+        // PARTIDOS NORMALES DE ZONA
+        // =================================
+
+        if (!e1 || !e2) return;
 
         e1.jugados++;
         e2.jugados++;
@@ -1030,174 +1177,370 @@ router.get("/traertablas/:id", async (req, res) => {
         e2.goles_favor += g2;
         e2.goles_contra += g1;
 
-        if (g1 > g2) e1.puntos += 3;
-        else if (g2 > g1) e2.puntos += 3;
-        else {
-          e1.puntos += 1;
-          e2.puntos += 1;
+        if (g1 > g2) {
+          e1.puntos += 3;
+        } else if (g2 > g1) {
+          e2.puntos += 3;
+        } else {
+          e1.puntos++;
+          e2.puntos++;
         }
       });
 
-      // 🔹 6. DIFERENCIA
+      // =====================================
+      // 8. CALCULAR DIFERENCIA DE GOLES
+      // =====================================
+
       Object.values(tabla).forEach((e) => {
         e.diferencia = e.goles_favor - e.goles_contra;
       });
 
-      // 🔹 7. ORDEN
+      // =====================================
+      // 9. ORDENAR TABLA
+      // =====================================
+
       const tablaOrdenada = Object.values(tabla).sort((a, b) => {
-        if (b.puntos !== a.puntos) return b.puntos - a.puntos;
-        if (b.diferencia !== a.diferencia)
+        if (b.puntos !== a.puntos) {
+          return b.puntos - a.puntos;
+        }
+
+        if (b.diferencia !== a.diferencia) {
           return b.diferencia - a.diferencia;
+        }
+
         return b.goles_favor - a.goles_favor;
       });
 
-      // 🔹 8. PARTIDOS FORMATEADOS
+      // =====================================
+      // 10. FORMATEAR PARTIDOS
+      // =====================================
+
       const partidosFormateados = partidos.map((p) => ({
-        equipo1: equiposMap[p.id_equipo_1] || "Equipo 1",
-        equipo2: equiposMap[p.id_equipo_2] || "Equipo 2",
+        id: p.id,
+
+        equipo1:
+          equiposMap[p.id_equipo_1] || "Equipo 1",
+
+        equipo2:
+          equiposMap[p.id_equipo_2] || "Equipo 2",
+
         goles1: p.goles_1,
         goles2: p.goles_2,
+
+        tipo_partido: p.tipo_partido || "zona",
       }));
 
+      // =====================================
+      // 11. AGREGAR ZONA AL RESULTADO
+      // =====================================
+
       resultado.push({
+        id: zona.id,
         zona: zona.nombre || `Zona ${zona.id}`,
         tabla: tablaOrdenada,
         partidos: partidosFormateados,
       });
     }
 
-    // 🔥 ÚLTIMO PARTIDO GLOBAL
+    // =====================================
+    // 12. ÚLTIMO PARTIDO GLOBAL
+    // =====================================
+
     let ultimoPartido = null;
 
     const ultimo = await pool.query(
-      "SELECT * FROM partidos_3x3 WHERE id_torneo = ? ORDER BY id DESC LIMIT 1",
+      `
+      SELECT *
+      FROM partidos_3x3
+      WHERE id_torneo = ?
+      ORDER BY id DESC
+      LIMIT 1
+      `,
       [id]
     );
 
     if (ultimo.length > 0) {
       const p = ultimo[0];
 
-      const equipos = await pool.query(
-        "SELECT id, nombre FROM equipos WHERE id IN (?, ?)",
+      const equiposUltimo = await pool.query(
+        `
+        SELECT id, nombre
+        FROM equipos
+        WHERE id IN (?, ?)
+        `,
         [p.id_equipo_1, p.id_equipo_2]
       );
 
       const map = {};
-      equipos.forEach((e) => (map[e.id] = e.nombre));
+
+      equiposUltimo.forEach((e) => {
+        map[e.id] = e.nombre;
+      });
 
       ultimoPartido = {
-        equipo1: map[p.id_equipo_1],
-        equipo2: map[p.id_equipo_2],
+        id: p.id,
+
+        equipo1:
+          map[p.id_equipo_1] || "Equipo 1",
+
+        equipo2:
+          map[p.id_equipo_2] || "Equipo 2",
+
         goles1: p.goles_1,
         goles2: p.goles_2,
+
+        tipo_partido: p.tipo_partido || "zona",
       };
     }
 
-    res.json({
+    // =====================================
+    // 13. RESPUESTA
+    // =====================================
+
+    return res.json({
       zonas: resultado,
       ultimoPartido,
     });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error en tablas" });
+    console.error("Error en traertablas:", error);
+
+    return res.status(500).json({
+      error: "Error en tablas",
+    });
   }
 });
+
+
+
 
 
 
 router.post("/guardarpartido", async (req, res) => {
   try {
     const {
+      id_partido,
       id_torneo,
       id_zona,
       id_equipo_1,
       id_equipo_2,
       goles_1,
       goles_2,
+      tipo_partido = "zona",
     } = req.body;
+
+    // =====================================
+    // VALIDACIONES BÁSICAS
+    // =====================================
 
     if (
       !id_torneo ||
-      !id_zona ||
       !id_equipo_1 ||
-      !id_equipo_2
+      !id_equipo_2 ||
+      goles_1 === "" ||
+      goles_2 === "" ||
+      goles_1 === undefined ||
+      goles_2 === undefined
     ) {
       return res.status(400).json({
         error: "Faltan datos obligatorios",
       });
     }
 
-    // 🔥 IMPORTANTE: contemplar A vs B y B vs A
-    const partidoExistente = await pool.query(
+    if (
+      !Number.isInteger(Number(goles_1)) ||
+      !Number.isInteger(Number(goles_2)) ||
+      Number(goles_1) < 0 ||
+      Number(goles_2) < 0
+    ) {
+      return res.status(400).json({
+        error: "Los goles deben ser números enteros positivos",
+      });
+    }
+
+    if (Number(id_equipo_1) === Number(id_equipo_2)) {
+      return res.status(400).json({
+        error: "Un equipo no puede jugar contra sí mismo",
+      });
+    }
+
+    if (!["zona", "interzonal"].includes(tipo_partido)) {
+      return res.status(400).json({
+        error: "Tipo de partido inválido",
+      });
+    }
+
+    // =====================================
+    // VERIFICAR PARTICIPACIÓN DE EQUIPOS
+    // =====================================
+
+    const participaciones = await pool.query(
       `
-      SELECT * FROM partidos_3x3
-      WHERE id_torneo = ?
-      AND id_zona = ?
-      AND (
-        (id_equipo_1 = ? AND id_equipo_2 = ?)
-        OR
-        (id_equipo_1 = ? AND id_equipo_2 = ?)
-      )
-      LIMIT 1
+      SELECT
+        p.id_equipo,
+        p.id_zona
+      FROM participacion_3x3 p
+      INNER JOIN zonas_3x3 z ON z.id = p.id_zona
+      WHERE z.id_torneo = ?
+      AND p.id_equipo IN (?, ?)
       `,
-      [
-        id_torneo,
-        id_zona,
-        id_equipo_1,
-        id_equipo_2,
-        id_equipo_2,
-        id_equipo_1,
-      ]
+      [id_torneo, id_equipo_1, id_equipo_2]
     );
 
-    if (partidoExistente.length > 0) {
-      // 🔥 UPDATE
-      const partido = partidoExistente[0];
+    if (participaciones.length !== 2) {
+      return res.status(400).json({
+        error: "Uno o ambos equipos no pertenecen al torneo",
+      });
+    }
+
+    const participacion1 = participaciones.find(
+      (p) => Number(p.id_equipo) === Number(id_equipo_1)
+    );
+
+    const participacion2 = participaciones.find(
+      (p) => Number(p.id_equipo) === Number(id_equipo_2)
+    );
+
+    if (!participacion1 || !participacion2) {
+      return res.status(400).json({
+        error: "No se encontraron los equipos",
+      });
+    }
+
+    // =====================================
+    // VALIDAR TIPO DE PARTIDO
+    // =====================================
+
+    let zona = null;
+
+    if (tipo_partido === "zona") {
+
+      if (!id_zona) {
+        return res.status(400).json({
+          error: "Debe indicar la zona",
+        });
+      }
+
+      if (
+        Number(participacion1.id_zona) !== Number(id_zona) ||
+        Number(participacion2.id_zona) !== Number(id_zona)
+      ) {
+        return res.status(400).json({
+          error: "Los equipos deben pertenecer a la zona indicada",
+        });
+      }
+
+      zona = id_zona;
+
+    } else {
+
+      if (
+        Number(participacion1.id_zona) ===
+        Number(participacion2.id_zona)
+      ) {
+        return res.status(400).json({
+          error: "Un interzonal debe enfrentar equipos de distintas zonas",
+        });
+      }
+
+      zona = null;
+    }
+
+    // =====================================
+    // ACTUALIZAR PARTIDO EXISTENTE
+    // =====================================
+
+    if (id_partido) {
+
+      const existente = await pool.query(
+        `
+        SELECT id
+        FROM partidos_3x3
+        WHERE id = ?
+        AND id_torneo = ?
+        `,
+        [id_partido, id_torneo]
+      );
+
+      if (!existente.length) {
+        return res.status(404).json({
+          error: "Partido no encontrado",
+        });
+      }
 
       await pool.query(
         `
         UPDATE partidos_3x3
-        SET goles_1 = ?, goles_2 = ?
+        SET
+          id_zona = ?,
+          id_equipo_1 = ?,
+          id_equipo_2 = ?,
+          goles_1 = ?,
+          goles_2 = ?,
+          tipo_partido = ?
         WHERE id = ?
         `,
         [
-          goles_1 || 0,
-          goles_2 || 0,
-          partido.id,
+          zona,
+          id_equipo_1,
+          id_equipo_2,
+          Number(goles_1),
+          Number(goles_2),
+          tipo_partido,
+          id_partido,
         ]
       );
 
       return res.json({
         message: "Partido actualizado",
+        id_partido,
       });
     }
 
-    // 🔥 INSERT
-    await pool.query(
+    // =====================================
+    // CREAR NUEVO PARTIDO
+    // =====================================
+
+    const resultado = await pool.query(
       `
-      INSERT INTO partidos_3x3 
-      (id_torneo, id_zona, id_equipo_1, id_equipo_2, goles_1, goles_2)
-      VALUES (?, ?, ?, ?, ?, ?)
-      `,
-      [
+      INSERT INTO partidos_3x3
+      (
         id_torneo,
         id_zona,
         id_equipo_1,
         id_equipo_2,
-        goles_1 || 0,
-        goles_2 || 0,
+        goles_1,
+        goles_2,
+        tipo_partido
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+      `,
+      [
+        id_torneo,
+        zona,
+        id_equipo_1,
+        id_equipo_2,
+        Number(goles_1),
+        Number(goles_2),
+        tipo_partido,
       ]
     );
 
-    res.json({
-      message: "Partido creado",
-    });
+ return res.json({
+  message: "Partido actualizado",
+  id_partido: String(id_partido),
+});
 
   } catch (error) {
     console.error("Error al guardar partido:", error);
-    res.status(500).json({ error: "Error al guardar partido" });
+
+    return res.status(500).json({
+      error: "Error al guardar partido",
+    });
   }
 });
+
+
 
 router.get("/traerequipos2/:id_torneo", async (req, res) => {
   const { id_torneo } = req.params;
